@@ -1,0 +1,158 @@
+---
+title: "Report"
+output: html_document
+date: "`r Sys.Date()`"
+params:
+  data: file.xlsx
+---
+
+```{r setup, include=FALSE}
+#library(openxlsx)
+#library(validate)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+#dados <- data |> select(!c(CHAVE, IBGE6))
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+```{r}
+df <- openxlsx::read.xlsx(params$data)
+df <- df |> 
+  select(!c(CHAVE, IBGE6))
+```
+
+
+
+```{r include=FALSE}
+# Definir funções ---------------------------------------------------------
+
+## https://blogs.sas.com/content/iml/2021/06/01/hampel-filter-robust-outliers.html
+hampel_filter <- function(var){
+  limite_inf <- median(var, na.rm = T) - 3 * mad(var, constant = 1, na.rm = T)
+  limite_sup <- median(var, na.rm = T) + 3 * mad(var, constant = 1, na.rm = T)
+  result <- (var < limite_inf | var > limite_sup)
+  return(result)
+}
+
+
+# Definir regras ----------------------------------------------------------
+
+## Categorias L_ORGESP
+categ_orgaogestor <- c(
+  "Outros",                                               
+  "Secretaria municipal exclusiva",                       
+  "Não possui estrutura",                                 
+  "Secretaria em conjunto com outras políticas setoriais",
+  "Secretaria exclusiva",                                 
+  "Setor subordinado a outra secretaria",                 
+  "Setor subordinado diretamente  à chefia do Executivo", 
+  "Órgão da administração indireta"    
+)
+
+## Regras
+
+### Tipo
+regra_tipo <- validator(
+  TI_L_EQUI    = is.character(L_EQUI),
+  TI_L_QUANT   = is.numeric(L_QUANT),
+  TI_L_PARTESP = is.character(L_PARTESP),
+  TI_L_PROGE   = is.numeric(L_PROGE),
+  TI_L_ESPESC  = is.numeric(L_ESPESC),
+  TI_L_ILRHE   = is.numeric(L_ILRHE),
+  TI_L_CONSESP = is.character(L_CONSESP),
+  TI_L_ORGESP  = is.character(L_ORGESP),
+  TI_L_CONVESP = is.character(L_CONVESP)
+)
+
+### Validade
+regra_validade <- validator(
+  VI_GERAL     = is_unique(ANO, IBGE7),
+  VI_L_EQUI    = L_EQUI %in% c("Sim", "Não"),
+  VI_L_QUANT   = L_QUANT >= 0,
+  VI_L_PARTESP = L_PARTESP %in% c("Sim", "Não"),
+  VI_L_PROGE   = L_PROGE >= 0,
+  VI_L_ESPESC  = in_range(L_ESPESC, min = 0, max = 100),
+  VI_L_ILRHE   = in_range(L_ILRHE, min = 0, max = 100),
+  VI_L_CONSESP = L_CONSESP %in% c("Sim", "Não"),
+  VI_L_ORGESP  = L_ORGESP %in% categ_orgaogestor,
+  VI_L_CONVESP = L_CONVESP %in% c("Sim", "Não")
+)
+
+### Consistência (TVL: Transversal/LGT: Longitudinal)
+regra_consistencia <- validator(
+  CF_TVL_L_QUANT_A  = do_by(L_QUANT, by = ANO, fun = hampel_filter) == FALSE, # Comparação por ano
+  CF_LGT_L_QUANT_A  = do_by(L_QUANT, by = IBGE7, fun = hampel_filter) == FALSE, # Comparação por município
+  CF_TVL_L_QUANT_B  = L_QUANT <= (2 * do_by(L_QUANT, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_QUANT_B  = L_QUANT <= (2 * do_by(L_QUANT, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_PROGE_A  = do_by(L_PROGE, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_PROGE_A  = do_by(L_PROGE, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_PROGE_B  = L_PROGE <= (2 * do_by(L_PROGE, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_PROGE_B  = L_PROGE <= (2 * do_by(L_PROGE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_ESPESC_A = do_by(L_ESPESC, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_ESPESC_A = do_by(L_ESPESC, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_ESPESC_B = L_ESPESC <= (2 * do_by(L_ESPESC, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_ESPESC_B = L_ESPESC <= (2 * do_by(L_ESPESC, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_ILRHE_A  = do_by(L_ILRHE, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_ILRHE_A  = do_by(L_ILRHE, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_ILRHE_B  = L_ILRHE <= (2 * do_by(L_ILRHE, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_ILRHE_B  = L_ILRHE <= (2 * do_by(L_ILRHE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right"))
+)
+
+
+```
+
+## Checando as regras de tipo
+```{r}
+check_tipo <- validate::confront(dados, regra_tipo)
+
+```
+
+## Checando as regras de validade
+```{r}
+check_validade <- validate::confront(dados, regra_validade)
+
+```
+
+## Checando as regras de consistência
+```{r}
+check_consistencia <- validate::confront(dados, regra_consistencia)
+
+```
+
+## Resumo da regra de tipo
+
+```{r}
+summary(check_tipo)
+```
+
+## Resumo da regra de validade
+```{r}
+summary(check_validade)
+```
+
+## Resumo da regra de consistência
+```{r}
+summary(check_consistencia)
+```
+
+
+## Gráfico para regra de tipo 
+```{r}
+plot(check_tipo)
+```
+
+## Gráfico para regra de validade
+```{r}
+plot(check_validade)
+```
+
+## Gráfico para regra de consistência
+```{r}
+plot(check_consistencia)
+```
+

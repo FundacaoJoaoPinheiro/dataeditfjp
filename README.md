@@ -4,7 +4,8 @@
 # criticaldatafjp
 
 - Ideias de funções:
-  - Função para criar ou gerar o relatórioa
+  - Criação do relatório
+  - Função para gerar o relatório
 
 <!-- badges: start -->
 <!-- badges: end -->
