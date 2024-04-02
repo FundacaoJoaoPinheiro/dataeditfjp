@@ -21,9 +21,9 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 
 ```{r}
-df <- openxlsx::read.xlsx(params$data)
-df <- df |> 
-  select(!c(CHAVE, IBGE6))
+dados <- openxlsx::read.xlsx(params$data)
+dados <- dados %>%  
+  dplyr::select(!c(CHAVE, IBGE6))
 ```
 
 
@@ -57,7 +57,7 @@ categ_orgaogestor <- c(
 ## Regras
 
 ### Tipo
-regra_tipo <- validator(
+regra_tipo <- validate::validator(
   TI_L_EQUI    = is.character(L_EQUI),
   TI_L_QUANT   = is.numeric(L_QUANT),
   TI_L_PARTESP = is.character(L_PARTESP),
@@ -70,7 +70,7 @@ regra_tipo <- validator(
 )
 
 ### Validade
-regra_validade <- validator(
+regra_validade <- validate::validator(
   VI_GERAL     = is_unique(ANO, IBGE7),
   VI_L_EQUI    = L_EQUI %in% c("Sim", "Não"),
   VI_L_QUANT   = L_QUANT >= 0,
@@ -84,23 +84,23 @@ regra_validade <- validator(
 )
 
 ### Consistência (TVL: Transversal/LGT: Longitudinal)
-regra_consistencia <- validator(
-  CF_TVL_L_QUANT_A  = do_by(L_QUANT, by = ANO, fun = hampel_filter) == FALSE, # Comparação por ano
-  CF_LGT_L_QUANT_A  = do_by(L_QUANT, by = IBGE7, fun = hampel_filter) == FALSE, # Comparação por município
-  CF_TVL_L_QUANT_B  = L_QUANT <= (2 * do_by(L_QUANT, by = ANO, fun = mean, na.rm = T)),
-  CF_LGT_L_QUANT_B  = L_QUANT <= (2 * do_by(L_QUANT, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
-  CF_TVL_L_PROGE_A  = do_by(L_PROGE, by = IBGE7, fun = hampel_filter) == FALSE,
-  CF_LGT_L_PROGE_A  = do_by(L_PROGE, by = ANO, fun = hampel_filter) == FALSE,
-  CF_TVL_L_PROGE_B  = L_PROGE <= (2 * do_by(L_PROGE, by = ANO, fun = mean, na.rm = T)),
-  CF_LGT_L_PROGE_B  = L_PROGE <= (2 * do_by(L_PROGE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
-  CF_TVL_L_ESPESC_A = do_by(L_ESPESC, by = IBGE7, fun = hampel_filter) == FALSE,
-  CF_LGT_L_ESPESC_A = do_by(L_ESPESC, by = ANO, fun = hampel_filter) == FALSE,
-  CF_TVL_L_ESPESC_B = L_ESPESC <= (2 * do_by(L_ESPESC, by = ANO, fun = mean, na.rm = T)),
-  CF_LGT_L_ESPESC_B = L_ESPESC <= (2 * do_by(L_ESPESC, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
-  CF_TVL_L_ILRHE_A  = do_by(L_ILRHE, by = IBGE7, fun = hampel_filter) == FALSE,
-  CF_LGT_L_ILRHE_A  = do_by(L_ILRHE, by = ANO, fun = hampel_filter) == FALSE,
-  CF_TVL_L_ILRHE_B  = L_ILRHE <= (2 * do_by(L_ILRHE, by = ANO, fun = mean, na.rm = T)),
-  CF_LGT_L_ILRHE_B  = L_ILRHE <= (2 * do_by(L_ILRHE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right"))
+regra_consistencia <- validate::validator(
+  CF_TVL_L_QUANT_A  = validate::do_by(L_QUANT, by = ANO, fun = hampel_filter) == FALSE, # Comparação por ano
+  CF_LGT_L_QUANT_A  = validate::do_by(L_QUANT, by = IBGE7, fun = hampel_filter) == FALSE, # Comparação por município
+  CF_TVL_L_QUANT_B  = L_QUANT <= (2 * validate::do_by(L_QUANT, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_QUANT_B  = L_QUANT <= (2 * validate::do_by(L_QUANT, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_PROGE_A  = validate::do_by(L_PROGE, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_PROGE_A  = validate::do_by(L_PROGE, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_PROGE_B  = L_PROGE <= (2 * validate::do_by(L_PROGE, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_PROGE_B  = L_PROGE <= (2 * validate::do_by(L_PROGE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_ESPESC_A = validate::do_by(L_ESPESC, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_ESPESC_A = validate::do_by(L_ESPESC, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_ESPESC_B = L_ESPESC <= (2 * validate::do_by(L_ESPESC, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_ESPESC_B = L_ESPESC <= (2 * validate::do_by(L_ESPESC, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")),
+  CF_TVL_L_ILRHE_A  = validate::do_by(L_ILRHE, by = IBGE7, fun = hampel_filter) == FALSE,
+  CF_LGT_L_ILRHE_A  = validate::do_by(L_ILRHE, by = ANO, fun = hampel_filter) == FALSE,
+  CF_TVL_L_ILRHE_B  = L_ILRHE <= (2 * validate::do_by(L_ILRHE, by = ANO, fun = mean, na.rm = T)),
+  CF_LGT_L_ILRHE_B  = L_ILRHE <= (2 * validate::do_by(L_ILRHE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right"))
 )
 
 
@@ -142,17 +142,17 @@ summary(check_consistencia)
 
 
 ## Gráfico para regra de tipo 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(check_tipo)
 ```
 
 ## Gráfico para regra de validade
-```{r}
+```{r eval=FALSE,include=FALSE}
 plot(check_validade)
 ```
 
 ## Gráfico para regra de consistência
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(check_consistencia)
 ```
 
