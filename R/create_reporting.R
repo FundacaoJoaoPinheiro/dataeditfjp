@@ -1,3 +1,11 @@
+#' Create Report
+#'
+#' This function return the report with all statistical analysis and critial rules
+#'
+#' @param path_data Path to dataset
+#'
+#' @return Report
+#' @export
 create_reporting <- function(path_data){
 
   #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_ESPORTE_2000-2022.xlsx"
