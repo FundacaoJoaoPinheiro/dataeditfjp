@@ -1,9 +1,13 @@
 ---
 title: "Report"
+author: 
+  name: "Coordenação de Indicadores Sociais (CIS)"
+  url: https://imrs.fjp.mg.gov.br/
 output: html_document
 date: "`r Sys.Date()`"
 params:
   data: file.xlsx
+  metadata: metafile.xlsx
 ---
 
 ```{r setup, include=FALSE}
@@ -11,8 +15,14 @@ params:
 #library(validate)
 
 knitr::opts_chunk$set(echo = TRUE)
+#Read dataset
+data <- openxlsx::read.xlsx(params$data)
+#Read dataset documentation
+metadata <- openxlsx::read.xlsx(params$metadata)
+data <- data %>%  
+  dplyr::select(-c("CHAVE", "IBGE6"))
 
-#dados <- data |> select(!c(CHAVE, IBGE6))
+
 ```
 
 ## R Markdown
@@ -20,15 +30,76 @@ knitr::opts_chunk$set(echo = TRUE)
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 
-```{r}
-dados <- openxlsx::read.xlsx(params$data)
-dados <- dados %>%  
-  dplyr::select(!c(CHAVE, IBGE6))
+```{r include=FALSE}
+#take all variables
+colunm_meta <- metadata %>% 
+  dplyr::filter(`DIMENSÃO` != "atlas") %>% 
+  dplyr::pull(SIGLA)
+
+#take all categorical variables
+categorical_variable <- metadata %>% 
+  dplyr::filter(`DIMENSÃO` != "atlas" & UNIDADE == "Sim/Não") %>% 
+  dplyr::pull(SIGLA)
+
+text_variable <- metadata %>% 
+  dplyr::filter(`DIMENSÃO` != "atlas" & is.na(UNIDADE)) %>%   
+  dplyr::pull(SIGLA)
+
+#quantitative variable
+
+numeric_variable <- colunm_meta[!(colunm_meta %in% c(categorical_variable,text_variable)) ] 
+
+```
+
+```{r include=FALSE}
+data$ANO <- as.character(data$ANO)
+yearbase <- max(data$ANO, na.rm = TRUE)
+yearstart <- min(data$ANO, na.rm = TRUE)
+n_city <- 853
+n_years <- length(unique(data$ANO))
+name_dimension <- tail(metadata$DIMENSÃO,1)
+```
+
+# IMRS - Dimensão `r tools::toTitleCase(name_dimension)`
+
+1.  A base de dados do IMRS da dimensão `r tools::toTitleCase(name_dimension)` `r if(nrow(data) == n_city * n_years) {" possui"} else {" não possui"}` o total esperado de observações. Vale ressaltar que a base de `r yearbase` deve possuir `r n_city*n_years` observações.
+
+2.  A base de dados da dimensão `r tools::toTitleCase(name_dimension)` possui `r length(colunm_meta)` variáveis excluindo CHAVE, IBGE6, IBGE7 e ANO.
+
+3.  Destas `r length(colunm_meta)` variáveis, `r length(numeric_variable)` são numéricas, `r length(text_variable)` `r if(length(text_variable) > 1) {" textuais"} else {" textual"}` e `r length(categorical_variable)` `r if(length(categorical_variable) > 1) {" booleanas"} else {" booleana"}`.
+
+
+# Tabelas e Gráficos
+```{r echo=FALSE}
+statistics <- data %>% 
+  dplyr::select(c(IBGE7,ANO,all_of(numeric_variable))) %>% 
+  tidyr::pivot_longer(!c(IBGE7,ANO), names_to = "variable", values_to = "value") %>%
+  dplyr::group_by(ANO, variable) %>%
+  dplyr::summarise(n_obs = dplyr::n(),
+                   minimo = min(value, na.rm = TRUE),
+                   q1 = quantile(value, probs = 0.25, na.rm = TRUE),
+                   media = mean(value, na.rm = TRUE),
+                   mediana = median(value, na.rm = TRUE),
+                   q3 = quantile(value, probs = 0.75, na.rm = TRUE),
+                   maximo = max(value, na.rm = TRUE),
+                   desvio_padrao = sd(value, na.rm = TRUE),
+                   n_zero = sum(value == 0, na.rm = TRUE),
+                   ausentes = sum(is.na(value), na.rm = TRUE)) %>% 
+  dplyr::ungroup() 
+
+res <- split(statistics, f = statistics$variable)
+# dd <- data %>% 
+#   dplyr::group_by(ANO) %>% 
+#   dplyr::summarise(dplyr::across(numeric_variable,
+#                    list(n_obs = ~dplyr::n(), minimo = ~min(.,na.rm = TRUE), media =  ~mean(., na.rm = TRUE), maximo = ~max(.,na.rm = TRUE) ) ) ) %>% 
+#   dplyr::ungroup()
+statistics %>% dplyr::arrange(variable)
 ```
 
 
 
-```{r include=FALSE}
+
+```{r echo=FALSE, include=FALSE}
 # Definir funções ---------------------------------------------------------
 
 ## https://blogs.sas.com/content/iml/2021/06/01/hampel-filter-robust-outliers.html
@@ -107,36 +178,36 @@ regra_consistencia <- validate::validator(
 ```
 
 ## Checando as regras de tipo
-```{r}
-check_tipo <- validate::confront(dados, regra_tipo)
+```{r echo=FALSE}
+check_tipo <- validate::confront(data, regra_tipo)
 
 ```
 
 ## Checando as regras de validade
-```{r}
-check_validade <- validate::confront(dados, regra_validade)
+```{r echo=FALSE}
+check_validade <- validate::confront(data, regra_validade)
 
 ```
 
 ## Checando as regras de consistência
-```{r}
-check_consistencia <- validate::confront(dados, regra_consistencia)
+```{r echo=FALSE, eval=FALSE}
+check_consistencia <- validate::confront(data, regra_consistencia)
 
 ```
 
 ## Resumo da regra de tipo
 
-```{r}
+```{r echo=FALSE, eval=FALSE}
 summary(check_tipo)
 ```
 
 ## Resumo da regra de validade
-```{r}
+```{r echo=FALSE, eval=FALSE}
 summary(check_validade)
 ```
 
 ## Resumo da regra de consistência
-```{r}
+```{r echo=FALSE, eval=FALSE}
 summary(check_consistencia)
 ```
 

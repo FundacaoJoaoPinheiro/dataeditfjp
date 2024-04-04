@@ -8,10 +8,14 @@
 #' @export
 create_reporting <- function(path_data){
 
-  #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_ESPORTE_2000-2022.xlsx"
+  #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
+  #path_metadata <-"C:/Users/edcam/Downloads/IMRS_METADADOS_MEIO-AMBIENTE.xlsx"
   path_report <- "R/report.Rmd"
 
   return(
-    rmarkdown::render(input = path_report,  params = list(data = path_data), output_dir = "../")
+    rmarkdown::render(input = path_report,
+                      params = list(data = path_data,
+                                    metadata = path_metadata),
+                      output_dir = "../")
     )
 }

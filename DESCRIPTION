@@ -19,4 +19,5 @@ Imports:
     magrittr,
     openxlsx,
     rmarkdown,
+    tidyr,
     validate
