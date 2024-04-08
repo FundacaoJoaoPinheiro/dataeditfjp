@@ -16,8 +16,10 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     dplyr,
+    ggplot2,
     magrittr,
     openxlsx,
+    pander,
     rmarkdown,
     tidyr,
     validate

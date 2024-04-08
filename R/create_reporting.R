@@ -6,10 +6,10 @@
 #'
 #' @return Report
 #' @export
-create_reporting <- function(path_data){
+create_reporting <- function(path_data,path_metadata){
 
-  #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
-  #path_metadata <-"C:/Users/edcam/Downloads/IMRS_METADADOS_MEIO-AMBIENTE.xlsx"
+  # path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
+  # path_metadata <-"C:/Users/edcam/Downloads/IMRS_METADADOS_MEIO-AMBIENTE.xlsx"
   path_report <- "R/report.Rmd"
 
   return(

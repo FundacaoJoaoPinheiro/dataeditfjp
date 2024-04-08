@@ -4,7 +4,7 @@
 \alias{create_reporting}
 \title{Create Report}
 \usage{
-create_reporting(path_data)
+create_reporting(path_data, path_metadata)
 }
 \arguments{
 \item{path_data}{Path to dataset}
