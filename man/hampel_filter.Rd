@@ -9,6 +9,9 @@ hampel_filter(variable)
 \arguments{
 \item{variable}{}
 }
+\value{
+resul
+}
 \description{
 Outlier data filter
 }

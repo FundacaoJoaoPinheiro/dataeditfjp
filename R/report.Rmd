@@ -168,7 +168,6 @@ lapply(seq(1,length(graphic)),
 ## https://blogs.sas.com/content/iml/2021/06/01/hampel-filter-robust-outliers.html
 source("total_sum.R")
 source("hampel_filter.R")
-
 # Definir regras ----------------------------------------------------------
 
 ## Regras para tema meio ambiente

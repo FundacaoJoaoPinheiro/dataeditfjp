@@ -21,6 +21,7 @@ Imports:
     openxlsx,
     pander,
     rmarkdown,
+    stats,
     tidyr,
     validate,
     zoo
