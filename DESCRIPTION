@@ -22,4 +22,5 @@ Imports:
     pander,
     rmarkdown,
     tidyr,
-    validate
+    validate,
+    zoo

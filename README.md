@@ -6,6 +6,7 @@
 - Ideias de funções:
   - Criação do relatório
   - Função para gerar o relatório
+  - Funções para detectar outliers
 
 <!-- badges: start -->
 <!-- badges: end -->

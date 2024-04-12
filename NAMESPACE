@@ -2,4 +2,6 @@
 
 export("%>%")
 export(create_reporting)
+export(hampel_filter)
+export(total_sum)
 importFrom(magrittr,"%>%")
