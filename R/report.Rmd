@@ -245,7 +245,7 @@ if(sum(var_amb %in% names(data)) != 0){
     CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE)
   )
   
-konst = 2
+konst <- 2
 ### Distribuicao
 distributionrules_magro <- validate::validator(
   DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Compara por ano
