@@ -1,4 +1,6 @@
-#' Outlier data filter
+#' @title Outlier data filter
+#' @description
+#' A short description...
 #'
 #' @param variable
 #'

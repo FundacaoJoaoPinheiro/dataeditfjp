@@ -13,5 +13,5 @@ hampel_filter(variable)
 resul
 }
 \description{
-Outlier data filter
+A short description...
 }

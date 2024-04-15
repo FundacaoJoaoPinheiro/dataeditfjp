@@ -164,10 +164,14 @@ lapply(seq(1,length(graphic)),
 ```{r echo=FALSE, warning=FALSE}
 # Definir funções ---------------------------------------------------------
 
-
 ## https://blogs.sas.com/content/iml/2021/06/01/hampel-filter-robust-outliers.html
+
+# A fórmula abaixo eh a mesma utilizada em dataMaid::identifyOutliers().
+# Q1 - 1,5 * exp(a * MC) * IQR; Q3 + 1,5 * exp(b * MC) * IQR
 source("total_sum.R")
 source("hampel_filter.R")
+source("outlier_function.R")
+source("compare_lag.R")
 # Definir regras ----------------------------------------------------------
 
 ## Regras para tema meio ambiente
@@ -241,117 +245,143 @@ if(sum(var_amb %in% names(data)) != 0){
     CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE)
   )
   
-
 konst = 2
 ### Distribuicao
 distributionrules_magro <- validate::validator(
-  DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Comparação por ano
-  DF_M_AGRO_out_city = validate::do_by(M_AGRO, by = IBGE7, fun = hampel_filter) == FALSE, # Comparação por município
-  DF_M_AGRO_min_year = M_AGRO  >= (konst*validate::do_by(M_AGRO, by = ANO, fun = min, na.rm = T)),
-  DF_M_AGRO_min_city = M_AGRO  >= (konst*validate::do_by(M_AGRO, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_AGRO_max_year = M_AGRO  <= (konst*validate::do_by(M_AGRO, by = ANO, fun = max, na.rm = T)),
-  DF_M_AGRO_max_city = M_AGRO  <= (konst*validate::do_by(M_AGRO, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_AGRO_median_mov = M_AGRO <= (konst*validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) )
+  DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Compara por ano
+  DF_M_AGRO_out_city = validate::do_by(M_AGRO, by = IBGE7, fun = hampel_filter) == FALSE, # Compara por cidade
+  DF_M_AGRO_out_datamaid_year = validate::do_by(M_AGRO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_AGRO_out_datamaid_city = validate::do_by(M_AGRO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
+  DF_M_AGRO_min_year = M_AGRO  >= konst*validate::do_by(M_AGRO, by = ANO, fun = min, na.rm = T),
+  DF_M_AGRO_min_city = M_AGRO  >= konst*validate::do_by(M_AGRO, by = IBGE7, fun = min, na.rm = T),
+  DF_M_AGRO_max_year = M_AGRO  <= konst*validate::do_by(M_AGRO, by = ANO, fun = max, na.rm = T),
+  DF_M_AGRO_max_city = M_AGRO  <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = max, na.rm = T),
+  DF_M_AGRO_median_mov = M_AGRO <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right") )
 
-  
+
 distributionrules_mbovino <- validate::validator(
   DF_M_BOVINO_out_year = validate::do_by(M_BOVINO, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_BOVINO_out_city = validate::do_by(M_BOVINO, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_BOVINO_min_year = M_BOVINO >= (konst*validate::do_by(M_BOVINO, by = ANO, fun = min, na.rm = T)),
-  DF_M_BOVINO_min_city = M_BOVINO >= (konst*validate::do_by(M_BOVINO, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_BOVINO_max_year = M_BOVINO <= (konst*validate::do_by(M_BOVINO, by = ANO, fun = max, na.rm = T)),
-  DF_M_BOVINO_max_city = M_BOVINO <= (konst*validate::do_by(M_BOVINO, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_BOVINO = M_BOVINO <= (konst*validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_BOVINO_out_datamaid_year = validate::do_by(M_BOVINO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_BOVINO_out_datamaid_city = validate::do_by(M_BOVINO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
+  DF_M_BOVINO_min_year = M_BOVINO >= konst*validate::do_by(M_BOVINO, by = ANO, fun = min, na.rm = T),
+  DF_M_BOVINO_min_city = M_BOVINO >= konst*validate::do_by(M_BOVINO, by = IBGE7, fun = min, na.rm = T),
+  DF_M_BOVINO_max_year = M_BOVINO <= konst*validate::do_by(M_BOVINO, by = ANO, fun = max, na.rm = T),
+  DF_M_BOVINO_max_city = M_BOVINO <= konst*validate::do_by(M_BOVINO, by = IBGE7, fun = max, na.rm = T),
+  DF_M_BOVINO_median_mov = M_BOVINO <= konst*validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")
 )
 
 distributionrules_mcana <- validate::validator(
   DF_M_CANA_out_year = validate::do_by(M_CANA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CANA_out_city = validate::do_by(M_CANA, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_CANA_out_datamaid_year = validate::do_by(M_CANA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_CANA_out_datamaid_city = validate::do_by(M_CANA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_CANA_min_year = M_CANA >= (konst*validate::do_by(M_CANA, by = ANO, fun = min, na.rm = T)),
   DF_M_CANA_min_city = M_CANA >= (konst*validate::do_by(M_CANA, by = IBGE7, fun = min, na.rm = T)),
   DF_M_CANA_max_year = M_CANA <= (konst*validate::do_by(M_CANA, by = ANO, fun = max, na.rm = T)),
   DF_M_CANA_max_city = M_CANA <= (konst*validate::do_by(M_CANA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CANA = M_CANA <= (konst*validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_CANA_median_mov = M_CANA <= (konst*validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mcfem <- validate::validator(
   DF_M_CFEM_out_year = validate::do_by(M_CFEM, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CFEM_out_city = validate::do_by(M_CFEM, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_CFEM_out_datamaid_year = validate::do_by(M_CFEM, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_CFEM_out_datamaid_city = validate::do_by(M_CFEM, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_CFEM_min_year = M_CFEM >= (konst*validate::do_by(M_CFEM, by = ANO, fun = min, na.rm = T)),
   DF_M_CFEM_min_city = M_CFEM >= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = min, na.rm = T)),
   DF_M_CFEM_max_year = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = max, na.rm = T)),
   DF_M_CFEM_max_city = M_CFEM <= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CFEM = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_CFEM_median_mov = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mcrh <- validate::validator(
   DF_M_CRH_out_year = validate::do_by(M_CRH, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CRH_out_city = validate::do_by(M_CRH, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_CRH_out_datamaid_year = validate::do_by(M_CRH, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_CRH_out_datamaid_city = validate::do_by(M_CRH, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_CRH_min_year = M_CRH >= (konst*validate::do_by(M_CRH, by = ANO, fun = min, na.rm = T)),
   DF_M_CRH_min_city = M_CRH >= (konst*validate::do_by(M_CRH, by = IBGE7, fun = min, na.rm = T)),
   DF_M_CRH_max_year = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = max, na.rm = T)),
   DF_M_CRH_max_city = M_CRH <= (konst*validate::do_by(M_CRH, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CRH = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_CRH_median_mov = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mflonativa <- validate::validator(
   DF_M_FLONATIVA_out_year = validate::do_by(M_FLONATIVA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FLONATIVA_out_city = validate::do_by(M_FLONATIVA, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_FLONATIVA_out_datamaid_year = validate::do_by(M_FLONATIVA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_FLONATIVA_out_datamaid_city = validate::do_by(M_FLONATIVA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_FLONATIVA_min_year = M_FLONATIVA >= (konst*validate::do_by(M_FLONATIVA, by = ANO, fun = min, na.rm = T)),
   DF_M_FLONATIVA_min_city = M_FLONATIVA >= (konst*validate::do_by(M_FLONATIVA, by = IBGE7, fun = min, na.rm = T)),
   DF_M_FLONATIVA_max_year = M_FLONATIVA <= (konst*validate::do_by(M_FLONATIVA, by = ANO, fun = max, na.rm = T)),
   DF_M_FLONATIVA_max_city = M_FLONATIVA <= (konst*validate::do_by(M_FLONATIVA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FLONATIVA = M_FLONATIVA <= (konst*validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_FLONATIVA_median_mov = M_FLONATIVA <= (konst*validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mfocos <- validate::validator(
   DF_M_FOCOS_out_year = validate::do_by(M_FOCOS, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FOCOS_out_city = validate::do_by(M_FOCOS, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_FOCOS_out_datamaid_year = validate::do_by(M_FOCOS, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_FOCOS_out_datamaid_city = validate::do_by(M_FOCOS, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_FOCOS_min_year = M_FOCOS >= (konst*validate::do_by(M_FOCOS, by = ANO, fun = min, na.rm = T)),
   DF_M_FOCOS_min_city = M_FOCOS >= (konst*validate::do_by(M_FOCOS, by = IBGE7, fun = min, na.rm = T)),
   DF_M_FOCOS_max_year = M_FOCOS <= (konst*validate::do_by(M_FOCOS, by = ANO, fun = max, na.rm = T)),
   DF_M_FOCOS_max_city = M_FOCOS <= (konst*validate::do_by(M_FOCOS, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FOCOS = M_FOCOS <= (konst*validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_FOCOS_median_mov = M_FOCOS <= (konst*validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mfrota <- validate::validator(
   DF_M_FROTA_out_year = validate::do_by(M_FROTA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FROTA_out_city = validate::do_by(M_FROTA, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_FROTA_out_datamaid_year = validate::do_by(M_FROTA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_FROTA_out_datamaid_city = validate::do_by(M_FROTA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_FROTA_min_year = M_FROTA >= (konst*validate::do_by(M_FROTA, by = ANO, fun = min, na.rm = T)),
   DF_M_FROTA_min_city = M_FROTA >= (konst*validate::do_by(M_FROTA, by = IBGE7, fun = min, na.rm = T)),
   DF_M_FROTA_max_year = M_FROTA <= (konst*validate::do_by(M_FROTA, by = ANO, fun = max, na.rm = T)),
   DF_M_FROTA_max_city = M_FROTA <= (konst*validate::do_by(M_FROTA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FROTA = M_FROTA <= (konst*validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_FROTA_median_mov = M_FROTA <= (konst*validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
+
+distibution_mfrota_compare <- validate::validator(
+  DF_M_FROTA_compare = validate::do_by(M_FROTA, by = IBGE7, fun = compare_lag)==TRUE
+)
+
 
 distributionrules_micmsecolog <- validate::validator(
   DF_M_ICMSECOLOG_out_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_ICMSECOLOG_out_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_ICMSECOLOG_out_datamaid_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_ICMSECOLOG_out_datamaid_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_ICMSECOLOG_min_year = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = min, na.rm = T)),
   DF_M_ICMSECOLOG_min_city = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = min, na.rm = T)),
   DF_M_ICMSECOLOG_max_year = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = max, na.rm = T)),
   DF_M_ICMSECOLOG_max_city = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_ICMSECOLOG = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_ICMSECOLOG_median_mov = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_minfra <- validate::validator(
   DF_M_INFRA_out_year = validate::do_by(M_INFRA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_INFRA_out_city = validate::do_by(M_INFRA, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_INFRA_out_datamaid_year = validate::do_by(M_INFRA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_INFRA_out_datamaid_city = validate::do_by(M_INFRA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_INFRA_min_year = M_INFRA >= (konst*validate::do_by(M_INFRA, by = ANO, fun = min, na.rm = T)),
   DF_M_INFRA_min_city = M_INFRA >= (konst*validate::do_by(M_INFRA, by = IBGE7, fun = min, na.rm = T)),
   DF_M_INFRA_max_year = M_INFRA <= (konst*validate::do_by(M_INFRA, by = ANO, fun = max, na.rm = T)),
   DF_M_INFRA_max_city = M_INFRA <= (konst*validate::do_by(M_INFRA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_INFRA = M_INFRA <= (konst*validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_INFRA_median_mov = M_INFRA <= (konst*validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mreflo <- validate::validator(
   DF_M_REFLO_out_year = validate::do_by(M_REFLO, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_REFLO_out_city = validate::do_by(M_REFLO, by = IBGE7, fun = hampel_filter) == FALSE,
+  DF_M_REFLO_out_datamaid_year = validate::do_by(M_REFLO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
+  DF_M_REFLO_out_datamaid_city = validate::do_by(M_REFLO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
   DF_M_REFLO_min_year = M_REFLO >= (konst*validate::do_by(M_REFLO, by = ANO, fun = min, na.rm = T)),
   DF_M_REFLO_min_city = M_REFLO >= (konst*validate::do_by(M_REFLO, by = IBGE7, fun = min, na.rm = T)),
   DF_M_REFLO_max_year = M_REFLO <= (konst*validate::do_by(M_REFLO, by = ANO, fun = max, na.rm = T)),
   DF_M_REFLO_max_city = M_REFLO <= (konst*validate::do_by(M_REFLO, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_REFLO = M_REFLO <= (konst*validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_REFLO_median_mov = M_REFLO <= (konst*validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 }
@@ -437,6 +467,15 @@ validate::summary(check_distibution_mfocos)
 ```{r warning=FALSE, message=FALSE}
 check_distibution_mfrota <- validate::confront(data, distributionrules_mfrota)
 validate::summary(check_distibution_mfrota)
+
+```
+
+
+```{r warning=FALSE, message=FALSE}
+
+check_distibution_mfrota_compare <- validate::confront(data, distibution_mfrota_compare)
+validate::summary(check_distibution_mfrota_compare)
+
 ```
 
 ### M_ICMSECOLOG
@@ -517,6 +556,8 @@ validate::plot(check_distibution_mfocos)
 ### M_FROTA
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 validate::plot(check_distibution_mfrota)
+
+validate::plot(check_distibution_mfrota_compare)
 ```
 
 ### M_ICMSECOLOG

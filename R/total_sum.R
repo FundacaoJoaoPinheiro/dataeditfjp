@@ -1,11 +1,13 @@
-#' Calculate the total of variable to compare
+#' @title Calculate the total of variable to compare
+#' @description
+#' A short description...
 #'
-#' @param variable
-#' @param total
+#' @param variable Quantitative variable
+#' @param total Total value to consider as result
 #'
-#' @return
+#' @return Vector TRUE or FALSE
 #' @export
 total_sum <- function(variable, total = 100){
-  res = (sum(variable, na.rm = TRUE) == total)
+  res = ifelse(sum(variable, na.rm = TRUE) == total, TRUE, FALSE)
   return(res)
 }

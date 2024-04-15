@@ -7,8 +7,13 @@
 total_sum(variable, total = 100)
 }
 \arguments{
-\item{total}{}
+\item{variable}{Quantitative variable}
+
+\item{total}{Total value to consider as result}
+}
+\value{
+Vector TRUE or FALSE
 }
 \description{
-Calculate the total of variable to compare
+A short description...
 }
