@@ -10,12 +10,12 @@ create_reporting <- function(path_data,path_metadata){
 
   #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
   #path_metadata <-"C:/Users/edcam/Downloads/IMRS_METADADOS_MEIO-AMBIENTE.xlsx"
-  path_report <- system.file("R/report.Rmd",package = "criticaldatafjp")
+  #path_report <- "R/report.Rmd"
+  path_report <- system.file("doc","report.Rmd",package = "criticaldatafjp")
 
   return(
     rmarkdown::render(input = path_report,
                       params = list(data = path_data,
-                                    metadata = path_metadata),
-                      output_dir = "../")
+                                    metadata = path_metadata))
     )
 }
