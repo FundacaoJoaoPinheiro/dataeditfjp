@@ -212,18 +212,23 @@ if(sum(var_amb %in% names(data)) != 0){
     TI_M_REFLO = is.numeric(M_REFLO)
   )
   
+  ## Acrescentar as demais variaveis numericas
   validaterules_na <- validate::validator(
     VI_M_AGRO = !is.na(M_AGRO),
     VI_M_BOVINO = !is.na(M_BOVINO),
     VI_M_CANA = !is.na(M_CANA),
+    VI_M_CFEM = !is.na(M_CFEM),
+    VI_M_COMITE = !is.na(M_COMITE),
+    VI_M_CRH = !is.na(M_CRH),
     VI_M_FLONATIVA = !is.na(M_FLONATIVA),
+    VI_M_FOCOS = !is.na(M_FOCOS),
     VI_M_INFRA = !is.na(M_INFRA),
     VI_M_REFLO = !is.na(M_REFLO),
-    VI_M_FROTA = !is.na(M_FROTA)
+    VI_M_FROTA = !is.na(M_FROTA),
+    VI_M_ICMSECOLOG = !is.na(M_ICMSECOLOG)
   )
   
   validaterules <-  validate::validator(
-    VI_GERAL = validate::is_unique(ANO,IBGE7),
     VI_M_AGRO = validate::in_range(M_AGRO, min = 0, max = 100),
     VI_M_BOVINO = M_BOVINO >= 0,
     VI_M_CANA = validate::in_range(M_CANA, min = 0, max = 100),
@@ -241,12 +246,17 @@ if(sum(var_amb %in% names(data)) != 0){
     VI_M_REFLO = validate::in_range(M_REFLO, min = 0, max = 100)
   )
   
+  ## Consistencia
   consistencyrules <- validate::validator(
-    CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE)
+    CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE),
+    CF_M_FOCOS_range = validate::in_range(M_FOCOS, min = 99, max = 101)
   )
   
+  
 konst <- 2
-### Distribuicao
+### Regra de Distribuicao
+
+##### PROPORCAO
 distributionrules_magro <- validate::validator(
   DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Compara por ano
   DF_M_AGRO_out_city = validate::do_by(M_AGRO, by = IBGE7, fun = hampel_filter) == FALSE, # Compara por cidade
@@ -258,7 +268,7 @@ distributionrules_magro <- validate::validator(
   DF_M_AGRO_max_city = M_AGRO  <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = max, na.rm = T),
   DF_M_AGRO_median_mov = M_AGRO <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right") )
 
-
+##### RAZAO
 distributionrules_mbovino <- validate::validator(
   DF_M_BOVINO_out_year = validate::do_by(M_BOVINO, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_BOVINO_out_city = validate::do_by(M_BOVINO, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -271,6 +281,7 @@ distributionrules_mbovino <- validate::validator(
   DF_M_BOVINO_median_mov = M_BOVINO <= konst*validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")
 )
 
+##### PROPORCAO
 distributionrules_mcana <- validate::validator(
   DF_M_CANA_out_year = validate::do_by(M_CANA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CANA_out_city = validate::do_by(M_CANA, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -287,26 +298,27 @@ distributionrules_mcfem <- validate::validator(
   DF_M_CFEM_out_year = validate::do_by(M_CFEM, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CFEM_out_city = validate::do_by(M_CFEM, by = IBGE7, fun = hampel_filter) == FALSE,
   DF_M_CFEM_out_datamaid_year = validate::do_by(M_CFEM, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_CFEM_out_datamaid_city = validate::do_by(M_CFEM, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_CFEM_min_year = M_CFEM >= (konst*validate::do_by(M_CFEM, by = ANO, fun = min, na.rm = T)),
-  DF_M_CFEM_min_city = M_CFEM >= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_CFEM_max_year = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = max, na.rm = T)),
-  DF_M_CFEM_max_city = M_CFEM <= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CFEM_median_mov = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_CFEM_out_datamaid_city = validate::do_by(M_CFEM, by = IBGE7, fun = outlier_function) == FALSE #, # Compara por cidade
+#  DF_M_CFEM_min_year = M_CFEM >= (konst*validate::do_by(M_CFEM, by = ANO, fun = min, na.rm = T)),
+#  DF_M_CFEM_min_city = M_CFEM >= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = min, na.rm = T)),
+#  DF_M_CFEM_max_year = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = max, na.rm = T)),
+#  DF_M_CFEM_max_city = M_CFEM <= (konst*validate::do_by(M_CFEM, by = IBGE7, fun = max, na.rm = T)),
+#  DF_M_CFEM_median_mov = M_CFEM <= (konst*validate::do_by(M_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 distributionrules_mcrh <- validate::validator(
   DF_M_CRH_out_year = validate::do_by(M_CRH, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_CRH_out_city = validate::do_by(M_CRH, by = IBGE7, fun = hampel_filter) == FALSE,
   DF_M_CRH_out_datamaid_year = validate::do_by(M_CRH, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_CRH_out_datamaid_city = validate::do_by(M_CRH, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_CRH_min_year = M_CRH >= (konst*validate::do_by(M_CRH, by = ANO, fun = min, na.rm = T)),
-  DF_M_CRH_min_city = M_CRH >= (konst*validate::do_by(M_CRH, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_CRH_max_year = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = max, na.rm = T)),
-  DF_M_CRH_max_city = M_CRH <= (konst*validate::do_by(M_CRH, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CRH_median_mov = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_CRH_out_datamaid_city = validate::do_by(M_CRH, by = IBGE7, fun = outlier_function) == FALSE #, # Compara por cidade
+  # DF_M_CRH_min_year = M_CRH >= (konst*validate::do_by(M_CRH, by = ANO, fun = min, na.rm = T)),
+  # DF_M_CRH_min_city = M_CRH >= (konst*validate::do_by(M_CRH, by = IBGE7, fun = min, na.rm = T)),
+  # DF_M_CRH_max_year = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = max, na.rm = T)),
+  # DF_M_CRH_max_city = M_CRH <= (konst*validate::do_by(M_CRH, by = IBGE7, fun = max, na.rm = T)),
+  # DF_M_CRH_median_mov = M_CRH <= (konst*validate::do_by(M_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+##### PROPORCAO
 distributionrules_mflonativa <- validate::validator(
   DF_M_FLONATIVA_out_year = validate::do_by(M_FLONATIVA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FLONATIVA_out_city = validate::do_by(M_FLONATIVA, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -319,6 +331,7 @@ distributionrules_mflonativa <- validate::validator(
   DF_M_FLONATIVA_median_mov = M_FLONATIVA <= (konst*validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+##### PROPORCAO
 distributionrules_mfocos <- validate::validator(
   DF_M_FOCOS_out_year = validate::do_by(M_FOCOS, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FOCOS_out_city = validate::do_by(M_FOCOS, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -331,6 +344,7 @@ distributionrules_mfocos <- validate::validator(
   DF_M_FOCOS_median_mov = M_FOCOS <= (konst*validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+##### RAZAO
 distributionrules_mfrota <- validate::validator(
   DF_M_FROTA_out_year = validate::do_by(M_FROTA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_FROTA_out_city = validate::do_by(M_FROTA, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -343,23 +357,25 @@ distributionrules_mfrota <- validate::validator(
   DF_M_FROTA_median_mov = M_FROTA <= (konst*validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+
 distibution_mfrota_compare <- validate::validator(
   DF_M_FROTA_compare = validate::do_by(M_FROTA, by = IBGE7, fun = compare_lag)==TRUE
 )
 
-
+##### TOTAL
 distributionrules_micmsecolog <- validate::validator(
   DF_M_ICMSECOLOG_out_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_ICMSECOLOG_out_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == FALSE,
   DF_M_ICMSECOLOG_out_datamaid_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_ICMSECOLOG_out_datamaid_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_ICMSECOLOG_min_year = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = min, na.rm = T)),
-  DF_M_ICMSECOLOG_min_city = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_ICMSECOLOG_max_year = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = max, na.rm = T)),
-  DF_M_ICMSECOLOG_max_city = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_ICMSECOLOG_median_mov = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_ICMSECOLOG_out_datamaid_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = outlier_function) == FALSE#, # Compara por cidade
+  # DF_M_ICMSECOLOG_min_year = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = min, na.rm = T)),
+  # DF_M_ICMSECOLOG_min_city = M_ICMSECOLOG >= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = min, na.rm = T)),
+  # DF_M_ICMSECOLOG_max_year = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = max, na.rm = T)),
+  # DF_M_ICMSECOLOG_max_city = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)),
+  # DF_M_ICMSECOLOG_median_mov = M_ICMSECOLOG <= (konst*validate::do_by(M_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+##### PROPORCAO
 distributionrules_minfra <- validate::validator(
   DF_M_INFRA_out_year = validate::do_by(M_INFRA, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_INFRA_out_city = validate::do_by(M_INFRA, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -372,6 +388,7 @@ distributionrules_minfra <- validate::validator(
   DF_M_INFRA_median_mov = M_INFRA <= (konst*validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
+##### PROPORCAO
 distributionrules_mreflo <- validate::validator(
   DF_M_REFLO_out_year = validate::do_by(M_REFLO, by = ANO, fun = hampel_filter) == FALSE,
   DF_M_REFLO_out_city = validate::do_by(M_REFLO, by = IBGE7, fun = hampel_filter) == FALSE,
@@ -417,6 +434,81 @@ validate::summary(check_validate)
 ```{r warning=FALSE, message=FALSE}
 check_consistency <- validate::confront(data, consistencyrules)
 validate::summary(check_consistency)
+
+```
+
+
+## Variáveis monetárias 
+
+### M_ICMSECOLOG
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+### variaveis de total: M_ICMSECOLOG, M_CRH, M_CFEM
+source("difpercentual.R")
+dd <- data %>% 
+  difpercentual(M_ICMSECOLOG) 
+
+data_aux <- data %>%
+  dplyr::left_join(dd %>% 
+                     dplyr::select(IBGE7,ANO,dif_prop),
+                   by = c("IBGE7", "ANO") ) %>% 
+  dplyr::select(IBGE7,ANO,M_ICMSECOLOG,dif_prop)
+
+consistency_icms <- validate::validator(
+  CF_M_ICMSECOLOG = in_range(dif_prop, min = -0.05, max = 0.05)
+)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+check_consistency_icms <- validate::confront(data_aux, consistency_icms)
+validate::summary(check_consistency_icms)
+validate::plot(check_consistency_icms)
+```
+
+### M_CRH
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+dd <- data %>% 
+  difpercentual(M_CRH) 
+
+data_aux <- data %>%
+  dplyr::left_join(dd %>% 
+                     dplyr::select(IBGE7,ANO,dif_prop),
+                   by = c("IBGE7", "ANO") ) %>% 
+  dplyr::select(IBGE7,ANO,M_CRH,dif_prop)
+
+consistency_crh <- validate::validator(
+  CF_M_ICMSECOLOG = in_range(dif_prop, min = -0.05, max = 0.05)
+)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+check_consistency_crh <- validate::confront(data_aux, consistency_crh)
+validate::summary(check_consistency_crh)
+validate::plot(check_consistency_crh)
+```
+
+### M_CFEM
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+dd <- data %>% 
+  difpercentual(M_CFEM) 
+
+data_aux <- data %>%
+  dplyr::left_join(dd %>% 
+                     dplyr::select(IBGE7,ANO,dif_prop),
+                   by = c("IBGE7", "ANO") ) %>% 
+  dplyr::select(IBGE7,ANO,M_CFEM,dif_prop)
+
+consistency_cfem <- validate::validator(
+  CF_M_M_CFEM = in_range(dif_prop, min = -0.05, max = 0.05)
+)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+check_consistency_cfem <- validate::confront(data_aux, consistency_cfem)
+validate::summary(check_consistency_cfem)
+validate::plot(check_consistency_cfem)
 ```
 
 
@@ -510,9 +602,10 @@ validate::plot(check_validate)
 ```
 
 ## Gráfico para regra de consistencia
-### 
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 validate::plot(check_consistency)
+
 ```
 
 
@@ -574,4 +667,6 @@ validate::plot(check_distibution_minfra)
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 validate::plot(check_distibution_mreflo)
 ```
+
+
 
