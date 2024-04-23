@@ -256,15 +256,15 @@ if(sum(var_amb %in% names(data)) != 0){
   
 konst <- 2
 ### Regra de Distribuicao
-
+fun_tes <- function(x){ return(min(x, na.rm = T))}
 ##### PROPORCAO
 distributionrules_magro <- validate::validator(
   DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Compara por ano
   DF_M_AGRO_out_city = validate::do_by(M_AGRO, by = IBGE7, fun = hampel_filter) == FALSE, # Compara por cidade
   DF_M_AGRO_out_datamaid_year = validate::do_by(M_AGRO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
   DF_M_AGRO_out_datamaid_city = validate::do_by(M_AGRO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_AGRO_min_year = M_AGRO  >= konst*validate::do_by(M_AGRO, by = ANO, fun = min, na.rm = T),
-  DF_M_AGRO_min_city = M_AGRO  >= konst*validate::do_by(M_AGRO, by = IBGE7, fun = min, na.rm = T),
+  DF_M_AGRO_min_year = M_AGRO  >= konst*validate::do_by(M_AGRO, by = ANO, fun = fun_tes),
+  DF_M_AGRO_min_city = M_AGRO  >= konst*validate::do_by(M_AGRO, by = IBGE7, fun = fun_tes),
   DF_M_AGRO_max_year = M_AGRO  <= konst*validate::do_by(M_AGRO, by = ANO, fun = max, na.rm = T),
   DF_M_AGRO_max_city = M_AGRO  <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = max, na.rm = T),
   DF_M_AGRO_median_mov = M_AGRO <= konst*validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right") )
