@@ -16,6 +16,7 @@ create_reporting <- function(path_data,path_metadata){
   return(
     rmarkdown::render(input = path_report,
                       params = list(data = path_data,
-                                    metadata = path_metadata))
+                                    metadata = path_metadata),
+                      output_dir = "../../")
     )
 }

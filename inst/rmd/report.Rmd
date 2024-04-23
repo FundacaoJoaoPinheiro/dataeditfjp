@@ -168,10 +168,11 @@ lapply(seq(1,length(graphic)),
 
 # A fórmula abaixo eh a mesma utilizada em dataMaid::identifyOutliers().
 # Q1 - 1,5 * exp(a * MC) * IQR; Q3 + 1,5 * exp(b * MC) * IQR
-source("../../R/total_sum.R")
-source("../../R/hampel_filter.R")
-source("../../R/outlier_function.R")
-source("../../R/compare_lag.R")
+# source("../../R/total_sum.R")
+# source("../../R/hampel_filter.R")
+# source("../../R/outlier_function.R")
+# source("../../R/compare_lag.R")
+# source("../../R/difpercentual.R")
 # Definir regras ----------------------------------------------------------
 
 ## Regras para tema meio ambiente
@@ -443,7 +444,7 @@ validate::summary(check_consistency)
 ### M_ICMSECOLOG
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ### variaveis de total: M_ICMSECOLOG, M_CRH, M_CFEM
-source("../../R/difpercentual.R")
+
 dd <- data %>% 
   difpercentual(M_ICMSECOLOG) 
 

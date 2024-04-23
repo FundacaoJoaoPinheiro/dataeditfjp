@@ -9,7 +9,7 @@
 #' @export
 
 difpercentual <- function(df, variable){
-  data %>%
+  df %>%
     dplyr::group_by(ANO) %>%
     dplyr::mutate(total = sum({{variable}}, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
