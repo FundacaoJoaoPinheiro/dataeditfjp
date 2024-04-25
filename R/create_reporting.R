@@ -6,7 +6,7 @@
 #'
 #' @return Report
 #' @export
-create_reporting <- function(path_data,path_metadata){
+create_reporting <- function(path_data,path_metadata, output_path = getwd()){
 
   #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
   #path_metadata <-"C:/Users/edcam/Downloads/IMRS_METADADOS_MEIO-AMBIENTE.xlsx"
@@ -17,6 +17,6 @@ create_reporting <- function(path_data,path_metadata){
     rmarkdown::render(input = path_report,
                       params = list(data = path_data,
                                     metadata = path_metadata),
-                      output_dir = "../../")
+                      output_dir = output_path)
     )
 }
