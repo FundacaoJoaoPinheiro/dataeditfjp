@@ -1,0 +1,12 @@
+.quarto-title-block .quarto-title-banner {
+  background-image: url(../images/fjp_minimal_logo_white.png);
+  background-size: 200px;
+  background-position: left;
+  background-repeat: no-repeat;
+  padding-left: 10px;
+  background-origin: content-box;
+}
+
+.title, .subtitle {
+  text-align: center;
+}

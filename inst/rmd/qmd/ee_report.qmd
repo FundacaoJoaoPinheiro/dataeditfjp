@@ -1,0 +1,322 @@
+---
+title: FJP Dados
+subtitle: Esporte
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#faab36"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#faab36"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/ee_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "ee_relatorio.html"
+---
+
+```{r source_functions}
+
+source(sistem.file("R", "aux_functions.R"), package = "criticaldatafjp")
+# source(here::here("R", "aux_functions.R"))
+```
+
+```{r set_param_global}
+
+k <- 2 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+
+## Parâmetros para os gráficos do validate::
+chart_title <- "Resultado das validações por regra estabelecida"
+chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
+chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
+chart_xlab <- ""
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+# Análise descritiva
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: page
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(var), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_qtl_table, results='asis'}
+
+pander::pandoc.header("Quantil", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_quantile(var), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2, 
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(var))
+  cat("\\pagebreak\n")
+}
+```
+
+# Regras de crítica
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+**EXPLICAR AS REGRAS ANTES DE MOSTRAR AS TABELAS COM OS RESULTADOS**
+
+```{r get_cat}
+
+# As categorias do ano atual serão comparadas às categorias presentes nos anos anteriores.
+check <- unique(data[data$ANO < max(data$ANO, na.rm = T), "EE_ORGESP"])
+
+org_esp <- check[!is.na(check)]
+```
+
+### Tipo
+
+#### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_EE_EQUI    = is.character(EE_EQUI),
+  TI_EE_QUANT   = is.numeric(EE_QUANT),
+  TI_EE_PARTESP = is.character(EE_PARTESP),
+  TI_EE_PROGE   = is.numeric(EE_PROGE),
+  TI_EE_ESPESC  = is.numeric(EE_ESPESC),
+  TI_EE_ILRHE   = is.numeric(EE_ILRHE),
+  TI_EE_CONSESP = is.character(EE_CONSESP),
+  TI_EE_ORGESP  = is.character(EE_ORGESP),
+  TI_EE_CONVESP = is.character(EE_CONVESP)
+)
+```
+
+```{r confront_type}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  kableExtra::kbl() |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_type}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_type, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Validade
+
+#### Todos os indicadores
+
+```{r rules_validate}
+
+rules_validate <- validate::validator(
+  VI_EE_EQUI    = EE_EQUI %in% c("Sim", "Não"),
+  VI_EE_QUANT   = EE_QUANT >= 0,
+  VI_EE_PARTESP = EE_PARTESP %in% c("Sim", "Não"),
+  VI_EE_PROGE   = EE_PROGE >= 0,
+  VI_EE_ESPESC  = in_range(EE_ESPESC, min = 0, max = 100),
+  VI_EE_ILRHE   = in_range(EE_ILRHE, min = 0, max = 100),
+  VI_EE_CONSESP = EE_CONSESP %in% c("Sim", "Não"),
+  VI_EE_ORGESP  = EE_ORGESP %in% org_esp,
+  VI_EE_CONVESP = EE_CONVESP %in% c("Sim", "Não")
+)
+```
+
+```{r confront_validate}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_validate <- validate::confront(data, rules_validate)
+
+validate::summary(check_validate) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_validate}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_validate, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Consistência
+
+```{r rules_consistency}
+
+rules_consistency <- validate::validator(
+CF_TVL_EE_QUANT_A = do_by(EE_QUANT, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+
+  CF_LGT_EE_QUANT_A = do_by(EE_QUANT, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+
+  CF_TVL_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+
+  CF_LGT_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+
+  CF_TVL_EE_PROGE_A = do_by(EE_PROGE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+
+  CF_LGT_EE_PROGE_A = do_by(EE_PROGE, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+
+  CF_TVL_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+
+  CF_LGT_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+
+  CF_TVL_EE_ESPESC_A = do_by(EE_ESPESC, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+
+  CF_LGT_EE_ESPESC_A = do_by(EE_ESPESC, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+
+  CF_TVL_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+
+  CF_LGT_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+
+  CF_TVL_EE_ILRHE_A = do_by(EE_ILRHE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+
+  CF_LGT_EE_ILRHE_A = do_by(EE_ILRHE, by = ANO, fun = hampel_filter) == FALSE, # Transversal (ano)
+
+  CF_TVL_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+
+  CF_LGT_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = IBGE7, fun = rollmean, k = 3, fill = NA, align = "right")) # Longitudinal (município)
+)
+```
+
+```{r confront_consistency}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_consistency <- validate::confront(data, rules_consistency)
+
+validate::summary(check_consistency) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r show_consistency}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_consistency, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Distribuição
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
