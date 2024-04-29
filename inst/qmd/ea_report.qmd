@@ -1,0 +1,496 @@
+---
+title: FJP Dados
+subtitle: Economia
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#00b4d8"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#00b4d8"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/ea_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "ea_relatorio.html"
+---
+
+```{r source_functions}
+
+# source(sistem.file("R", "aux_functions.R"), package = "criticaldatafjp")
+source(here::here("R", "aux_functions.R"))
+```
+
+```{r set_param_global}
+
+k <- 2 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+
+## Parâmetros para os gráficos do validate::
+chart_title <- "Resultado das validações por regra estabelecida"
+chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
+chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
+chart_xlab <- ""
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+# Análise descritiva
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: page
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(var), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_qtl_table, results='asis'}
+
+pander::pandoc.header("Quantil", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_quantile(var), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2, 
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(var))
+  cat("\\pagebreak\n")
+}
+```
+
+# Regras de crítica
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+**EXPLICAR AS REGRAS ANTES DE MOSTRAR AS TABELAS COM OS RESULTADOS**
+
+### Tipo
+
+#### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_EA_BFFAM    = is.numeric(TI_EA_BFFAM),
+  TI_EA_TRFAM    = is.numeric(TI_EA_TRFAM),
+  TI_EA_TRPF     = is.numeric(TI_EA_TRPF),
+  TI_EA_BPCDEF   = is.numeric(TI_EA_BPCDEF),
+  TI_EA_BPCIDO   = is.numeric(TI_EA_BPCIDO),
+  TI_EA_BFBPC    = is.numeric(TI_EA_BFBPC),
+  TI_EA_TRBPCDEF = is.numeric(TI_EA_TRBPCDEF),
+  TI_EA_TRBPCIDO = is.numeric(TI_EA_TRBPCIDO),
+  TI_EA_TRBPC    = is.numeric(TI_EA_TRBPC),
+  TI_EA_TRBPCPB  = is.numeric(TI_EA_TRBPCPB),
+  TI_EA_TRBFBPC  = is.numeric(TI_EA_TRBFBPC),
+  TI_EA_TRPC     = is.numeric(TI_EA_TRPC),
+  TI_EA_TRPCBF   = is.numeric(TI_EA_TRPCBF),
+  TI_EA_TRPCBPC  = is.numeric(TI_EA_TRPCBPC),
+  TI_EA_VAAGR    = is.numeric(TI_EA_VAAGR),
+  TI_EA_VAIND    = is.numeric(TI_EA_VAIND),
+  TI_EA_VAADM    = is.numeric(TI_EA_VAADM),
+  TI_EA_VASERV   = is.numeric(TI_EA_VASERV),
+  TI_EA_PVAAGR   = is.numeric(TI_EA_PVAAGR),
+  TI_EA_PVAIND   = is.numeric(TI_EA_PVAIND),
+  TI_EA_PVAADM   = is.numeric(TI_EA_PVAADM),
+  TI_EA_PVASERV  = is.numeric(TI_EA_PVASERV),
+  TI_EA_VATOT    = is.numeric(TI_EA_VATOT),
+  TI_EA_IMPLIQ   = is.numeric(TI_EA_IMPLIQ),
+  TI_EA_PIB      = is.numeric(TI_EA_PIB),
+  TI_EA_PIBPC    = is.numeric(TI_EA_PIBPC),
+  TI_EA_VAFAG    = is.numeric(TI_EA_VAFAG),
+  TI_EA_VAF      = is.numeric(TI_EA_VAF),
+  TI_EA_VAFMI    = is.numeric(TI_EA_VAFMI),
+  TI_EA_VAFIT    = is.numeric(TI_EA_VAFIT),
+  TI_EA_VAFIC    = is.numeric(TI_EA_VAFIC),
+  TI_EA_VAFUP    = is.numeric(TI_EA_VAFUP),
+  TI_EA_VAFCV    = is.numeric(TI_EA_VAFCV),
+  TI_EA_VAFCA    = is.numeric(TI_EA_VAFCA),
+  TI_EA_VAFSE    = is.numeric(TI_EA_VAFSE),
+  TI_EA_VAFO     = is.numeric(TI_EA_VAFO),
+  TI_EA_PVAFAG   = is.numeric(TI_EA_PVAFAG),
+  TI_EA_PVAFMI   = is.numeric(TI_EA_PVAFMI),
+  TI_EA_PVAFIT   = is.numeric(TI_EA_PVAFIT),
+  TI_EA_PVAFIC   = is.numeric(TI_EA_PVAFIC),
+  TI_EA_PVAFUP   = is.numeric(TI_EA_PVAFUP),
+  TI_EA_PVAFCV   = is.numeric(TI_EA_PVAFCV),
+  TI_EA_PVAFCA   = is.numeric(TI_EA_PVAFCA),
+  TI_EA_PVAFSE   = is.numeric(TI_EA_PVAFSE),
+  TI_EA_PVAFO    = is.numeric(TI_EA_PVAFO),
+  TI_EA_VAFPC    = is.numeric(TI_EA_VAFPC),
+  TI_EA_VAFCVPC  = is.numeric(TI_EA_VAFCVPC),
+  TI_EA_EMPRSF   = is.numeric(TI_EA_EMPRSF),
+  TI_EA_EMPRSFTX = is.numeric(TI_EA_EMPRSFTX),
+  TI_EA_RENSF    = is.numeric(TI_EA_RENSF),
+  TI_EA_RENPCSF  = is.numeric(TI_EA_RENPCSF),
+  TI_EA_EMPRSFAG = is.numeric(TI_EA_EMPRSFAG),
+  TI_EA_EMPRSFMI = is.numeric(TI_EA_EMPRSFMI),
+  TI_EA_EMPRSFIT = is.numeric(TI_EA_EMPRSFIT),
+  TI_EA_EMPRSFUP = is.numeric(TI_EA_EMPRSFUP),
+  TI_EA_EMPRSFIC = is.numeric(TI_EA_EMPRSFIC),
+  TI_EA_EMPRSFCO = is.numeric(TI_EA_EMPRSFCO),
+  TI_EA_EMPRSFSE = is.numeric(TI_EA_EMPRSFSE)
+)
+```
+
+```{r confront_type}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  kableExtra::kbl() |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_type}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_type, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Validade
+
+#### Todos os indicadores - Valores ausentes
+
+```{r rules_validate_na}
+
+rules_validate_na <- validate::validator(
+  VI_EA_BFFAM    = !is.na(EA_BFFAM),
+  VI_EA_TRFAM    = !is.na(EA_TRFAM),
+  VI_EA_TRPF     = !is.na(EA_TRPF),
+  VI_EA_BPCDEF   = !is.na(EA_BPCDEF),
+  VI_EA_BPCIDO   = !is.na(EA_BPCIDO),
+  VI_EA_BFBPC    = !is.na(EA_BFBPC),
+  VI_EA_TRBPCDEF = !is.na(EA_TRBPCDEF),
+  VI_EA_TRBPCIDO = !is.na(EA_TRBPCIDO),
+  VI_EA_TRBPC    = !is.na(EA_TRBPC),
+  VI_EA_TRBPCPB  = !is.na(EA_TRBPCPB),
+  VI_EA_TRBFBPC  = !is.na(EA_TRBFBPC),
+  VI_EA_TRPC     = !is.na(EA_TRPC),
+  VI_EA_TRPCBF   = !is.na(EA_TRPCBF),
+  VI_EA_TRPCBPC  = !is.na(EA_TRPCBPC),
+  VI_EA_VAAGR    = !is.na(EA_VAAGR),
+  VI_EA_VAIND    = !is.na(EA_VAIND),
+  VI_EA_VAADM    = !is.na(EA_VAADM),
+  VI_EA_VASERV   = !is.na(EA_VASERV),
+  VI_EA_PVAAGR   = !is.na(EA_PVAAGR),
+  VI_EA_PVAIND   = !is.na(EA_PVAIND),
+  VI_EA_PVAADM   = !is.na(EA_PVAADM),
+  VI_EA_PVASERV  = !is.na(EA_PVASERV),
+  VI_EA_VATOT    = !is.na(EA_VATOT),
+  VI_EA_IMPLIQ   = !is.na(EA_IMPLIQ),
+  VI_EA_PIB      = !is.na(EA_PIB),
+  VI_EA_PIBPC    = !is.na(EA_PIBPC),
+  VI_EA_VAFAG    = !is.na(EA_VAFAG),
+  VI_EA_VAF      = !is.na(EA_VAF),
+  VI_EA_VAFMI    = !is.na(EA_VAFMI),
+  VI_EA_VAFIT    = !is.na(EA_VAFIT),
+  VI_EA_VAFIC    = !is.na(EA_VAFIC),
+  VI_EA_VAFUP    = !is.na(EA_VAFUP),
+  VI_EA_VAFCV    = !is.na(EA_VAFCV),
+  VI_EA_VAFCA    = !is.na(EA_VAFCA),
+  VI_EA_VAFSE    = !is.na(EA_VAFSE),
+  VI_EA_VAFO     = !is.na(EA_VAFO),
+  VI_EA_PVAFAG   = !is.na(EA_PVAFAG),
+  VI_EA_PVAFMI   = !is.na(EA_PVAFMI),
+  VI_EA_PVAFIT   = !is.na(EA_PVAFIT),
+  VI_EA_PVAFIC   = !is.na(EA_PVAFIC),
+  VI_EA_PVAFUP   = !is.na(EA_PVAFUP),
+  VI_EA_PVAFCV   = !is.na(EA_PVAFCV),
+  VI_EA_PVAFCA   = !is.na(EA_PVAFCA),
+  VI_EA_PVAFSE   = !is.na(EA_PVAFSE),
+  VI_EA_PVAFO    = !is.na(EA_PVAFO),
+  VI_EA_VAFPC    = !is.na(EA_VAFPC),
+  VI_EA_VAFCVPC  = !is.na(EA_VAFCVPC),
+  VI_EA_EMPRSF   = !is.na(EA_EMPRSF),
+  VI_EA_EMPRSFTX = !is.na(EA_EMPRSFTX),
+  VI_EA_RENSF    = !is.na(EA_RENSF),
+  VI_EA_RENPCSF  = !is.na(EA_RENPCSF),
+  VI_EA_EMPRSFAG = !is.na(EA_EMPRSFAG),
+  VI_EA_EMPRSFMI = !is.na(EA_EMPRSFMI),
+  VI_EA_EMPRSFIT = !is.na(EA_EMPRSFIT),
+  VI_EA_EMPRSFUP = !is.na(EA_EMPRSFUP),
+  VI_EA_EMPRSFIC = !is.na(EA_EMPRSFIC),
+  VI_EA_EMPRSFCO = !is.na(EA_EMPRSFCO),
+  VI_EA_EMPRSFSE = !is.na(EA_EMPRSFSE)
+)
+```
+
+```{r confront_validate_na}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_validate_na <- validate::confront(data, rules_validate_na)
+
+validate::summary(check_validate_na) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_validate_na}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_validate_na, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+#### Todos os indicadores - Demais regras
+
+```{r rules_validate_others}
+
+rules_validate_others <- validate::validator(
+  VI_EA_BFFAM    = VI_EA_BFFAM >= 0,
+  VI_EA_TRFAM    = VI_EA_TRFAM >= 0 ,
+  VI_EA_TRPF     = VI_EA_TRPF >= 0,
+  VI_EA_BPCDEF   = VI_EA_BPCDEF >= 0,
+  VI_EA_BPCIDO   = VI_EA_BPCIDO >= 0,
+  VI_EA_BFBPC    = VI_EA_BFBPC >= 0,
+  VI_EA_TRBPCDEF = VI_EA_TRBPCDEF >= 0,
+  VI_EA_TRBPCIDO = VI_EA_TRBPCIDO >= 0,
+  VI_EA_TRBPC    = VI_EA_TRBPC >= 0,
+  VI_EA_TRBPCPB  = VI_EA_TRBPCPB >= 0,
+  VI_EA_TRBFBPC  = VI_EA_TRBFBPC >= 0,
+  VI_EA_TRPC     = VI_EA_TRPC >= 0,
+  VI_EA_TRPCBF   = VI_EA_TRPCBF >= 0,
+  VI_EA_TRPCBPC  = VI_EA_TRPCBPC >= 0,
+  VI_EA_VAAGR    = VI_EA_VAAGR >= 0,
+  VI_EA_VAIND    = VI_EA_VAIND >= 0,
+  VI_EA_VAADM    = VI_EA_VAADM >= 0,
+  VI_EA_VASERV   = VI_EA_VASERV >= 0,
+  VI_EA_PVAAGR   = in_range(VI_EA_PVAAGR, min = 0, max = 100),
+  VI_EA_PVAIND   = in_range(VI_EA_PVAIND, min = 0, max = 100),
+  VI_EA_PVAADM   = in_range(VI_EA_PVAADM, min = 0, max = 100),
+  VI_EA_PVASERV  = in_range(VI_EA_PVASERV, min = 0, max = 100),
+  VI_EA_VATOT    = VI_EA_VATOT >= 0,
+  VI_EA_IMPLIQ   = VI_EA_IMPLIQ >= 0,
+  VI_EA_PIB      = VI_EA_PIB >= 0,
+  VI_EA_PIBPC    = VI_EA_PIBPC >= 0,
+  VI_EA_VAFAG    = VI_EA_VAFAG >= 0,
+  VI_EA_VAF      = VI_EA_VAF >= 0,
+  VI_EA_VAFMI    = VI_EA_VAFMI >= 0,
+  VI_EA_VAFIT    = VI_EA_VAFIT >= 0,
+  VI_EA_VAFIC    = VI_EA_VAFIC >= 0,
+  VI_EA_VAFUP    = VI_EA_VAFUP >= 0,
+  VI_EA_VAFCV    = VI_EA_VAFCV >= 0,
+  VI_EA_VAFCA    = VI_EA_VAFCA >= 0,
+  VI_EA_VAFSE    = VI_EA_VAFSE >= 0,
+  VI_EA_VAFO     = VI_EA_VAFO >= 0, 
+  VI_EA_PVAFAG   = in_range(VI_EA_PVAFAG, min = 0, max = 100),
+  VI_EA_PVAFMI   = in_range(VI_EA_PVAFMI, min = 0, max = 100),
+  VI_EA_PVAFIT   = in_range(VI_EA_PVAFIT, min = 0, max = 100),
+  VI_EA_PVAFIC   = in_range(VI_EA_PVAFIC, min = 0, max = 100),
+  VI_EA_PVAFUP   = in_range(VI_EA_PVAFUP, min = 0, max = 100),
+  VI_EA_PVAFCV   = in_range(VI_EA_PVAFCV, min = 0, max = 100),
+  VI_EA_PVAFCA   = in_range(VI_EA_PVAFCA, min = 0, max = 100),
+  VI_EA_PVAFSE   = in_range(VI_EA_PVAFSE, min = 0, max = 100),
+  VI_EA_PVAFO    = in_range(VI_EA_PVAFO, min = 0, max = 100),
+  VI_EA_VAFPC    = VI_EA_VAFPC >= 0,
+  VI_EA_VAFCVPC  = VI_EA_VAFCVPC >= 0,
+  VI_EA_EMPRSF   = VI_EA_EMPRSF >= 0,
+  VI_EA_EMPRSFTX = in_range(VI_EA_EMPRSFTX, min = 0, max = 100),
+  VI_EA_RENSF    = VI_EA_RENSF >= 0,
+  VI_EA_RENPCSF  = VI_EA_RENPCSF >= 0,
+  VI_EA_EMPRSFAG = VI_EA_EMPRSFAG >= 0,
+  VI_EA_EMPRSFMI = VI_EA_EMPRSFMI >= 0,
+  VI_EA_EMPRSFIT = VI_EA_EMPRSFIT >= 0,
+  VI_EA_EMPRSFUP = VI_EA_EMPRSFUP >= 0,
+  VI_EA_EMPRSFIC = VI_EA_EMPRSFIC >= 0,
+  VI_EA_EMPRSFCO = VI_EA_EMPRSFCO >= 0,
+  VI_EA_EMPRSFSE = VI_EA_EMPRSFSE >= 0
+)
+```
+
+```{r confront_validate_others}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_validate_others <- validate::confront(data, rules_validate_others)
+
+validate::summary(check_validate_others) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_validate_others}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_validate_others, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Consistência
+
+```{r rules_consistency}
+
+# rules_consistency <- validate::validator(
+# CF_TVL_EE_QUANT_A = do_by(EE_QUANT, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+# 
+#   CF_LGT_EE_QUANT_A = do_by(EE_QUANT, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+# 
+#   CF_TVL_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+# 
+#   CF_LGT_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+# 
+#   CF_TVL_EE_PROGE_A = do_by(EE_PROGE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+# 
+#   CF_LGT_EE_PROGE_A = do_by(EE_PROGE, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+# 
+#   CF_TVL_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+# 
+#   CF_LGT_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+# 
+#   CF_TVL_EE_ESPESC_A = do_by(EE_ESPESC, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+# 
+#   CF_LGT_EE_ESPESC_A = do_by(EE_ESPESC, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+# 
+#   CF_TVL_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+# 
+#   CF_LGT_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+# 
+#   CF_TVL_EE_ILRHE_A = do_by(EE_ILRHE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+# 
+#   CF_LGT_EE_ILRHE_A = do_by(EE_ILRHE, by = ANO, fun = hampel_filter) == FALSE, # Transversal (ano)
+# 
+#   CF_TVL_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
+# 
+#   CF_LGT_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")) # Longitudinal (município)
+# )
+```
+
+```{r confront_consistency}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+# check_consistency <- validate::confront(data, rules_consistency)
+# 
+# validate::summary(check_consistency) |> 
+#   kableExtra::kbl() |> 
+#   kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r show_consistency}
+#| out-width: 100%
+
+## Gráfico com os resultados
+# validate::plot(check_consistency, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+### Distribuição
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
