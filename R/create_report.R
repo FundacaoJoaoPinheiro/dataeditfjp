@@ -12,14 +12,16 @@
 ## esta opção
 create_report <- function(){
   # Mapeamento dos relatórios
-  # path_list <- c(
-  #   "MA" = here::here("inst", "qmd", "ma_report.qmd"),
-  #   "EE" = here::here("inst", "qmd", "ee_report.qmd")
-  # )
   path_list <- c(
-    "MA" = system.file("inst", "qmd", "ma_report.qmd", package = "criticaldatafjp"),
-    "EE" = system.file("inst", "qmd", "ee_report.qmd", package = "criticaldatafjp")
+    "MA" = here::here("inst", "qmd", "ma_report.qmd"),
+    "EE" = here::here("inst", "qmd", "ee_report.qmd"),
+    "EA" = here::here("inst", "qmd", "ea_report.qmd")
   )
+  # path_list <- c(
+  #   "MA" = system.file("inst", "qmd", "ma_report.qmd", package = "criticaldatafjp"),
+  #   "EE" = system.file("inst", "qmd", "ee_report.qmd", package = "criticaldatafjp"),
+  #   "EA" = system.file("inst", "qmd", "ea_report.qmd", package = "criticaldatafjp")
+  # )
 
   # Prompt para o usuário selecionar a base de dados
   path_data <- file.choose()
@@ -32,7 +34,7 @@ create_report <- function(){
       output_format  = "html",
       quiet          = F,
       execute_params = list(data = path_data),
-      cache          = T
+      #cache          = T
     )
   )
 }
