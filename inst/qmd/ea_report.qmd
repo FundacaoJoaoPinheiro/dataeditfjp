@@ -178,64 +178,64 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, met
 ```{r rules_type}
   
 rules_type <- validate::validator(
-  TI_EA_BFFAM    = is.numeric(TI_EA_BFFAM),
-  TI_EA_TRFAM    = is.numeric(TI_EA_TRFAM),
-  TI_EA_TRPF     = is.numeric(TI_EA_TRPF),
-  TI_EA_BPCDEF   = is.numeric(TI_EA_BPCDEF),
-  TI_EA_BPCIDO   = is.numeric(TI_EA_BPCIDO),
-  TI_EA_BFBPC    = is.numeric(TI_EA_BFBPC),
-  TI_EA_TRBPCDEF = is.numeric(TI_EA_TRBPCDEF),
-  TI_EA_TRBPCIDO = is.numeric(TI_EA_TRBPCIDO),
-  TI_EA_TRBPC    = is.numeric(TI_EA_TRBPC),
-  TI_EA_TRBPCPB  = is.numeric(TI_EA_TRBPCPB),
-  TI_EA_TRBFBPC  = is.numeric(TI_EA_TRBFBPC),
-  TI_EA_TRPC     = is.numeric(TI_EA_TRPC),
-  TI_EA_TRPCBF   = is.numeric(TI_EA_TRPCBF),
-  TI_EA_TRPCBPC  = is.numeric(TI_EA_TRPCBPC),
-  TI_EA_VAAGR    = is.numeric(TI_EA_VAAGR),
-  TI_EA_VAIND    = is.numeric(TI_EA_VAIND),
-  TI_EA_VAADM    = is.numeric(TI_EA_VAADM),
-  TI_EA_VASERV   = is.numeric(TI_EA_VASERV),
-  TI_EA_PVAAGR   = is.numeric(TI_EA_PVAAGR),
-  TI_EA_PVAIND   = is.numeric(TI_EA_PVAIND),
-  TI_EA_PVAADM   = is.numeric(TI_EA_PVAADM),
-  TI_EA_PVASERV  = is.numeric(TI_EA_PVASERV),
-  TI_EA_VATOT    = is.numeric(TI_EA_VATOT),
-  TI_EA_IMPLIQ   = is.numeric(TI_EA_IMPLIQ),
-  TI_EA_PIB      = is.numeric(TI_EA_PIB),
-  TI_EA_PIBPC    = is.numeric(TI_EA_PIBPC),
-  TI_EA_VAFAG    = is.numeric(TI_EA_VAFAG),
-  TI_EA_VAF      = is.numeric(TI_EA_VAF),
-  TI_EA_VAFMI    = is.numeric(TI_EA_VAFMI),
-  TI_EA_VAFIT    = is.numeric(TI_EA_VAFIT),
-  TI_EA_VAFIC    = is.numeric(TI_EA_VAFIC),
-  TI_EA_VAFUP    = is.numeric(TI_EA_VAFUP),
-  TI_EA_VAFCV    = is.numeric(TI_EA_VAFCV),
-  TI_EA_VAFCA    = is.numeric(TI_EA_VAFCA),
-  TI_EA_VAFSE    = is.numeric(TI_EA_VAFSE),
-  TI_EA_VAFO     = is.numeric(TI_EA_VAFO),
-  TI_EA_PVAFAG   = is.numeric(TI_EA_PVAFAG),
-  TI_EA_PVAFMI   = is.numeric(TI_EA_PVAFMI),
-  TI_EA_PVAFIT   = is.numeric(TI_EA_PVAFIT),
-  TI_EA_PVAFIC   = is.numeric(TI_EA_PVAFIC),
-  TI_EA_PVAFUP   = is.numeric(TI_EA_PVAFUP),
-  TI_EA_PVAFCV   = is.numeric(TI_EA_PVAFCV),
-  TI_EA_PVAFCA   = is.numeric(TI_EA_PVAFCA),
-  TI_EA_PVAFSE   = is.numeric(TI_EA_PVAFSE),
-  TI_EA_PVAFO    = is.numeric(TI_EA_PVAFO),
-  TI_EA_VAFPC    = is.numeric(TI_EA_VAFPC),
-  TI_EA_VAFCVPC  = is.numeric(TI_EA_VAFCVPC),
-  TI_EA_EMPRSF   = is.numeric(TI_EA_EMPRSF),
-  TI_EA_EMPRSFTX = is.numeric(TI_EA_EMPRSFTX),
-  TI_EA_RENSF    = is.numeric(TI_EA_RENSF),
-  TI_EA_RENPCSF  = is.numeric(TI_EA_RENPCSF),
-  TI_EA_EMPRSFAG = is.numeric(TI_EA_EMPRSFAG),
-  TI_EA_EMPRSFMI = is.numeric(TI_EA_EMPRSFMI),
-  TI_EA_EMPRSFIT = is.numeric(TI_EA_EMPRSFIT),
-  TI_EA_EMPRSFUP = is.numeric(TI_EA_EMPRSFUP),
-  TI_EA_EMPRSFIC = is.numeric(TI_EA_EMPRSFIC),
-  TI_EA_EMPRSFCO = is.numeric(TI_EA_EMPRSFCO),
-  TI_EA_EMPRSFSE = is.numeric(TI_EA_EMPRSFSE)
+  TI_EA_BFFAM    = is.numeric(EA_BFFAM),
+  TI_EA_TRFAM    = is.numeric(EA_TRFAM),
+  TI_EA_TRPF     = is.numeric(EA_TRPF),
+  TI_EA_BPCDEF   = is.numeric(EA_BPCDEF),
+  TI_EA_BPCIDO   = is.numeric(EA_BPCIDO),
+  TI_EA_BFBPC    = is.numeric(EA_BFBPC),
+  TI_EA_TRBPCDEF = is.numeric(EA_TRBPCDEF),
+  TI_EA_TRBPCIDO = is.numeric(EA_TRBPCIDO),
+  TI_EA_TRBPC    = is.numeric(EA_TRBPC),
+  TI_EA_TRBPCPB  = is.numeric(EA_TRBPCPB),
+  TI_EA_TRBFBPC  = is.numeric(EA_TRBFBPC),
+  TI_EA_TRPC     = is.numeric(EA_TRPC),
+  TI_EA_TRPCBF   = is.numeric(EA_TRPCBF),
+  TI_EA_TRPCBPC  = is.numeric(EA_TRPCBPC),
+  TI_EA_VAAGR    = is.numeric(EA_VAAGR),
+  TI_EA_VAIND    = is.numeric(EA_VAIND),
+  TI_EA_VAADM    = is.numeric(EA_VAADM),
+  TI_EA_VASERV   = is.numeric(EA_VASERV),
+  TI_EA_PVAAGR   = is.numeric(EA_PVAAGR),
+  TI_EA_PVAIND   = is.numeric(EA_PVAIND),
+  TI_EA_PVAADM   = is.numeric(EA_PVAADM),
+  TI_EA_PVASERV  = is.numeric(EA_PVASERV),
+  TI_EA_VATOT    = is.numeric(EA_VATOT),
+  TI_EA_IMPLIQ   = is.numeric(EA_IMPLIQ),
+  TI_EA_PIB      = is.numeric(EA_PIB),
+  TI_EA_PIBPC    = is.numeric(EA_PIBPC),
+  TI_EA_VAFAG    = is.numeric(EA_VAFAG),
+  TI_EA_VAF      = is.numeric(EA_VAF),
+  TI_EA_VAFMI    = is.numeric(EA_VAFMI),
+  TI_EA_VAFIT    = is.numeric(EA_VAFIT),
+  TI_EA_VAFIC    = is.numeric(EA_VAFIC),
+  TI_EA_VAFUP    = is.numeric(EA_VAFUP),
+  TI_EA_VAFCV    = is.numeric(EA_VAFCV),
+  TI_EA_VAFCA    = is.numeric(EA_VAFCA),
+  TI_EA_VAFSE    = is.numeric(EA_VAFSE),
+  TI_EA_VAFO     = is.numeric(EA_VAFO),
+  TI_EA_PVAFAG   = is.numeric(EA_PVAFAG),
+  TI_EA_PVAFMI   = is.numeric(EA_PVAFMI),
+  TI_EA_PVAFIT   = is.numeric(EA_PVAFIT),
+  TI_EA_PVAFIC   = is.numeric(EA_PVAFIC),
+  TI_EA_PVAFUP   = is.numeric(EA_PVAFUP),
+  TI_EA_PVAFCV   = is.numeric(EA_PVAFCV),
+  TI_EA_PVAFCA   = is.numeric(EA_PVAFCA),
+  TI_EA_PVAFSE   = is.numeric(EA_PVAFSE),
+  TI_EA_PVAFO    = is.numeric(EA_PVAFO),
+  TI_EA_VAFPC    = is.numeric(EA_VAFPC),
+  TI_EA_VAFCVPC  = is.numeric(EA_VAFCVPC),
+  TI_EA_EMPRSF   = is.numeric(EA_EMPRSF),
+  TI_EA_EMPRSFTX = is.numeric(EA_EMPRSFTX),
+  TI_EA_RENSF    = is.numeric(EA_RENSF),
+  TI_EA_RENPCSF  = is.numeric(EA_RENPCSF),
+  TI_EA_EMPRSFAG = is.numeric(EA_EMPRSFAG),
+  TI_EA_EMPRSFMI = is.numeric(EA_EMPRSFMI),
+  TI_EA_EMPRSFIT = is.numeric(EA_EMPRSFIT),
+  TI_EA_EMPRSFUP = is.numeric(EA_EMPRSFUP),
+  TI_EA_EMPRSFIC = is.numeric(EA_EMPRSFIC),
+  TI_EA_EMPRSFCO = is.numeric(EA_EMPRSFCO),
+  TI_EA_EMPRSFSE = is.numeric(EA_EMPRSFSE)
 )
 ```
 
@@ -250,247 +250,2195 @@ validate::summary(check_type) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_type}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_type, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
 ### Validade
 
 #### Todos os indicadores - Valores ausentes
 
-```{r rules_validate_na}
+##### Total
 
-rules_validate_na <- validate::validator(
-  VI_EA_BFFAM    = !is.na(EA_BFFAM),
-  VI_EA_TRFAM    = !is.na(EA_TRFAM),
-  VI_EA_TRPF     = !is.na(EA_TRPF),
-  VI_EA_BPCDEF   = !is.na(EA_BPCDEF),
-  VI_EA_BPCIDO   = !is.na(EA_BPCIDO),
-  VI_EA_BFBPC    = !is.na(EA_BFBPC),
-  VI_EA_TRBPCDEF = !is.na(EA_TRBPCDEF),
-  VI_EA_TRBPCIDO = !is.na(EA_TRBPCIDO),
-  VI_EA_TRBPC    = !is.na(EA_TRBPC),
-  VI_EA_TRBPCPB  = !is.na(EA_TRBPCPB),
-  VI_EA_TRBFBPC  = !is.na(EA_TRBFBPC),
-  VI_EA_TRPC     = !is.na(EA_TRPC),
-  VI_EA_TRPCBF   = !is.na(EA_TRPCBF),
-  VI_EA_TRPCBPC  = !is.na(EA_TRPCBPC),
-  VI_EA_VAAGR    = !is.na(EA_VAAGR),
-  VI_EA_VAIND    = !is.na(EA_VAIND),
-  VI_EA_VAADM    = !is.na(EA_VAADM),
-  VI_EA_VASERV   = !is.na(EA_VASERV),
-  VI_EA_PVAAGR   = !is.na(EA_PVAAGR),
-  VI_EA_PVAIND   = !is.na(EA_PVAIND),
-  VI_EA_PVAADM   = !is.na(EA_PVAADM),
-  VI_EA_PVASERV  = !is.na(EA_PVASERV),
-  VI_EA_VATOT    = !is.na(EA_VATOT),
-  VI_EA_IMPLIQ   = !is.na(EA_IMPLIQ),
-  VI_EA_PIB      = !is.na(EA_PIB),
-  VI_EA_PIBPC    = !is.na(EA_PIBPC),
-  VI_EA_VAFAG    = !is.na(EA_VAFAG),
-  VI_EA_VAF      = !is.na(EA_VAF),
-  VI_EA_VAFMI    = !is.na(EA_VAFMI),
-  VI_EA_VAFIT    = !is.na(EA_VAFIT),
-  VI_EA_VAFIC    = !is.na(EA_VAFIC),
-  VI_EA_VAFUP    = !is.na(EA_VAFUP),
-  VI_EA_VAFCV    = !is.na(EA_VAFCV),
-  VI_EA_VAFCA    = !is.na(EA_VAFCA),
-  VI_EA_VAFSE    = !is.na(EA_VAFSE),
-  VI_EA_VAFO     = !is.na(EA_VAFO),
-  VI_EA_PVAFAG   = !is.na(EA_PVAFAG),
-  VI_EA_PVAFMI   = !is.na(EA_PVAFMI),
-  VI_EA_PVAFIT   = !is.na(EA_PVAFIT),
-  VI_EA_PVAFIC   = !is.na(EA_PVAFIC),
-  VI_EA_PVAFUP   = !is.na(EA_PVAFUP),
-  VI_EA_PVAFCV   = !is.na(EA_PVAFCV),
-  VI_EA_PVAFCA   = !is.na(EA_PVAFCA),
-  VI_EA_PVAFSE   = !is.na(EA_PVAFSE),
-  VI_EA_PVAFO    = !is.na(EA_PVAFO),
-  VI_EA_VAFPC    = !is.na(EA_VAFPC),
-  VI_EA_VAFCVPC  = !is.na(EA_VAFCVPC),
-  VI_EA_EMPRSF   = !is.na(EA_EMPRSF),
-  VI_EA_EMPRSFTX = !is.na(EA_EMPRSFTX),
-  VI_EA_RENSF    = !is.na(EA_RENSF),
-  VI_EA_RENPCSF  = !is.na(EA_RENPCSF),
-  VI_EA_EMPRSFAG = !is.na(EA_EMPRSFAG),
-  VI_EA_EMPRSFMI = !is.na(EA_EMPRSFMI),
-  VI_EA_EMPRSFIT = !is.na(EA_EMPRSFIT),
-  VI_EA_EMPRSFUP = !is.na(EA_EMPRSFUP),
-  VI_EA_EMPRSFIC = !is.na(EA_EMPRSFIC),
-  VI_EA_EMPRSFCO = !is.na(EA_EMPRSFCO),
-  VI_EA_EMPRSFSE = !is.na(EA_EMPRSFSE)
+```{r rules_validate_na_total}
+
+rules_validate_na_total <- validate::validator(
+  VI_NA_EA_BFFAM    = !is.na(EA_BFFAM),
+  VI_NA_EA_TRFAM    = !is.na(EA_TRFAM),
+  VI_NA_EA_TRPF     = !is.na(EA_TRPF),
+  VI_NA_EA_BPCDEF   = !is.na(EA_BPCDEF),
+  VI_NA_EA_BPCIDO   = !is.na(EA_BPCIDO),
+  VI_NA_EA_BFBPC    = !is.na(EA_BFBPC),
+  VI_NA_EA_TRBPCDEF = !is.na(EA_TRBPCDEF),
+  VI_NA_EA_TRBPCIDO = !is.na(EA_TRBPCIDO),
+  VI_NA_EA_TRBPC    = !is.na(EA_TRBPC),
+  VI_NA_EA_TRBPCPB  = !is.na(EA_TRBPCPB),
+  VI_NA_EA_TRBFBPC  = !is.na(EA_TRBFBPC),
+  VI_NA_EA_TRPC     = !is.na(EA_TRPC),
+  VI_NA_EA_TRPCBF   = !is.na(EA_TRPCBF),
+  VI_NA_EA_TRPCBPC  = !is.na(EA_TRPCBPC),
+  VI_NA_EA_VAAGR    = !is.na(EA_VAAGR),
+  VI_NA_EA_VAIND    = !is.na(EA_VAIND),
+  VI_NA_EA_VAADM    = !is.na(EA_VAADM),
+  VI_NA_EA_VASERV   = !is.na(EA_VASERV),
+  VI_NA_EA_VATOT    = !is.na(EA_VATOT),
+  VI_NA_EA_IMPLIQ   = !is.na(EA_IMPLIQ),
+  VI_NA_EA_PIB      = !is.na(EA_PIB),
+  VI_NA_EA_PIBPC    = !is.na(EA_PIBPC),
+  VI_NA_EA_VAFAG    = !is.na(EA_VAFAG),
+  VI_NA_EA_VAF      = !is.na(EA_VAF),
+  VI_NA_EA_VAFMI    = !is.na(EA_VAFMI),
+  VI_NA_EA_VAFIT    = !is.na(EA_VAFIT),
+  VI_NA_EA_VAFIC    = !is.na(EA_VAFIC),
+  VI_NA_EA_VAFUP    = !is.na(EA_VAFUP),
+  VI_NA_EA_VAFCV    = !is.na(EA_VAFCV),
+  VI_NA_EA_VAFCA    = !is.na(EA_VAFCA),
+  VI_NA_EA_VAFSE    = !is.na(EA_VAFSE),
+  VI_NA_EA_VAFO     = !is.na(EA_VAFO),
+  VI_NA_EA_VAFPC    = !is.na(EA_VAFPC),
+  VI_NA_EA_VAFCVPC  = !is.na(EA_VAFCVPC),
+  VI_NA_EA_EMPRSF   = !is.na(EA_EMPRSF),
+  VI_NA_EA_RENSF    = !is.na(EA_RENSF),
+  VI_NA_EA_RENPCSF  = !is.na(EA_RENPCSF),
+  VI_NA_EA_EMPRSFAG = !is.na(EA_EMPRSFAG),
+  VI_NA_EA_EMPRSFMI = !is.na(EA_EMPRSFMI),
+  VI_NA_EA_EMPRSFIT = !is.na(EA_EMPRSFIT),
+  VI_NA_EA_EMPRSFUP = !is.na(EA_EMPRSFUP),
+  VI_NA_EA_EMPRSFIC = !is.na(EA_EMPRSFIC),
+  VI_NA_EA_EMPRSFCO = !is.na(EA_EMPRSFCO),
+  VI_NA_EA_EMPRSFSE = !is.na(EA_EMPRSFSE)
 )
 ```
 
-```{r confront_validate_na}
+```{r confront_validate_na_total}
 #| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_validate_na <- validate::confront(data, rules_validate_na)
+check_validate_na_total <- validate::confront(data, rules_validate_na_total)
 
-validate::summary(check_validate_na) |> 
+validate::summary(check_validate_na_total) |> 
   kableExtra::kbl() |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_validate_na}
+```{r chart_validate_na_total}
 #| out-width: 100%
 
 ## Gráfico com os resultados
-validate::plot(check_validate_na, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_validate_na_total, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+##### Percentual
+
+```{r rules_validate_na_pct}
+
+rules_validate_na_pct <- validate::validator(
+  VI_NA_EA_PVAAGR   = !is.na(EA_PVAAGR),
+  VI_NA_EA_PVAIND   = !is.na(EA_PVAIND),
+  VI_NA_EA_PVAADM   = !is.na(EA_PVAADM),
+  VI_NA_EA_PVASERV  = !is.na(EA_PVASERV),
+  VI_NA_EA_PVAFAG   = !is.na(EA_PVAFAG),
+  VI_NA_EA_PVAFMI   = !is.na(EA_PVAFMI),
+  VI_NA_EA_PVAFIT   = !is.na(EA_PVAFIT),
+  VI_NA_EA_PVAFIC   = !is.na(EA_PVAFIC),
+  VI_NA_EA_PVAFUP   = !is.na(EA_PVAFUP),
+  VI_NA_EA_PVAFCV   = !is.na(EA_PVAFCV),
+  VI_NA_EA_PVAFCA   = !is.na(EA_PVAFCA),
+  VI_NA_EA_PVAFSE   = !is.na(EA_PVAFSE),
+  VI_NA_EA_PVAFO    = !is.na(EA_PVAFO),
+  VI_NA_EA_EMPRSFTX = !is.na(EA_EMPRSFTX)
+)
+```
+
+
+```{r confront_validate_na_pct}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_validate_na_pct <- validate::confront(data, rules_validate_na_pct)
+
+validate::summary(check_validate_na_pct) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_validate_na_pct}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_validate_na_pct, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
 ```
 
 #### Todos os indicadores - Demais regras
 
-```{r rules_validate_others}
+##### Total
 
-rules_validate_others <- validate::validator(
-  VI_EA_BFFAM    = VI_EA_BFFAM >= 0,
-  VI_EA_TRFAM    = VI_EA_TRFAM >= 0 ,
-  VI_EA_TRPF     = VI_EA_TRPF >= 0,
-  VI_EA_BPCDEF   = VI_EA_BPCDEF >= 0,
-  VI_EA_BPCIDO   = VI_EA_BPCIDO >= 0,
-  VI_EA_BFBPC    = VI_EA_BFBPC >= 0,
-  VI_EA_TRBPCDEF = VI_EA_TRBPCDEF >= 0,
-  VI_EA_TRBPCIDO = VI_EA_TRBPCIDO >= 0,
-  VI_EA_TRBPC    = VI_EA_TRBPC >= 0,
-  VI_EA_TRBPCPB  = VI_EA_TRBPCPB >= 0,
-  VI_EA_TRBFBPC  = VI_EA_TRBFBPC >= 0,
-  VI_EA_TRPC     = VI_EA_TRPC >= 0,
-  VI_EA_TRPCBF   = VI_EA_TRPCBF >= 0,
-  VI_EA_TRPCBPC  = VI_EA_TRPCBPC >= 0,
-  VI_EA_VAAGR    = VI_EA_VAAGR >= 0,
-  VI_EA_VAIND    = VI_EA_VAIND >= 0,
-  VI_EA_VAADM    = VI_EA_VAADM >= 0,
-  VI_EA_VASERV   = VI_EA_VASERV >= 0,
-  VI_EA_PVAAGR   = in_range(VI_EA_PVAAGR, min = 0, max = 100),
-  VI_EA_PVAIND   = in_range(VI_EA_PVAIND, min = 0, max = 100),
-  VI_EA_PVAADM   = in_range(VI_EA_PVAADM, min = 0, max = 100),
-  VI_EA_PVASERV  = in_range(VI_EA_PVASERV, min = 0, max = 100),
-  VI_EA_VATOT    = VI_EA_VATOT >= 0,
-  VI_EA_IMPLIQ   = VI_EA_IMPLIQ >= 0,
-  VI_EA_PIB      = VI_EA_PIB >= 0,
-  VI_EA_PIBPC    = VI_EA_PIBPC >= 0,
-  VI_EA_VAFAG    = VI_EA_VAFAG >= 0,
-  VI_EA_VAF      = VI_EA_VAF >= 0,
-  VI_EA_VAFMI    = VI_EA_VAFMI >= 0,
-  VI_EA_VAFIT    = VI_EA_VAFIT >= 0,
-  VI_EA_VAFIC    = VI_EA_VAFIC >= 0,
-  VI_EA_VAFUP    = VI_EA_VAFUP >= 0,
-  VI_EA_VAFCV    = VI_EA_VAFCV >= 0,
-  VI_EA_VAFCA    = VI_EA_VAFCA >= 0,
-  VI_EA_VAFSE    = VI_EA_VAFSE >= 0,
-  VI_EA_VAFO     = VI_EA_VAFO >= 0, 
-  VI_EA_PVAFAG   = in_range(VI_EA_PVAFAG, min = 0, max = 100),
-  VI_EA_PVAFMI   = in_range(VI_EA_PVAFMI, min = 0, max = 100),
-  VI_EA_PVAFIT   = in_range(VI_EA_PVAFIT, min = 0, max = 100),
-  VI_EA_PVAFIC   = in_range(VI_EA_PVAFIC, min = 0, max = 100),
-  VI_EA_PVAFUP   = in_range(VI_EA_PVAFUP, min = 0, max = 100),
-  VI_EA_PVAFCV   = in_range(VI_EA_PVAFCV, min = 0, max = 100),
-  VI_EA_PVAFCA   = in_range(VI_EA_PVAFCA, min = 0, max = 100),
-  VI_EA_PVAFSE   = in_range(VI_EA_PVAFSE, min = 0, max = 100),
-  VI_EA_PVAFO    = in_range(VI_EA_PVAFO, min = 0, max = 100),
-  VI_EA_VAFPC    = VI_EA_VAFPC >= 0,
-  VI_EA_VAFCVPC  = VI_EA_VAFCVPC >= 0,
-  VI_EA_EMPRSF   = VI_EA_EMPRSF >= 0,
-  VI_EA_EMPRSFTX = in_range(VI_EA_EMPRSFTX, min = 0, max = 100),
-  VI_EA_RENSF    = VI_EA_RENSF >= 0,
-  VI_EA_RENPCSF  = VI_EA_RENPCSF >= 0,
-  VI_EA_EMPRSFAG = VI_EA_EMPRSFAG >= 0,
-  VI_EA_EMPRSFMI = VI_EA_EMPRSFMI >= 0,
-  VI_EA_EMPRSFIT = VI_EA_EMPRSFIT >= 0,
-  VI_EA_EMPRSFUP = VI_EA_EMPRSFUP >= 0,
-  VI_EA_EMPRSFIC = VI_EA_EMPRSFIC >= 0,
-  VI_EA_EMPRSFCO = VI_EA_EMPRSFCO >= 0,
-  VI_EA_EMPRSFSE = VI_EA_EMPRSFSE >= 0
+```{r rules_validate_others_total}
+
+rules_validate_others_total <- validate::validator(
+  VI_EA_BFFAM    = EA_BFFAM >= 0,
+  VI_EA_TRFAM    = EA_TRFAM >= 0,
+  VI_EA_TRPF     = EA_TRPF >= 0,
+  VI_EA_BPCDEF   = EA_BPCDEF >= 0,
+  VI_EA_BPCIDO   = EA_BPCIDO >= 0,
+  VI_EA_BFBPC    = EA_BFBPC >= 0,
+  VI_EA_TRBPCDEF = EA_TRBPCDEF >= 0,
+  VI_EA_TRBPCIDO = EA_TRBPCIDO >= 0,
+  VI_EA_TRBPC    = EA_TRBPC >= 0,
+  VI_EA_TRBPCPB  = EA_TRBPCPB >= 0,
+  VI_EA_TRBFBPC  = EA_TRBFBPC >= 0,
+  VI_EA_TRPC     = EA_TRPC >= 0,
+  VI_EA_TRPCBF   = EA_TRPCBF >= 0,
+  VI_EA_TRPCBPC  = EA_TRPCBPC >= 0,
+  VI_EA_VAAGR    = EA_VAAGR >= 0,
+  VI_EA_VAIND    = EA_VAIND >= 0,
+  VI_EA_VAADM    = EA_VAADM >= 0,
+  VI_EA_VASERV   = EA_VASERV >= 0,
+  VI_EA_VATOT    = EA_VATOT >= 0,
+  VI_EA_IMPLIQ   = EA_IMPLIQ >= 0,
+  VI_EA_PIB      = EA_PIB >= 0,
+  VI_EA_PIBPC    = EA_PIBPC >= 0,
+  VI_EA_VAFAG    = EA_VAFAG >= 0,
+  VI_EA_VAF      = EA_VAF >= 0,
+  VI_EA_VAFMI    = EA_VAFMI >= 0,
+  VI_EA_VAFIT    = EA_VAFIT >= 0,
+  VI_EA_VAFIC    = EA_VAFIC >= 0,
+  VI_EA_VAFUP    = EA_VAFUP >= 0,
+  VI_EA_VAFCV    = EA_VAFCV >= 0,
+  VI_EA_VAFCA    = EA_VAFCA >= 0,
+  VI_EA_VAFSE    = EA_VAFSE >= 0,
+  VI_EA_VAFO     = EA_VAFO >= 0,
+  VI_EA_VAFPC    = EA_VAFPC >= 0,
+  VI_EA_VAFCVPC  = EA_VAFCVPC >= 0,
+  VI_EA_EMPRSF   = EA_EMPRSF >= 0,
+  VI_EA_RENSF    = EA_RENSF >= 0,
+  VI_EA_RENPCSF  = EA_RENPCSF >= 0,
+  VI_EA_EMPRSFAG = EA_EMPRSFAG >= 0,
+  VI_EA_EMPRSFMI = EA_EMPRSFMI >= 0,
+  VI_EA_EMPRSFIT = EA_EMPRSFIT >= 0,
+  VI_EA_EMPRSFUP = EA_EMPRSFUP >= 0,
+  VI_EA_EMPRSFIC = EA_EMPRSFIC >= 0,
+  VI_EA_EMPRSFCO = EA_EMPRSFCO >= 0,
+  VI_EA_EMPRSFSE = EA_EMPRSFSE >= 0
 )
 ```
 
-```{r confront_validate_others}
+```{r confront_validate_others_total}
 #| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_validate_others <- validate::confront(data, rules_validate_others)
+check_validate_others_total <- validate::confront(data, rules_validate_others_total)
 
-validate::summary(check_validate_others) |> 
+validate::summary(check_validate_others_total) |> 
   kableExtra::kbl() |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_validate_others}
+```{r chart_validate_others_total}
 #| out-width: 100%
 
 ## Gráfico com os resultados
-validate::plot(check_validate_others, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_validate_others_total, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+##### Percentual
+
+```{r rules_validate_others_pct}
+
+rules_validate_others_pct <- validate::validator(
+  VI_EA_PVAAGR   = in_range(EA_PVAAGR, min = 0, max = 100),
+  VI_EA_PVAIND   = in_range(EA_PVAIND, min = 0, max = 100),
+  VI_EA_PVAADM   = in_range(EA_PVAADM, min = 0, max = 100),
+  VI_EA_PVASERV  = in_range(EA_PVASERV, min = 0, max = 100),
+  VI_EA_PVAFAG   = in_range(EA_PVAFAG, min = 0, max = 100),
+  VI_EA_PVAFMI   = in_range(EA_PVAFMI, min = 0, max = 100),
+  VI_EA_PVAFIT   = in_range(EA_PVAFIT, min = 0, max = 100),
+  VI_EA_PVAFIC   = in_range(EA_PVAFIC, min = 0, max = 100),
+  VI_EA_PVAFUP   = in_range(EA_PVAFUP, min = 0, max = 100),
+  VI_EA_PVAFCV   = in_range(EA_PVAFCV, min = 0, max = 100),
+  VI_EA_PVAFCA   = in_range(EA_PVAFCA, min = 0, max = 100),
+  VI_EA_PVAFSE   = in_range(EA_PVAFSE, min = 0, max = 100),
+  VI_EA_PVAFO    = in_range(EA_PVAFO, min = 0, max = 100),
+  VI_EA_EMPRSFTX = in_range(EA_EMPRSFTX, min = 0, max = 100)
+)
+```
+
+
+```{r confront_validate_others_pct}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_validate_others_pct <- validate::confront(data, rules_validate_others_pct)
+
+validate::summary(check_validate_others_pct) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_validate_others_pct}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_validate_others_pct, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
 ```
 
 ### Consistência
 
 ```{r rules_consistency}
 
-# rules_consistency <- validate::validator(
-# CF_TVL_EE_QUANT_A = do_by(EE_QUANT, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-# 
-#   CF_LGT_EE_QUANT_A = do_by(EE_QUANT, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-# 
-#   CF_TVL_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
-# 
-#   CF_LGT_EE_QUANT_B = EE_QUANT <= (2 * do_by(EE_QUANT, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
-# 
-#   CF_TVL_EE_PROGE_A = do_by(EE_PROGE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-# 
-#   CF_LGT_EE_PROGE_A = do_by(EE_PROGE, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-# 
-#   CF_TVL_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
-# 
-#   CF_LGT_EE_PROGE_B = EE_PROGE <= (2 * do_by(EE_PROGE, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
-# 
-#   CF_TVL_EE_ESPESC_A = do_by(EE_ESPESC, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-# 
-#   CF_LGT_EE_ESPESC_A = do_by(EE_ESPESC, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-# 
-#   CF_TVL_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
-# 
-#   CF_LGT_EE_ESPESC_B = EE_ESPESC <= (2 * do_by(EE_ESPESC, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")), # Longitudinal (município)
-# 
-#   CF_TVL_EE_ILRHE_A = do_by(EE_ILRHE, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-# 
-#   CF_LGT_EE_ILRHE_A = do_by(EE_ILRHE, by = ANO, fun = hampel_filter) == FALSE, # Transversal (ano)
-# 
-#   CF_TVL_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = ANO, fun = mean, na.rm = T)), # Transversal (ano)
-# 
-#   CF_LGT_EE_ILRHE_B = EE_ILRHE <= (2 * do_by(EE_ILRHE, by = IBGE7, fun = zoo::rollmean, k = 3, fill = NA, align = "right")) # Longitudinal (município)
-# )
+rules_consistency <- validate::validator(
+  CI_VA_total  = in_range(EA_PVAAGR + EA_PVAIND + EA_PVAADM + EA_PVASERV, min = 99, max = 101),
+  CI_VAF_total = in_range(EA_PVAFAG + EA_PVAFMI + EA_PVAFIT + EA_PVAFIC + EA_PVAFUP + EA_PVAFCV + EA_PVAFCA + EA_PVAFSE + EA_PVAFO, min = 99, max = 101)
+)
 ```
 
 ```{r confront_consistency}
 #| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-# check_consistency <- validate::confront(data, rules_consistency)
-# 
-# validate::summary(check_consistency) |> 
-#   kableExtra::kbl() |> 
-#   kableExtra::kable_paper("hover", full_width = F)
+check_consistency <- validate::confront(data, rules_consistency)
+
+validate::summary(check_consistency) |>
+  kableExtra::kbl() |>
+  kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consistency}
 #| out-width: 100%
 
 ## Gráfico com os resultados
-# validate::plot(check_consistency, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_consistency, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
 ```
 
 ### Distribuição
 
-```{r}
+EA_BFFAM
+
+```{r rules_dist_total_ea_bffam}
+
+rules_dist_total_ea_bffam <- validate::validator(
+  DF_EA_BFFAM_hampel_year  = validate::do_by(EA_BFFAM, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_BFFAM_hampel_munic = validate::do_by(EA_BFFAM, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_BFFAM_out_year  = validate::do_by(EA_BFFAM, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_BFFAM_out_munic = validate::do_by(EA_BFFAM, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_BFFAM_min_year = EA_BFFAM >= (k * validate::min_by(EA_BFFAM, by = ANO, na.rm = T)),
+  
+  DF_EA_BFFAM_min_munic = EA_BFFAM >= (k * validate::min_by(EA_BFFAM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BFFAM_max_year = EA_BFFAM <= (k * validate::max_by(EA_BFFAM, by = ANO, na.rm = T)),
+  
+  DF_EA_BFFAM_max_munic = EA_BFFAM <= (k * validate::max_by(EA_BFFAM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BFFAM_median_roll = EA_BFFAM <= (k * validate::do_by(EA_BFFAM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_BFFAM_dif        = validate::do_by(EA_BFFAM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BFFAM, na.rm = T)
+)
 ```
 
-```{r}
+```{r confront_dist_total_ea_bffam}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_bffam <- validate::confront(data, rules_dist_total_ea_bffam)
+
+validate::summary(check_dist_total_ea_bffam) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r}
+```{r chart_dist_total_ea_bffam}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_bffam, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRFAM
+
+```{r rules_dist_total_ea_trfam}
+
+rules_dist_total_ea_trfam <- validate::validator(
+  DF_EA_TRFAM_hampel_year  = validate::do_by(EA_TRFAM, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRFAM_hampel_munic = validate::do_by(EA_TRFAM, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRFAM_out_year  = validate::do_by(EA_TRFAM, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRFAM_out_munic = validate::do_by(EA_TRFAM, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRFAM_min_year = EA_TRFAM >= (k * validate::min_by(EA_TRFAM, by = ANO, na.rm = T)),
+  
+  DF_EA_TRFAM_min_munic = EA_TRFAM >= (k * validate::min_by(EA_TRFAM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRFAM_max_year = EA_TRFAM <= (k * validate::max_by(EA_TRFAM, by = ANO, na.rm = T)),
+  
+  DF_EA_TRFAM_max_munic = EA_TRFAM <= (k * validate::max_by(EA_TRFAM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRFAM_median_roll = EA_TRFAM <= (k * validate::do_by(EA_TRFAM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRFAM_dif        = validate::do_by(EA_TRFAM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRFAM, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trfam}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trfam <- validate::confront(data, rules_dist_total_ea_trfam)
+
+validate::summary(check_dist_total_ea_trfam) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trfam}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trfam, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRPF
+
+```{r rules_dist_total_ea_trpf}
+  
+rules_dist_total_ea_trpf <- validate::validator(
+  DF_EA_TRPF_hampel_year  = validate::do_by(EA_TRPF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRPF_hampel_munic = validate::do_by(EA_TRPF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRPF_out_year  = validate::do_by(EA_TRPF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRPF_out_munic = validate::do_by(EA_TRPF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRPF_min_year = EA_TRPF >= (k * validate::min_by(EA_TRPF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPF_min_munic = EA_TRPF >= (k * validate::min_by(EA_TRPF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPF_max_year = EA_TRPF <= (k * validate::max_by(EA_TRPF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPF_max_munic = EA_TRPF <= (k * validate::max_by(EA_TRPF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPF_median_roll = EA_TRPF <= (k * validate::do_by(EA_TRPF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRPF_dif        = validate::do_by(EA_TRPF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trpf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trpf <- validate::confront(data, rules_dist_total_ea_trpf)
+
+validate::summary(check_dist_total_ea_trpf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trpf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trpf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_BPCDEF
+
+```{r rules_dist_total_ea_bpcde}
+
+rules_dist_total_ea_bpcde <- validate::validator(
+  DF_EA_BPCDEF_hampel_year  = validate::do_by(EA_BPCDEF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_BPCDEF_hampel_munic = validate::do_by(EA_BPCDEF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_BPCDEF_out_year  = validate::do_by(EA_BPCDEF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_BPCDEF_out_munic = validate::do_by(EA_BPCDEF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_BPCDEF_min_year = EA_BPCDEF >= (k * validate::min_by(EA_BPCDEF, by = ANO, na.rm = T)),
+  
+  DF_EA_BPCDEF_min_munic = EA_BPCDEF >= (k * validate::min_by(EA_BPCDEF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BPCDEF_max_year = EA_BPCDEF <= (k * validate::max_by(EA_BPCDEF, by = ANO, na.rm = T)),
+  
+  DF_EA_BPCDEF_max_munic = EA_BPCDEF <= (k * validate::max_by(EA_BPCDEF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BPCDEF_median_roll = EA_BPCDEF <= (k * validate::do_by(EA_BPCDEF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_BPCDEF_dif        = validate::do_by(EA_BPCDEF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BPCDEF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_bpcde}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_bpcde <- validate::confront(data, rules_dist_total_ea_bpcde)
+
+validate::summary(check_dist_total_ea_bpcde) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_bpcde}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_bpcde, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_BPCIDO
+
+```{r rules_dist_total_ea_bpcido}
+
+rules_dist_total_ea_bpcido <- validate::validator(
+  DF_EA_BPCIDO_hampel_year  = validate::do_by(EA_BPCIDO, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_BPCIDO_hampel_munic = validate::do_by(EA_BPCIDO, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_BPCIDO_out_year  = validate::do_by(EA_BPCIDO, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_BPCIDO_out_munic = validate::do_by(EA_BPCIDO, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_BPCIDO_min_year = EA_BPCIDO >= (k * validate::min_by(EA_BPCIDO, by = ANO, na.rm = T)),
+  
+  DF_EA_BPCIDO_min_munic = EA_BPCIDO >= (k * validate::min_by(EA_BPCIDO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BPCIDO_max_year = EA_BPCIDO <= (k * validate::max_by(EA_BPCIDO, by = ANO, na.rm = T)),
+  
+  DF_EA_BPCIDO_max_munic = EA_BPCIDO <= (k * validate::max_by(EA_BPCIDO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BPCIDO_median_roll = EA_BPCIDO <= (k * validate::do_by(EA_BPCIDO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_BPCIDO_dif        = validate::do_by(EA_BPCIDO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BPCIDO, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_bpcido}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_bpcido <- validate::confront(data, rules_dist_total_ea_bpcido)
+
+validate::summary(check_dist_total_ea_bpcido) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_bpcido}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_bpcido, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_BFBPC
+
+```{r rules_dist_total_ea_bfbpc}
+
+rules_dist_total_ea_bfbpc <- validate::validator(
+  DF_EA_BFBPC_hampel_year  = validate::do_by(EA_BFBPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_BFBPC_hampel_munic = validate::do_by(EA_BFBPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_BFBPC_out_year  = validate::do_by(EA_BFBPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_BFBPC_out_munic = validate::do_by(EA_BFBPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_BFBPC_min_year = EA_BFBPC >= (k * validate::min_by(EA_BFBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_BFBPC_min_munic = EA_BFBPC >= (k * validate::min_by(EA_BFBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BFBPC_max_year = EA_BFBPC <= (k * validate::max_by(EA_BFBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_BFBPC_max_munic = EA_BFBPC <= (k * validate::max_by(EA_BFBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_BFBPC_median_roll = EA_BFBPC <= (k * validate::do_by(EA_BFBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_BFBPC_dif        = validate::do_by(EA_BFBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BFBPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_bfbpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_bfbpc <- validate::confront(data, rules_dist_total_ea_bfbpc)
+
+validate::summary(check_dist_total_ea_bfbpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_bfbpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_bfbpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRBPCDEF
+
+```{r rules_dist_total_ea_trbpcdef}
+
+rules_dist_total_ea_trbpcdef <- validate::validator( 
+  DF_EA_TRBPCDEF_hampel_year  = validate::do_by(EA_TRBPCDEF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCDEF_hampel_munic = validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCDEF_out_year  = validate::do_by(EA_TRBPCDEF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCDEF_out_munic = validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCDEF_min_year = EA_TRBPCDEF >= (k * validate::min_by(EA_TRBPCDEF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCDEF_min_munic = EA_TRBPCDEF >= (k * validate::min_by(EA_TRBPCDEF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCDEF_max_year = EA_TRBPCDEF <= (k * validate::max_by(EA_TRBPCDEF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCDEF_max_munic = EA_TRBPCDEF <= (k * validate::max_by(EA_TRBPCDEF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCDEF_median_roll = EA_TRBPCDEF <= (k * validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRBPCDEF_dif        = validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCDEF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trbpcdef}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trbpcdef <- validate::confront(data, rules_dist_total_ea_trbpcdef)
+
+validate::summary(check_dist_total_ea_trbpcdef) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trbpcdef}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trbpcdef, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRBPCIDO
+
+```{r rules_dist_total_ea_trbpcido}
+
+rules_dist_total_ea_trbpcido <- validate::validator(  
+  DF_EA_TRBPCIDO_hampel_year  = validate::do_by(EA_TRBPCIDO, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCIDO_hampel_munic = validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCIDO_out_year  = validate::do_by(EA_TRBPCIDO, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCIDO_out_munic = validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCIDO_min_year = EA_TRBPCIDO >= (k * validate::min_by(EA_TRBPCIDO, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCIDO_min_munic = EA_TRBPCIDO >= (k * validate::min_by(EA_TRBPCIDO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCIDO_max_year = EA_TRBPCIDO <= (k * validate::max_by(EA_TRBPCIDO, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCIDO_max_munic = EA_TRBPCIDO <= (k * validate::max_by(EA_TRBPCIDO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCIDO_median_roll = EA_TRBPCIDO <= (k * validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRBPCIDO_dif        = validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCIDO, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trbpcido}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trbpcido <- validate::confront(data, rules_dist_total_ea_trbpcido)
+
+validate::summary(check_dist_total_ea_trbpcido) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trbpcido}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trbpcido, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRBPC
+
+```{r rules_dist_total_ea_trbpc}
+
+rules_dist_total_ea_trbpc <- validate::validator(  
+  DF_EA_TRBPC_hampel_year  = validate::do_by(EA_TRBPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPC_hampel_munic = validate::do_by(EA_TRBPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPC_out_year  = validate::do_by(EA_TRBPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPC_out_munic = validate::do_by(EA_TRBPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPC_min_year = EA_TRBPC >= (k * validate::min_by(EA_TRBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPC_min_munic = EA_TRBPC >= (k * validate::min_by(EA_TRBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPC_max_year = EA_TRBPC <= (k * validate::max_by(EA_TRBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPC_max_munic = EA_TRBPC <= (k * validate::max_by(EA_TRBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPC_median_roll = EA_TRBPC <= (k * validate::do_by(EA_TRBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRBPC_dif        = validate::do_by(EA_TRBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trbpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trbpc <- validate::confront(data, rules_dist_total_ea_trbpc)
+
+validate::summary(check_dist_total_ea_trbpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trbpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trbpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRBPCPB
+
+```{r rules_dist_total_ea_trbpcpb}
+
+rules_dist_total_ea_trbpcpb <- validate::validator( 
+  DF_EA_TRBPCPB_hampel_year  = validate::do_by(EA_TRBPCPB, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCPB_hampel_munic = validate::do_by(EA_TRBPCPB, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRBPCPB_out_year  = validate::do_by(EA_TRBPCPB, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCPB_out_munic = validate::do_by(EA_TRBPCPB, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRBPCPB_min_year = EA_TRBPCPB >= (k * validate::min_by(EA_TRBPCPB, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCPB_min_munic = EA_TRBPCPB >= (k * validate::min_by(EA_TRBPCPB, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCPB_max_year = EA_TRBPCPB <= (k * validate::max_by(EA_TRBPCPB, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBPCPB_max_munic = EA_TRBPCPB <= (k * validate::max_by(EA_TRBPCPB, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBPCPB_median_roll = EA_TRBPCPB <= (k * validate::do_by(EA_TRBPCPB, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRBPCPB_dif        = validate::do_by(EA_TRBPCPB, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCPB, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trbpcpb}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trbpcpb <- validate::confront(data, rules_dist_total_ea_trbpcpb)
+
+validate::summary(check_dist_total_ea_trbpcpb) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trbpcpb}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trbpcpb, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRBFBPC
+
+```{r rules_dist_total_ea_trbfbpc}
+
+rules_dist_total_ea_trbfbpc <- validate::validator(  
+  DF_EA_TRBFBPC_hampel_year  = validate::do_by(EA_TRBFBPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRBFBPC_hampel_munic = validate::do_by(EA_TRBFBPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRBFBPC_out_year  = validate::do_by(EA_TRBFBPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRBFBPC_out_munic = validate::do_by(EA_TRBFBPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRBFBPC_min_year = EA_TRBFBPC >= (k * validate::min_by(EA_TRBFBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBFBPC_min_munic = EA_TRBFBPC >= (k * validate::min_by(EA_TRBFBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBFBPC_max_year = EA_TRBFBPC <= (k * validate::max_by(EA_TRBFBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRBFBPC_max_munic = EA_TRBFBPC <= (k * validate::max_by(EA_TRBFBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRBFBPC_median_roll = EA_TRBFBPC <= (k * validate::do_by(EA_TRBFBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRBFBPC_dif        = validate::do_by(EA_TRBFBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBFBPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trbfbpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trbfbpc <- validate::confront(data, rules_dist_total_ea_trbfbpc)
+
+validate::summary(check_dist_total_ea_trbfbpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trbfbpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trbfbpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRPC
+
+```{r rules_dist_total_ea_trpc}
+
+rules_dist_total_ea_trpc <- validate::validator( 
+  DF_EA_TRPC_hampel_year  = validate::do_by(EA_TRPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRPC_hampel_munic = validate::do_by(EA_TRPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRPC_out_year  = validate::do_by(EA_TRPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRPC_out_munic = validate::do_by(EA_TRPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRPC_min_year = EA_TRPC >= (k * validate::min_by(EA_TRPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPC_min_munic = EA_TRPC >= (k * validate::min_by(EA_TRPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPC_max_year = EA_TRPC <= (k * validate::max_by(EA_TRPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPC_max_munic = EA_TRPC <= (k * validate::max_by(EA_TRPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPC_median_roll = EA_TRPC <= (k * validate::do_by(EA_TRPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRPC_dif        = validate::do_by(EA_TRPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trpc <- validate::confront(data, rules_dist_total_ea_trpc)
+
+validate::summary(check_dist_total_ea_trpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRPCBF
+
+```{r rules_dist_total_ea_trpcbf}
+
+rules_dist_total_ea_trpcbf <- validate::validator( 
+  DF_EA_TRPCBF_hampel_year  = validate::do_by(EA_TRPCBF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_TRPCBF_hampel_munic = validate::do_by(EA_TRPCBF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRPCBF_out_year  = validate::do_by(EA_TRPCBF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_TRPCBF_out_munic = validate::do_by(EA_TRPCBF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRPCBF_min_year = EA_TRPCBF >= (k * validate::min_by(EA_TRPCBF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPCBF_min_munic = EA_TRPCBF >= (k * validate::min_by(EA_TRPCBF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPCBF_max_year = EA_TRPCBF <= (k * validate::max_by(EA_TRPCBF, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPCBF_max_munic = EA_TRPCBF <= (k * validate::max_by(EA_TRPCBF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPCBF_median_roll = EA_TRPCBF <= (k * validate::do_by(EA_TRPCBF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRPCBF_dif        = validate::do_by(EA_TRPCBF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPCBF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trpcbf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trpcbf <- validate::confront(data, rules_dist_total_ea_trpcbf)
+
+validate::summary(check_dist_total_ea_trpcbf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trpcbf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trpcbf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_TRPCBPC
+
+```{r rules_dist_total_ea_trpcbpc}
+
+rules_dist_total_ea_trpcbpc <- validate::validator( 
+  DF_EA_TRPCBPC_hampel_year   = validate::do_by(EA_TRPCBPC, by = ANO, fun = hampel_filter) == F,
+  
+   DF_EA_TRPCBPC_hampel_munic = validate::do_by(EA_TRPCBPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_TRPCBPC_out_year   = validate::do_by(EA_TRPCBPC, by = ANO, fun = outlier_detection) == F,
+  
+   DF_EA_TRPCBPC_out_munic = validate::do_by(EA_TRPCBPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_TRPCBPC_min_year = EA_TRPCBPC >= (k * validate::min_by(EA_TRPCBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPCBPC_min_munic = EA_TRPCBPC >= (k * validate::min_by(EA_TRPCBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPCBPC_max_year = EA_TRPCBPC <= (k * validate::max_by(EA_TRPCBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_TRPCBPC_max_munic = EA_TRPCBPC <= (k * validate::max_by(EA_TRPCBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_TRPCBPC_median_roll = EA_TRPCBPC <= (k * validate::do_by(EA_TRPCBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_TRPCBPC_dif        = validate::do_by(EA_TRPCBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPCBPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_trpcbpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_trpcbpc <- validate::confront(data, rules_dist_total_ea_trpcbpc)
+
+validate::summary(check_dist_total_ea_trpcbpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_trpcbpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_trpcbpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAAGR
+
+```{r rules_dist_total_ea_vaagr}
+
+rules_dist_total_ea_vaagr <- validate::validator(
+  DF_EA_VAAGR_hampel_year  = validate::do_by(EA_VAAGR, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAAGR_hampel_munic = validate::do_by(EA_VAAGR, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAAGR_out_year  = validate::do_by(EA_VAAGR, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAAGR_out_munic = validate::do_by(EA_VAAGR, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAAGR_min_year = EA_VAAGR >= (k * validate::min_by(EA_VAAGR, by = ANO, na.rm = T)),
+  
+  DF_EA_VAAGR_min_munic = EA_VAAGR >= (k * validate::min_by(EA_VAAGR, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAAGR_max_year = EA_VAAGR <= (k * validate::max_by(EA_VAAGR, by = ANO, na.rm = T)),
+  
+  DF_EA_VAAGR_max_munic = EA_VAAGR <= (k * validate::max_by(EA_VAAGR, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAAGR_median_roll = EA_VAAGR <= (k * validate::do_by(EA_VAAGR, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAAGR_dif        = validate::do_by(EA_VAAGR, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAAGR, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vaagr}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vaagr <- validate::confront(data, rules_dist_total_ea_vaagr)
+
+validate::summary(check_dist_total_ea_vaagr) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vaagr}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vaagr, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAIND
+
+```{r rules_dist_total_ea_vaind}
+
+rules_dist_total_ea_vaind <- validate::validator(
+  DF_EA_VAIND_hampel_year  = validate::do_by(EA_VAIND, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAIND_hampel_munic = validate::do_by(EA_VAIND, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAIND_out_year  = validate::do_by(EA_VAIND, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAIND_out_munic = validate::do_by(EA_VAIND, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAIND_min_year = EA_VAIND >= (k * validate::min_by(EA_VAIND, by = ANO, na.rm = T)),
+  
+  DF_EA_VAIND_min_munic = EA_VAIND >= (k * validate::min_by(EA_VAIND, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAIND_max_year = EA_VAIND <= (k * validate::max_by(EA_VAIND, by = ANO, na.rm = T)),
+  
+  DF_EA_VAIND_max_munic = EA_VAIND <= (k * validate::max_by(EA_VAIND, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAIND_median_roll = EA_VAIND <= (k * validate::do_by(EA_VAIND, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAIND_dif        = validate::do_by(EA_VAIND, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAIND, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vaind}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vaind <- validate::confront(data, rules_dist_total_ea_vaind)
+
+validate::summary(check_dist_total_ea_vaind) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vaind}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vaind, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAADM
+
+```{r rules_dist_total_ea_vaadm}
+
+rules_dist_total_ea_vaadm <- validate::validator(
+  DF_EA_VAADM_hampel_year  = validate::do_by(EA_VAADM, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAADM_hampel_munic = validate::do_by(EA_VAADM, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAADM_out_year  = validate::do_by(EA_VAADM, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAADM_out_munic = validate::do_by(EA_VAADM, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAADM_min_year = EA_VAADM >= (k * validate::min_by(EA_VAADM, by = ANO, na.rm = T)),
+  
+  DF_EA_VAADM_min_munic = EA_VAADM >= (k * validate::min_by(EA_VAADM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAADM_max_year = EA_VAADM <= (k * validate::max_by(EA_VAADM, by = ANO, na.rm = T)),
+  
+  DF_EA_VAADM_max_munic = EA_VAADM <= (k * validate::max_by(EA_VAADM, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAADM_median_roll = EA_VAADM <= (k * validate::do_by(EA_VAADM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAADM_dif        = validate::do_by(EA_VAADM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAADM, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vaadm}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vaadm <- validate::confront(data, rules_dist_total_ea_vaadm)
+
+validate::summary(check_dist_total_ea_vaadm) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vaadm}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vaadm, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VASERV
+
+```{r rules_dist_total_ea_vaserv}
+
+rules_dist_total_ea_vaserv <- validate::validator(
+  DF_EA_VASERV_hampel_year  = validate::do_by(EA_VASERV, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VASERV_hampel_munic = validate::do_by(EA_VASERV, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VASERV_out_year  = validate::do_by(EA_VASERV, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VASERV_out_munic = validate::do_by(EA_VASERV, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VASERV_min_year = EA_VASERV >= (k * validate::min_by(EA_VASERV, by = ANO, na.rm = T)),
+  
+  DF_EA_VASERV_min_munic = EA_VASERV >= (k * validate::min_by(EA_VASERV, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VASERV_max_year = EA_VASERV <= (k * validate::max_by(EA_VASERV, by = ANO, na.rm = T)),
+  
+  DF_EA_VASERV_max_munic = EA_VASERV <= (k * validate::max_by(EA_VASERV, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VASERV_median_roll = EA_VASERV <= (k * validate::do_by(EA_VASERV, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VASERV_dif        = validate::do_by(EA_VASERV, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VASERV, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vaserv}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vaserv <- validate::confront(data, rules_dist_total_ea_vaserv)
+
+validate::summary(check_dist_total_ea_vaserv) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vaserv}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vaserv, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_IMPLIQ
+
+```{r rules_dist_total_ea_impliq}
+
+rules_dist_total_ea_impliq <- validate::validator(
+  DF_EA_IMPLIQ_hampel_year  = validate::do_by(EA_IMPLIQ, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_IMPLIQ_hampel_munic = validate::do_by(EA_IMPLIQ, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_IMPLIQ_out_year  = validate::do_by(EA_IMPLIQ, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_IMPLIQ_out_munic = validate::do_by(EA_IMPLIQ, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_IMPLIQ_min_year = EA_IMPLIQ >= (k * validate::min_by(EA_IMPLIQ, by = ANO, na.rm = T)),
+  
+  DF_EA_IMPLIQ_min_munic = EA_IMPLIQ >= (k * validate::min_by(EA_IMPLIQ, by = IBGE7, na.rm = T)),
+  
+  DF_EA_IMPLIQ_max_year = EA_IMPLIQ <= (k * validate::max_by(EA_IMPLIQ, by = ANO, na.rm = T)),
+  
+  DF_EA_IMPLIQ_max_munic = EA_IMPLIQ <= (k * validate::max_by(EA_IMPLIQ, by = IBGE7, na.rm = T)),
+  
+  DF_EA_IMPLIQ_median_roll = EA_IMPLIQ <= (k * validate::do_by(EA_IMPLIQ, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_IMPLIQ_dif        = validate::do_by(EA_IMPLIQ, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_IMPLIQ, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_impliq}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_impliq <- validate::confront(data, rules_dist_total_ea_impliq)
+
+validate::summary(check_dist_total_ea_impliq) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_impliq}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_impliq, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_PIB
+
+```{r rules_dist_total_ea_pib}
+
+rules_dist_total_ea_pib <- validate::validator(
+  DF_EA_PIB_hampel_year  = validate::do_by(EA_PIB, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_PIB_hampel_munic = validate::do_by(EA_PIB, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_PIB_out_year  = validate::do_by(EA_PIB, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_PIB_out_munic = validate::do_by(EA_PIB, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_PIB_min_year = EA_PIB >= (k * validate::min_by(EA_PIB, by = ANO, na.rm = T)),
+  
+  DF_EA_PIB_min_munic = EA_PIB >= (k * validate::min_by(EA_PIB, by = IBGE7, na.rm = T)),
+  
+  DF_EA_PIB_max_year = EA_PIB <= (k * validate::max_by(EA_PIB, by = ANO, na.rm = T)),
+  
+  DF_EA_PIB_max_munic = EA_PIB <= (k * validate::max_by(EA_PIB, by = IBGE7, na.rm = T)),
+  
+  DF_EA_PIB_median_roll = EA_PIB <= (k * validate::do_by(EA_PIB, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_PIB_dif        = validate::do_by(EA_PIB, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_PIB, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_pib}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_pib <- validate::confront(data, rules_dist_total_ea_pib)
+
+validate::summary(check_dist_total_ea_pib) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_pib}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_pib, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_PIBPC
+
+```{r rules_dist_total_ea_pibpc}
+
+rules_dist_total_ea_pibpc <- validate::validator(  
+  DF_EA_PIBPC_hampel_year  = validate::do_by(EA_PIBPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_PIBPC_hampel_munic = validate::do_by(EA_PIBPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_PIBPC_out_year  = validate::do_by(EA_PIBPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_PIBPC_out_munic = validate::do_by(EA_PIBPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_PIBPC_min_year = EA_PIBPC >= (k * validate::min_by(EA_PIBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_PIBPC_min_munic = EA_PIBPC >= (k * validate::min_by(EA_PIBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_PIBPC_max_year = EA_PIBPC <= (k * validate::max_by(EA_PIBPC, by = ANO, na.rm = T)),
+  
+  DF_EA_PIBPC_max_munic = EA_PIBPC <= (k * validate::max_by(EA_PIBPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_PIBPC_median_roll = EA_PIBPC <= (k * validate::do_by(EA_PIBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_PIBPC_dif        = validate::do_by(EA_PIBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_PIBPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_pibpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_pibpc <- validate::confront(data, rules_dist_total_ea_pibpc)
+
+validate::summary(check_dist_total_ea_pibpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_pibpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_pibpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFAG
+
+```{r rules_dist_total_ea_vafag}
+
+rules_dist_total_ea_vafag <- validate::validator(
+  DF_EA_VAFAG_hampel_year  = validate::do_by(EA_VAFAG, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFAG_hampel_munic = validate::do_by(EA_VAFAG, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFAG_out_year  = validate::do_by(EA_VAFAG, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFAG_out_munic = validate::do_by(EA_VAFAG, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFAG_min_year = EA_VAFAG >= (k * validate::min_by(EA_VAFAG, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFAG_min_munic = EA_VAFAG >= (k * validate::min_by(EA_VAFAG, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFAG_max_year = EA_VAFAG <= (k * validate::max_by(EA_VAFAG, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFAG_max_munic = EA_VAFAG <= (k * validate::max_by(EA_VAFAG, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFAG_median_roll = EA_VAFAG <= (k * validate::do_by(EA_VAFAG, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFAG_dif        = validate::do_by(EA_VAFAG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFAG, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafag}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafag <- validate::confront(data, rules_dist_total_ea_vafag)
+
+validate::summary(check_dist_total_ea_vafag) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafag}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafag, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAF
+
+```{r rules_dist_total_ea_vaf}
+
+rules_dist_total_ea_vaf <- validate::validator(
+  DF_EA_VAF_hampel_year  = validate::do_by(EA_VAF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAF_hampel_munic = validate::do_by(EA_VAF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAF_out_year  = validate::do_by(EA_VAF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAF_out_munic = validate::do_by(EA_VAF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAF_min_year = EA_VAF >= (k * validate::min_by(EA_VAF, by = ANO, na.rm = T)),
+  
+  DF_EA_VAF_min_munic = EA_VAF >= (k * validate::min_by(EA_VAF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAF_max_year = EA_VAF <= (k * validate::max_by(EA_VAF, by = ANO, na.rm = T)),
+  
+  DF_EA_VAF_max_munic = EA_VAF <= (k * validate::max_by(EA_VAF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAF_median_roll = EA_VAF <= (k * validate::do_by(EA_VAF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAF_dif        = validate::do_by(EA_VAF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vaf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vaf <- validate::confront(data, rules_dist_total_ea_vaf)
+
+validate::summary(check_dist_total_ea_vaf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vaf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vaf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFMI
+
+```{r rules_dist_total_ea_vafmi}
+
+rules_dist_total_ea_vafmi <- validate::validator(
+  DF_EA_VAFMI_hampel_year  = validate::do_by(EA_VAFMI, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFMI_hampel_munic = validate::do_by(EA_VAFMI, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFMI_out_year  = validate::do_by(EA_VAFMI, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFMI_out_munic = validate::do_by(EA_VAFMI, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFMI_min_year = EA_VAFMI >= (k * validate::min_by(EA_VAFMI, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFMI_min_munic = EA_VAFMI >= (k * validate::min_by(EA_VAFMI, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFMI_max_year = EA_VAFMI <= (k * validate::max_by(EA_VAFMI, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFMI_max_munic = EA_VAFMI <= (k * validate::max_by(EA_VAFMI, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFMI_median_roll = EA_VAFMI <= (k * validate::do_by(EA_VAFMI, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFMI_dif        = validate::do_by(EA_VAFMI, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFMI, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafmi}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafmi <- validate::confront(data, rules_dist_total_ea_vafmi)
+
+validate::summary(check_dist_total_ea_vafmi) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafmi}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafmi, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFIT
+
+```{r rules_dist_total_ea_vafit}
+
+rules_dist_total_ea_vafit <- validate::validator(  
+  DF_EA_VAFIT_hampel_year  = validate::do_by(EA_VAFIT, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFIT_hampel_munic = validate::do_by(EA_VAFIT, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFMI_out_year  = validate::do_by(EA_VAFIT, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFIT_out_munic = validate::do_by(EA_VAFIT, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFIT_min_year = EA_VAFIT >= (k * validate::min_by(EA_VAFIT, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFIT_min_munic = EA_VAFIT >= (k * validate::min_by(EA_VAFIT, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFIT_max_year = EA_VAFIT <= (k * validate::max_by(EA_VAFIT, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFIT_max_munic = EA_VAFIT <= (k * validate::max_by(EA_VAFIT, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFIT_median_roll = EA_VAFIT <= (k * validate::do_by(EA_VAFIT, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFIT_dif        = validate::do_by(EA_VAFIT, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFIT, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafit}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafit <- validate::confront(data, rules_dist_total_ea_vafit)
+
+validate::summary(check_dist_total_ea_vafit) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafit}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafit, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFIC
+
+```{r rules_dist_total_ea_vafic}
+
+rules_dist_total_ea_vafic <- validate::validator(
+  DF_EA_VAFIC_hampel_year  = validate::do_by(EA_VAFIC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFIC_hampel_munic = validate::do_by(EA_VAFIC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFIC_out_year  = validate::do_by(EA_VAFIC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFIC_out_munic = validate::do_by(EA_VAFIC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFIC_min_year = EA_VAFIC >= (k * validate::min_by(EA_VAFIC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFIC_min_munic = EA_VAFIC >= (k * validate::min_by(EA_VAFIC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFIC_max_year = EA_VAFIC <= (k * validate::max_by(EA_VAFIC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFIC_max_munic = EA_VAFIC <= (k * validate::max_by(EA_VAFIC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFIC_median_roll = EA_VAFIC <= (k * validate::do_by(EA_VAFIC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFIC_dif        = validate::do_by(EA_VAFIC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFIC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafic}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafic <- validate::confront(data, rules_dist_total_ea_vafic)
+
+validate::summary(check_dist_total_ea_vafic) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafic}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafic, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFUP
+
+```{r rules_dist_total_ea_vafup}
+
+rules_dist_total_ea_vafup <- validate::validator(
+  DF_EA_VAFUP_hampel_year  = validate::do_by(EA_VAFUP, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFUP_hampel_munic = validate::do_by(EA_VAFUP, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFUP_out_year  = validate::do_by(EA_VAFUP, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFUP_out_munic = validate::do_by(EA_VAFUP, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFUP_min_year = EA_VAFUP >= (k * validate::min_by(EA_VAFUP, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFUP_min_munic = EA_VAFUP >= (k * validate::min_by(EA_VAFUP, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFUP_max_year = EA_VAFUP <= (k * validate::max_by(EA_VAFUP, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFUP_max_munic = EA_VAFUP <= (k * validate::max_by(EA_VAFUP, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFUP_median_roll = EA_VAFUP <= (k * validate::do_by(EA_VAFUP, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFUP_dif        = validate::do_by(EA_VAFUP, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFUP, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafup}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafup <- validate::confront(data, rules_dist_total_ea_vafup)
+
+validate::summary(check_dist_total_ea_vafup) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafup}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafup, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFCV
+
+```{r rules_dist_total_ea_vafcv}
+
+rules_dist_total_ea_vafcv <- validate::validator(  
+  DF_EA_VAFCV_hampel_year  = validate::do_by(EA_VAFCV, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCV_hampel_munic = validate::do_by(EA_VAFCV, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCV_out_year  = validate::do_by(EA_VAFCV, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCV_out_munic = validate::do_by(EA_VAFCV, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCV_min_year = EA_VAFCV >= (k * validate::min_by(EA_VAFCV, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCV_min_munic = EA_VAFCV >= (k * validate::min_by(EA_VAFCV, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCV_max_year = EA_VAFCV <= (k * validate::max_by(EA_VAFCV, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCV_max_munic = EA_VAFCV <= (k * validate::max_by(EA_VAFCV, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCV_median_roll = EA_VAFCV <= (k * validate::do_by(EA_VAFCV, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFCV_dif        = validate::do_by(EA_VAFCV, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCV, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafcv}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafcv <- validate::confront(data, rules_dist_total_ea_vafcv)
+
+validate::summary(check_dist_total_ea_vafcv) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafcv}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafcv, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFCA
+
+```{r rules_dist_total_ea_vafca}
+
+rules_dist_total_ea_vafca <- validate::validator(
+  DF_EA_VAFCA_hampel_year  = validate::do_by(EA_VAFCA, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCA_hampel_munic = validate::do_by(EA_VAFCA, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCA_out_year  = validate::do_by(EA_VAFCA, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCA_out_munic = validate::do_by(EA_VAFCA, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCA_min_year = EA_VAFCA >= (k * validate::min_by(EA_VAFCA, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCA_min_munic = EA_VAFCA >= (k * validate::min_by(EA_VAFCA, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCA_max_year = EA_VAFCA <= (k * validate::max_by(EA_VAFCA, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCA_max_munic = EA_VAFCA <= (k * validate::max_by(EA_VAFCA, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCA_median_roll = EA_VAFCA <= (k * validate::do_by(EA_VAFCA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFCA_dif        = validate::do_by(EA_VAFCA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCA, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafca}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafca <- validate::confront(data, rules_dist_total_ea_vafca)
+
+validate::summary(check_dist_total_ea_vafca) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafca}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafca, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFSE
+
+```{r rules_dist_total_ea_vafse}
+
+rules_dist_total_ea_vafse <- validate::validator(  
+  DF_EA_VAFSE_hampel_year  = validate::do_by(EA_VAFSE, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFSE_hampel_munic = validate::do_by(EA_VAFSE, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFSE_out_year  = validate::do_by(EA_VAFSE, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFSE_out_munic = validate::do_by(EA_VAFSE, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFSE_min_year = EA_VAFSE >= (k * validate::min_by(EA_VAFSE, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFSE_min_munic = EA_VAFSE >= (k * validate::min_by(EA_VAFSE, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFSE_max_year = EA_VAFSE <= (k * validate::max_by(EA_VAFSE, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFSE_max_munic = EA_VAFSE <= (k * validate::max_by(EA_VAFSE, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFSE_median_roll = EA_VAFSE <= (k * validate::do_by(EA_VAFSE, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFSE_dif        = validate::do_by(EA_VAFSE, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFSE, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafse}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafse <- validate::confront(data, rules_dist_total_ea_vafse)
+
+validate::summary(check_dist_total_ea_vafse) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafse}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafse, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFO
+
+```{r rules_dist_total_ea_vafo}
+
+rules_dist_total_ea_vafo <- validate::validator( 
+  DF_EA_VAFO_hampel_year  = validate::do_by(EA_VAFO, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFO_hampel_munic = validate::do_by(EA_VAFO, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFO_out_year  = validate::do_by(EA_VAFO, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFO_out_munic = validate::do_by(EA_VAFO, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFO_min_year = EA_VAFO >= (k * validate::min_by(EA_VAFO, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFO_min_munic = EA_VAFO >= (k * validate::min_by(EA_VAFO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFO_max_year = EA_VAFO <= (k * validate::max_by(EA_VAFO, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFO_max_munic = EA_VAFO <= (k * validate::max_by(EA_VAFO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFO_median_roll = EA_VAFO <= (k * validate::do_by(EA_VAFO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFO_dif        = validate::do_by(EA_VAFO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFO, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafo}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafo <- validate::confront(data, rules_dist_total_ea_vafo)
+
+validate::summary(check_dist_total_ea_vafo) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafo}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafo, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFPC
+
+```{r rules_dist_total_ea_vafpc}
+
+rules_dist_total_ea_vafpc <- validate::validator(
+  DF_EA_VAFPC_hampel_year  = validate::do_by(EA_VAFPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFPC_hampel_munic = validate::do_by(EA_VAFPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFPC_out_year  = validate::do_by(EA_VAFPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFPC_out_munic = validate::do_by(EA_VAFPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFPC_min_year = EA_VAFPC >= (k * validate::min_by(EA_VAFPC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFPC_min_munic = EA_VAFPC >= (k * validate::min_by(EA_VAFPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFPC_max_year = EA_VAFPC <= (k * validate::max_by(EA_VAFPC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFPC_max_munic = EA_VAFPC <= (k * validate::max_by(EA_VAFPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFPC_median_roll = EA_VAFPC <= (k * validate::do_by(EA_VAFPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFPC_dif        = validate::do_by(EA_VAFPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafpc <- validate::confront(data, rules_dist_total_ea_vafpc)
+
+validate::summary(check_dist_total_ea_vafpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_VAFCVPC
+
+```{r rules_dist_total_ea_vafcvpc}
+
+rules_dist_total_ea_vafcvpc <- validate::validator( 
+  DF_EA_VAFCVPC_hampel_year  = validate::do_by(EA_VAFCVPC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCVPC_hampel_munic = validate::do_by(EA_VAFCVPC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_VAFCVPC_out_year  = validate::do_by(EA_VAFCVPC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCVPC_out_munic = validate::do_by(EA_VAFCVPC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_VAFCVPC_min_year = EA_VAFCVPC >= (k * validate::min_by(EA_VAFCVPC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCVPC_min_munic = EA_VAFCVPC >= (k * validate::min_by(EA_VAFCVPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCVPC_max_year = EA_VAFCVPC <= (k * validate::max_by(EA_VAFCVPC, by = ANO, na.rm = T)),
+  
+  DF_EA_VAFCVPC_max_munic = EA_VAFCVPC <= (k * validate::max_by(EA_VAFCVPC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_VAFCVPC_median_roll = EA_VAFCVPC <= (k * validate::do_by(EA_VAFCVPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_VAFCVPC_dif        = validate::do_by(EA_VAFCVPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCVPC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_vafcvpc}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_vafcvpc <- validate::confront(data, rules_dist_total_ea_vafcvpc)
+
+validate::summary(check_dist_total_ea_vafcvpc) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_vafcvpc}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_vafcvpc, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSF
+
+```{r rules_dist_total_ea_emprsf}
+
+rules_dist_total_ea_emprsf <- validate::validator(
+  DF_EA_EMPRSF_hampel_year  = validate::do_by(EA_EMPRSF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSF_hampel_munic = validate::do_by(EA_EMPRSF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSF_out_year  = validate::do_by(EA_EMPRSF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSF_out_munic = validate::do_by(EA_EMPRSF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSF_min_year = EA_EMPRSF >= (k * validate::min_by(EA_EMPRSF, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSF_min_munic = EA_EMPRSF >= (k * validate::min_by(EA_EMPRSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSF_max_year = EA_EMPRSF <= (k * validate::max_by(EA_EMPRSF, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSF_max_munic = EA_EMPRSF <= (k * validate::max_by(EA_EMPRSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSF_median_roll = EA_EMPRSF <= (k * validate::do_by(EA_EMPRSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSF_dif        = validate::do_by(EA_EMPRSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsf <- validate::confront(data, rules_dist_total_ea_emprsf)
+
+validate::summary(check_dist_total_ea_emprsf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_RENSF
+
+```{r rules_dist_total_ea_rensf}
+
+rules_dist_total_ea_rensf <- validate::validator(
+  DF_EA_RENSF_hampel_year  = validate::do_by(EA_RENSF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_RENSF_hampel_munic = validate::do_by(EA_RENSF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_RENSF_out_year  = validate::do_by(EA_RENSF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_RENSF_out_munic = validate::do_by(EA_RENSF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_RENSF_min_year = EA_RENSF >= (k * validate::min_by(EA_RENSF, by = ANO, na.rm = T)),
+  
+  DF_EA_RENSF_min_munic = EA_RENSF >= (k * validate::min_by(EA_RENSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_RENSF_max_year = EA_RENSF <= (k * validate::max_by(EA_RENSF, by = ANO, na.rm = T)),
+  
+  DF_EA_RENSF_max_munic = EA_RENSF <= (k * validate::max_by(EA_RENSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_RENSF_median_roll = EA_RENSF <= (k * validate::do_by(EA_RENSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_RENSF_dif        = validate::do_by(EA_RENSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_RENSF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_rensf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_rensf <- validate::confront(data, rules_dist_total_ea_rensf)
+
+validate::summary(check_dist_total_ea_rensf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_rensf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_rensf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_RENPCSF
+
+```{r rules_dist_total_ea_renpcsf}
+
+rules_dist_total_ea_renpcsf <- validate::validator(
+  DF_EA_RENPCSF_hampel_year  = validate::do_by(EA_RENPCSF, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_RENPCSF_hampel_munic = validate::do_by(EA_RENPCSF, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_RENPCSF_out_year  = validate::do_by(EA_RENPCSF, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_RENPCSF_out_munic = validate::do_by(EA_RENPCSF, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_RENPCSF_min_year = EA_RENPCSF >= (k * validate::min_by(EA_RENPCSF, by = ANO, na.rm = T)),
+  
+  DF_EA_RENPCSF_min_munic = EA_RENPCSF >= (k * validate::min_by(EA_RENPCSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_RENPCSF_max_year = EA_RENPCSF <= (k * validate::max_by(EA_RENPCSF, by = ANO, na.rm = T)),
+  
+  DF_EA_RENPCSF_max_munic = EA_RENPCSF <= (k * validate::max_by(EA_RENPCSF, by = IBGE7, na.rm = T)),
+  
+  DF_EA_RENPCSF_median_roll = EA_RENPCSF <= (k * validate::do_by(EA_RENPCSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_RENPCSF_dif        = validate::do_by(EA_RENPCSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_RENPCSF, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_renpcsf}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_renpcsf <- validate::confront(data, rules_dist_total_ea_renpcsf)
+
+validate::summary(check_dist_total_ea_renpcsf) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_renpcsf}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_renpcsf, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFAG
+
+```{r rules_dist_total_ea_emprsfag}
+
+rules_dist_total_ea_emprsfag <- validate::validator(
+  DF_EA_EMPRSFAG_hampel_year  = validate::do_by(EA_EMPRSFAG, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFAG_hampel_munic = validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFAG_out_year  = validate::do_by(EA_EMPRSFAG, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFAG_out_munic = validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFAG_min_year = EA_EMPRSFAG >= (k * validate::min_by(EA_EMPRSFAG, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFAG_min_munic = EA_EMPRSFAG >= (k * validate::min_by(EA_EMPRSFAG, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFAG_max_year = EA_EMPRSFAG <= (k * validate::max_by(EA_EMPRSFAG, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFAG_max_munic = EA_EMPRSFAG <= (k * validate::max_by(EA_EMPRSFAG, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFAG_median_roll = EA_EMPRSFAG <= (k * validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFAG_dif        = validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFAG, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfag}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfag <- validate::confront(data, rules_dist_total_ea_emprsfag)
+
+validate::summary(check_dist_total_ea_emprsfag) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfag}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfag, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFMI
+
+```{r rules_dist_total_ea_emprsfmi}
+
+rules_dist_total_ea_emprsfmi <- validate::validator( 
+  DF_EA_EMPRSFMI_hampel_year  = validate::do_by(EA_EMPRSFMI, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFMI_hampel_munic = validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFMI_out_year  = validate::do_by(EA_EMPRSFMI, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFMI_out_munic = validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFMI_min_year = EA_EMPRSFMI >= (k * validate::min_by(EA_EMPRSFMI, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFMI_min_munic = EA_EMPRSFMI >= (k * validate::min_by(EA_EMPRSFMI, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFMI_max_year = EA_EMPRSFMI <= (k * validate::max_by(EA_EMPRSFMI, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFMI_max_munic = EA_EMPRSFMI <= (k * validate::max_by(EA_EMPRSFMI, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFMI_median_roll = EA_EMPRSFMI <= (k * validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFMI_dif        = validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFMI, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfmi}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfmi <- validate::confront(data, rules_dist_total_ea_emprsfmi)
+
+validate::summary(check_dist_total_ea_emprsfmi) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfmi}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfmi, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFIT
+
+```{r rules_dist_total_ea_emprsfit}
+
+rules_dist_total_ea_emprsfit <- validate::validator( 
+  DF_EA_EMPRSFIT_hampel_year  = validate::do_by(EA_EMPRSFIT, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFIT_hampel_munic = validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFIT_out_year  = validate::do_by(EA_EMPRSFIT, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFIT_out_munic = validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFIT_min_year = EA_EMPRSFIT >= (k * validate::min_by(EA_EMPRSFIT, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFIT_min_munic = EA_EMPRSFIT >= (k * validate::min_by(EA_EMPRSFIT, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFIT_max_year = EA_EMPRSFIT <= (k * validate::max_by(EA_EMPRSFIT, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFIT_max_munic = EA_EMPRSFIT <= (k * validate::max_by(EA_EMPRSFIT, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFIT_median_roll = EA_EMPRSFIT <= (k * validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFIT_dif        = validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFIT, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfit}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfit <- validate::confront(data, rules_dist_total_ea_emprsfit)
+
+validate::summary(check_dist_total_ea_emprsfit) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfit}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfit, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFUP
+
+```{r rules_dist_total_ea_emprsfup}
+
+rules_dist_total_ea_emprsfup <- validate::validator(
+  DF_EA_EMPRSFUP_hampel_year  = validate::do_by(EA_EMPRSFUP, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFUP_hampel_munic = validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFUP_out_year  = validate::do_by(EA_EMPRSFUP, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFUP_out_munic = validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFUP_min_year = EA_EMPRSFUP >= (k * validate::min_by(EA_EMPRSFUP, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFUP_min_munic = EA_EMPRSFUP >= (k * validate::min_by(EA_EMPRSFUP, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFUP_max_year = EA_EMPRSFUP <= (k * validate::max_by(EA_EMPRSFUP, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFUP_max_munic = EA_EMPRSFUP <= (k * validate::max_by(EA_EMPRSFUP, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFUP_median_roll = EA_EMPRSFUP <= (k * validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFUP_dif        = validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFUP, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfup}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfup <- validate::confront(data, rules_dist_total_ea_emprsfup)
+
+validate::summary(check_dist_total_ea_emprsfup) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfup}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfup, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFIC
+
+```{r rules_dist_total_ea_emprsfic}
+
+rules_dist_total_ea_emprsfic <- validate::validator(
+  DF_EA_EMPRSFIC_hampel_year  = validate::do_by(EA_EMPRSFIC, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFIC_hampel_munic = validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFIC_out_year  = validate::do_by(EA_EMPRSFIC, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFIC_out_munic = validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFIC_min_year = EA_EMPRSFIC >= (k * validate::min_by(EA_EMPRSFIC, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFIC_min_munic = EA_EMPRSFIC >= (k * validate::min_by(EA_EMPRSFIC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFIC_max_year = EA_EMPRSFIC <= (k * validate::max_by(EA_EMPRSFIC, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFIC_max_munic = EA_EMPRSFIC <= (k * validate::max_by(EA_EMPRSFIC, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFIC_median_roll = EA_EMPRSFIC <= (k * validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFIC_dif        = validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFIC, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfic}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfic <- validate::confront(data, rules_dist_total_ea_emprsfic)
+
+validate::summary(check_dist_total_ea_emprsfic) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfic}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfic, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFCO
+
+```{r rules_dist_total_ea_emprsfco}
+
+rules_dist_total_ea_emprsfco <- validate::validator( 
+  DF_EA_EMPRSFCO_hampel_year  = validate::do_by(EA_EMPRSFCO, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFCO_hampel_munic = validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFCO_out_year  = validate::do_by(EA_EMPRSFCO, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFCO_out_munic = validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFCO_min_year = EA_EMPRSFCO >= (k * validate::min_by(EA_EMPRSFCO, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFCO_min_munic = EA_EMPRSFCO >= (k * validate::min_by(EA_EMPRSFCO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFCO_max_year = EA_EMPRSFCO <= (k * validate::max_by(EA_EMPRSFCO, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFCO_max_munic = EA_EMPRSFCO <= (k * validate::max_by(EA_EMPRSFCO, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFCO_median_roll = EA_EMPRSFCO <= (k * validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFCO_dif        = validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFCO, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfco}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfco <- validate::confront(data, rules_dist_total_ea_emprsfco)
+
+validate::summary(check_dist_total_ea_emprsfco) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfco}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfco, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+EA_EMPRSFSE
+
+```{r rules_dist_total_ea_emprsfse}
+
+rules_dist_total_ea_emprsfse <- validate::validator( 
+  DF_EA_EMPRSFSE_hampel_year  = validate::do_by(EA_EMPRSFSE, by = ANO, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFSE_hampel_munic = validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = hampel_filter) == F,
+  
+  DF_EA_EMPRSFSE_out_year  = validate::do_by(EA_EMPRSFSE, by = ANO, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFSE_out_munic = validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = outlier_detection) == F,
+  
+  DF_EA_EMPRSFSE_min_year = EA_EMPRSFSE >= (k * validate::min_by(EA_EMPRSFSE, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFSE_min_munic = EA_EMPRSFSE >= (k * validate::min_by(EA_EMPRSFSE, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFSE_max_year = EA_EMPRSFSE <= (k * validate::max_by(EA_EMPRSFSE, by = ANO, na.rm = T)),
+  
+  DF_EA_EMPRSFSE_max_munic = EA_EMPRSFSE <= (k * validate::max_by(EA_EMPRSFSE, by = IBGE7, na.rm = T)),
+  
+  DF_EA_EMPRSFSE_median_roll = EA_EMPRSFSE <= (k * validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
+  
+  DF_EA_EMPRSFSE_dif        = validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFSE, na.rm = T)
+)
+```
+
+```{r confront_dist_total_ea_emprsfse}
+#| column: page
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_total_ea_emprsfse <- validate::confront(data, rules_dist_total_ea_emprsfse)
+
+validate::summary(check_dist_total_ea_emprsfse) |> 
+  kableExtra::kbl() |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_total_ea_emprsfse}
+#| out-width: 100%
+
+## Gráfico com os resultados
+validate::plot(check_dist_total_ea_emprsfse, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
 ```
