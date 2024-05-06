@@ -226,7 +226,7 @@ validate::plot(check_type, title = chart_title, labels = chart_label, fill = cha
 
 #### Todos os indicadores - Valores ausentes
 
-```{r rules_validate_missing}
+```{r rules_validate_na}
 
 rules_validate_na <- validate::validator(
     VI_MA_AGRO       = !is.na(MA_AGRO),
@@ -466,7 +466,9 @@ rules_dist_prop_ma_agro <- validate::validator(
   
   DF_MA_AGRO_max_city = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_AGRO_median_mov = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Longitudinal (município)
+  DF_MA_AGRO_median_mov = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_AGRO_dif        = validate::do_by(MA_AGRO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -510,7 +512,9 @@ rules_dist_ratio_ma_bovino <- validate::validator(
   
   DF_MA_BOVINO_max_city = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_BOVINO_median_mov = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_BOVINO_median_mov = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_BOVINO_dif        = validate::do_by(MA_BOVINO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -554,7 +558,9 @@ rules_dist_prop_ma_cana <- validate::validator(
   
   DF_MA_CANA_max_city = MA_CANA <= (k * validate::do_by(MA_CANA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_CANA_median_mov = MA_CANA <= (k * validate::do_by(MA_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_CANA_median_mov = MA_CANA <= (k * validate::do_by(MA_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_CANA_dif        = validate::do_by(MA_CANA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -598,7 +604,9 @@ rules_dist_out_ma_cfem <- validate::validator(
   
   DF_MA_CFEMA_max_city = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_CFEMA_median_mov = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_CFEMA_median_mov = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_CFEMA_dif        = validate::do_by(MA_CFEMA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -642,7 +650,9 @@ rules_dist_out_ma_crh <- validate::validator(
 
   DF_MA_CRH_max_city = MA_CRH <= (k * validate::do_by(MA_CRH, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
 
-  DF_MA_CRH_median_mov = MA_CRH <= (k * validate::do_by(MA_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_CRH_median_mov = MA_CRH <= (k * validate::do_by(MA_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_CRH_dif        = validate::do_by(MA_CRH, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -686,7 +696,9 @@ rules_dist_prop_ma_flonativa <- validate::validator(
   
   DF_MA_FLONATIVA_max_city = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
    
-  DF_MA_FLONATIVA_median_mov = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_FLONATIVA_median_mov = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_FLONATIVA_dif        = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -730,7 +742,9 @@ rules_dist_prop_ma_focos <- validate::validator(
   
   DF_MA_FOCOS_max_city = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_FOCOS_median_mov = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_FOCOS_median_mov = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_FOCOS_dif        = validate::do_by(MA_FOCOS, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -774,7 +788,9 @@ rules_dist_ratio_ma_frota <- validate::validator(
   
   DF_MA_FROTA_max_city = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_FROTA_median_mov = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_FROTA_median_mov = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_FROTA_dif        = validate::do_by(MA_FROTA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 
 ## Comparação
@@ -848,7 +864,9 @@ rules_dist_total_ma_icmsecolog <- validate::validator(
 
   DF_MA_ICMSECOLOG_max_city = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_median_mov = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_ICMSECOLOG_median_mov = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_ICMSECOLOG_dif        = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -892,7 +910,9 @@ rules_dist_prop_ma_infra <- validate::validator(
   
   DF_MA_INFRA_max_city = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_INFRA_median_mov = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_INFRA_median_mov = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_INFRA_dif        = validate::do_by(MA_INFRA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
@@ -928,15 +948,17 @@ rules_dist_prop_ma_reflo <- validate::validator(
   
   DF_MA_REFLO_out_datamaid_city = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_REFLO_min_year = MA_REFLO >= (k*validate::do_by(MA_REFLO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
+  DF_MA_REFLO_min_year = MA_REFLO >= (k * validate::do_by(MA_REFLO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_REFLO_min_city = MA_REFLO >= (k*validate::do_by(MA_REFLO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_REFLO_min_city = MA_REFLO >= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_REFLO_max_year = MA_REFLO <= (k*validate::do_by(MA_REFLO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
+  DF_MA_REFLO_max_year = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_REFLO_max_city = MA_REFLO <= (k*validate::do_by(MA_REFLO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_REFLO_max_city = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_REFLO_median_mov = MA_REFLO <= (k*validate::do_by(MA_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+  DF_MA_REFLO_median_mov = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  
+  DF_MA_REFLO_dif        = validate::do_by(MA_REFLO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
 )
 ```
 
