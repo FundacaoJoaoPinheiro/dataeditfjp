@@ -17,9 +17,11 @@ Config/testthat/edition: 3
 Imports: 
     dplyr,
     ggplot2,
+    kableExtra,
     magrittr,
     openxlsx,
     pander,
+    quarto,
     rlang,
     rmarkdown,
     robustbase,

@@ -1,0 +1,28 @@
+#' Title
+#'
+#' @param variabe
+#' @param data
+#'
+#' @return
+#' @export
+
+chart_boxplot <- function(variable, data){
+  result <- data  %>%
+    dplyr::mutate(
+      ANO = as.character(ANO)
+    )  %>%
+    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log({{variable}} + 1), fill = ANO)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x    = ggplot2::element_blank(),
+      axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}

@@ -245,7 +245,7 @@ lapply(seq(1,length(graphic)),
   ## Consistencia
   consistencyrules <- validate::validator(
     CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE),
-    CF_M_FOCOS_range = validate::in_range(M_FOCOS, min = 99, max = 101)
+    CF_M_FOCOS_range = validate::in_range(M_FOCOS, min = 0, max = 100)
   )
   
   
@@ -388,7 +388,7 @@ distributionrules_mreflo <- validate::validator(
   DF_M_REFLO_max_year = M_REFLO <= (k2*validate::do_by(M_REFLO, by = ANO, fun = max, na.rm = T)),
   DF_M_REFLO_max_city = M_REFLO <= (k2*validate::do_by(M_REFLO, by = IBGE7, fun = max, na.rm = T)),
   DF_M_REFLO_median_mov_sup = M_REFLO <= (k2+validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-   DF_M_REFLO_median_mov_inf = M_REFLO >= (k2-validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+  DF_M_REFLO_median_mov_inf = M_REFLO >= (k2-validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
 )
 
 ```
