@@ -267,21 +267,21 @@ validate::plot(check_validate_na, title = chart_title, labels = chart_label, fil
 ```{r rules_validate_others}
 
 rules_validate_others <- validate::validator(
-    VI_MA_AGRO        = in_range(MA_AGRO, min = 0, max = 100),
-    VI_MA_BOVINO      = MA_BOVINO >= 0,
-    VI_MA_CANA        = in_range(MA_CANA, min = 0, max = 100),
-    VI_MA_CFEM        = MA_CFEM >= 0,
-    VI_MA_COMITE      = MA_COMITE %in% c("Sim", "Não"),
-    VI_MA_CRH         = MA_CRH >= 0,
-    VI_MA_FLONATIVA   = in_range(MA_FLONATIVA, min = 0, max = 100),
-    VI_MA_FMMA        = MA_FMMA %in% c("Sim", "Não"),
-    VI_MA_FOCOS       = in_range(MA_FOCOS, min = 0, max = 100),
-    VI_MA_FROTA       = MA_FROTA >= 0,
-    VI_MA_ICMSECOLOG  = MA_ICMSECOLOG >= 0,
-    VI_MA_INFRA       = in_range(MA_INFRA, min = 0, max = 100),
-    VI_MA_LEGISL      = MA_LEGISL %in% c("Sim", "Não"),
-    VI_MA_OGESTOR     = MA_OGESTOR %in% org_gestor,
-    VI_MA_REFLO       = in_range(MA_REFLO, min = 0, max = 100)
+    VI_MA_AGRO       = in_range(MA_AGRO, min = 0, max = 100),
+    VI_MA_BOVINO     = MA_BOVINO >= 0,
+    VI_MA_CANA       = in_range(MA_CANA, min = 0, max = 100),
+    VI_MA_CFEM       = MA_CFEM >= 0,
+    VI_MA_COMITE     = MA_COMITE %in% c("Sim", "Não"),
+    VI_MA_CRH        = MA_CRH >= 0,
+    VI_MA_FLONATIVA  = in_range(MA_FLONATIVA, min = 0, max = 100),
+    VI_MA_FMMA       = MA_FMMA %in% c("Sim", "Não"),
+    VI_MA_FOCOS      = in_range(MA_FOCOS, min = 0, max = 100),
+    VI_MA_FROTA      = MA_FROTA >= 0,
+    VI_MA_ICMSECOLOG = MA_ICMSECOLOG >= 0,
+    VI_MA_INFRA      = in_range(MA_INFRA, min = 0, max = 100),
+    VI_MA_LEGISL     = MA_LEGISL %in% c("Sim", "Não"),
+    VI_MA_OGESTOR    = MA_OGESTOR %in% org_gestor,
+    VI_MA_REFLO      = in_range(MA_REFLO, min = 0, max = 100)
   )
 ```
 
@@ -450,25 +450,25 @@ validate::plot(check_consistency_ma_icmsecolog, title = chart_title, labels = ch
 
 ## Proporção
 rules_dist_prop_ma_agro <- validate::validator(
-  DF_MA_AGRO_out_year = validate::do_by(MA_AGRO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_AGRO_hampel_year = validate::do_by(MA_AGRO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_AGRO_out_city = validate::do_by(MA_AGRO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_AGRO_hampel_munic = validate::do_by(MA_AGRO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_AGRO_out_datamaid_year = validate::do_by(MA_AGRO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_AGRO_out_year = validate::do_by(MA_AGRO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_AGRO_out_datamaid_city = validate::do_by(MA_AGRO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_AGRO_out_munic = validate::do_by(MA_AGRO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_AGRO_min_year = MA_AGRO >= (k * validate::do_by(MA_AGRO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_AGRO_min_city = MA_AGRO >= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_AGRO_min_munic = MA_AGRO >= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_AGRO_max_year = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_AGRO_max_city = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_AGRO_max_munic = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_AGRO_median_mov = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
-  DF_MA_AGRO_dif        = validate::do_by(MA_AGRO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_AGRO_dif        = validate::do_by(MA_AGRO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -496,25 +496,25 @@ validate::plot(check_ma_agro, title = chart_title, labels = chart_label, fill = 
 
 ## Razão
 rules_dist_ratio_ma_bovino <- validate::validator(
-  DF_MA_BOVINO_out_year = validate::do_by(MA_BOVINO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_BOVINO_hampel_year = validate::do_by(MA_BOVINO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_BOVINO_out_city = validate::do_by(MA_BOVINO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_BOVINO_hampel_munic = validate::do_by(MA_BOVINO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_BOVINO_out_datamaid_year = validate::do_by(MA_BOVINO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_BOVINO_out_year = validate::do_by(MA_BOVINO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_BOVINO_out_datamaid_city = validate::do_by(MA_BOVINO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_BOVINO_out_munic = validate::do_by(MA_BOVINO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_BOVINO_min_year = MA_BOVINO >= (k * validate::do_by(MA_BOVINO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_BOVINO_min_city = MA_BOVINO >= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_BOVINO_min_munic = MA_BOVINO >= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_BOVINO_max_year = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_BOVINO_max_city = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_BOVINO_max_munic = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_BOVINO_median_mov = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_BOVINO_dif        = validate::do_by(MA_BOVINO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_BOVINO_dif        = validate::do_by(MA_BOVINO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -542,25 +542,25 @@ validate::plot(check_ma_bovino, title = chart_title, labels = chart_label, fill 
 
 ## Proporção
 rules_dist_prop_ma_cana <- validate::validator(
-  DF_MA_CANA_out_year = validate::do_by(MA_CANA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_CANA_hampel_year = validate::do_by(MA_CANA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_CANA_out_city = validate::do_by(MA_CANA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_CANA_hampel_munic = validate::do_by(MA_CANA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_CANA_out_datamaid_year = validate::do_by(MA_CANA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_CANA_out_year = validate::do_by(MA_CANA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_CANA_out_datamaid_city = validate::do_by(MA_CANA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_CANA_out_munic = validate::do_by(MA_CANA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_CANA_min_year = MA_CANA >= (k * validate::do_by(MA_CANA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_CANA_min_city = MA_CANA >= (k * validate::do_by(MA_CANA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_CANA_min_munic = MA_CANA >= (k * validate::do_by(MA_CANA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_CANA_max_year = MA_CANA <= (k * validate::do_by(MA_CANA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_CANA_max_city = MA_CANA <= (k * validate::do_by(MA_CANA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_CANA_max_munic = MA_CANA <= (k * validate::do_by(MA_CANA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_CANA_median_mov = MA_CANA <= (k * validate::do_by(MA_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_CANA_dif        = validate::do_by(MA_CANA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_CANA_dif        = validate::do_by(MA_CANA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -588,25 +588,25 @@ validate::plot(check_ma_cana, title = chart_title, labels = chart_label, fill = 
 
 ## Outlier
 rules_dist_out_ma_cfem <- validate::validator(
-  DF_MA_CFEMA_out_year = validate::do_by(MA_CFEM, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_CFEM_hampel_year = validate::do_by(MA_CFEM, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_CFEMA_out_city = validate::do_by(MA_CFEM, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_CFEM_hampel_munic = validate::do_by(MA_CFEM, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_CFEMA_out_datamaid_year = validate::do_by(MA_CFEM, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_CFEM_out_year = validate::do_by(MA_CFEM, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_CFEMA_out_datamaid_city = validate::do_by(MA_CFEM, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_CFEM_out_munic = validate::do_by(MA_CFEM, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_CFEMA_min_year = MA_CFEM >= (k * validate::do_by(MA_CFEM, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
+  DF_MA_CFEM_min_year = MA_CFEM >= (k * validate::do_by(MA_CFEM, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_CFEMA_min_city = MA_CFEM >= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_CFEM_min_munic = MA_CFEM >= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_CFEMA_max_year = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
+  DF_MA_CFEM_max_year = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_CFEMA_max_city = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_CFEM_max_munic = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_CFEMA_median_mov = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
+  DF_MA_CFEM_median_mov = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_CFEMA_dif        = validate::do_by(MA_CFEMA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_CFEM_dif        = validate::do_by(MA_CFEM, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -634,25 +634,25 @@ validate::plot(check_out_ma_cfem, title = chart_title, labels = chart_label, fil
 
 ## Outlier
 rules_dist_out_ma_crh <- validate::validator(
-  DF_MA_CRH_out_year = validate::do_by(MA_CRH, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_CRH_hampel_year = validate::do_by(MA_CRH, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_CRH_out_city = validate::do_by(MA_CRH, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_CRH_hampel_munic = validate::do_by(MA_CRH, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_CRH_out_datamaid_year = validate::do_by(MA_CRH, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_CRH_out_year = validate::do_by(MA_CRH, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_CRH_out_datamaid_city = validate::do_by(MA_CRH, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_CRH_out_munic = validate::do_by(MA_CRH, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_CRH_min_year = MA_CRH >= (k * validate::do_by(MA_CRH, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_CRH_min_city = MA_CRH >= (k * validate::do_by(MA_CRH, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_CRH_min_munic = MA_CRH >= (k * validate::do_by(MA_CRH, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
 
   DF_MA_CRH_max_year = MA_CRH <= (k * validate::do_by(MA_CRH, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
 
-  DF_MA_CRH_max_city = MA_CRH <= (k * validate::do_by(MA_CRH, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_CRH_max_munic = MA_CRH <= (k * validate::do_by(MA_CRH, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
 
   DF_MA_CRH_median_mov = MA_CRH <= (k * validate::do_by(MA_CRH, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_CRH_dif        = validate::do_by(MA_CRH, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_CRH_dif        = validate::do_by(MA_CRH, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -680,25 +680,25 @@ validate::plot(check_ma_crh, title = chart_title, labels = chart_label, fill = c
 
 ## Proporção
 rules_dist_prop_ma_flonativa <- validate::validator(
-  DF_MA_FLONATIVA_out_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_FLONATIVA_hampel_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_FLONATIVA_out_city = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_FLONATIVA_hampel_munic = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_FLONATIVA_out_datamaid_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_FLONATIVA_out_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_FLONATIVA_out_datamaid_city = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_FLONATIVA_out_munic = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_FLONATIVA_min_year = MA_FLONATIVA >= (k * validate::do_by(MA_FLONATIVA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FLONATIVA_min_city = MA_FLONATIVA >= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_FLONATIVA_min_munic = MA_FLONATIVA >= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FLONATIVA_max_year = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FLONATIVA_max_city = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_FLONATIVA_max_munic = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
    
   DF_MA_FLONATIVA_median_mov = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_FLONATIVA_dif        = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_FLONATIVA_dif        = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -726,25 +726,25 @@ validate::plot(check_ma_flonativa, title = chart_title, labels = chart_label, fi
 
 ## Proporção
 rules_dist_prop_ma_focos <- validate::validator(
-  DF_MA_FOCOS_out_year = validate::do_by(MA_FOCOS, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_FOCOS_hampel_year = validate::do_by(MA_FOCOS, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_FOCOS_out_city = validate::do_by(MA_FOCOS, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_FOCOS_hampel_munic = validate::do_by(MA_FOCOS, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_FOCOS_out_datamaid_year = validate::do_by(MA_FOCOS, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_FOCOS_out_year = validate::do_by(MA_FOCOS, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_FOCOS_out_datamaid_city = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_FOCOS_out_munic = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_FOCOS_min_year = MA_FOCOS >= (k * validate::do_by(MA_FOCOS, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FOCOS_min_city = MA_FOCOS >= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_FOCOS_min_munic = MA_FOCOS >= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FOCOS_max_year = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FOCOS_max_city = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_FOCOS_max_munic = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FOCOS_median_mov = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_FOCOS_dif        = validate::do_by(MA_FOCOS, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_FOCOS_dif        = validate::do_by(MA_FOCOS, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -772,25 +772,25 @@ validate::plot(check_ma_focos, title = chart_title, labels = chart_label, fill =
 
 ## Razão
 rules_dist_ratio_ma_frota <- validate::validator(
-  DF_MA_FROTA_out_year = validate::do_by(MA_FROTA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_FROTA_hampel_year = validate::do_by(MA_FROTA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_FROTA_out_city = validate::do_by(MA_FROTA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_FROTA_hampel_munic = validate::do_by(MA_FROTA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_out_datamaid_year = validate::do_by(MA_FROTA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_FROTA_out_year = validate::do_by(MA_FROTA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_FROTA_out_datamaid_city = validate::do_by(MA_FROTA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_FROTA_out_munic = validate::do_by(MA_FROTA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_FROTA_min_year = MA_FROTA >= (k * validate::do_by(MA_FROTA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FROTA_min_city = MA_FROTA >= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_FROTA_min_munic = MA_FROTA >= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FROTA_max_year = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_FROTA_max_city = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_FROTA_max_munic = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FROTA_median_mov = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_FROTA_dif        = validate::do_by(MA_FROTA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_FROTA_dif        = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 
 ## Comparação
@@ -848,25 +848,25 @@ validate::plot(check_compare_ma_frota, title = chart_title, labels = chart_label
 
 ## Total
 rules_dist_total_ma_icmsecolog <- validate::validator(
-  DF_MA_ICMSECOLOG_out_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_ICMSECOLOG_hampel_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_ICMSECOLOG_out_city = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_ICMSECOLOG_hampel_munic = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_out_datamaid_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_ICMSECOLOG_out_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_ICMSECOLOG_out_datamaid_city = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_ICMSECOLOG_out_munic = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_ICMSECOLOG_min_year = MA_ICMSECOLOG >= (k * validate::do_by(MA_ICMSECOLOG, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_ICMSECOLOG_min_city = MA_ICMSECOLOG >= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_ICMSECOLOG_min_munic = MA_ICMSECOLOG >= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_ICMSECOLOG_max_year = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
 
-  DF_MA_ICMSECOLOG_max_city = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_ICMSECOLOG_max_munic = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_ICMSECOLOG_median_mov = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_ICMSECOLOG_dif        = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_ICMSECOLOG_dif        = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -894,25 +894,25 @@ validate::plot(check_ma_icmsecolog, title = chart_title, labels = chart_label, f
 
 ## Proporção
 rules_dist_prop_ma_infra <- validate::validator(
-  DF_MA_INFRA_out_year = validate::do_by(MA_INFRA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_INFRA_hampel_year = validate::do_by(MA_INFRA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_INFRA_out_city = validate::do_by(MA_INFRA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_INFRA_hampel_munic = validate::do_by(MA_INFRA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_INFRA_out_datamaid_year = validate::do_by(MA_INFRA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_INFRA_out_year = validate::do_by(MA_INFRA, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_INFRA_out_datamaid_city = validate::do_by(MA_INFRA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_INFRA_out_munic = validate::do_by(MA_INFRA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_INFRA_min_year = MA_INFRA >= (k * validate::do_by(MA_INFRA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_INFRA_min_city = MA_INFRA >= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_INFRA_min_munic = MA_INFRA >= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_INFRA_max_year = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_INFRA_max_city = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_INFRA_max_munic = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_INFRA_median_mov = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_INFRA_dif        = validate::do_by(MA_INFRA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_INFRA_dif        = validate::do_by(MA_INFRA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -940,25 +940,25 @@ validate::plot(check_ma_infra, title = chart_title, labels = chart_label, fill =
 
 ## Proporção
 rules_dist_prop_ma_reflo <- validate::validator(
-  DF_MA_REFLO_out_year = validate::do_by(MA_REFLO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+  DF_MA_REFLO_hampel_year = validate::do_by(MA_REFLO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
   
-  DF_MA_REFLO_out_city = validate::do_by(MA_REFLO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_REFLO_hampel_munic = validate::do_by(MA_REFLO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_REFLO_out_datamaid_year = validate::do_by(MA_REFLO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
+  DF_MA_REFLO_out_year = validate::do_by(MA_REFLO, by = ANO, fun = outlier_detection) == F, # Transversal (ano)
   
-  DF_MA_REFLO_out_datamaid_city = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
+  DF_MA_REFLO_out_munic = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
   DF_MA_REFLO_min_year = MA_REFLO >= (k * validate::do_by(MA_REFLO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
   
-  DF_MA_REFLO_min_city = MA_REFLO >= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+  DF_MA_REFLO_min_munic = MA_REFLO >= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
   
   DF_MA_REFLO_max_year = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
   
-  DF_MA_REFLO_max_city = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
+  DF_MA_REFLO_max_munic = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
   
   DF_MA_REFLO_median_mov = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
   
-  DF_MA_REFLO_dif        = validate::do_by(MA_REFLO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= k # Longitudinal (município)
+  DF_MA_REFLO_dif        = validate::do_by(MA_REFLO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
@@ -978,4 +978,127 @@ validate::summary(check_ma_reflo) |>
 
 ## Gráfico com os resultados
 validate::plot(check_ma_reflo, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+```
+
+## Temporário
+
+### Violações regras MA_FOCOS
+
+-   DF_MA_FOCOS_hampel_year: filtro de hampel (detecção outlier) por ano;
+
+-   DF_MA_FOCOS_hampel_munic: filtro de hampel (detecção outlier) por município;
+
+-   DF_MA_FOCOS_out_year: detecção outlier datamaid por ano;
+
+-   DF_MA_FOCOS_out_munic: detecção outlier datamaid por município;
+
+-   DF_MA_FOCOS_min_year: \>= k \* valor mínimo por ano;
+
+-   DF_MA_FOCOS_min_munic: \>= k \* valor mínimo por município;
+
+-   DF_MA_FOCOS_max_year: \<= k \* valor máximo por ano;
+
+-   DF_MA_FOCOS_max_munic: \<= k \* valor máximo por município;
+
+-   DF_MA_FOCOS_median_mov: \<= k \* média móvel por ano;
+
+-   DF_MA_FOCOS_dif: \< a menor primeira diferença absoluta.
+
+```{r show_viol_ma_focos}
+
+rule_DF_MA_FOCOS_hampel_year <- validate::validator(
+  DF_MA_FOCOS_hampel_year = validate::do_by(MA_FOCOS, by = ANO, fun = hampel_filter) == F # Transversal (ano)
+)
+
+rule_DF_MA_FOCOS_hampel_munic <- validate::validator(
+  DF_MA_FOCOS_hampel_munic = validate::do_by(MA_FOCOS, by = IBGE7, fun = hampel_filter) == F # Longitudinal (município)
+)
+
+rule_DF_MA_FOCOS_out_year <- validate::validator(
+  DF_MA_FOCOS_out_year = validate::do_by(MA_FOCOS, by = ANO, fun = outlier_detection) == F # Transversal (ano)
+)
+
+rule_DF_MA_FOCOS_out_munic <- validate::validator(    
+  DF_MA_FOCOS_out_munic = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_detection) == F # Longitudinal (município)
+)
+
+rule_DF_MA_FOCOS_min_year <- validate::validator(  
+  DF_MA_FOCOS_min_year = MA_FOCOS >= (k * validate::do_by(MA_FOCOS, by = ANO, fun = min, na.rm = T)) # Transversal (ano)
+)
+
+rule_DF_MA_FOCOS_min_munic <- validate::validator(  
+  DF_MA_FOCOS_min_munic = MA_FOCOS >= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = min, na.rm = T)) # Longitudinal (município)
+)
+
+rule_DF_MA_FOCOS_max_year <- validate::validator(  
+  DF_MA_FOCOS_max_year = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = max, na.rm = T)) # Transversal (ano)
+)
+
+rule_DF_MA_FOCOS_max_munic <- validate::validator(    
+  DF_MA_FOCOS_max_munic = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = max, na.rm = T)) # Longitudinal (município)
+)
+
+rule_DF_MA_FOCOS_median_mov <- validate::validator(   
+  DF_MA_FOCOS_median_mov = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")) # Transversal (ano)
+)
+
+rule_DF_MA_FOCOS_dif <- validate::validator(
+  DF_MA_FOCOS_dif        = validate::do_by(MA_FOCOS, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r}
+
+data_bind_viol_distrib <- dplyr::bind_rows(
+  list(  
+    "rule_DF_MA_FOCOS_hampel_year"  = validate::violating(data, rule_DF_MA_FOCOS_hampel_year),
+    
+    "rule_DF_MA_FOCOS_hampel_munic" = validate::violating(data, rule_DF_MA_FOCOS_hampel_munic),
+    
+    "rule_DF_MA_FOCOS_out_year"     = validate::violating(data, rule_DF_MA_FOCOS_out_year),
+    
+    "rule_DF_MA_FOCOS_out_munic"    = validate::violating(data, rule_DF_MA_FOCOS_out_munic),
+    
+    "rule_DF_MA_FOCOS_min_year"     = validate::violating(data, rule_DF_MA_FOCOS_min_year),
+    
+    "rule_DF_MA_FOCOS_min_munic"    = validate::violating(data, rule_DF_MA_FOCOS_min_munic),
+    
+    "rule_DF_MA_FOCOS_max_year"     = validate::violating(data, rule_DF_MA_FOCOS_max_year),
+    
+    "rule_DF_MA_FOCOS_max_munic"    = validate::violating(data, rule_DF_MA_FOCOS_max_munic),
+    
+    "rule_DF_MA_FOCOS_median_mov"   = validate::violating(data, rule_DF_MA_FOCOS_median_mov),
+    
+    "rule_DF_MA_FOCOS_dif"          = validate::violating(data, rule_DF_MA_FOCOS_dif)
+  ),
+  .id = "REGRA"
+) |> 
+  dplyr::select(REGRA, ANO, IBGE7, MA_FOCOS)
+
+openxlsx::write.xlsx(data_bind_viol_distrib, "data_bind_viol_ma_focos.xlsx")
+```
+
+```{r}
+
+data_join_viol_distrib <- validate::violating(data, rule_DF_MA_FOCOS_hampel_year)[,c("ANO", "IBGE7", "MA_FOCOS")] |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_hampel_munic)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |>
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_out_year)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_out_munic)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_min_year)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_min_munic)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_max_year)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+  
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_max_munic)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+                     
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_median_mov)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7)) |> 
+    
+  dplyr::full_join(validate::violating(data, rule_DF_MA_FOCOS_dif)[,c("ANO", "IBGE7", "MA_FOCOS")], by = dplyr::join_by(ANO, IBGE7))
+
+openxlsx::write.xlsx(data_join_viol_distrib, "data_join_viol_ma_focos.xlsx")
 ```

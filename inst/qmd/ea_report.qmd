@@ -531,7 +531,7 @@ rules_dist_total_ea_bffam <- validate::validator(
   
   DF_EA_BFFAM_median_roll = EA_BFFAM <= (k * validate::do_by(EA_BFFAM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_BFFAM_dif        = validate::do_by(EA_BFFAM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BFFAM, na.rm = T)
+  DF_EA_BFFAM_dif        = validate::do_by(EA_BFFAM, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -576,7 +576,7 @@ rules_dist_total_ea_trfam <- validate::validator(
   
   DF_EA_TRFAM_median_roll = EA_TRFAM <= (k * validate::do_by(EA_TRFAM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRFAM_dif        = validate::do_by(EA_TRFAM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRFAM, na.rm = T)
+  DF_EA_TRFAM_dif        = validate::do_by(EA_TRFAM, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -621,7 +621,7 @@ rules_dist_total_ea_trpf <- validate::validator(
   
   DF_EA_TRPF_median_roll = EA_TRPF <= (k * validate::do_by(EA_TRPF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRPF_dif        = validate::do_by(EA_TRPF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPF, na.rm = T)
+  DF_EA_TRPF_dif        = validate::do_by(EA_TRPF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -666,7 +666,7 @@ rules_dist_total_ea_bpcde <- validate::validator(
   
   DF_EA_BPCDEF_median_roll = EA_BPCDEF <= (k * validate::do_by(EA_BPCDEF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_BPCDEF_dif        = validate::do_by(EA_BPCDEF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BPCDEF, na.rm = T)
+  DF_EA_BPCDEF_dif        = validate::do_by(EA_BPCDEF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -711,7 +711,7 @@ rules_dist_total_ea_bpcido <- validate::validator(
   
   DF_EA_BPCIDO_median_roll = EA_BPCIDO <= (k * validate::do_by(EA_BPCIDO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_BPCIDO_dif        = validate::do_by(EA_BPCIDO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BPCIDO, na.rm = T)
+  DF_EA_BPCIDO_dif        = validate::do_by(EA_BPCIDO, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -756,7 +756,7 @@ rules_dist_total_ea_bfbpc <- validate::validator(
   
   DF_EA_BFBPC_median_roll = EA_BFBPC <= (k * validate::do_by(EA_BFBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_BFBPC_dif        = validate::do_by(EA_BFBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_BFBPC, na.rm = T)
+  DF_EA_BFBPC_dif        = validate::do_by(EA_BFBPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -801,7 +801,7 @@ rules_dist_total_ea_trbpcdef <- validate::validator(
   
   DF_EA_TRBPCDEF_median_roll = EA_TRBPCDEF <= (k * validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRBPCDEF_dif        = validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCDEF, na.rm = T)
+  DF_EA_TRBPCDEF_dif        = validate::do_by(EA_TRBPCDEF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -846,7 +846,7 @@ rules_dist_total_ea_trbpcido <- validate::validator(
   
   DF_EA_TRBPCIDO_median_roll = EA_TRBPCIDO <= (k * validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRBPCIDO_dif        = validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCIDO, na.rm = T)
+  DF_EA_TRBPCIDO_dif        = validate::do_by(EA_TRBPCIDO, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -891,7 +891,7 @@ rules_dist_total_ea_trbpc <- validate::validator(
   
   DF_EA_TRBPC_median_roll = EA_TRBPC <= (k * validate::do_by(EA_TRBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRBPC_dif        = validate::do_by(EA_TRBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPC, na.rm = T)
+  DF_EA_TRBPC_dif        = validate::do_by(EA_TRBPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -936,7 +936,7 @@ rules_dist_total_ea_trbpcpb <- validate::validator(
   
   DF_EA_TRBPCPB_median_roll = EA_TRBPCPB <= (k * validate::do_by(EA_TRBPCPB, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRBPCPB_dif        = validate::do_by(EA_TRBPCPB, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBPCPB, na.rm = T)
+  DF_EA_TRBPCPB_dif        = validate::do_by(EA_TRBPCPB, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -981,7 +981,7 @@ rules_dist_total_ea_trbfbpc <- validate::validator(
   
   DF_EA_TRBFBPC_median_roll = EA_TRBFBPC <= (k * validate::do_by(EA_TRBFBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRBFBPC_dif        = validate::do_by(EA_TRBFBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRBFBPC, na.rm = T)
+  DF_EA_TRBFBPC_dif        = validate::do_by(EA_TRBFBPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1026,7 +1026,7 @@ rules_dist_total_ea_trpc <- validate::validator(
   
   DF_EA_TRPC_median_roll = EA_TRPC <= (k * validate::do_by(EA_TRPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRPC_dif        = validate::do_by(EA_TRPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPC, na.rm = T)
+  DF_EA_TRPC_dif        = validate::do_by(EA_TRPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1071,7 +1071,7 @@ rules_dist_total_ea_trpcbf <- validate::validator(
   
   DF_EA_TRPCBF_median_roll = EA_TRPCBF <= (k * validate::do_by(EA_TRPCBF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRPCBF_dif        = validate::do_by(EA_TRPCBF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPCBF, na.rm = T)
+  DF_EA_TRPCBF_dif        = validate::do_by(EA_TRPCBF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1116,7 +1116,7 @@ rules_dist_total_ea_trpcbpc <- validate::validator(
   
   DF_EA_TRPCBPC_median_roll = EA_TRPCBPC <= (k * validate::do_by(EA_TRPCBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_TRPCBPC_dif        = validate::do_by(EA_TRPCBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_TRPCBPC, na.rm = T)
+  DF_EA_TRPCBPC_dif        = validate::do_by(EA_TRPCBPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1161,7 +1161,7 @@ rules_dist_total_ea_vaagr <- validate::validator(
   
   DF_EA_VAAGR_median_roll = EA_VAAGR <= (k * validate::do_by(EA_VAAGR, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAAGR_dif        = validate::do_by(EA_VAAGR, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAAGR, na.rm = T)
+  DF_EA_VAAGR_dif        = validate::do_by(EA_VAAGR, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1206,7 +1206,7 @@ rules_dist_total_ea_vaind <- validate::validator(
   
   DF_EA_VAIND_median_roll = EA_VAIND <= (k * validate::do_by(EA_VAIND, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAIND_dif        = validate::do_by(EA_VAIND, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAIND, na.rm = T)
+  DF_EA_VAIND_dif        = validate::do_by(EA_VAIND, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1251,7 +1251,7 @@ rules_dist_total_ea_vaadm <- validate::validator(
   
   DF_EA_VAADM_median_roll = EA_VAADM <= (k * validate::do_by(EA_VAADM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAADM_dif        = validate::do_by(EA_VAADM, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAADM, na.rm = T)
+  DF_EA_VAADM_dif        = validate::do_by(EA_VAADM, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1296,7 +1296,7 @@ rules_dist_total_ea_vaserv <- validate::validator(
   
   DF_EA_VASERV_median_roll = EA_VASERV <= (k * validate::do_by(EA_VASERV, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VASERV_dif        = validate::do_by(EA_VASERV, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VASERV, na.rm = T)
+  DF_EA_VASERV_dif        = validate::do_by(EA_VASERV, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1341,7 +1341,7 @@ rules_dist_total_ea_impliq <- validate::validator(
   
   DF_EA_IMPLIQ_median_roll = EA_IMPLIQ <= (k * validate::do_by(EA_IMPLIQ, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_IMPLIQ_dif        = validate::do_by(EA_IMPLIQ, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_IMPLIQ, na.rm = T)
+  DF_EA_IMPLIQ_dif        = validate::do_by(EA_IMPLIQ, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1386,7 +1386,7 @@ rules_dist_total_ea_pib <- validate::validator(
   
   DF_EA_PIB_median_roll = EA_PIB <= (k * validate::do_by(EA_PIB, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_PIB_dif        = validate::do_by(EA_PIB, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_PIB, na.rm = T)
+  DF_EA_PIB_dif        = validate::do_by(EA_PIB, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1431,7 +1431,7 @@ rules_dist_total_ea_pibpc <- validate::validator(
   
   DF_EA_PIBPC_median_roll = EA_PIBPC <= (k * validate::do_by(EA_PIBPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_PIBPC_dif        = validate::do_by(EA_PIBPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_PIBPC, na.rm = T)
+  DF_EA_PIBPC_dif        = validate::do_by(EA_PIBPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1476,7 +1476,7 @@ rules_dist_total_ea_vafag <- validate::validator(
   
   DF_EA_VAFAG_median_roll = EA_VAFAG <= (k * validate::do_by(EA_VAFAG, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFAG_dif        = validate::do_by(EA_VAFAG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFAG, na.rm = T)
+  DF_EA_VAFAG_dif        = validate::do_by(EA_VAFAG, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1521,7 +1521,7 @@ rules_dist_total_ea_vaf <- validate::validator(
   
   DF_EA_VAF_median_roll = EA_VAF <= (k * validate::do_by(EA_VAF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAF_dif        = validate::do_by(EA_VAF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAF, na.rm = T)
+  DF_EA_VAF_dif        = validate::do_by(EA_VAF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1566,7 +1566,7 @@ rules_dist_total_ea_vafmi <- validate::validator(
   
   DF_EA_VAFMI_median_roll = EA_VAFMI <= (k * validate::do_by(EA_VAFMI, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFMI_dif        = validate::do_by(EA_VAFMI, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFMI, na.rm = T)
+  DF_EA_VAFMI_dif        = validate::do_by(EA_VAFMI, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1611,7 +1611,7 @@ rules_dist_total_ea_vafit <- validate::validator(
   
   DF_EA_VAFIT_median_roll = EA_VAFIT <= (k * validate::do_by(EA_VAFIT, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFIT_dif        = validate::do_by(EA_VAFIT, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFIT, na.rm = T)
+  DF_EA_VAFIT_dif        = validate::do_by(EA_VAFIT, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1656,7 +1656,7 @@ rules_dist_total_ea_vafic <- validate::validator(
   
   DF_EA_VAFIC_median_roll = EA_VAFIC <= (k * validate::do_by(EA_VAFIC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFIC_dif        = validate::do_by(EA_VAFIC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFIC, na.rm = T)
+  DF_EA_VAFIC_dif        = validate::do_by(EA_VAFIC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1701,7 +1701,7 @@ rules_dist_total_ea_vafup <- validate::validator(
   
   DF_EA_VAFUP_median_roll = EA_VAFUP <= (k * validate::do_by(EA_VAFUP, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFUP_dif        = validate::do_by(EA_VAFUP, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFUP, na.rm = T)
+  DF_EA_VAFUP_dif        = validate::do_by(EA_VAFUP, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1746,7 +1746,7 @@ rules_dist_total_ea_vafcv <- validate::validator(
   
   DF_EA_VAFCV_median_roll = EA_VAFCV <= (k * validate::do_by(EA_VAFCV, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFCV_dif        = validate::do_by(EA_VAFCV, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCV, na.rm = T)
+  DF_EA_VAFCV_dif        = validate::do_by(EA_VAFCV, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1791,7 +1791,7 @@ rules_dist_total_ea_vafca <- validate::validator(
   
   DF_EA_VAFCA_median_roll = EA_VAFCA <= (k * validate::do_by(EA_VAFCA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFCA_dif        = validate::do_by(EA_VAFCA, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCA, na.rm = T)
+  DF_EA_VAFCA_dif        = validate::do_by(EA_VAFCA, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1836,7 +1836,7 @@ rules_dist_total_ea_vafse <- validate::validator(
   
   DF_EA_VAFSE_median_roll = EA_VAFSE <= (k * validate::do_by(EA_VAFSE, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFSE_dif        = validate::do_by(EA_VAFSE, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFSE, na.rm = T)
+  DF_EA_VAFSE_dif        = validate::do_by(EA_VAFSE, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1881,7 +1881,7 @@ rules_dist_total_ea_vafo <- validate::validator(
   
   DF_EA_VAFO_median_roll = EA_VAFO <= (k * validate::do_by(EA_VAFO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFO_dif        = validate::do_by(EA_VAFO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFO, na.rm = T)
+  DF_EA_VAFO_dif        = validate::do_by(EA_VAFO, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1926,7 +1926,7 @@ rules_dist_total_ea_vafpc <- validate::validator(
   
   DF_EA_VAFPC_median_roll = EA_VAFPC <= (k * validate::do_by(EA_VAFPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFPC_dif        = validate::do_by(EA_VAFPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFPC, na.rm = T)
+  DF_EA_VAFPC_dif        = validate::do_by(EA_VAFPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -1971,7 +1971,7 @@ rules_dist_total_ea_vafcvpc <- validate::validator(
   
   DF_EA_VAFCVPC_median_roll = EA_VAFCVPC <= (k * validate::do_by(EA_VAFCVPC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_VAFCVPC_dif        = validate::do_by(EA_VAFCVPC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_VAFCVPC, na.rm = T)
+  DF_EA_VAFCVPC_dif        = validate::do_by(EA_VAFCVPC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2016,7 +2016,7 @@ rules_dist_total_ea_emprsf <- validate::validator(
   
   DF_EA_EMPRSF_median_roll = EA_EMPRSF <= (k * validate::do_by(EA_EMPRSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSF_dif        = validate::do_by(EA_EMPRSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSF, na.rm = T)
+  DF_EA_EMPRSF_dif        = validate::do_by(EA_EMPRSF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2061,7 +2061,7 @@ rules_dist_total_ea_rensf <- validate::validator(
   
   DF_EA_RENSF_median_roll = EA_RENSF <= (k * validate::do_by(EA_RENSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_RENSF_dif        = validate::do_by(EA_RENSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_RENSF, na.rm = T)
+  DF_EA_RENSF_dif        = validate::do_by(EA_RENSF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2106,7 +2106,7 @@ rules_dist_total_ea_renpcsf <- validate::validator(
   
   DF_EA_RENPCSF_median_roll = EA_RENPCSF <= (k * validate::do_by(EA_RENPCSF, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_RENPCSF_dif        = validate::do_by(EA_RENPCSF, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_RENPCSF, na.rm = T)
+  DF_EA_RENPCSF_dif        = validate::do_by(EA_RENPCSF, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2151,7 +2151,7 @@ rules_dist_total_ea_emprsfag <- validate::validator(
   
   DF_EA_EMPRSFAG_median_roll = EA_EMPRSFAG <= (k * validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFAG_dif        = validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFAG, na.rm = T)
+  DF_EA_EMPRSFAG_dif        = validate::do_by(EA_EMPRSFAG, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2196,7 +2196,7 @@ rules_dist_total_ea_emprsfmi <- validate::validator(
   
   DF_EA_EMPRSFMI_median_roll = EA_EMPRSFMI <= (k * validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFMI_dif        = validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFMI, na.rm = T)
+  DF_EA_EMPRSFMI_dif        = validate::do_by(EA_EMPRSFMI, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2241,7 +2241,7 @@ rules_dist_total_ea_emprsfit <- validate::validator(
   
   DF_EA_EMPRSFIT_median_roll = EA_EMPRSFIT <= (k * validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFIT_dif        = validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFIT, na.rm = T)
+  DF_EA_EMPRSFIT_dif        = validate::do_by(EA_EMPRSFIT, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2286,7 +2286,7 @@ rules_dist_total_ea_emprsfup <- validate::validator(
   
   DF_EA_EMPRSFUP_median_roll = EA_EMPRSFUP <= (k * validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFUP_dif        = validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFUP, na.rm = T)
+  DF_EA_EMPRSFUP_dif        = validate::do_by(EA_EMPRSFUP, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2331,7 +2331,7 @@ rules_dist_total_ea_emprsfic <- validate::validator(
   
   DF_EA_EMPRSFIC_median_roll = EA_EMPRSFIC <= (k * validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFIC_dif        = validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFIC, na.rm = T)
+  DF_EA_EMPRSFIC_dif        = validate::do_by(EA_EMPRSFIC, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2376,7 +2376,7 @@ rules_dist_total_ea_emprsfco <- validate::validator(
   
   DF_EA_EMPRSFCO_median_roll = EA_EMPRSFCO <= (k * validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFCO_dif        = validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFCO, na.rm = T)
+  DF_EA_EMPRSFCO_dif        = validate::do_by(EA_EMPRSFCO, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
@@ -2421,7 +2421,7 @@ rules_dist_total_ea_emprsfse <- validate::validator(
   
   DF_EA_EMPRSFSE_median_roll = EA_EMPRSFSE <= (k * validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
   
-  DF_EA_EMPRSFSE_dif        = validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = \(x) abs(round(c(diff(x), NA_real_), 2))) <= max(EA_EMPRSFSE, na.rm = T)
+  DF_EA_EMPRSFSE_dif        = validate::do_by(EA_EMPRSFSE, by = IBGE7, fun = compare_first_dif) == F
 )
 ```
 
