@@ -77,6 +77,14 @@ outlier_detection <- function(var, a = -4, b = 3){
   return(check)
 }
 
+compare_first_dif <- function(var){
+  dif <- abs(round(c(NA_real_, diff(var)), 2))
+  dif_max <- max(abs(round(c(NA_real_, diff(var)), 2)), na.rm = T)
+  check <- ifelse(dif >= dif_max, T, F)
+
+  return(check)
+}
+
 ## Build descriptive table
 table_descriptive <- function(var, df = data){
   result <-
