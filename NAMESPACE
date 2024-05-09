@@ -3,6 +3,7 @@
 export("%>%")
 export(chart_boxplot)
 export(chart_histogram)
+export(compare_first_dif)
 export(compare_lag)
 export(create_report)
 export(create_reporting)
