@@ -51,8 +51,8 @@ k <- 1.5
 lockBinding("k", globalenv())
 
 ## Parâmetros para os gráficos do validate::
-chart_title <- "Resultado das validações por regra estabelecida"
-chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
+chart_title <- "Sumário da validação por regra estabelecida"
+chart_label <- c("Suspeito", "Validado", "Missing", "Total")
 chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
 chart_xlab <- ""
 ```
@@ -173,11 +173,11 @@ check_type <- validate::confront(data, rules_type)
 
 validate::summary(check_type) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
@@ -219,21 +219,35 @@ check_validate_na <- validate::confront(data, rules_validate_na)
 
 validate::summary(check_validate_na) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_validate_na}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, check_validate_na), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_validate_na, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### Todos os indicadores - Demais regras
@@ -266,21 +280,35 @@ check_validate_others <- validate::confront(data, rules_validate_others)
 
 validate::summary(check_validate_others) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_validate_others}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, check_validate_others), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_validate_others, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 ### Consistência
@@ -311,21 +339,35 @@ check_consist_ma_icmsecolog <- validate::confront(data_aux_ma_icmsecolog, rules_
 ## Exibir uma tabela com os resultados
 validate::summary(check_consist_ma_icmsecolog) |>
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consist_chart_ma_icmsecolog}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_icmsecolog, rules_consist_ma_icmsecolog), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_consist_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CRH
@@ -354,21 +396,35 @@ check_consist_ma_crh <- validate::confront(data_aux_ma_crh, rules_consist_ma_crh
 ## Exibir uma tabela com os resultados
 validate::summary(check_consist_ma_crh) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consist_chart_ma_crh}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_crh, rules_consist_ma_crh), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_consist_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CFEM
@@ -397,21 +453,35 @@ check_consist_ma_cfem <- validate::confront(data_aux_ma_cfem, rules_consist_ma_c
 ## Exibir uma tabela com os resultados
 validate::summary(check_consist_ma_cfem) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consistency_chart_ma_cfem}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_cfem, rules_consist_ma_cfem), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_consist_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_FOCOS
@@ -431,21 +501,35 @@ check_consist_ma_focos <- validate::confront(data, rules_consist_ma_focos)
 ## Exibir uma tabela com os resultados
 validate::summary(check_consist_ma_focos) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consist_chart_ma_focos}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_consist_ma_focos), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_consist_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 ### Distribuição
@@ -477,21 +561,35 @@ check_dist_ma_icmsecolog <- validate::confront(data, rules_dist_ma_icmsecolog)
 
 validate::summary(check_dist_ma_icmsecolog) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_icmsecolog}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_icmsecolog), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CRH
@@ -521,21 +619,35 @@ check_dist_ma_crh <- validate::confront(data, rules_dist_ma_crh)
 
 validate::summary(check_dist_ma_crh) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_crh}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_crh), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CFEM
@@ -565,21 +677,35 @@ check_dist_ma_cfem <- validate::confront(data, rules_dist_ma_cfem)
 
 validate::summary(check_dist_ma_cfem) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_cfem}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_cfem), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_FOCOS
@@ -609,21 +735,35 @@ check_dist_ma_focos <- validate::confront(data, rules_dist_ma_focos)
 
 validate::summary(check_dist_ma_focos) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_focos}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_focos), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CANA
@@ -653,21 +793,35 @@ check_dist_ma_cana <- validate::confront(data, rules_dist_ma_cana)
 
 validate::summary(check_dist_ma_cana) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_cana}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_cana), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_cana, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_FROTA
@@ -700,21 +854,35 @@ check_dist_ma_frota <- validate::confront(data, rules_dist_ma_frota)
 ## Exibir uma tabela com os resultados
 validate::summary(check_dist_ma_frota) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_frota}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_frota), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_frota, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_BOVINO
@@ -744,21 +912,35 @@ check_dist_ma_bovino <- validate::confront(data, rules_dist_ma_bovino)
 
 validate::summary(check_dist_ma_bovino) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_bovino}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_bovino), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_bovino, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_REFLO
@@ -788,21 +970,35 @@ check_dist_ma_reflo <- validate::confront(data, rules_dist_ma_reflo)
 
 validate::summary(check_dist_ma_reflo) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_reflo}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_reflo), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_reflo, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_FLONATIVA
@@ -832,21 +1028,35 @@ check_dist_ma_flonativa <- validate::confront(data, rules_dist_ma_flonativa)
 
 validate::summary(check_dist_ma_flonativa) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_flonativa}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_flonativa), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_flonativa, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_INFRA
@@ -876,21 +1086,35 @@ check_dist_ma_infra <- validate::confront(data, rules_dist_ma_infra)
 
 validate::summary(check_dist_ma_infra) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_infra}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_infra), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_infra, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_AGRO
@@ -920,21 +1144,35 @@ check_dist_ma_agro <- validate::confront(data, rules_dist_ma_agro)
 
 validate::summary(check_dist_ma_agro) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Missing  = nNA
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_dist_ma_agro}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_agro), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_dist_ma_agro, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 # Análise descritiva
