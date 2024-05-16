@@ -79,7 +79,7 @@ outlier_detection <- function(var, a = -4, b = 3){
 
 compare_first_dif <- function(var){
   dif <- abs(round(c(NA_real_, diff(var)), 2))
-  dif_max <- max(lag(dif), na.rm = T)
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
   check <- ifelse(dif > dif_max, T, F)
 
   return(check)
