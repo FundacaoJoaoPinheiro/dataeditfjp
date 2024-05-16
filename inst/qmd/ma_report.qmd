@@ -544,9 +544,9 @@ rules_dist_ma_icmsecolog <- validate::validator(
   
   DF_MA_ICMSECOLOG_out_munic     = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
 
-  DF_MA_ICMSECOLOG_min_munic     = MA_ICMSECOLOG >= (validate::min_by(lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_ICMSECOLOG_min_munic     = MA_ICMSECOLOG >= (validate::min_by(dplyr::lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_max_munic     = MA_ICMSECOLOG <= (k * validate::max_by(lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_ICMSECOLOG_max_munic     = MA_ICMSECOLOG <= (k * validate::max_by(dplyr::lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_ICMSECOLOG_med_mov_munic = MA_ICMSECOLOG <= (k * validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -602,9 +602,9 @@ rules_dist_ma_crh <- validate::validator(
   
   DF_MA_CRH_out_munic     = validate::do_by(MA_CRH, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_CRH_min_munic     = MA_CRH >= (validate::min_by(lag(MA_CRH), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_CRH_min_munic     = MA_CRH >= (validate::min_by(dplyr::lag(MA_CRH), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
 
-  DF_MA_CRH_max_munic     = MA_CRH <= (k * validate::max_by(lag(MA_CRH), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_CRH_max_munic     = MA_CRH <= (k * validate::max_by(dplyr::lag(MA_CRH), by = IBGE7, na.rm = T)), # Longitudinal (município)
 
   DF_MA_CRH_med_mov_munic = MA_CRH <= (k * validate::do_by(MA_CRH, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -660,9 +660,9 @@ rules_dist_ma_cfem <- validate::validator(
   
   DF_MA_CFEM_out_munic     = validate::do_by(MA_CFEM, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_CFEM_min_munic     = MA_CFEM >= (validate::min_by(lag(MA_CFEM), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_CFEM_min_munic     = MA_CFEM >= (validate::min_by(dplyr::lag(MA_CFEM), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_CFEM_max_munic     = MA_CFEM <= (k * validate::max_by(lag(MA_CFEM), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_CFEM_max_munic     = MA_CFEM <= (k * validate::max_by(dplyr::lag(MA_CFEM), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_CFEM_med_mov_munic = MA_CFEM <= (k * validate::do_by(MA_CFEM, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -718,9 +718,9 @@ rules_dist_ma_focos <- validate::validator(
   
   DF_MA_FOCOS_out_munic     = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_FOCOS_min_munic     = MA_FOCOS >= (validate::min_by(lag(MA_FOCOS), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_FOCOS_min_munic     = MA_FOCOS >= (validate::min_by(dplyr::lag(MA_FOCOS), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_FOCOS_max_munic     = MA_FOCOS <= (k * validate::max_by(lag(MA_FOCOS), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_FOCOS_max_munic     = MA_FOCOS <= (k * validate::max_by(dplyr::lag(MA_FOCOS), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FOCOS_med_mov_munic = MA_FOCOS <= (k * validate::do_by(MA_FOCOS, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -776,9 +776,9 @@ rules_dist_ma_cana <- validate::validator(
   
   DF_MA_CANA_out_munic     = validate::do_by(MA_CANA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_CANA_min_munic     = MA_CANA >= (validate::min_by(lag(MA_CANA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_CANA_min_munic     = MA_CANA >= (validate::min_by(dplyr::lag(MA_CANA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_CANA_max_munic     = MA_CANA <= (k * validate::max_by(lag(MA_CANA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_CANA_max_munic     = MA_CANA <= (k * validate::max_by(dplyr::lag(MA_CANA), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_CANA_med_mov_munic = MA_CANA <= (k * validate::do_by(MA_CANA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -834,15 +834,15 @@ rules_dist_ma_frota <- validate::validator(
   
   DF_MA_FROTA_out_munic     = validate::do_by(MA_FROTA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_min_munic     = MA_FROTA >= (validate::min_by(lag(MA_FROTA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_FROTA_min_munic     = MA_FROTA >= (validate::min_by(dplyr::lag(MA_FROTA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_FROTA_max_munic     = MA_FROTA <= (k * validate::max_by(lag(MA_FROTA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_FROTA_max_munic     = MA_FROTA <= (k * validate::max_by(dplyr::lag(MA_FROTA), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_FROTA_med_mov_munic = MA_FROTA <= (k * validate::do_by(MA_FROTA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
   DF_MA_FROTA_dif_munic     = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_first_dif) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_compare       = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_lag) == T # Longitudinal (município) [comparação]
+  DF_MA_FROTA_compare       = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_dplyr::lag) == T # Longitudinal (município) [comparação]
 )
 ```
 
@@ -895,9 +895,9 @@ rules_dist_ma_bovino <- validate::validator(
   
   DF_MA_BOVINO_out_munic     = validate::do_by(MA_BOVINO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_BOVINO_min_munic     = MA_BOVINO >= (validate::min_by(lag(MA_BOVINO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_BOVINO_min_munic     = MA_BOVINO >= (validate::min_by(dplyr::lag(MA_BOVINO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_BOVINO_max_munic     = MA_BOVINO <= (k * validate::max_by(lag(MA_BOVINO), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_BOVINO_max_munic     = MA_BOVINO <= (k * validate::max_by(dplyr::lag(MA_BOVINO), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_BOVINO_med_mov_munic = MA_BOVINO <= (k * validate::do_by(MA_BOVINO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -953,9 +953,9 @@ rules_dist_ma_reflo <- validate::validator(
   
   DF_MA_REFLO_out_munic     = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_REFLO_min_munic     = MA_REFLO >= (validate::min_by(lag(MA_REFLO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_REFLO_min_munic     = MA_REFLO >= (validate::min_by(dplyr::lag(MA_REFLO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_REFLO_max_munic     = MA_REFLO <= (k * validate::max_by(lag(MA_REFLO), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_REFLO_max_munic     = MA_REFLO <= (k * validate::max_by(dplyr::lag(MA_REFLO), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_REFLO_med_mov_munic = MA_REFLO <= (k * validate::do_by(MA_REFLO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -1011,9 +1011,9 @@ rules_dist_ma_flonativa <- validate::validator(
   
   DF_MA_FLONATIVA_out_munic     = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_FLONATIVA_min_munic     = MA_FLONATIVA >= (validate::min_by(lag(MA_FLONATIVA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_FLONATIVA_min_munic     = MA_FLONATIVA >= (validate::min_by(dplyr::lag(MA_FLONATIVA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_FLONATIVA_max_munic     = MA_FLONATIVA <= (k * validate::max_by(lag(MA_FLONATIVA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_FLONATIVA_max_munic     = MA_FLONATIVA <= (k * validate::max_by(dplyr::lag(MA_FLONATIVA), by = IBGE7, na.rm = T)), # Longitudinal (município)
    
   DF_MA_FLONATIVA_med_mov_munic = MA_FLONATIVA <= (k * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -1069,9 +1069,9 @@ rules_dist_ma_infra <- validate::validator(
   
   DF_MA_INFRA_out_munic     = validate::do_by(MA_INFRA, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_INFRA_min_munic     = MA_INFRA >= (validate::min_by(lag(MA_INFRA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_INFRA_min_munic     = MA_INFRA >= (validate::min_by(dplyr::lag(MA_INFRA), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_INFRA_max_munic     = MA_INFRA <= (k * validate::max_by(lag(MA_INFRA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_INFRA_max_munic     = MA_INFRA <= (k * validate::max_by(dplyr::lag(MA_INFRA), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_INFRA_med_mov_munic = MA_INFRA <= (k * validate::do_by(MA_INFRA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
@@ -1127,9 +1127,9 @@ rules_dist_ma_agro <- validate::validator(
   
   DF_MA_AGRO_out_munic     = validate::do_by(MA_AGRO, by = IBGE7, fun = outlier_detection) == F, # Longitudinal (município)
   
-  DF_MA_AGRO_min_munic     = MA_AGRO >= (validate::min_by(lag(MA_AGRO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
+  DF_MA_AGRO_min_munic     = MA_AGRO >= (validate::min_by(dplyr::lag(MA_AGRO), by = IBGE7, na.rm = T) / k), # Longitudinal (município)
   
-  DF_MA_AGRO_max_munic     = MA_AGRO <= (k * validate::max_by(lag(MA_AGRO), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  DF_MA_AGRO_max_munic     = MA_AGRO <= (k * validate::max_by(dplyr::lag(MA_AGRO), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
   DF_MA_AGRO_med_mov_munic = MA_AGRO <= (k * validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
