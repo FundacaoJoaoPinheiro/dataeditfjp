@@ -53,64 +53,10 @@ project:
 #source("../../R/table_quantile.R")
 ```
 
-```{r set_param_global}
-
-k1 <- 2 
-k2 <- 0.05
-## "Truque" para setar "k" como uma constante
-lockBinding("k1", globalenv())
-lockBinding("k2", globalenv())
-
-## Parâmetros para os gráficos do validate::
-chart_title <- "Resultado das validações por regra estabelecida"
-chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
-chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
-chart_xlab <- ""
-```
-
-```{r import_data}
-
-data <- openxlsx::read.xlsx(params$data)
-```
-
-```{r get_var_numeric}
-
-# Obter as siglas das variáveis do tipo numérico
-var_numeric <- data |> 
-  dplyr::select(
-    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
-  ) |> 
-  colnames() |> 
-  unlist()
-```
-
-```{r get_var_character}
-
-# Obter as siglas variáveis do tipo string
-var_char <- data |> 
-  dplyr::select(
-    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
-  ) |> 
-  colnames() |> 
-  unlist()
-```
-
-# Introdução
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
-
-# Análise descritiva
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
-
-## Tabelas
-
 
 ```{r setup, include=FALSE}
 #library(robustbase)
 #library(zoo)
-
-data$ANO <- as.character(data$ANO)
 
 table_descriptive <- function(variable, data){
   res <- data |>
@@ -179,6 +125,27 @@ chart_histogram <- function(variable, data){
   return(result)
 }
 
+chart_bar <- function(ano, n){
+  result <- data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
 difpercentual <- function(df, variable){
   df |>
     dplyr::group_by(ANO) |>
@@ -216,98 +183,120 @@ hampel_filter <- function(variable){
 
 compare_first_dif <- function(var){
   dif <- abs(round(c(NA_real_, diff(var)), 2))
-  dif_max <- max(abs(round(c(NA_real_, diff(var)), 2)), na.rm = T)
-  check <- ifelse(dif >= dif_max, T, F)
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
+  check <- ifelse(dif > dif_max, TRUE, FALSE)
 
   return(check)
 }
 
-```
-
-```{r show_desc_table, results='asis'}
-#| column: page
-
-pander::pandoc.header("Descritiva", level = 3)
-
-# Loop para mostrar os resultados por variável
-for(var in var_numeric){
-  pander::pandoc.header(var, level = 4)
-  pander::pandoc.table(
-    table_descriptive(variable = var,data = data), 
-    decimal.mark = ",", 
-    big.mark     = ".", 
-    round        = 2,
-    split.table  = Inf
-  )
-}
-```
-
-```{r show_qtl_table, results='asis'}
-
-pander::pandoc.header("Quantil", level = 3)
-
-# Loop para mostrar os resultados por variável
-for(var in var_numeric){
-  pander::pandoc.header(var, level = 4)
-  pander::pandoc.table(
-    table_quantile(variable = var, data = data), 
-    decimal.mark = ",", 
-    big.mark     = ".", 
-    round        = 2, 
-    split.table  = Inf
-  )
-}
-
-#criticaldatafjp::table_quantile(variable = "MA_MATLANTICA", data = data)
-
-```
-
-## Gráficos
-
-::: {.callout-note appearance="minimal"}
-Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
-:::
-
-```{r show_boxplot_chart, results='asis'}
-#| out-width: 100%
-#| fig-format: svg
-
-pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
-
-# Loop para mostrar os resultados por variável
-for(var in var_numeric){
-  pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(variable = var, data = data))
-}
-```
-
-```{r  show_hist_chart, results='asis'}
-#| out-width: 100%
-#| fig-format: svg
-
-pander::pandoc.header("Histograma", level = 3)
-
-# Loop para mostrar os resultados por variável
-for(var in var_numeric){
-  pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data))
+compare_lag <- function(var){
+  return(var >= dplyr::lag(var, n = 1))
 }
 
 ```
 
-# Regras de crítica
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
 
-**EXPLICAR AS REGRAS ANTES DE MOSTRAR AS TABELAS COM OS RESULTADOS**
+```{r set_param_global}
+
+k1 <- 2 
+k2 <- 0.05
+## "Truque" para setar "k" como uma constante
+lockBinding("k1", globalenv())
+lockBinding("k2", globalenv())
+
+## Parâmetros para os gráficos do validate::
+chart_title <- "Resultado das validações por regra estabelecida"
+chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
+chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
+chart_xlab <- ""
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
+```
+
 
 ```{r get_cat}
 
-# As categorias do ano atual serão comparadas às categorias presentes nos anos anteriores.
-check <- unique(data[data$ANO < max(data$ANO, na.rm = T), "MA_OGESTOR"])
-
-org_gestor <- check[!is.na(check)]
+## Categorias encontradas na série histórica
+org_gestor <- c(
+  "Departamento, assessoria, setor ou órgão similar",
+  "Não possui estrutura",
+  "Não possui estrutura para a área",
+  "Órgão da administração indireta",
+  "Secretaria em conjunto com outra política",
+  "Secretaria em conjunto com outras políticas setoriais",
+  "Secretaria exclusiva",
+  "Secretaria municipal em conjunto com outras políticas",
+  "Secretaria municipal em conjunto com outros temas",
+  "Secretaria municipal exclusiva",
+  "Setor subordinado a outra secretaria",
+  "Setor subordinado diretamente à chefia do executivo"
+)
 ```
+
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+-   Tipo
+
+    -   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+-   Validade
+
+    -   **VI\_\[...\]**: dado é não negativo e/ou está entre um intervalo estipulado (ex.: 0% e 100%).
+
+-   Consistência
+
+    -   **CF\_\[...\]\_prop**: ???
+
+    -   **CF\_\[...\]\_total**: a soma da proporção é igual a $\approx$ 100%.
+
+-   Distribuição
+
+    -   **DF\_\[...\]\_hampel_munic**: identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor / k valor da série histórica;
+
+    -   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior \* k valor da série histórica;
+
+    -   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a mediana móvel \* k;
+
+    -   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+    -   **DF\_\[...\]\_compare**: ???
+
+
+# Regras de crítica
 
 ### Tipo
 
@@ -335,13 +324,19 @@ rules_type <- validate::validator(
 ```
 
 ```{r confront_type}
-#| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
 check_type <- validate::confront(data, rules_type)
 
 validate::summary(check_type) |> 
-  kableExtra::kbl() |>
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
@@ -356,7 +351,7 @@ validate::plot(check_type, title = chart_title, labels = chart_label, fill = cha
 
 #### Todos os indicadores - Valores ausentes
 
-```{r rules_validate_missing}
+```{r rules_validate_na}
 
 rules_validate_na <- validate::validator(
     VI_MA_AGRO       = !is.na(MA_AGRO),
@@ -375,21 +370,41 @@ rules_validate_na <- validate::validator(
 ```
 
 ```{r confront_validate_na}
-#| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
 check_validate_na <- validate::confront(data, rules_validate_na)
 
 validate::summary(check_validate_na) |> 
-  kableExtra::kbl() |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_validate_na}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, check_validate_na), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_validate_na, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### Todos os indicadores - Demais regras
@@ -397,61 +412,68 @@ validate::plot(check_validate_na, title = chart_title, labels = chart_label, fil
 ```{r rules_validate_others}
 
 rules_validate_others <- validate::validator(
-    VI_MA_AGRO        = in_range(MA_AGRO, min = 0, max = 100),
-    VI_MA_BOVINO      = MA_BOVINO >= 0,
-    VI_MA_CANA        = in_range(MA_CANA, min = 0, max = 100),
-    VI_MA_CFEM        = MA_CFEM >= 0,
-    VI_MA_COMITE      = MA_COMITE %in% c("Sim", "Não"),
-    VI_MA_CRH         = MA_CRH >= 0,
-    VI_MA_FLONATIVA   = in_range(MA_FLONATIVA, min = 0, max = 100),
-    VI_MA_FMMA        = MA_FMMA %in% c("Sim", "Não"),
-    VI_MA_FOCOS       = in_range(MA_FOCOS, min = 0, max = 100),
-    VI_MA_FROTA       = MA_FROTA >= 0,
-    VI_MA_ICMSECOLOG  = MA_ICMSECOLOG >= 0,
-    VI_MA_INFRA       = in_range(MA_INFRA, min = 0, max = 100),
-    VI_MA_LEGISL      = MA_LEGISL %in% c("Sim", "Não"),
-    VI_MA_OGESTOR     = MA_OGESTOR %in% org_gestor,
-    VI_MA_REFLO       = in_range(MA_REFLO, min = 0, max = 100)
+    VI_MA_AGRO       = in_range(MA_AGRO, min = 0, max = 100),
+    VI_MA_BOVINO     = MA_BOVINO >= 0,
+    VI_MA_CANA       = in_range(MA_CANA, min = 0, max = 100),
+    VI_MA_CFEM       = MA_CFEM >= 0,
+    VI_MA_COMITE     = MA_COMITE %in% c("Sim", "Não"),
+    VI_MA_CRH        = MA_CRH >= 0,
+    VI_MA_FLONATIVA  = in_range(MA_FLONATIVA, min = 0, max = 100),
+    VI_MA_FMMA       = MA_FMMA %in% c("Sim", "Não"),
+    VI_MA_FOCOS      = in_range(MA_FOCOS, min = 0, max = 100),
+    VI_MA_FROTA      = MA_FROTA >= 0,
+    VI_MA_ICMSECOLOG = MA_ICMSECOLOG >= 0,
+    VI_MA_INFRA      = in_range(MA_INFRA, min = 0, max = 100),
+    VI_MA_LEGISL     = MA_LEGISL %in% c("Sim", "Não"),
+    VI_MA_OGESTOR    = MA_OGESTOR %in% org_gestor,
+    VI_MA_REFLO      = in_range(MA_REFLO, min = 0, max = 100)
   )
 ```
 
 ```{r confront_validate_others}
-#| column: page
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
 check_validate_others <- validate::confront(data, rules_validate_others)
 
 validate::summary(check_validate_others) |> 
-  kableExtra::kbl() |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r chart_validate_others}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, check_validate_others), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
 validate::plot(check_validate_others, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 ### Consistência
 
-```{r rules_consistency_data_wrangling}
+#### MA_ICMSECOLOG
 
-## MA_CFEM
-data_aux_ma_cfem <- data |> 
-  difpercentual(MA_CFEM) |> 
-  dplyr::select(IBGE7, ANO, dif_prop) |> 
-  dplyr::right_join(data, by = dplyr::join_by(IBGE7, ANO)) |>  
-  dplyr::select(IBGE7, ANO, MA_CFEM, dif_prop)
+```{r rules_consist_data_wrangling_ma_icmsecolog}
 
-## MA_CRH
-data_aux_ma_crh <- data |> 
-  difpercentual(MA_CRH) |> 
-  dplyr::select(IBGE7, ANO, dif_prop) |> 
-  dplyr::right_join(data, by = dplyr::join_by(IBGE7, ANO)) |>  
-  dplyr::select(IBGE7, ANO, MA_CRH, dif_prop)
-
-## MA_ICMSECOLOG
 data_aux_ma_icmsecolog <- data |> 
   difpercentual(MA_ICMSECOLOG) |> 
   dplyr::select(IBGE7, ANO, dif_prop) |> 
@@ -459,648 +481,977 @@ data_aux_ma_icmsecolog <- data |>
   dplyr::select(IBGE7, ANO, MA_ICMSECOLOG, dif_prop)
 ```
 
-```{r rules_consistency}
+```{r rules_consist_ma_icmsecolog}
 
-## MA_FOCOS
-rules_consistency_ma_focos <- validate::validator(
-    CF_MA_FOCOS   = validate::sum_by(MA_FOCOS, by = ANO, na.rm = T) == 100, # Transversal (ano)
-    CF_MA_FOCOS_min   = validate::sum_by(MA_FOCOS, by = ANO, na.rm = T) >= 99, # Transversal (ano)
-    CF_MA_FOCOS_max   = validate::sum_by(MA_FOCOS, by = ANO, na.rm = T) <= 101, # Transversal (ano)
-    CF_MA_FOCOS_range = in_range(MA_FOCOS, min = 0, max = 100)
-)
-    
-## MA_CFEM
-rules_consistency_ma_cfem <- validate::validator(
-    CF_MA_CFEM = in_range(dif_prop, min = -0.05, max = 0.05)
-)
-
-## MA_CRH
-rules_consistency_ma_crh <- validate::validator(
-    CF_MA_CRH = in_range(dif_prop, min = -0.05, max = 0.05)
-)
-
-## MA_ICMSECOLOG
-rules_consistency_ma_icmsecolog <- validate::validator(
-   CF_MA_ICMSECOLOG = in_range(dif_prop, min = -0.05, max = 0.05)
+rules_consist_ma_icmsecolog <- validate::validator(
+  CF_MA_ICMSECOLOG_prop = in_range(dif_prop, min = -0.05, max = 0.05)
 )
 ```
 
-```{r confront_consistency}
+```{r show_consist_table_ma_icmsecolog}
 
-## Confrontar os dados com as regras
-
-## MA_FOCOS
-check_consistency_ma_focos <- validate::confront(data, rules_consistency_ma_focos)
-
-## MA_CFEM
-check_consistency_ma_cfem <- validate::confront(data_aux_ma_cfem, rules_consistency_ma_cfem)
-
-## MA_CRH
-check_consistency_ma_crh <- validate::confront(data_aux_ma_crh, rules_consistency_ma_crh)
-
-## MA_ICMSECOLOG
-check_consistency_ma_icmsecolog <- validate::confront(data_aux_ma_icmsecolog, rules_consistency_ma_icmsecolog)
-```
-
-#### MA_FOCOS
-
-```{r show_consistency_table_ma_focos}
-#| column: page
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_consist_ma_icmsecolog <- validate::confront(data_aux_ma_icmsecolog, rules_consist_ma_icmsecolog)
 
 ## Exibir uma tabela com os resultados
-validate::summary(check_consistency_ma_focos) |> 
-  kableExtra::kbl() |> 
+validate::summary(check_consist_ma_icmsecolog) |>
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r show_consistency_chart_ma_focos}
+```{r show_consist_chart_ma_icmsecolog}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
 
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_icmsecolog, rules_consist_ma_icmsecolog), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
 ## Gráfico com os resultados
-validate::plot(check_consistency_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_consist_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_CRH
+
+```{r rules_consist_data_wrangling_ma_crh}
+
+data_aux_ma_crh <- data |> 
+  difpercentual(MA_CRH) |> 
+  dplyr::select(IBGE7, ANO, dif_prop) |> 
+  dplyr::right_join(data, by = dplyr::join_by(IBGE7, ANO)) |>  
+  dplyr::select(IBGE7, ANO, MA_CRH, dif_prop)
+```
+
+```{r rules_consist_ma_crh}
+
+rules_consist_ma_crh <- validate::validator(
+  CF_MA_CRH_prop = in_range(dif_prop, min = -0.05, max = 0.05)
+)
+```
+
+```{r show_consist_table_ma_crh}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_consist_ma_crh <- validate::confront(data_aux_ma_crh, rules_consist_ma_crh)
+
+## Exibir uma tabela com os resultados
+validate::summary(check_consist_ma_crh) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r show_consist_chart_ma_crh}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_crh, rules_consist_ma_crh), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_consist_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_CFEM
 
-```{r show_consistency_table_ma_cfem}
-#| column: page
+```{r rules_consist_data_wrangling_ma_cfem}
+
+data_aux_ma_cfem <- data |> 
+  difpercentual(MA_CFEM) |> 
+  dplyr::select(IBGE7, ANO, dif_prop) |> 
+  dplyr::right_join(data, by = dplyr::join_by(IBGE7, ANO)) |>  
+  dplyr::select(IBGE7, ANO, MA_CFEM, dif_prop)
+```
+
+```{r rules_consist_ma_cfem}
+
+rules_consist_ma_cfem <- validate::validator(
+  CF_MA_CFEM_prop = in_range(dif_prop, min = -0.05, max = 0.05)
+)
+```
+
+```{r show_consist_table_ma_cfem}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_consist_ma_cfem <- validate::confront(data_aux_ma_cfem, rules_consist_ma_cfem)
 
 ## Exibir uma tabela com os resultados
-validate::summary(check_consistency_ma_cfem) |> 
-  kableExtra::kbl() |> 
+validate::summary(check_consist_ma_cfem) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ```{r show_consistency_chart_ma_cfem}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
 
-## Gráfico com os resultados
-validate::plot(check_consistency_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
+barplot_data <- dplyr::select(validate::violating(data_aux_ma_cfem, rules_consist_ma_cfem), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
 
-#### MA_CRH
-
-```{r show_consistency_table_ma_crh}
-#| column: page
-
-## Exibir uma tabela com os resultados
-validate::summary(check_consistency_ma_crh) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r show_consistency_chart_ma_crh}
-#| out-width: 100%
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
-validate::plot(check_consistency_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
+validate::plot(check_consist_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
 
-#### MA_ICMSECOLOG
-
-```{r show_consistency_table_ma_icmsecolog}
-#| column: page
-
-## Exibir uma tabela com os resultados
-validate::summary(check_consistency_ma_icmsecolog) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r show_consistency_chart_ma_icmsecolog}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_consistency_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-### Distribuição
-
-#### MA_AGRO
-
-```{r  rules_ma_agro}
-
-## Proporção
-rules_dist_prop_ma_agro <- validate::validator(
-  DF_MA_AGRO_out_year = validate::do_by(MA_AGRO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_AGRO_out_city = validate::do_by(MA_AGRO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_AGRO_out_datamaid_year = validate::do_by(MA_AGRO, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_AGRO_out_datamaid_city = validate::do_by(MA_AGRO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_AGRO_min_year = MA_AGRO >= (k2 * validate::do_by(MA_AGRO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_AGRO_min_city = MA_AGRO >= (k2 * validate::do_by(MA_AGRO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_AGRO_max_year = MA_AGRO <= (k2 * validate::do_by(MA_AGRO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_AGRO_max_city = MA_AGRO <= (k2 * validate::do_by(MA_AGRO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_AGRO_median_mov_sup = M_AGRO <= k2 + validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"), # Longitudinal (município)
-  
-  DF_M_AGRO_median_mov_inf = M_AGRO >= k2 - validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"), # Longitudinal (município)
-
-DF_MA_AGRO_dif        = validate::do_by(MA_AGRO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-
-)
-```
-
-```{r confront_ma_agro}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_agro <- validate::confront(data, rules_dist_prop_ma_agro)
-
-validate::summary(check_ma_agro) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_agro}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ma_agro, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_BOVINO
-
-```{r rules_ma_bovino}
-
-## Razão
-rules_dist_ratio_ma_bovino <- validate::validator(
-  DF_MA_BOVINO_out_year = validate::do_by(MA_BOVINO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_BOVINO_out_city = validate::do_by(MA_BOVINO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_BOVINO_out_datamaid_year = validate::do_by(MA_BOVINO, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_BOVINO_out_datamaid_city = validate::do_by(MA_BOVINO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_BOVINO_min_year = MA_BOVINO >= (k1 * validate::do_by(MA_BOVINO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_BOVINO_min_city = MA_BOVINO >= (k1 * validate::do_by(MA_BOVINO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_BOVINO_max_year = MA_BOVINO <= (k1 * validate::do_by(MA_BOVINO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_BOVINO_max_city = MA_BOVINO <= (k1 * validate::do_by(MA_BOVINO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_BOVINO_median_mov_sup = M_BOVINO <= k1 + validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"), # Transversal (ano)
-  
-  DF_M_BOVINO_median_mov_inf = M_BOVINO >= k1 - validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"),
-
-DF_MA_BOVINO_dif        = validate::do_by(MA_BOVINO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-    
-)
-```
-
-```{r confront_ma_bovino}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_bovino <- validate::confront(data, rules_dist_ratio_ma_bovino)
-
-validate::summary(check_ma_bovino) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_bovino}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ma_bovino, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_CANA
-
-```{r rules_ma_cana}
-
-## Proporção
-rules_dist_prop_ma_cana <- validate::validator(
-  DF_MA_CANA_out_year = validate::do_by(MA_CANA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_CANA_out_city = validate::do_by(MA_CANA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_CANA_out_datamaid_year = validate::do_by(MA_CANA, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_CANA_out_datamaid_city = validate::do_by(MA_CANA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_CANA_min_year = MA_CANA >= (k2 * validate::do_by(MA_CANA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_CANA_min_city = MA_CANA >= (k2 * validate::do_by(MA_CANA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_CANA_max_year = MA_CANA <= (k2 * validate::do_by(MA_CANA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_CANA_max_city = MA_CANA <= (k2 * validate::do_by(MA_CANA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_CANA_median_mov_sup = M_CANA <= (k2 + validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano) 
-
-  DF_M_CANA_median_mov_inf = M_CANA >= (k2 - validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-    
-DF_MA_CANA_dif        = validate::do_by(MA_CANA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-)
-```
-
-```{r confront_ma_cana}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_cana <- validate::confront(data, rules_dist_prop_ma_cana)
-
-validate::summary(check_ma_cana) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_cana}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ma_cana, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_CFEM
-
-```{r rules_ma_cefem}
-
-## Outlier
-rules_dist_out_ma_cfem <- validate::validator(
-  DF_MA_CFEM_out_year = validate::do_by(MA_CFEM, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_CFEM_out_city = validate::do_by(MA_CFEM, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_CFEM_out_datamaid_year = validate::do_by(MA_CFEM, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_CFEM_out_datamaid_city = validate::do_by(MA_CFEM, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-
-  DF_MA_CFEM_dif        = validate::do_by(MA_CFEM, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-
-)
-```
-
-```{r confront_ma_cfem}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_out_ma_cfem <- validate::confront(data, rules_dist_out_ma_cfem)
-
-validate::summary(check_out_ma_cfem) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_cfem}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_out_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_CRH
-
-```{r rules_ma_crh}
-
-## Outlier
-rules_dist_out_ma_crh <- validate::validator(
-  DF_MA_CRH_out_year = validate::do_by(MA_CRH, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_CRH_out_city = validate::do_by(MA_CRH, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_CRH_out_datamaid_year = validate::do_by(MA_CRH, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_CRH_out_datamaid_city = validate::do_by(MA_CRH, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-
-  DF_MA_CRH_dif        = validate::do_by(MA_CRH, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-  
-)
-```
-
-```{r confront_ma_crh}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_crh <- validate::confront(data, rules_dist_out_ma_crh)
-
-validate::summary(check_ma_crh) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_crh}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_FLONATIVA
-
-```{r rules_ma_flonativa}
-
-## Proporção
-rules_dist_prop_ma_flonativa <- validate::validator(
-  DF_MA_FLONATIVA_out_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_FLONATIVA_out_city = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_FLONATIVA_out_datamaid_year = validate::do_by(MA_FLONATIVA, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_FLONATIVA_out_datamaid_city = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_FLONATIVA_min_year = MA_FLONATIVA >= (k2 * validate::do_by(MA_FLONATIVA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_FLONATIVA_min_city = MA_FLONATIVA >= (k2 * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_FLONATIVA_max_year = MA_FLONATIVA <= (k2 * validate::do_by(MA_FLONATIVA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_FLONATIVA_max_city = MA_FLONATIVA <= (k2 * validate::do_by(MA_FLONATIVA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_FLONATIVA_median_mov_sup = M_FLONATIVA <= (k2 +validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-  
-  DF_M_FLONATIVA_median_mov_inf = M_FLONATIVA >= (k2-validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-
-DF_MA_FLONATIVA_dif        = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-
-)
-```
-
-```{r confront_ma_flonativa}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_flonativa <- validate::confront(data, rules_dist_prop_ma_flonativa)
-
-validate::summary(check_ma_flonativa) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_flonativa}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ma_flonativa, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+rm(barplot_data)
 ```
 
 #### MA_FOCOS
 
-```{r rules_ma_focos}
+```{r rules_consist_ma_focos}
 
-## Proporção
-rules_dist_prop_ma_focos <- validate::validator(
-  DF_MA_FOCOS_out_year = validate::do_by(MA_FOCOS, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_FOCOS_out_city = validate::do_by(MA_FOCOS, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_FOCOS_out_datamaid_year = validate::do_by(MA_FOCOS, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_FOCOS_out_datamaid_city = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_FOCOS_min_year = MA_FOCOS >= (k2 * validate::do_by(MA_FOCOS, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_FOCOS_min_city = MA_FOCOS >= (k2 * validate::do_by(MA_FOCOS, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_FOCOS_max_year = MA_FOCOS <= (k2 * validate::do_by(MA_FOCOS, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_FOCOS_max_city = MA_FOCOS <= (k2 * validate::do_by(MA_FOCOS, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_FOCOS_median_mov_sup = M_FOCOS <= (k2 + validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-  
-  DF_M_FOCOS_median_mov_inf = M_FOCOS >= (k2 - validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-
- DF_MA_FOCOS_dif        = validate::do_by(MA_FOCOS, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+rules_consist_ma_focos <- validate::validator(
+  CF_MA_FOCOS_total = in_range(validate::sum_by(MA_FOCOS, by = ANO, na.rm = T), min = 99.5, max = 100.9)
 )
 ```
 
-```{r confront_ma_focos}
-#| column: page
+```{r show_consist_table_ma_focos}
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_focos <- validate::confront(data, rules_dist_prop_ma_focos)
+check_consist_ma_focos <- validate::confront(data, rules_consist_ma_focos)
 
-validate::summary(check_ma_focos) |> 
-  kableExtra::kbl() |> 
+## Exibir uma tabela com os resultados
+validate::summary(check_consist_ma_focos) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_ma_focos}
+```{r show_consist_chart_ma_focos}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
 
+barplot_data <- dplyr::select(validate::violating(data, rules_consist_ma_focos), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
 ## Gráfico com os resultados
-validate::plot(check_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_consist_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+### Distribuição
+
+#### MA_ICMSECOLOG
+
+```{r rules_dist_ma_icmsecolog}
+
+## Total
+rules_dist_ma_icmsecolog <- validate::validator(
+  DF_MA_ICMSECOLOG_hampel_munic  = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_ICMSECOLOG_out_munic     = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+
+#  DF_MA_ICMSECOLOG_min_munic     = MA_ICMSECOLOG >= (validate::min_by(dplyr::lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+#  DF_MA_ICMSECOLOG_max_munic     = MA_ICMSECOLOG <= (k2 * validate::max_by(dplyr::lag(MA_ICMSECOLOG), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  
+  DF_MA_ICMSECOLOG_dif_munic     = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_icmsecolog}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_icmsecolog <- validate::confront(data, rules_dist_ma_icmsecolog) 
+
+validate::summary(check_dist_ma_icmsecolog) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_icmsecolog}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_icmsecolog), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_CRH
+
+```{r rules_dist_ma_crh}
+
+## Outlier
+rules_dist_ma_crh <- validate::validator(
+  DF_MA_CRH_hampel_munic  = validate::do_by(MA_CRH, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_CRH_out_munic     = validate::do_by(MA_CRH, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+#  DF_MA_CRH_min_munic     = MA_CRH >= (validate::min_by(dplyr::lag(MA_CRH), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+
+#  DF_MA_CRH_max_munic     = MA_CRH <= (k2 * validate::max_by(dplyr::lag(MA_CRH), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_CRH_dif_munic     = validate::do_by(MA_CRH, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_crh}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_crh <- validate::confront(data, rules_dist_ma_crh)
+
+validate::summary(check_dist_ma_crh) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_crh}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_crh), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_crh, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_CFEM
+
+```{r rules_dist_ma_cefem}
+
+## Outlier
+rules_dist_ma_cfem <- validate::validator(
+  DF_MA_CFEM_hampel_munic  = validate::do_by(MA_CFEM, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_CFEM_out_munic     = validate::do_by(MA_CFEM, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  #DF_MA_CFEM_min_munic     = MA_CFEM >= (validate::min_by(dplyr::lag(MA_CFEM), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  #DF_MA_CFEM_max_munic     = MA_CFEM <= (k2 * validate::max_by(dplyr::lag(MA_CFEM), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_CFEM_dif_munic     = validate::do_by(MA_CFEM, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_cfem}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_cfem <- validate::confront(data, rules_dist_ma_cfem)
+
+validate::summary(check_dist_ma_cfem) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_cfem}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_cfem), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_cfem, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_FOCOS
+
+```{r rules_dist_ma_focos}
+
+## Proporção
+rules_dist_ma_focos <- validate::validator(
+  DF_MA_FOCOS_hampel_munic  = validate::do_by(MA_FOCOS, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_FOCOS_out_munic     = validate::do_by(MA_FOCOS, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  DF_MA_FOCOS_min_munic     = MA_FOCOS >= (validate::min_by(dplyr::lag(MA_FOCOS), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  DF_MA_FOCOS_max_munic     = MA_FOCOS <= (k2 * validate::max_by(dplyr::lag(MA_FOCOS), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_FOCOS_med_mov_inf = MA_FOCOS <= (k2 - validate::do_by(MA_FOCOS, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+   DF_MA_FOCOS_med_mov_sup = MA_FOCOS <= (k2 + validate::do_by(MA_FOCOS, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+
+  DF_MA_FOCOS_dif_munic     = validate::do_by(MA_FOCOS, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_focos}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_focos <- validate::confront(data, rules_dist_ma_focos)
+
+validate::summary(check_dist_ma_focos) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_focos}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_focos), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_focos, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_CANA
+
+```{r rules_dist_ma_cana}
+
+## Proporção
+rules_dist_ma_cana <- validate::validator(
+  DF_MA_CANA_hampel_munic  = validate::do_by(MA_CANA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_CANA_out_munic     = validate::do_by(MA_CANA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  DF_MA_CANA_min_munic     = MA_CANA >= (validate::min_by(dplyr::lag(MA_CANA), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  DF_MA_CANA_max_munic     = MA_CANA <= (k2 * validate::max_by(dplyr::lag(MA_CANA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_CANA_med_mov_inf = MA_CANA <= (k2 - validate::do_by(MA_CANA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+   DF_MA_CANA_med_mov_sup = MA_CANA <= (k2 + validate::do_by(MA_CANA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_CANA_dif_munic     = validate::do_by(MA_CANA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_cana}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_cana <- validate::confront(data, rules_dist_ma_cana)
+
+validate::summary(check_dist_ma_cana) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_cana}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_cana), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_cana, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_FROTA
 
-```{r rules_ma_frota}
+```{r rules_dist_ma_frota}
 
 ## Razão
-rules_dist_ratio_ma_frota <- validate::validator(
-  DF_MA_FROTA_out_year = validate::do_by(MA_FROTA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+rules_dist_ma_frota <- validate::validator(
+  DF_MA_FROTA_hampel_munic  = validate::do_by(MA_FROTA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_out_city = validate::do_by(MA_FROTA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_FROTA_out_munic     = validate::do_by(MA_FROTA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_out_datamaid_year = validate::do_by(MA_FROTA, by = ANO, fun = outlier_function) == F, # Transversal (ano)
+  DF_MA_FROTA_min_munic     = MA_FROTA >= (validate::min_by(dplyr::lag(MA_FROTA), by = IBGE7, na.rm = T) / k1), # Longitudinal (município)
   
-  DF_MA_FROTA_out_datamaid_city = validate::do_by(MA_FROTA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  DF_MA_FROTA_max_munic     = MA_FROTA <= (k1 * validate::max_by(dplyr::lag(MA_FROTA), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_FROTA_min_year = MA_FROTA >= (k1 * validate::do_by(MA_FROTA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
+  DF_MA_FROTA_med_mov_inf = MA_FROTA <= (k1 - validate::do_by(MA_FROTA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
-  DF_MA_FROTA_min_city = MA_FROTA >= (k1 * validate::do_by(MA_FROTA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+    DF_MA_FROTA_med_mov_sup = MA_FROTA <= (k1 + validate::do_by(MA_FROTA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
-  DF_MA_FROTA_max_year = MA_FROTA <= (k1 * validate::do_by(MA_FROTA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
+  DF_MA_FROTA_dif_munic     = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_first_dif) == F, # Longitudinal (município)
   
-  DF_MA_FROTA_max_city = MA_FROTA <= (k1 * validate::do_by(MA_FROTA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_FROTA_median_mov_sup = M_FROTA <= (k1 + validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-  
-  DF_M_FROTA_median_mov_inf = M_FROTA >= (k1 - validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-
-DF_MA_FROTA_dif        = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-)
-
-## Comparação
-rules_dist_compare_ma_frota <- validate::validator(
-  DF_MA_FROTA_compare = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_lag) == T # Longitudinal (município)
+  DF_MA_FROTA_compare       = validate::do_by(MA_FROTA, by = IBGE7, fun = compare_lag) == T # Longitudinal (município) [comparação]
 )
 ```
 
-```{r confront_ma_frota}
+```{r confront_dist_ma_frota}
 
-## Confrontar os dados com as regras
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_frota <- validate::confront(data, rules_dist_ma_frota)
+
+## Exibir uma tabela com os resultados
+validate::summary(check_dist_ma_frota) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_frota}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_frota), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_frota, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_BOVINO
+
+```{r rules_dist_ma_bovino}
 
 ## Razão
-check_ratio_ma_frota <- validate::confront(data, rules_dist_ratio_ma_frota)
-
-## Comparação
-check_compare_ma_frota <- validate::confront(data, rules_dist_compare_ma_frota)
-```
-
-```{r show_consistency_table_ratio_ma_frota}
-#| column: page
-
-## Exibir uma tabela com os resultados
-validate::summary(check_ratio_ma_frota) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r show_consistency_chart_ratio_ma_frota}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_ratio_ma_frota, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-```{r show_consistency_table_compare_ma_frota}
-#| column: page
-
-## Exibir uma tabela com os resultados
-validate::summary(check_compare_ma_frota) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r show_consistency_chart_compare_ma_frota}
-#| out-width: 100%
-
-## Gráfico com os resultados
-validate::plot(check_compare_ma_frota, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
-
-#### MA_ICMSECOLOG
-
-```{r rules_ma_icmsecolog}
-
-## Total
-rules_dist_total_ma_icmsecolog <- validate::validator(
-  DF_MA_ICMSECOLOG_out_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+rules_dist_ma_bovino <- validate::validator(
+  DF_MA_BOVINO_hampel_munic  = validate::do_by(MA_BOVINO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_out_city = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_BOVINO_out_munic     = validate::do_by(MA_BOVINO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_out_datamaid_year = validate::do_by(MA_ICMSECOLOG, by = ANO, fun = outlier_function) == F, # Transversal (ano)
+  DF_MA_BOVINO_min_munic     = MA_BOVINO >= (validate::min_by(dplyr::lag(MA_BOVINO), by = IBGE7, na.rm = T) / k1), # Longitudinal (município)
   
-  DF_MA_ICMSECOLOG_out_datamaid_city = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-
-  DF_MA_ICMSECOLOG_dif        = validate::do_by(MA_ICMSECOLOG, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+  DF_MA_BOVINO_max_munic     = MA_BOVINO <= (k1 * validate::max_by(dplyr::lag(MA_BOVINO), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_BOVINO_med_mov_inf = MA_BOVINO <= (k1 - validate::do_by(MA_BOVINO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+    DF_MA_BOVINO_med_mov_sup = MA_BOVINO <= (k1 + validate::do_by(MA_BOVINO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_BOVINO_dif_munic     = validate::do_by(MA_BOVINO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
-```{r confront_ma_icmsecolog}
-#| column: page
+```{r confront_dist_ma_bovino}
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_icmsecolog <- validate::confront(data, rules_dist_total_ma_icmsecolog) 
+check_dist_ma_bovino <- validate::confront(data, rules_dist_ma_bovino)
 
-validate::summary(check_ma_icmsecolog) |> 
-  kableExtra::kbl() |> 
+validate::summary(check_dist_ma_bovino) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_ma_icmsecolog}
+```{r chart_dist_ma_bovino}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
 
-## Gráfico com os resultados
-validate::plot(check_ma_icmsecolog, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
-```
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_bovino), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
 
-#### MA_INFRA
-
-```{r rules_ma_infra}
-
-## Proporção
-rules_dist_prop_ma_infra <- validate::validator(
-  DF_MA_INFRA_out_year = validate::do_by(MA_INFRA, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
-  
-  DF_MA_INFRA_out_city = validate::do_by(MA_INFRA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
-  
-  DF_MA_INFRA_out_datamaid_year = validate::do_by(MA_INFRA, by = ANO, fun = outlier_function) == F, # Transversal (ano)
-  
-  DF_MA_INFRA_out_datamaid_city = validate::do_by(MA_INFRA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
-  
-  DF_MA_INFRA_min_year = MA_INFRA >= (k2 * validate::do_by(MA_INFRA, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_INFRA_min_city = MA_INFRA >= (k2 * validate::do_by(MA_INFRA, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
-  
-  DF_MA_INFRA_max_year = MA_INFRA <= (k2 * validate::do_by(MA_INFRA, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_INFRA_max_city = MA_INFRA <= (k2 * validate::do_by(MA_INFRA, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_INFRA_median_mov_sup = M_INFRA <= (k2 + validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-    
-  DF_M_INFRA_median_mov_inf = M_INFRA >= (k2 - validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-
-DF_MA_INFRA_dif        = validate::do_by(MA_INFRA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-
-)
-```
-
-```{r confront_ma_infra}
-#| column: page
-
-## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_infra <- validate::confront(data, rules_dist_prop_ma_infra)
-
-validate::summary(check_ma_infra) |> 
-  kableExtra::kbl() |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_ma_infra}
-#| out-width: 100%
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
 
 ## Gráfico com os resultados
-validate::plot(check_ma_infra, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_dist_ma_bovino, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
 ```
 
 #### MA_REFLO
 
-```{r rules_ma_reflo}
+```{r rules_dist_ma_reflo}
 
 ## Proporção
-rules_dist_prop_ma_reflo <- validate::validator(
-  DF_MA_REFLO_out_year = validate::do_by(MA_REFLO, by = ANO, fun = hampel_filter) == F, # Transversal (ano)
+rules_dist_ma_reflo <- validate::validator(
+  DF_MA_REFLO_hampel_munic  = validate::do_by(MA_REFLO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
   
-  DF_MA_REFLO_out_city = validate::do_by(MA_REFLO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  DF_MA_REFLO_out_munic     = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
   
-  DF_MA_REFLO_out_datamaid_year = validate::do_by(MA_REFLO, by = ANO, fun = outlier_function) == F, # Transversal (ano)
+  DF_MA_REFLO_min_munic     = MA_REFLO >= (validate::min_by(dplyr::lag(MA_REFLO), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
   
-  DF_MA_REFLO_out_datamaid_city = validate::do_by(MA_REFLO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  DF_MA_REFLO_max_munic     = MA_REFLO <= (k2 * validate::max_by(dplyr::lag(MA_REFLO), by = IBGE7, na.rm = T)), # Longitudinal (município)
   
-  DF_MA_REFLO_min_year = MA_REFLO >= (k2 * validate::do_by(MA_REFLO, by = ANO, fun = min, na.rm = T)), # Transversal (ano)
+  DF_MA_REFLO_med_mov_inf = MA_REFLO <= (k2 - validate::do_by(MA_REFLO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
-  DF_MA_REFLO_min_city = MA_REFLO >= (k2 * validate::do_by(MA_REFLO, by = IBGE7, fun = min, na.rm = T)), # Longitudinal (município)
+    DF_MA_REFLO_med_mov_sup = MA_REFLO <= (k2 + validate::do_by(MA_REFLO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
   
-  DF_MA_REFLO_max_year = MA_REFLO <= (k2 * validate::do_by(MA_REFLO, by = ANO, fun = max, na.rm = T)), # Transversal (ano)
-  
-  DF_MA_REFLO_max_city = MA_REFLO <= (k2 * validate::do_by(MA_REFLO, by = IBGE7, fun = max, na.rm = T)), # Longitudinal (município)
-  
-  DF_M_REFLO_median_mov_sup = M_REFLO <= (k2 + validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Transversal (ano)
-  
-  DF_M_REFLO_median_mov_inf = M_REFLO >= (k2 - validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-
-DF_MA_REFLO_dif        = validate::do_by(MA_REFLO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
-
+  DF_MA_REFLO_dif_munic     = validate::do_by(MA_REFLO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
 )
 ```
 
-```{r confront_ma_reflo}
-#| column: page
+```{r confront_dist_ma_reflo}
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_ma_reflo <- validate::confront(data, rules_dist_prop_ma_reflo)
+check_dist_ma_reflo <- validate::confront(data, rules_dist_ma_reflo)
 
-validate::summary(check_ma_reflo) |> 
-  kableExtra::kbl() |> 
+validate::summary(check_dist_ma_reflo) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_ma_reflo}
+```{r chart_dist_ma_reflo}
+#| column: screen-inset-right
+#| layout-ncol: 2
 #| out-width: 100%
 
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_reflo), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
 ## Gráfico com os resultados
-validate::plot(check_ma_reflo, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+validate::plot(check_dist_ma_reflo, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_FLONATIVA
+
+```{r rules_dist_ma_flonativa}
+
+## Proporção
+rules_dist_ma_flonativa <- validate::validator(
+  DF_MA_FLONATIVA_hampel_munic  = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_FLONATIVA_out_munic     = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  DF_MA_FLONATIVA_min_munic     = MA_FLONATIVA >= (validate::min_by(dplyr::lag(MA_FLONATIVA), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  DF_MA_FLONATIVA_max_munic     = MA_FLONATIVA <= (k2 * validate::max_by(dplyr::lag(MA_FLONATIVA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+   
+  DF_MA_FLONATIVA_med_mov_inf = MA_FLONATIVA <= (k2 - validate::do_by(MA_FLONATIVA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+    DF_MA_FLONATIVA_med_mov_sup = MA_FLONATIVA <= (k2 + validate::do_by(MA_FLONATIVA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_FLONATIVA_dif_munic     = validate::do_by(MA_FLONATIVA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_flonativa}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_flonativa <- validate::confront(data, rules_dist_ma_flonativa)
+
+validate::summary(check_dist_ma_flonativa) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_flonativa}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_flonativa), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_flonativa, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_INFRA
+
+```{r rules_dist_ma_infra}
+
+## Proporção
+rules_dist_ma_infra <- validate::validator(
+  DF_MA_INFRA_hampel_munic  = validate::do_by(MA_INFRA, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_INFRA_out_munic     = validate::do_by(MA_INFRA, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  DF_MA_INFRA_min_munic     = MA_INFRA >= (validate::min_by(dplyr::lag(MA_INFRA), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  DF_MA_INFRA_max_munic     = MA_INFRA <= (k2 * validate::max_by(dplyr::lag(MA_INFRA), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_INFRA_med_mov_inf = MA_INFRA <= (k2 - validate::do_by(MA_INFRA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+    DF_MA_INFRA_med_mov_sup= MA_INFRA <= (k2 + validate::do_by(MA_INFRA, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_INFRA_dif_munic     = validate::do_by(MA_INFRA, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_infra}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_infra <- validate::confront(data, rules_dist_ma_infra)
+
+validate::summary(check_dist_ma_infra) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_infra}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_infra), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_infra, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+#### MA_AGRO
+
+```{r rules_dist_ma_agro}
+
+## Proporção
+rules_dist_ma_agro <- validate::validator(
+  DF_MA_AGRO_hampel_munic  = validate::do_by(MA_AGRO, by = IBGE7, fun = hampel_filter) == F, # Longitudinal (município)
+  
+  DF_MA_AGRO_out_munic     = validate::do_by(MA_AGRO, by = IBGE7, fun = outlier_function) == F, # Longitudinal (município)
+  
+  DF_MA_AGRO_min_munic     = MA_AGRO >= (validate::min_by(dplyr::lag(MA_AGRO), by = IBGE7, na.rm = T) / k2), # Longitudinal (município)
+  
+  DF_MA_AGRO_max_munic     = MA_AGRO <= (k2 * validate::max_by(dplyr::lag(MA_AGRO), by = IBGE7, na.rm = T)), # Longitudinal (município)
+  
+  DF_MA_AGRO_med_mov_inf   = MA_AGRO <= (k2 - validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+    DF_MA_AGRO_med_mov_sup = MA_AGRO <= (k2 + validate::do_by(MA_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")), # Longitudinal (município)
+  
+  DF_MA_AGRO_dif_munic     = validate::do_by(MA_AGRO, by = IBGE7, fun = compare_first_dif) == F # Longitudinal (município)
+)
+```
+
+```{r confront_dist_ma_agro}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_dist_ma_agro <- validate::confront(data, rules_dist_ma_agro)
+
+validate::summary(check_dist_ma_agro) |> 
+  dplyr::select(
+    Regra    = name,
+    Total    = items,
+    Validado = passes,
+    Suspeito = fails,
+    Ausentes  = nNA
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_agro}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+barplot_data <- dplyr::select(validate::violating(data, rules_dist_ma_agro), ANO) |> 
+  dplyr::group_by(ANO) |>
+  dplyr::summarise(
+    n = dplyr::n()
+  )
+
+## Gráfico barra obs. suspeitas por ano
+if(dplyr::n_distinct(barplot_data$ANO) >= 1)
+  chart_bar(barplot_data$ANO, barplot_data$n)
+
+## Gráfico com os resultados
+validate::plot(check_dist_ma_agro, title = chart_title, labels = chart_label, fill = chart_palette, xlab = chart_xlab)
+
+rm(barplot_data)
+```
+
+# Análise descritiva
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var,data = data), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+}
+
+```
+
+```{r show_qtl_table, results='asis'}
+
+pander::pandoc.header("Quantil", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_quantile(variable = var, data = data), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2, 
+    split.table  = Inf
+  )
+}
+
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(variable = var, data = data))
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data))
+}
+
+```
+
+```{r eval=FALSE, df_viol_build}
+
+# Criar base com as observações que violaram uma ou mais regras
+
+## Consistência
+data_viol_consist_export <- dplyr::select(validate::violating(data, rules_consist_ma_focos), ANO, IBGE7, MA_FOCOS) |> 
+  dplyr::arrange(ANO, IBGE7)
+
+## Distribuição
+data_viol_dist_export <- dplyr::select(validate::violating(data, rules_dist_ma_icmsecolog), ANO, IBGE7, MA_ICMSECOLOG) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_crh), ANO, IBGE7, MA_CRH), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_cfem), ANO, IBGE7, MA_CFEM), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_focos), ANO, IBGE7, MA_FOCOS), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_cana), ANO, IBGE7, MA_CANA), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_frota), ANO, IBGE7,MA_FROTA), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_bovino), ANO, IBGE7, MA_BOVINO), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_reflo), ANO, IBGE7, MA_REFLO), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_flonativa), ANO, IBGE7, MA_FLONATIVA), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_infra), ANO, IBGE7, MA_INFRA), by = dplyr::join_by(ANO, IBGE7)) |> 
+dplyr::full_join(dplyr::select(validate::violating(data, rules_dist_ma_agro), ANO, IBGE7, MA_AGRO), by = dplyr::join_by(ANO, IBGE7)) |> 
+  dplyr::arrange(ANO, IBGE7)
+```
+
+```{r eval=FALSE, df_viol_export}
+
+# Exportar base com as observações que violaram uma ou mais regras
+pt <- openxlsx::createWorkbook()
+
+openxlsx::addWorksheet(pt, "Regra consistência")
+openxlsx::addWorksheet(pt, "Regra distribuição")
+
+openxlsx::writeData(pt, "Regra consistência", data_viol_consist_export)
+openxlsx::writeData(pt, "Regra distribuição", data_viol_dist_export)
+
+openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T)
 ```
