@@ -52,7 +52,7 @@ lockBinding("k", globalenv())
 
 ## Parâmetros para os gráficos do validate::
 chart_title <- "Resultado das validações por regra estabelecida"
-chart_label <- c("Erros", "Sucessos", "Ausentes", "Total")
+chart_label <- c("Erros", "Sucessos", "Missing", "Total")
 chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
 chart_xlab <- ""
 ```
