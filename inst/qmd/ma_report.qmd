@@ -1167,7 +1167,7 @@ df_rules_valid_ma_icmsecolog <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_ICMSECOLOG")
+    dplyr::ends_with("MA_ICMSECOLOG")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1182,7 +1182,7 @@ df_rules_valid_ma_crh <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_CRH")
+    dplyr::ends_with("MA_CRH")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1197,7 +1197,7 @@ df_rules_valid_ma_cfem <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_CFEM")
+    dplyr::ends_with("MA_CFEM")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1212,7 +1212,7 @@ df_rules_valid_ma_ogestor <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_OGESTOR")
+    dplyr::ends_with("MA_OGESTOR")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1227,7 +1227,7 @@ df_rules_valid_ma_fmma <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FMMA")
+    dplyr::ends_with("MA_FMMA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1242,7 +1242,7 @@ df_rules_valid_ma_legisl <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_LEGISL")
+    dplyr::ends_with("MA_LEGISL")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1257,7 +1257,7 @@ df_rules_valid_ma_comite <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_COMITE")
+    dplyr::ends_with("MA_COMITE")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1272,7 +1272,7 @@ df_rules_valid_ma_focos <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FOCOS")
+    dplyr::ends_with("MA_FOCOS")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1287,7 +1287,7 @@ df_rules_valid_ma_cana <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_CANA")
+    dplyr::ends_with("MA_CANA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1302,7 +1302,7 @@ df_rules_valid_ma_frota <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FROTA")
+    dplyr::ends_with("MA_FROTA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1317,7 +1317,7 @@ df_rules_valid_ma_bovino <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_BOVINO")
+    dplyr::ends_with("MA_BOVINO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1332,7 +1332,7 @@ df_rules_valid_ma_reflo <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_REFLO")
+    dplyr::ends_with("MA_REFLO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1347,7 +1347,7 @@ df_rules_valid_ma_flonativa <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FLONATIVA")
+    dplyr::ends_with("MA_FLONATIVA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1362,7 +1362,7 @@ df_rules_valid_ma_infra <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_INFRA")
+    dplyr::ends_with("MA_INFRA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
@@ -1377,7 +1377,7 @@ df_rules_valid_ma_agro <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_AGRO")
+    dplyr::ends_with("MA_AGRO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
