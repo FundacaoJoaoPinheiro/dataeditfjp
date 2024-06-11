@@ -172,7 +172,7 @@ chart_vbar <- function(df){
       Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
       Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
     ) |>
-    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")) |>
     tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
     ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
     ggplot2::geom_bar(position = "stack", stat = "identity") +
@@ -200,7 +200,7 @@ chart_heatmap <- function(df){
     df |>
     dplyr::mutate(
       Ano   = as.character(Ano),
-      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
     ) |>
     ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
     ggplot2::geom_tile() +

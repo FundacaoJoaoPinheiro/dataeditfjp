@@ -7,15 +7,16 @@
 #' @return Report
 #' @export
 
-## To-do: criar uma função para mover o relátorio "relatorio.html" do diretório
+## To-do: criar uma função para mover o relatório "relatorio.html" do diretório
 ## \inst\qmd para a raíz do projeto, dado que quarto::quarto_render() não oferece
 ## esta opção
 create_report <- function(){
   # Mapeamento dos relatórios
   path_list <- c(
-    "MA" = here::here("inst", "qmd", "ma_report.qmd"),
+    "EA" = here::here("inst", "qmd", "ea_report.qmd"),
     "EE" = here::here("inst", "qmd", "ee_report.qmd"),
-    "EA" = here::here("inst", "qmd", "ea_report.qmd")
+    "MA" = here::here("inst", "qmd", "ma_report.qmd"),
+    "SP" = here::here("inst", "qmd", "sp_report.qmd")
   )
   # path_list <- c(
   #   "MA" = system.file("inst", "qmd", "ma_report.qmd", package = "criticaldatafjp"),
