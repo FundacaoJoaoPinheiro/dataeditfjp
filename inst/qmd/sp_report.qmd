@@ -115,7 +115,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, met
 
 ```{r get_cat}
 
-## Categorias varíaveis dicotômicas
+## Categorias variáveis dicotômicas
 cat_dic <- c(
   "Sim",
   "Não"
@@ -282,6 +282,120 @@ cat_natpm <- c(
 )
 ```
 
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_SP_CV",               
+    "VI_SP_CVPA",             
+    "VI_SP_CVPE",            
+    "VI_SP_MPO",              
+    "VI_SP_HOMTX",            
+    "VI_SP_HOMI",             
+    "VI_SP_TENHOM",           
+    "VI_SP_LATROCINIO",       
+    "VI_SP_ROUBO",            
+    "VI_SP_TRAFICO",          
+    "VI_SP_POSSE",            
+    "VI_SP_ARMA",             
+    "VI_SP_ESTUPRO",          
+    "VI_SP_SUICIDIOSSIM",     
+    "VI_SP_MORTESTRANSIM",    
+    "VI_SP_HOMISIM",          
+    "VI_SP_HOMITXSIM",        
+    "VI_SP_HOMMENOR15SIM",    
+    "VI_SP_HOM15A24SIM",      
+    "VI_SP_HOM25A29SIM",      
+    "VI_SP_HOMMAIOR30SIM",    
+    "VI_SP_HOMBRANCASIM",     
+    "VI_SP_HOMPRETASIM",      
+    "VI_SP_HOMPARDASIM",      
+    "VI_SP_HOMOUTROSSIM",     
+    "VI_SP_HOMHOMEMSIM",      
+    "VI_SP_HOMMULHERSIM",    
+    "VI_SP_PM",               
+    "VF_SP_PM1",              
+    "VF_SP_PC1",              
+    "VI_SP_PMPC",             
+    "VI_SP_JUI2",             
+    "VI_SP_PRO2",             
+    "VI_SP_DEFP2",            
+    "VI_SP_NATPM",            
+    "VI_SP_DELEGACIA",        
+    "VI_SP_INF",              
+    "VI_SP_PEN",              
+    "VI_SP_PRESOSPC",         
+    "VI_SP_OCUPPC",           
+    "VI_SP_PRESOSSUAPI",      
+    "VI_SP_OCUPSUAPI",        
+    "VI_SP_COMARCA"          
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_SP_CV"            ~ desc_regra_valid[5],
+      "VI_SP_CVPA"          ~ desc_regra_valid[5],
+      "VI_SP_CVPE"          ~ desc_regra_valid[5],
+      "VI_SP_MPO"           ~ desc_regra_valid[5],
+      "VI_SP_HOMTX"         ~ desc_regra_valid[5],
+      "VI_SP_HOMI"          ~ desc_regra_valid[1],
+      "VI_SP_TENHOM"        ~ desc_regra_valid[1],
+      "VI_SP_LATROCINIO"    ~ desc_regra_valid[1],
+      "VI_SP_ROUBO"         ~ desc_regra_valid[1],
+      "VI_SP_TRAFICO"       ~ desc_regra_valid[1],
+      "VI_SP_POSSE"         ~ desc_regra_valid[1],
+      "VI_SP_ARMA"          ~ desc_regra_valid[1],
+      "VI_SP_ESTUPRO"       ~ desc_regra_valid[1],
+      "VI_SP_SUICIDIOSSIM"  ~ desc_regra_valid[1],
+      "VI_SP_MORTESTRANSIM" ~ desc_regra_valid[1],
+      "VI_SP_HOMISIM"       ~ desc_regra_valid[1],
+      "VI_SP_HOMITXSIM"     ~ desc_regra_valid[5],
+      "VI_SP_HOMMENOR15SIM" ~ desc_regra_valid[1],
+      "VI_SP_HOM15A24SIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOM25A29SIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMMAIOR30SIM" ~ desc_regra_valid[1],
+      "VI_SP_HOMBRANCASIM"  ~ desc_regra_valid[1],
+      "VI_SP_HOMPRETASIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMPARDASIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMOUTROSSIM"  ~ desc_regra_valid[1],
+      "VI_SP_HOMHOMEMSIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMMULHERSIM"  ~ desc_regra_valid[1],
+      "VI_SP_PM"            ~ desc_regra_valid[7],
+      "VF_SP_PM1"           ~ desc_regra_valid[8],
+      "VF_SP_PC1"           ~ desc_regra_valid[1],
+      "VI_SP_PMPC"          ~ desc_regra_valid[7],
+      "VI_SP_JUI2"          ~ desc_regra_valid[1],
+      "VI_SP_PRO2"          ~ desc_regra_valid[1],
+      "VI_SP_DEFP2"         ~ desc_regra_valid[1],
+      "VI_SP_NATPM"         ~ desc_regra_valid[2],
+      "VI_SP_DELEGACIA"     ~ desc_regra_valid[2],
+      "VI_SP_INF"           ~ desc_regra_valid[2],
+      "VI_SP_PEN"           ~ desc_regra_valid[2],
+      "VI_SP_PRESOSPC"      ~ desc_regra_valid[1],
+      "VI_SP_OCUPPC"        ~ desc_regra_valid[3],
+      "VI_SP_PRESOSSUAPI"   ~ desc_regra_valid[1],
+      "VI_SP_OCUPSUAPI"     ~ desc_regra_valid[3],
+      "VI_SP_COMARCA"       ~ desc_regra_valid[2]
+    )
+  )
+```
+
 ## Tipo
 
 ### Todos os indicadores
@@ -342,11 +456,8 @@ check_type <- validate::confront(data, rules_type)
 
 validate::summary(check_type) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Validada = passes
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
@@ -354,9 +465,9 @@ validate::summary(check_type) |>
 
 ## Validade
 
-```{r data_rules_valid_ea_all}
+```{r data_rules_valid_sp_all}
 
-df_rules_valid_ea_all <- data |> 
+df_rules_valid_sp_all <- data |> 
   dplyr::select(
     Ano   = ANO, 
     ibge7 = IBGE7, 
@@ -364,46 +475,49 @@ df_rules_valid_ea_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_SP_CV            = dplyr::if_else(!is.na(SP_CV), F, T),
-    VI_NA_SP_CVPA          = dplyr::if_else(!is.na(SP_CVPA), F, T),
-    VI_NA_SP_CVPE          = dplyr::if_else(!is.na(SP_CVPE), F, T),
-    VI_NA_SP_MPO           = dplyr::if_else(!is.na(SP_MPO), F, T),
-    VI_NA_SP_HOMTX         = dplyr::if_else(!is.na(SP_HOMTX), F, T),
-    VI_NA_SP_HOMI          = dplyr::if_else(!is.na(SP_HOMI), F, T),
-    VI_NA_SP_TENHOM        = dplyr::if_else(!is.na(SP_TENHOM), F, T),
-    VI_NA_SP_LATROCINIO    = dplyr::if_else(!is.na(SP_LATROCINIO), F, T),
-    VI_NA_SP_ROUBO         = dplyr::if_else(!is.na(SP_ROUBO), F, T),
-    VI_NA_SP_TRAFICO       = dplyr::if_else(!is.na(SP_TRAFICO), F, T),
-    VI_NA_SP_POSSE         = dplyr::if_else(!is.na(SP_POSSE), F, T),
-    VI_NA_SP_ARMA          = dplyr::if_else(!is.na(SP_ARMA), F, T),
-    VI_NA_SP_ESTUPRO       = dplyr::if_else(!is.na(SP_ESTUPRO), F, T),
-    VI_NA_SP_SUICIDIOSSIM  = dplyr::if_else(!is.na(SP_SUICIDIOSSIM), F, T),
-    VI_NA_SP_MORTESTRANSIM = dplyr::if_else(!is.na(SP_MORTESTRANSIM), F, T),
-    VI_NA_SP_HOMISIM       = dplyr::if_else(!is.na(SP_HOMISIM), F, T),
-    VI_NA_SP_HOMITXSIM     = dplyr::if_else(!is.na(SP_HOMITXSIM), F, T),
-    VI_NA_SP_HOMMENOR15SIM = dplyr::if_else(!is.na(SP_HOMMENOR15SIM), F, T),
-    VI_NA_SP_HOM15A24SIM   = dplyr::if_else(!is.na(SP_HOM15A24SIM), F, T),
-    VI_NA_SP_HOM25A29SIM   = dplyr::if_else(!is.na(SP_HOM25A29SIM), F, T),
-    VI_NA_SP_HOMMAIOR30SIM = dplyr::if_else(!is.na(SP_HOMMAIOR30SIM), F, T),
-    VI_NA_SP_HOMBRANCASIM  = dplyr::if_else(!is.na(SP_HOMBRANCASIM), F, T),
-    VI_NA_SP_HOMPRETASIM   = dplyr::if_else(!is.na(SP_HOMPRETASIM), F, T),
-    VI_NA_SP_HOMPARDASIM   = dplyr::if_else(!is.na(SP_HOMPARDASIM), F, T),
-    VI_NA_SP_HOMOUTROSSIM  = dplyr::if_else(!is.na(SP_HOMOUTROSSIM), F, T),
-    VI_NA_SP_HOMHOMEMSIM   = dplyr::if_else(!is.na(SP_HOMHOMEMSIM), F, T),
-    VI_NA_SP_HOMMULHERSIM  = dplyr::if_else(!is.na(SP_HOMMULHERSIM), F, T),
-    VI_NA_SP_PM            = dplyr::if_else(!is.na(SP_PM), F, T),
-    VI_NA_SP_PM1           = dplyr::if_else(!is.na(SP_PM1), F, T),
-    VI_NA_SP_PC1           = dplyr::if_else(!is.na(SP_PC1), F, T),
-    VI_NA_SP_PMPC          = dplyr::if_else(!is.na(SP_PMPC), F, T),
-    VI_NA_SP_NATPM         = dplyr::if_else(!is.na(SP_NATPM), F, T),
-    VI_NA_SP_DELEGACIA     = dplyr::if_else(!is.na(SP_DELEGACIA), F, T),
-    VI_NA_SP_INF           = dplyr::if_else(!is.na(SP_INF), F, T),
-    VI_NA_SP_PEN           = dplyr::if_else(!is.na(SP_PEN), F, T),
-    VI_NA_SP_PRESOSPC      = dplyr::if_else(!is.na(SP_PRESOSPC), F, T),
-    VI_NA_SP_OCUPPC        = dplyr::if_else(!is.na(SP_OCUPPC), F, T),
-    VI_NA_SP_PRESOSSUAPI   = dplyr::if_else(!is.na(SP_PRESOSSUAPI), F, T),
-    VI_NA_SP_OCUPSUAPI     = dplyr::if_else(!is.na(SP_OCUPSUAPI), F, T),
-    VI_NA_SP_COMARCA       = dplyr::if_else(!is.na(SP_COMARCA), F, T),
+    VI_NA_SP_CV            = dplyr::if_else(!is.na(SP_CV), F, NA),
+    VI_NA_SP_CVPA          = dplyr::if_else(!is.na(SP_CVPA), F, NA),
+    VI_NA_SP_CVPE          = dplyr::if_else(!is.na(SP_CVPE), F, NA),
+    VI_NA_SP_MPO           = dplyr::if_else(!is.na(SP_MPO), F, NA),
+    VI_NA_SP_HOMTX         = dplyr::if_else(!is.na(SP_HOMTX), F, NA),
+    VI_NA_SP_HOMI          = dplyr::if_else(!is.na(SP_HOMI), F, NA),
+    VI_NA_SP_TENHOM        = dplyr::if_else(!is.na(SP_TENHOM), F, NA),
+    VI_NA_SP_LATROCINIO    = dplyr::if_else(!is.na(SP_LATROCINIO), F, NA),
+    VI_NA_SP_ROUBO         = dplyr::if_else(!is.na(SP_ROUBO), F, NA),
+    VI_NA_SP_TRAFICO       = dplyr::if_else(!is.na(SP_TRAFICO), F, NA),
+    VI_NA_SP_POSSE         = dplyr::if_else(!is.na(SP_POSSE), F, NA),
+    VI_NA_SP_ARMA          = dplyr::if_else(!is.na(SP_ARMA), F, NA),
+    VI_NA_SP_ESTUPRO       = dplyr::if_else(!is.na(SP_ESTUPRO), F, NA),
+    VI_NA_SP_SUICIDIOSSIM  = dplyr::if_else(!is.na(SP_SUICIDIOSSIM), F, NA),
+    VI_NA_SP_MORTESTRANSIM = dplyr::if_else(!is.na(SP_MORTESTRANSIM), F, NA),
+    VI_NA_SP_HOMISIM       = dplyr::if_else(!is.na(SP_HOMISIM), F, NA),
+    VI_NA_SP_HOMITXSIM     = dplyr::if_else(!is.na(SP_HOMITXSIM), F, NA),
+    VI_NA_SP_HOMMENOR15SIM = dplyr::if_else(!is.na(SP_HOMMENOR15SIM), F, NA),
+    VI_NA_SP_HOM15A24SIM   = dplyr::if_else(!is.na(SP_HOM15A24SIM), F, NA),
+    VI_NA_SP_HOM25A29SIM   = dplyr::if_else(!is.na(SP_HOM25A29SIM), F, NA),
+    VI_NA_SP_HOMMAIOR30SIM = dplyr::if_else(!is.na(SP_HOMMAIOR30SIM), F, NA),
+    VI_NA_SP_HOMBRANCASIM  = dplyr::if_else(!is.na(SP_HOMBRANCASIM), F, NA),
+    VI_NA_SP_HOMPRETASIM   = dplyr::if_else(!is.na(SP_HOMPRETASIM), F, NA),
+    VI_NA_SP_HOMPARDASIM   = dplyr::if_else(!is.na(SP_HOMPARDASIM), F, NA),
+    VI_NA_SP_HOMOUTROSSIM  = dplyr::if_else(!is.na(SP_HOMOUTROSSIM), F, NA),
+    VI_NA_SP_HOMHOMEMSIM   = dplyr::if_else(!is.na(SP_HOMHOMEMSIM), F, NA),
+    VI_NA_SP_HOMMULHERSIM  = dplyr::if_else(!is.na(SP_HOMMULHERSIM), F, NA),
+    VI_NA_SP_PM            = dplyr::if_else(!is.na(SP_PM), F, NA),
+    VI_NA_SP_PM1           = dplyr::if_else(!is.na(SP_PM1), F, NA),
+    VI_NA_SP_PC1           = dplyr::if_else(!is.na(SP_PC1), F, NA),
+    VI_NA_SP_PMPC          = dplyr::if_else(!is.na(SP_PMPC), F, NA),
+    VF_NA_SP_JUI2          = dplyr::if_else(!is.na(SP_JUI2), F, NA),
+    VF_NA_SP_PRO2          = dplyr::if_else(!is.na(SP_PRO2), F, NA),
+    VF_NA_SP_DEFP2         = dplyr::if_else(!is.na(SP_DEFP2), F, NA),
+    VI_NA_SP_NATPM         = dplyr::if_else(!is.na(SP_NATPM), F, NA),
+    VI_NA_SP_DELEGACIA     = dplyr::if_else(!is.na(SP_DELEGACIA), F, NA),
+    VI_NA_SP_INF           = dplyr::if_else(!is.na(SP_INF), F, NA),
+    VI_NA_SP_PEN           = dplyr::if_else(!is.na(SP_PEN), F, NA),
+    VI_NA_SP_PRESOSPC      = dplyr::if_else(!is.na(SP_PRESOSPC), F, NA),
+    VI_NA_SP_OCUPPC        = dplyr::if_else(!is.na(SP_OCUPPC), F, NA),
+    VI_NA_SP_PRESOSSUAPI   = dplyr::if_else(!is.na(SP_PRESOSSUAPI), F, NA),
+    VI_NA_SP_OCUPSUAPI     = dplyr::if_else(!is.na(SP_OCUPSUAPI), F, NA),
+    VI_NA_SP_COMARCA       = dplyr::if_else(!is.na(SP_COMARCA), F, NA),
     # Others
     VI_SP_CV               = dplyr::if_else(dplyr::between(SP_CV, 0, 10000), F, T),
     VI_SP_CVPA             = dplyr::if_else(dplyr::between(SP_CVPA, 0, 10000), F, T),
@@ -433,8 +547,8 @@ df_rules_valid_ea_all <- data |>
     VI_SP_HOMHOMEMSIM      = dplyr::if_else(SP_HOMHOMEMSIM >= 0, F, T),
     VI_SP_HOMMULHERSIM     = dplyr::if_else(SP_HOMMULHERSIM >= 0, F, T),
     VI_SP_PM               = dplyr::if_else(SP_PM >= 1, F, T),
-    VI_SP_PM1              = dplyr::if_else(SP_PM1 >= 10, F, T),
-    VI_SP_PC1              = dplyr::if_else(SP_PC1 >= 10, F, T),
+    VF_SP_PM1              = dplyr::if_else(SP_PM1 >= 8, F, T),
+    VF_SP_PC1              = dplyr::if_else(SP_PC1 >= 0, F, T),
     VI_SP_PMPC             = dplyr::if_else(SP_PMPC >= 1, F, T),
     VI_SP_JUI2             = dplyr::if_else(SP_JUI2 >= 0, F, T),
     VI_SP_PRO2             = dplyr::if_else(SP_PRO2 >= 0, F, T),
@@ -451,19 +565,19 @@ df_rules_valid_ea_all <- data |>
 )
 ```
 
-```{r data_wrangling_valid_ea_all}
+```{r data_wrangling_valid_sp_all}
 
 ## Transformação dos resultados
-df_sumario_valid_ea <- df_rules_valid_ea_all |> 
+df_sumario_valid_sp <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with("VI_")
+    dplyr::starts_with(c("VI_", "VF_"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_valid_ea |> 
+df_sumario <- df_sumario_valid_sp |> 
   dplyr::group_by(Ano, Regra) |> 
   dplyr::summarise(
     Total        = dplyr::n(),
@@ -479,9 +593,10 @@ df_sumario <- df_sumario_valid_ea |>
 
 ### Todos os indicadores - Valores ausentes
 
-```{r table_valid_ea_na_all}
+```{r table_valid_sp_na_all}
 
 df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -493,7 +608,8 @@ df_sumario |>
 
 ### Todos os indicadores - Demais regras
 
-```{r table_valid_ea_all}
+```{r table_valid_sp_all}
+#| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(
@@ -502,6 +618,7 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -2788,7 +2905,7 @@ pt <- openxlsx::createWorkbook()
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_sp_cv <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_cv <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2803,7 +2920,7 @@ df_rules_valid_sp_cv <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_cvpa <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_cvpa <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2818,7 +2935,7 @@ df_rules_valid_sp_cvpa <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_cvpe <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_cvpe <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2833,7 +2950,7 @@ df_rules_valid_sp_cvpe <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_mpo <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_mpo <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2848,7 +2965,7 @@ df_rules_valid_sp_mpo <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homtx <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homtx <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2863,7 +2980,7 @@ df_rules_valid_sp_homtx <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homi <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homi <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2878,7 +2995,7 @@ df_rules_valid_sp_homi <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_tenhom <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_tenhom <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2893,7 +3010,7 @@ df_rules_valid_sp_tenhom <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_latrocinio <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_latrocinio <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2908,7 +3025,7 @@ df_rules_valid_sp_latrocinio <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_roubo <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_roubo <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2923,7 +3040,7 @@ df_rules_valid_sp_roubo <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_trafico <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_trafico <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2938,7 +3055,7 @@ df_rules_valid_sp_trafico <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_posse <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_posse <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2953,7 +3070,7 @@ df_rules_valid_sp_posse <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_arma <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_arma <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2968,7 +3085,7 @@ df_rules_valid_sp_arma <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_estupro <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_estupro <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2983,7 +3100,7 @@ df_rules_valid_sp_estupro <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_suicidiossim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_suicidiossim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -2998,7 +3115,7 @@ df_rules_valid_sp_suicidiossim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_mortestransim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_mortestransim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3013,7 +3130,7 @@ df_rules_valid_sp_mortestransim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homisim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homisim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3028,7 +3145,7 @@ df_rules_valid_sp_homisim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homitxsim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homitxsim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3043,7 +3160,7 @@ df_rules_valid_sp_homitxsim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hommenor15sim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hommenor15sim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3058,7 +3175,7 @@ df_rules_valid_sp_hommenor15sim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hom15a24sim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hom15a24sim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3073,7 +3190,7 @@ df_rules_valid_sp_hom15a24sim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hom25a29sim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hom25a29sim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3088,7 +3205,7 @@ df_rules_valid_sp_hom25a29sim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hommaior30sim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hommaior30sim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3103,7 +3220,7 @@ df_rules_valid_sp_hommaior30sim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hombrancasim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hombrancasim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3118,7 +3235,7 @@ df_rules_valid_sp_hombrancasim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hompretasim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hompretasim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3133,7 +3250,7 @@ df_rules_valid_sp_hompretasim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hompardasim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hompardasim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3148,7 +3265,7 @@ df_rules_valid_sp_hompardasim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homoutrossim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homoutrossim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3163,7 +3280,7 @@ df_rules_valid_sp_homoutrossim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_homhomemsim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_homhomemsim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3178,7 +3295,7 @@ df_rules_valid_sp_homhomemsim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_hommulhersim <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_hommulhersim <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3193,7 +3310,7 @@ df_rules_valid_sp_hommulhersim <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pm <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pm <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3208,7 +3325,7 @@ df_rules_valid_sp_pm <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pm1 <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pm1 <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3223,7 +3340,7 @@ df_rules_valid_sp_pm1 <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pc1 <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pc1 <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3238,7 +3355,7 @@ df_rules_valid_sp_pc1 <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pmpc <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pmpc <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3253,7 +3370,7 @@ df_rules_valid_sp_pmpc <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_jui2 <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_jui2 <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3268,7 +3385,7 @@ df_rules_valid_sp_jui2 <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pro2 <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pro2 <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3283,7 +3400,7 @@ df_rules_valid_sp_pro2 <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_defp2 <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_defp2 <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3298,7 +3415,7 @@ df_rules_valid_sp_defp2 <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_natpm <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_natpm <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3313,7 +3430,7 @@ df_rules_valid_sp_natpm <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_delegacia <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_delegacia <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3328,7 +3445,7 @@ df_rules_valid_sp_delegacia <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_inf <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_inf <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3343,7 +3460,7 @@ df_rules_valid_sp_inf <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_pen <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_pen <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3358,7 +3475,7 @@ df_rules_valid_sp_pen <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_presospc <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_presospc <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3373,7 +3490,7 @@ df_rules_valid_sp_presospc <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_ocuppc <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_ocuppc <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3388,7 +3505,7 @@ df_rules_valid_sp_ocuppc <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_presossuapi <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_presossuapi <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3403,7 +3520,7 @@ df_rules_valid_sp_presossuapi <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_ocupsuapi <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_ocupsuapi <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -3418,7 +3535,7 @@ df_rules_valid_sp_ocupsuapi <- df_rules_valid_ea_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_sp_comarca <- df_rules_valid_ea_all |> 
+df_rules_valid_sp_comarca <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,

@@ -49,12 +49,6 @@ k <- 1.5
 
 ## "Truque" para setar "k" como uma constante
 lockBinding("k", globalenv())
-
-## Parâmetros para os gráficos do validate::
-chart_title <- "Sumário da validação por regra estabelecida"
-chart_label <- c("Suspeita", "Validada", "Ausente", "Total")
-chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
-chart_xlab <- ""
 ```
 
 ```{r import_data}
@@ -127,7 +121,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, met
 
 ```{r get_cat}
 
-## Categorias varíaveis dicotômicas
+## Categorias variáveis dicotômicas
 cat_dic <- c(
   "Sim",
   "Não"
@@ -148,6 +142,85 @@ cat_ogestor <- c(
   "Setor subordinado a outra secretaria",
   "Setor subordinado diretamente à chefia do executivo"
 )
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_MA_ICMSECOLOG",
+    "VI_MA_CRH",
+    "VI_MA_CFEM",
+    "VI_MA_OGESTOR",
+    "VI_MA_FMMA",
+    "VI_MA_LEGISL",
+    "VI_MA_COMITE",
+    "VI_MA_FOCOS",
+    "VI_MA_CANA",
+    "VI_MA_FROTA",
+    "VI_MA_BOVINO",
+    "VI_MA_REFLO",
+    "VI_MA_FLONATIVA",
+    "VI_MA_INFRA",
+    "VI_MA_AGRO"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_MA_ICMSECOLOG" ~ desc_regra_valid[1],
+      "VI_MA_CRH"        ~ desc_regra_valid[1],
+      "VI_MA_CFEM"       ~ desc_regra_valid[1],
+      "VI_MA_OGESTOR"    ~ desc_regra_valid[2],
+      "VI_MA_FMMA"       ~ desc_regra_valid[2],
+      "VI_MA_LEGISL"     ~ desc_regra_valid[2],
+      "VI_MA_COMITE"     ~ desc_regra_valid[2],
+      "VI_MA_FOCOS"      ~ desc_regra_valid[3],
+      "VI_MA_CANA"       ~ desc_regra_valid[3],
+      "VI_MA_FROTA"      ~ desc_regra_valid[1],
+      "VI_MA_BOVINO"     ~ desc_regra_valid[1],
+      "VI_MA_REFLO"      ~ desc_regra_valid[3],
+      "VI_MA_FLONATIVA"  ~ desc_regra_valid[3],
+      "VI_MA_INFRA"      ~ desc_regra_valid[3],
+      "VI_MA_AGRO"       ~ desc_regra_valid[3]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma da proporção anual é igual a 100%" # MA_FOCOS
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CF_MA_FOCOS_total_year"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CF_MA_FOCOS_total_year" ~ desc_regra_consist[1]
+    )
+  )
 ```
 
 ## Tipo
@@ -183,10 +256,7 @@ check_type <- validate::confront(data, rules_type)
 validate::summary(check_type) |> 
   dplyr::select(
     Regra    = name,
-    Total    = items,
-    Validada = passes,
-    Suspeita = fails,
-    Ausente  = nNA
+    Validada = passes
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
@@ -205,17 +275,17 @@ df_rules_valid_ma_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_MA_ICMSECOLOG = dplyr::if_else(!is.na(MA_ICMSECOLOG), F, T),
-    VI_NA_MA_CRH        = dplyr::if_else(!is.na(MA_CRH), F, T),
-    VI_NA_MA_CFEM       = dplyr::if_else(!is.na(MA_CFEM), F, T),
-    VI_NA_MA_FOCOS      = dplyr::if_else(!is.na(MA_FOCOS), F, T),
-    VI_NA_MA_CANA       = dplyr::if_else(!is.na(MA_CANA), F, T),
-    VI_NA_MA_FROTA      = dplyr::if_else(!is.na(MA_FROTA), F, T),
-    VI_NA_MA_BOVINO     = dplyr::if_else(!is.na(MA_BOVINO), F, T),
-    VI_NA_MA_REFLO      = dplyr::if_else(!is.na(MA_REFLO), F, T),
-    VI_NA_MA_FLONATIVA  = dplyr::if_else(!is.na(MA_FLONATIVA), F, T),
-    VI_NA_MA_INFRA      = dplyr::if_else(!is.na(MA_INFRA), F, T),
-    VI_NA_MA_AGRO       = dplyr::if_else(!is.na(MA_AGRO), F, T),
+    VI_NA_MA_ICMSECOLOG = dplyr::if_else(!is.na(MA_ICMSECOLOG), F, NA),
+    VI_NA_MA_CRH        = dplyr::if_else(!is.na(MA_CRH), F, NA),
+    VI_NA_MA_CFEM       = dplyr::if_else(!is.na(MA_CFEM), F, NA),
+    VI_NA_MA_FOCOS      = dplyr::if_else(!is.na(MA_FOCOS), F, NA),
+    VI_NA_MA_CANA       = dplyr::if_else(!is.na(MA_CANA), F, NA),
+    VI_NA_MA_FROTA      = dplyr::if_else(!is.na(MA_FROTA), F, NA),
+    VI_NA_MA_BOVINO     = dplyr::if_else(!is.na(MA_BOVINO), F, NA),
+    VI_NA_MA_REFLO      = dplyr::if_else(!is.na(MA_REFLO), F, NA),
+    VI_NA_MA_FLONATIVA  = dplyr::if_else(!is.na(MA_FLONATIVA), F, NA),
+    VI_NA_MA_INFRA      = dplyr::if_else(!is.na(MA_INFRA), F, NA),
+    VI_NA_MA_AGRO       = dplyr::if_else(!is.na(MA_AGRO), F, NA),
     # Others
     VI_MA_ICMSECOLOG    = dplyr::if_else(MA_ICMSECOLOG >= 0, F, T),
     VI_MA_CRH           = dplyr::if_else(MA_CRH >= 0, F, T),
@@ -230,7 +300,7 @@ df_rules_valid_ma_all <- data |>
     VI_MA_BOVINO        = dplyr::if_else(MA_BOVINO >= 0, F, T),
     VI_MA_REFLO         = dplyr::if_else(dplyr::between(MA_REFLO, 0, 100), F, T),
     VI_MA_FLONATIVA     = dplyr::if_else(dplyr::between(MA_FLONATIVA, 0, 100), F, T),
-     VI_MA_INFRA        = dplyr::if_else(dplyr::between(MA_INFRA, 0, 100), F, T),
+    VI_MA_INFRA         = dplyr::if_else(dplyr::between(MA_INFRA, 0, 100), F, T),
     VI_MA_AGRO          = dplyr::if_else(dplyr::between(MA_AGRO, 0, 100), F, T)
   )
 ```
@@ -242,7 +312,7 @@ df_sumario_valid_ma <- df_rules_valid_ma_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with("VI_")
+    dplyr::starts_with(c("VI_", "VF_"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
@@ -266,6 +336,7 @@ df_sumario <- df_sumario_valid_ma |>
 ```{r table_valid_ma_na_all}
 
 df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -278,6 +349,7 @@ df_sumario |>
 ### Todos os indicadores - Demais regras
 
 ```{r table_valid_ma_all}
+#| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(
@@ -286,6 +358,7 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -333,10 +406,12 @@ df_sumario <- df_sumario_consist_ma |>
 ### Todos os indicadores
 
 ```{r table_consist_ma_all}
+#| column: screen-inset-right
 
 df_sumario |> 
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
