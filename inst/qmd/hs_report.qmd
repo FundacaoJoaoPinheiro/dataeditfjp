@@ -1,0 +1,3301 @@
+---
+title: FJP Dados
+subtitle: Habitação e Saneamento
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#A1467E"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#A1467E"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/hs_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "hs_relatorio.html"
+---
+
+```{r setup, include=FALSE}
+
+table_descriptive <- function(variable, data){
+  res <- data |>
+    dplyr::group_by(ANO) |>
+    dplyr::summarise(
+      N = dplyr::n(),
+      `Mínimo`=dplyr::na_if(min(.data[[variable]], na.rm = TRUE), Inf),
+      `Média`  = mean(.data[[variable]], na.rm = TRUE),
+      Mediana  = median(.data[[variable]], na.rm = TRUE),
+      `Máximo` = dplyr::na_if(max(.data[[variable]], na.rm = TRUE), -Inf),
+      `D. P.`  = sd(.data[[variable]], na.rm = TRUE),
+      `C. V.`  = sd(.data[[variable]], na.rm = TRUE)/mean(.data[[variable]], na.rm = TRUE),
+      Zero     = sum(.data[[variable]] == 0, na.rm = T),
+      Ausentes  = sum(is.na(.data[[variable]])),
+      .groups = "drop")
+
+    return(res)
+}
+
+table_quantile <- function(variable, data){
+  result <- data  |>
+    dplyr::group_by(ANO)  |>
+    dplyr::summarise(value = stats::quantile(.data[[variable]], probs = c(.25, .75), na.rm = T),
+                     .groups  = "drop")  |>
+    dplyr::mutate(quantil = rep(c("25%", "75%"),length(unique(ANO))) ) |>
+    tidyr::pivot_wider(id_cols = ANO, values_from = value, names_from = quantil)
+  return(result)
+}
+
+chart_boxplot <- function(variable, data){
+  result <- data  |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_fill_viridis_d(option = "mako", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x    = ggplot2::element_blank(),
+      axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+
+chart_histogram <- function(variable, data){
+  result <- data |>
+    dplyr::mutate(ANO = as.numeric(ANO)) |>
+    ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_histogram() +
+    ggplot2::scale_fill_viridis_c(option = "mako", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title      = ggplot2::element_blank(),
+      axis.ticks      = ggplot2::element_blank()
+    ) +
+    ggplot2::facet_wrap(~ANO, ncol = 4)
+
+  return(result)
+}
+
+chart_bar <- function(ano, n){
+  result <- data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+# Build horizontal bar chart
+chart_hbar <- function(ano, n){
+  result <-
+    data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+# Build vertical bar chart
+chart_vbar <- function(df){
+  result <-
+    df |>
+    dplyr::group_by(Regra) |>
+    dplyr::summarise(
+      Validada = round(sum(Validada) / sum(Total) * 100, 2),
+      Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
+      Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
+    ) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")) |>
+    tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
+    ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
+    ggplot2::geom_bar(position = "stack", stat = "identity") +
+    ggplot2::scale_fill_brewer(palette = "Set2") +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_percent(scale = 1, big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Percentual geral de classificação das observações por regra",
+      x     = NULL,
+      y     = "Regra\n",
+      fill  = NULL
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "top"
+    )
+
+  return(print(result))
+}
+
+# Build heatmap
+chart_heatmap <- function(df){
+  result <-
+    df |>
+    dplyr::mutate(
+      Ano   = as.character(Ano),
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
+    ggplot2::geom_tile() +
+    ggplot2::geom_text(ggplot2::aes(label = Suspeita), size = 3) +
+    ggplot2::scale_fill_distiller(palette = "OrRd", direction = 1) +
+    ggplot2::labs(
+      title = "Total de observações suspeitas por regra e ano",
+      x     = "\nRegra",
+      y     = "Ano\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "None",
+      axis.text.x     = ggplot2::element_text(angle = 45, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+difpercentual <- function(df, variable){
+  df |>
+    dplyr::group_by(ANO) |>
+    dplyr::mutate(total = sum({{variable}}, na.rm = TRUE)) |>
+    dplyr::ungroup() |>
+    dplyr::group_by(IBGE7) |>
+    dplyr::summarise(ANO = ANO,
+                     {{variable}} := {{variable}},
+                     part = {{variable}}/total,
+                     part_lag = dplyr::lag(part, n = 1),
+                     dif_prop = part - part_lag,
+                     .groups = "drop")
+}
+
+outlier_function <- function(variable, a=-4,b=3){
+  q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)
+  q3 <- stats::quantile(variable, probs = 0.75, na.rm = T, names = F)
+  iqr <- stats::IQR(variable, na.rm = T)
+  mc <- robustbase::mc(variable, na.rm = T)
+  inf <- q1 - 1.5*exp(a*mc)*iqr
+  sup <- q3 + 1.5*exp(b*mc)*iqr
+
+  check <- ifelse(variable < inf | variable > sup, T, F)
+
+  return(check)
+}
+
+hampel_filter <- function(variable){
+  limite_inf = stats::median(variable, na.rm = T) - 3 * stats::mad(variable, constant = 1, na.rm = T)
+  limite_sup = stats::median(variable, na.rm = T) + 3 * stats::mad(variable, constant = 1, na.rm = T)
+  result = (variable < limite_inf | variable > limite_sup)
+  return(result)
+}
+
+
+compare_first_dif <- function(var){
+  dif <- abs(round(c(NA_real_, diff(var)), 2))
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
+  check <- ifelse(dif > dif_max, TRUE, FALSE)
+
+  return(check)
+}
+
+compare_lag <- function(var){
+  return(var >= dplyr::lag(var, n = 1))
+}
+
+
+```
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+
+## Parâmetros para os gráficos do validate::
+# chart_title <- "Sumário da validação por regra estabelecida"
+# chart_label <- c("Suspeita", "Validada", "Ausente", "Total")
+# chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
+# chart_xlab <- ""
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+# Regras de crítica
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+-   Tipo
+
+    -   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+-   Validade
+
+    -   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+    -   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+-   Consistência
+
+    -   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+-   Distribuição
+
+    -   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+    -   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+    -   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+    -   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+    -   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+    -   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+    -   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+```{r get_cat}
+
+## Categorias varíaveis dicotômicas
+cat_dic <- c(
+  "Sim",
+  "Não"
+)
+
+## Categorias encontradas na série histórica
+cat_disposlixo <- c(
+  "AAF em verificação",
+  "AS Não Regularizado",
+  "AS Regularizado",
+  "AS+UTC Não Regularizados",
+  "AS+UTC Regularizados",
+  "Aterro Controlado",
+  "Fora do Estado",
+  "Lixão",
+  "UTC Não Regularizada",
+  "UTC Regularizada"
+  )
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8", # SP_PM1
+  `9`  = "Valor está dentro da faixa esperada (0 a 0,33)", # HS_POLITICA e HS_PLANOSAN
+  `10` = "Valor está dentro da faixa esperada (0 a 0,34)", # HS_CONSELHO
+  `11` = "Valor está dentro da faixa esperada (0 a 1)"     # HS_GESTAO
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_HS_COBAGUA",
+    "VI_HS_COBESGOTO",
+    "VI_HS_ESGOTOAD",
+    "VI_HS_DISPOSLIXO",
+    "VI_HS_LIXO",
+    "VI_HS_COLSELETIVA",
+    "VI_HS_LIXOAD",
+    "VI_HS_COBLIXO",
+    "VI_HS_POLITICAEXISTENCIA",
+    "VI_HS_POLITICAAGUA",
+    "VI_HS_POLITICAESGOTO",
+    "VI_HS_POLITICARESIDUOSSOLIDOS",
+    "VI_HS_POLITICADRENAGEM",
+    "VI_HS_POLITICA",
+    "VI_HS_PLANOSAHSEXISTENCIA",
+    "VI_HS_PLANOSAHSAGUA",
+    "VI_HS_PLANOSAHSESGOTO",
+    "VI_HS_PLANOSAHSRESIDUOSSOLIDOS",
+    "VI_HS_PLANOSAHSDRENAGEM",
+    "VI_HS_PLANOSAN",
+    "VI_HS_PARTICIPACAO",
+    "VI_HS_CONSELHO",
+    "VI_HS_GESTAO",
+    "VI_HS_REGULACAOAGUA",
+    "VI_HS_REGULACAOESGOTO",
+    "VI_HS_REGULACAORESIDUOS",
+    "VI_HS_REGULACAODRENAGEM",
+    "VI_HS_DEFICIT",
+    "VI_HS_DEFICITREL",
+    "VI_HS_DPRECARIO",
+    "VI_HS_DCOAB",
+    "VI_HS_DONUS",
+    "VI_HS_DADENS",
+    "VI_HS_DINADEQUADO",
+    "VI_HS_DSEMINFRA",
+    "VI_HS_SEMBANH",
+    "VI_HS_DDURBADENS",
+    "VI_HS_TRATESGOTO"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+    "VI_HS_COBAGUA"                  ~ desc_regra_valid[3],
+    "VI_HS_COBESGOTO"                ~ desc_regra_valid[3],
+    "VI_HS_ESGOTOAD"                 ~ desc_regra_valid[3],
+    "VI_HS_DISPOSLIXO"               ~ desc_regra_valid[2],
+    "VI_HS_LIXO"                     ~ desc_regra_valid[3],
+    "VI_HS_COLSELETIVA"              ~ desc_regra_valid[2],
+    "VI_HS_LIXOAD"                   ~ desc_regra_valid[3],
+    "VI_HS_COBLIXO"                  ~ desc_regra_valid[3],
+    "VI_HS_POLITICAEXISTENCIA"       ~ desc_regra_valid[2],
+    "VI_HS_POLITICAAGUA"             ~ desc_regra_valid[2],
+    "VI_HS_POLITICAESGOTO"           ~ desc_regra_valid[2],
+    "VI_HS_POLITICARESIDUOSSOLIDOS"  ~ desc_regra_valid[2],
+    "VI_HS_POLITICADRENAGEM"         ~ desc_regra_valid[2],
+    "VI_HS_POLITICA"                 ~ desc_regra_valid[9],
+    "VI_HS_PLANOSAHSEXISTENCIA"      ~ desc_regra_valid[2],
+    "VI_HS_PLANOSAHSAGUA"            ~ desc_regra_valid[2],
+    "VI_HS_PLANOSAHSESGOTO"          ~ desc_regra_valid[2],
+    "VI_HS_PLANOSAHSRESIDUOSSOLIDOS" ~ desc_regra_valid[2],
+    "VI_HS_PLANOSAHSDRENAGEM"        ~ desc_regra_valid[2],
+    "VI_HS_PLANOSAN"                 ~ desc_regra_valid[9],
+    "VI_HS_PARTICIPACAO"             ~ desc_regra_valid[2],
+    "VI_HS_CONSELHO"                 ~ desc_regra_valid[10],
+    "VI_HS_GESTAO"                   ~ desc_regra_valid[11],
+    "VI_HS_REGULACAOAGUA"            ~ desc_regra_valid[2],
+    "VI_HS_REGULACAOESGOTO"          ~ desc_regra_valid[2],
+    "VI_HS_REGULACAORESIDUOS"        ~ desc_regra_valid[2],
+    "VI_HS_REGULACAODRENAGEM"        ~ desc_regra_valid[2],
+    "VI_HS_DEFICIT"                  ~ desc_regra_valid[1],
+    "VI_HS_DEFICITREL"               ~ desc_regra_valid[3],
+    "VI_HS_DPRECARIO"                ~ desc_regra_valid[1],
+    "VI_HS_DCOAB"                    ~ desc_regra_valid[1],
+    "VI_HS_DONUS"                    ~ desc_regra_valid[1],
+    "VI_HS_DADENS"                   ~ desc_regra_valid[1],
+    "VI_HS_DINADEQUADO"              ~ desc_regra_valid[1],
+    "VI_HS_DSEMINFRA"                ~ desc_regra_valid[1],
+    "VI_HS_SEMBANH"                  ~ desc_regra_valid[1],
+    "VI_HS_DDURBADENS"               ~ desc_regra_valid[1],
+    "VI_HS_TRATESGOTO"               ~ desc_regra_valid[3]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma HS_POLITICA+HS_PLANOSAN+HS_CONSELHO=HS_GESTAO" # HS_GESTAO
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CI_GESTAO_munic"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CI_GESTAO_munic" ~ desc_regra_consist[1]
+    )
+  )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_HS_COBAGUA                  = is.numeric(HS_COBAGUA),
+  TI_HS_PRESTAGUA                = is.character(HS_PRESTAGUA),
+  TI_HS_COBESGOTO                = is.numeric(HS_COBESGOTO),
+  TI_HS_PRESTESGOTO              = is.character(HS_PRESTESGOTO),
+  TI_HS_ESGOTOAD                 = is.numeric(HS_ESGOTOAD),
+  TI_HS_DISPOSLIXO               = is.character(HS_DISPOSLIXO),
+  # TI_HS_DISPOSLIXVALOR          = is.numeric(HS_DISPOSLIXVALOR),
+  TI_HS_LIXO                     = is.numeric(HS_LIXO),
+  TI_HS_COLSELETIVA              = is.character(HS_COLSELETIVA),
+  TI_HS_LIXOAD                   = is.numeric(HS_LIXOAD),
+  TI_HS_COBLIXO                  = is.numeric(HS_COBLIXO),
+  TI_HS_POLITICAEXISTENCIA       = is.character(HS_POLITICAEXISTENCIA),
+  TI_HS_POLITICAAGUA             = is.character(HS_POLITICAAGUA),
+  TI_HS_POLITICAESGOTO           = is.character(HS_POLITICAESGOTO),
+  TI_HS_POLITICARESIDUOSSOLIDOS  = is.character(HS_POLITICARESIDUOSSOLIDOS),
+  TI_HS_POLITICADRENAGEM         = is.character(HS_POLITICADRENAGEM),
+  TI_HS_POLITICA                 = is.numeric(HS_POLITICA),
+  TI_HS_PLANOSAHSEXISTENCIA      = is.character(HS_PLANOSAHSEXISTENCIA),
+  TI_HS_PLANOSAHSAGUA            = is.character(HS_PLANOSAHSAGUA),
+  TI_HS_PLANOSAHSESGOTO          = is.character(HS_PLANOSAHSESGOTO),
+  TI_HS_PLANOSAHSRESIDUOSSOLIDOS = is.character(HS_PLANOSAHSRESIDUOSSOLIDOS),
+  TI_HS_PLANOSAHSDRENAGEM        = is.character(HS_PLANOSAHSDRENAGEM),
+  TI_HS_PLANOSAN                 = is.numeric(HS_PLANOSAN),
+  TI_HS_PARTICIPACAO             = is.character(HS_PARTICIPACAO),
+  TI_HS_CONSELHO                 = is.numeric(HS_CONSELHO),
+  TI_HS_GESTAO                   = is.numeric(HS_GESTAO),
+  TI_HS_REGULACAOAGUA            = is.character(HS_REGULACAOAGUA),
+  TI_HS_REGULACAOESGOTO          = is.character(HS_REGULACAOESGOTO),
+  TI_HS_REGULACAORESIDUOS        = is.character(HS_REGULACAORESIDUOS),
+  TI_HS_REGULACAODRENAGEM        = is.character(HS_REGULACAODRENAGEM),
+  TI_HS_DEFICIT                  = is.numeric(HS_DEFICIT),
+  TI_HS_DEFICITREL               = is.numeric(HS_DEFICITREL),
+  TI_HS_DPRECARIO                = is.numeric(HS_DPRECARIO),
+  TI_HS_DCOAB                    = is.numeric(HS_DCOAB),
+  TI_HS_DONUS                    = is.numeric(HS_DONUS),
+  TI_HS_DADENS                   = is.numeric(HS_DADENS),
+  TI_HS_DINADEQUADO              = is.numeric(HS_DINADEQUADO),
+  TI_HS_DSEMINFRA                = is.numeric(HS_DSEMINFRA),
+  TI_HS_SEMBANH                  = is.numeric(HS_SEMBANH),
+  TI_HS_DDURBADENS               = is.numeric(HS_DDURBADENS),
+  TI_HS_TRATESGOTO               = is.numeric(HS_TRATESGOTO)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_hs_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_hs_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("HS_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_HS_COBAGUA             = dplyr::if_else(!is.na(HS_COBAGUA), F, T),
+    VI_NA_HS_PRESTAGUA           = dplyr::if_else(!is.na(HS_PRESTAGUA), F, T),
+    VI_NA_HS_COBESGOTO           = dplyr::if_else(!is.na(HS_COBESGOTO), F, T),
+    VI_NA_HS_PRESTESGOTO         = dplyr::if_else(!is.na(HS_PRESTESGOTO), F, T),
+    VI_NA_HS_ESGOTOAD            = dplyr::if_else(!is.na(HS_ESGOTOAD), F, T),
+    VI_NA_HS_DISPOSLIXO          = dplyr::if_else(!is.na(HS_DISPOSLIXO), F, T),
+    VI_NA_HS_LIXO                = dplyr::if_else(!is.na(HS_LIXO), F, T),
+    VI_NA_HS_COLSELETIVA         = dplyr::if_else(!is.na(HS_COLSELETIVA), F, T),
+    VI_NA_HS_LIXOAD              = dplyr::if_else(!is.na(HS_LIXOAD), F, T),
+    VI_NA_HS_COBLIXO             = dplyr::if_else(!is.na(HS_COBLIXO), F, T),
+    VI_NA_HS_POLITICAEXISTENCIA  = dplyr::if_else(!is.na(HS_POLITICAEXISTENCIA), F, T),
+    VI_NA_HS_POLITICAAGUA        = dplyr::if_else(!is.na(HS_POLITICAAGUA), F, T),
+    VI_NA_HS_POLITICAESGOTO      = dplyr::if_else(!is.na(HS_POLITICAESGOTO), F, T),
+    VI_NA_HS_POLITICARESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_POLITICARESIDUOSSOLIDOS), F, T),
+    VI_NA_HS_POLITICADRENAGEM    = dplyr::if_else(!is.na(HS_POLITICADRENAGEM), F, T),
+    VI_NA_HS_POLITICA            = dplyr::if_else(!is.na(HS_POLITICA), F, T),
+    VI_NA_HS_PLANOSAHSEXISTENCIA = dplyr::if_else(!is.na(HS_PLANOSAHSEXISTENCIA), F, T),
+    VI_NA_HS_PLANOSAHSAGUA       = dplyr::if_else(!is.na(HS_PLANOSAHSAGUA), F, T),
+    VI_NA_HS_PLANOSAHSESGOTO     = dplyr::if_else(!is.na(HS_PLANOSAHSESGOTO), F, T),
+    VI_NA_HS_PLANOSAHSRESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_PLANOSAHSRESIDUOSSOLIDOS), F, T),
+    VI_NA_HS_PLANOSAHSDRENAGEM   = dplyr::if_else(!is.na(HS_PLANOSAHSDRENAGEM), F, T),
+    VI_NA_HS_PLANOSAN            = dplyr::if_else(!is.na(HS_PLANOSAN), F, T),
+    VI_NA_HS_PARTICIPACAO        = dplyr::if_else(!is.na(HS_PARTICIPACAO), F, T),
+    VI_NA_HS_CONSELHO            = dplyr::if_else(!is.na(HS_CONSELHO), F, T),
+    VI_NA_HS_GESTAO              = dplyr::if_else(!is.na(HS_GESTAO), F, T),
+    VI_NA_HS_REGULACAOAGUA       = dplyr::if_else(!is.na(HS_REGULACAOAGUA), F, T),
+    VI_NA_HS_REGULACAOESGOTO     = dplyr::if_else(!is.na(HS_REGULACAOESGOTO), F, T),
+    VI_NA_HS_REGULACAORESIDUOS   = dplyr::if_else(!is.na(HS_REGULACAORESIDUOS), F, T),
+    VI_NA_HS_REGULACAODRENAGEM   = dplyr::if_else(!is.na(HS_REGULACAODRENAGEM), F, T),
+    VI_NA_HS_DEFICIT             = dplyr::if_else(!is.na(HS_DEFICIT), F, T),
+    VI_NA_HS_DEFICITREL          = dplyr::if_else(!is.na(HS_DEFICITREL), F, T),
+    VI_NA_HS_DPRECARIO           = dplyr::if_else(!is.na(HS_DPRECARIO), F, T),
+    VI_NA_HS_DCOAB               = dplyr::if_else(!is.na(HS_DCOAB), F, T),
+    VI_NA_HS_DONUS               = dplyr::if_else(!is.na(HS_DONUS), F, T),
+    VI_NA_HS_DADENS              = dplyr::if_else(!is.na(HS_DADENS), F, T),
+    VI_NA_HS_DINADEQUADO         = dplyr::if_else(!is.na(HS_DINADEQUADO), F, T),
+    VI_NA_HS_DSEMINFRA           = dplyr::if_else(!is.na(HS_DSEMINFRA), F, T),
+    VI_NA_HS_SEMBANH             = dplyr::if_else(!is.na(HS_SEMBANH), F, T),
+    VI_NA_HS_DDURBADENS          = dplyr::if_else(!is.na(HS_DDURBADENS), F, T),
+    VI_NA_HS_TRATESGOTO          = dplyr::if_else(!is.na(HS_TRATESGOTO), F, T),
+    # Others
+    VI_HS_COBAGUA     = dplyr::if_else(dplyr::between(HS_COBAGUA, 0, 100), F, T),
+    VI_HS_COBESGOTO   = dplyr::if_else(dplyr::between(HS_COBESGOTO, 0, 100), F, T),
+    VI_HS_ESGOTOAD    = dplyr::if_else(dplyr::between(HS_ESGOTOAD, 0, 100), F, T),
+    VI_HS_DISPOSLIXO  = dplyr::if_else(HS_DISPOSLIXO %in% cat_disposlixo, F, T),
+    # VI_HS_DISPOSLIXVALOR = dplyr::if_else(HS_DISPOSLIXVALOR == 0 | HS_DISPOSLIXVALOR == 0.5 | HS_DISPOSLIXVALOR == 1, F, T),
+    VI_HS_LIXO        = dplyr::if_else(dplyr::between(HS_LIXO, 0, 100), F, T),
+    VI_HS_LIXOAD      = dplyr::if_else(dplyr::between(HS_LIXOAD, 0, 100), F, T),
+    VI_HS_COBLIXO     = dplyr::if_else(dplyr::between(HS_COBLIXO, 0, 100), F, T),
+    VI_HS_COLSELETIVA = dplyr::if_else(HS_COLSELETIVA %in% cat_dic, F, T),
+    VI_HS_POLITICAEXISTENCIA = dplyr::if_else(HS_POLITICAEXISTENCIA %in% cat_dic, F, T),
+    VI_HS_POLITICAAGUA       = dplyr::if_else(HS_POLITICAAGUA %in% cat_dic, F, T),
+    VI_HS_POLITICAESGOTO     = dplyr::if_else(HS_POLITICAESGOTO %in% cat_dic, F, T),
+    VI_HS_POLITICARESIDUOSSOLIDOS = dplyr::if_else(HS_POLITICARESIDUOSSOLIDOS %in% cat_dic, F, T),
+    VI_HS_POLITICADRENAGEM  = dplyr::if_else(HS_POLITICADRENAGEM %in% cat_dic, F, T),
+    VI_HS_POLITICA          = dplyr::if_else(dplyr::between(HS_POLITICA, 0, 0.33), F, T),
+    VI_HS_PLANOSAHSEXISTENCIA = dplyr::if_else(HS_PLANOSAHSEXISTENCIA %in% cat_dic, F, T),
+    VI_HS_PLANOSAHSAGUA     = dplyr::if_else(HS_PLANOSAHSAGUA %in% cat_dic, F, T),
+    VI_HS_PLANOSAHSESGOTO   = dplyr::if_else(HS_PLANOSAHSESGOTO %in% cat_dic, F, T),
+    VI_HS_PLANOSAHSRESIDUOSSOLIDOS = dplyr::if_else(HS_PLANOSAHSRESIDUOSSOLIDOS %in% cat_dic, F, T),
+    VI_HS_PLANOSAHSDRENAGEM = dplyr::if_else(HS_PLANOSAHSDRENAGEM %in% cat_dic, F, T),
+    VI_HS_PLANOSAN          = dplyr::if_else(dplyr::between(HS_PLANOSAN, 0, 0.33), F, T),
+    VI_HS_PARTICIPACAO      = dplyr::if_else(HS_PARTICIPACAO %in% cat_dic, F, T),
+    VI_HS_CONSELHO          = dplyr::if_else(dplyr::between(HS_CONSELHO, 0, 0.34), F, T),
+    VI_HS_GESTAO            = dplyr::if_else(dplyr::between(HS_GESTAO, 0, 1), F, T),
+    VI_HS_REGULACAOAGUA     = dplyr::if_else(HS_REGULACAOAGUA %in% cat_dic, F, T),
+    VI_HS_REGULACAOESGOTO   = dplyr::if_else(HS_REGULACAOESGOTO %in% cat_dic, F, T),
+    VI_HS_REGULACAORESIDUOS = dplyr::if_else(HS_REGULACAORESIDUOS %in% cat_dic, F, T),
+    VI_HS_REGULACAODRENAGEM = dplyr::if_else(HS_REGULACAODRENAGEM %in% cat_dic, F, T),
+    VI_HS_DEFICIT           = dplyr::if_else(HS_DPRECARIO >= 0, F, T),
+    VI_HS_DEFICITREL        = dplyr::if_else(dplyr::between(HS_DEFICITREL, 0, 100), F, T),
+    VI_HS_DPRECARIO         = dplyr::if_else(HS_DPRECARIO >= 0, F, T),
+    VI_HS_DCOAB             = dplyr::if_else(HS_DCOAB >= 0, F, T),
+    VI_HS_DONUS             = dplyr::if_else(HS_DONUS >= 0, F, T),
+    VI_HS_DADENS            = dplyr::if_else(HS_DADENS >= 0, F, T),
+    VI_HS_DINADEQUADO       = dplyr::if_else(HS_DINADEQUADO >= 0, F, T),
+    VI_HS_DSEMINFRA         = dplyr::if_else(HS_DSEMINFRA >= 0, F, T),
+    VI_HS_SEMBANH           = dplyr::if_else(HS_SEMBANH >= 0, F, T),
+    VI_HS_DDURBADENS        = dplyr::if_else(HS_DDURBADENS >= 0, F, T),
+    VI_HS_TRATESGOTO        = dplyr::if_else(dplyr::between(HS_TRATESGOTO, 0, 100), F, T)
+  )
+```
+
+```{r data_wrangling_valid_hs_all}
+
+## Transformação dos resultados
+df_sumario_valid_hs <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with("VI_")
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_hs_na_all}
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_hs_all}
+
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Consistência
+
+```{r data_rules_consist_hs_all}
+
+## df com o resultado das aplicações das regras
+df_rules_consist_hs_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7,
+    HS_POLITICA,
+    HS_PLANOSAN,
+    HS_CONSELHO,
+    HS_GESTAO
+  ) |> 
+  dplyr::mutate(
+    CI_GESTAO_munic = dplyr::if_else(rowSums(dplyr::across(c(HS_POLITICA, HS_PLANOSAN, HS_CONSELHO)), na.rm = T) == (HS_GESTAO), F, T)
+)
+```
+
+```{r data_wrangling_consist_hs_all}
+
+## Tranformação dos resultados
+df_sumario_consist_hs <- df_rules_consist_hs_all |> 
+  dplyr::select(
+    !c(
+        HS_POLITICA, 
+        HS_PLANOSAN, 
+        HS_CONSELHO, 
+        HS_GESTAO
+      )
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_consist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores
+
+```{r table_consist_hs_all}
+# 
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### HS_COBAGUA
+
+```{r rules_dist_hs_cobagua}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_cobagua <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBAGUA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_COBAGUA_hampel_munic  = dplyr::if_else(!hampel_filter(HS_COBAGUA), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_out_munic     = dplyr::if_else(!outlier_function(HS_COBAGUA), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_min_munic     = dplyr::if_else(HS_COBAGUA >= (min(dplyr::lag(HS_COBAGUA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_max_munic     = dplyr::if_else(HS_COBAGUA <= (max(dplyr::lag(HS_COBAGUA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_min_k_munic   = dplyr::if_else(HS_COBAGUA >= (min(dplyr::lag(HS_COBAGUA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_max_k_munic   = dplyr::if_else(HS_COBAGUA <= (k * max(dplyr::lag(HS_COBAGUA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_med_mov_munic = dplyr::if_else(HS_COBAGUA <= (k * zoo::rollmedian(HS_COBAGUA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_COBAGUA_dif_munic     = dplyr::if_else(!compare_first_dif(HS_COBAGUA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_cobagua}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_cobagua |> 
+  dplyr::select(!HS_COBAGUA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_cobagua}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_cobagua}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_COBESGOTO
+
+```{r rules_dist_hs_cobesgoto}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_cobesgoto <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBESGOTO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_COBESGOTO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_COBESGOTO), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_out_munic     = dplyr::if_else(!outlier_function(HS_COBESGOTO), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_min_munic     = dplyr::if_else(HS_COBESGOTO >= (min(dplyr::lag(HS_COBESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_max_munic     = dplyr::if_else(HS_COBESGOTO <= (max(dplyr::lag(HS_COBESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_min_k_munic   = dplyr::if_else(HS_COBESGOTO >= (min(dplyr::lag(HS_COBESGOTO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_max_k_munic   = dplyr::if_else(HS_COBESGOTO <= (k * max(dplyr::lag(HS_COBESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_med_mov_munic = dplyr::if_else(HS_COBESGOTO <= (k * zoo::rollmedian(HS_COBESGOTO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_COBESGOTO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_COBESGOTO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_cobesgoto}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_cobesgoto |> 
+  dplyr::select(!HS_COBESGOTO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_cobesgoto}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_cobesgoto}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_ESGOTOAD
+
+```{r rules_dist_hs_esgotoad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_esgotoad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_ESGOTOAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_ESGOTOAD_hampel_munic  = dplyr::if_else(!hampel_filter(HS_ESGOTOAD), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_out_munic     = dplyr::if_else(!outlier_function(HS_ESGOTOAD), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_min_munic     = dplyr::if_else(HS_ESGOTOAD >= (min(dplyr::lag(HS_ESGOTOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_max_munic     = dplyr::if_else(HS_ESGOTOAD <= (max(dplyr::lag(HS_ESGOTOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_min_k_munic   = dplyr::if_else(HS_ESGOTOAD >= (min(dplyr::lag(HS_ESGOTOAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_max_k_munic   = dplyr::if_else(HS_ESGOTOAD <= (k * max(dplyr::lag(HS_ESGOTOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_med_mov_munic = dplyr::if_else(HS_ESGOTOAD <= (k * zoo::rollmedian(HS_ESGOTOAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_ESGOTOAD_dif_munic     = dplyr::if_else(!compare_first_dif(HS_ESGOTOAD), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_esgotoad}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_esgotoad |> 
+  dplyr::select(!HS_ESGOTOAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_esgotoad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_esgotoad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+<!-- ### HS_DISPOSLIXVALOR -->
+
+```{r rules_dist_hs_disposlixvalor}
+
+## df com o resultado das aplicações das regras
+# df_rules_dist_hs_disposlixvalor <- data |> 
+#   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DISPOSLIXVALOR) |> 
+#   dplyr::group_by(ibge7) |> 
+#   dplyr::mutate(
+#     DF_HS_DISPOSLIXVALOR_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DISPOSLIXVALOR), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_out_munic     = dplyr::if_else(!outlier_function(HS_DISPOSLIXVALOR), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_min_munic     = dplyr::if_else(HS_DISPOSLIXVALOR >= (min(dplyr::lag(HS_DISPOSLIXVALOR), na.rm = T)), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_max_munic     = dplyr::if_else(HS_DISPOSLIXVALOR <= (max(dplyr::lag(HS_DISPOSLIXVALOR), na.rm = T)), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_min_k_munic   = dplyr::if_else(HS_DISPOSLIXVALOR >= (min(dplyr::lag(HS_DISPOSLIXVALOR), na.rm = T) / k), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_max_k_munic   = dplyr::if_else(HS_DISPOSLIXVALOR <= (k * max(dplyr::lag(HS_DISPOSLIXVALOR), na.rm = T)), F, T), # Longitudinal (município)
+#     
+#     DF_HS_DISPOSLIXVALOR_med_mov_munic = dplyr::if_else(HS_DISPOSLIXVALOR <= (k * zoo::rollmedian(HS_DISPOSLIXVALOR, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+  #   DF_HS_DISPOSLIXVALOR_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DISPOSLIXVALOR), F, T) # Longitudinal (município)
+  # )
+```
+
+```{r data_wrangling_dist_hs_disposlixvalor}
+
+## Transformação dos resultados
+# df_sumario_dist_hs <- df_rules_dist_hs_disposlixvalor |> 
+#   dplyr::select(!HS_DISPOSLIXVALOR) |> 
+#   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+# 
+# ## df com um sumário dos resultados
+# df_sumario <- df_sumario_dist_hs |> 
+#   dplyr::group_by(Ano, Regra) |> 
+#   dplyr::summarise(
+#     Total        = dplyr::n(),
+#     Validada     = sum(!resultado, na.rm = T),
+#     Suspeita     = sum(resultado, na.rm = T),
+#     Ausente      = sum(is.na(resultado)),
+#     `% Validada` = round(Validada / Total * 100, 2),
+#     `% Suspeita` = round(Suspeita / Total * 100, 2),
+#     `% Ausente`  = round(Ausente / Total * 100, 2)
+#   ) |> 
+#   dplyr::ungroup()
+```
+
+```{r table_dist_hs_disposlixvalor}
+#| column: screen-inset-right
+
+# df_sumario |> 
+#   dplyr::filter(Ano == max(Ano)) |>
+#   dplyr::mutate(Ano = as.character(Ano)) |>
+#   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+#   kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_disposlixvalor}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+# chart_heatmap(df_sumario)
+# chart_vbar(df_sumario)
+```
+
+### HS_LIXO
+
+```{r rules_dist_hs_lixo}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_lixo <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_LIXO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_LIXO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_LIXO), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_out_munic     = dplyr::if_else(!outlier_function(HS_LIXO), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_min_munic     = dplyr::if_else(HS_LIXO >= (min(dplyr::lag(HS_LIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_max_munic     = dplyr::if_else(HS_LIXO <= (max(dplyr::lag(HS_LIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_min_k_munic   = dplyr::if_else(HS_LIXO >= (min(dplyr::lag(HS_LIXO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_max_k_munic   = dplyr::if_else(HS_LIXO <= (k * max(dplyr::lag(HS_LIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_med_mov_munic = dplyr::if_else(HS_LIXO <= (k * zoo::rollmedian(HS_LIXO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_LIXO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_lixo}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_lixo |> 
+  dplyr::select(!HS_LIXO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_lixo}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_lixo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_LIXOAD
+
+```{r rules_dist_hs_lixoad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_lixoad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_LIXOAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_LIXOAD_hampel_munic  = dplyr::if_else(!hampel_filter(HS_LIXOAD), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_out_munic     = dplyr::if_else(!outlier_function(HS_LIXOAD), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_min_munic     = dplyr::if_else(HS_LIXOAD >= (min(dplyr::lag(HS_LIXOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_max_munic     = dplyr::if_else(HS_LIXOAD <= (max(dplyr::lag(HS_LIXOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_min_k_munic   = dplyr::if_else(HS_LIXOAD >= (min(dplyr::lag(HS_LIXOAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_max_k_munic   = dplyr::if_else(HS_LIXOAD <= (k * max(dplyr::lag(HS_LIXOAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_med_mov_munic = dplyr::if_else(HS_LIXOAD <= (k * zoo::rollmedian(HS_LIXOAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_LIXOAD_dif_munic     = dplyr::if_else(!compare_first_dif(HS_LIXOAD), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_lixoad}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_lixoad |> 
+  dplyr::select(!HS_LIXOAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_lixoad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_lixoad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_COBLIXO
+
+```{r rules_dist_hs_coblixo}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_coblixo <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBLIXO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_COBLIXO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_COBLIXO), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_out_munic     = dplyr::if_else(!outlier_function(HS_COBLIXO), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_min_munic     = dplyr::if_else(HS_COBLIXO >= (min(dplyr::lag(HS_COBLIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_max_munic     = dplyr::if_else(HS_COBLIXO <= (max(dplyr::lag(HS_COBLIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_min_k_munic   = dplyr::if_else(HS_COBLIXO >= (min(dplyr::lag(HS_COBLIXO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_max_k_munic   = dplyr::if_else(HS_COBLIXO <= (k * max(dplyr::lag(HS_COBLIXO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_med_mov_munic = dplyr::if_else(HS_COBLIXO <= (k * zoo::rollmedian(HS_COBLIXO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_COBLIXO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_COBLIXO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_coblixo}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_coblixo |> 
+  dplyr::select(!HS_COBLIXO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_coblixo}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_coblixo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_POLITICA
+
+```{r rules_dist_hs_politica}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_politica <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_POLITICA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_POLITICA_hampel_munic  = dplyr::if_else(!hampel_filter(HS_POLITICA), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_out_munic     = dplyr::if_else(!outlier_function(HS_POLITICA), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_min_munic     = dplyr::if_else(HS_POLITICA >= (min(dplyr::lag(HS_POLITICA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_max_munic     = dplyr::if_else(HS_POLITICA <= (max(dplyr::lag(HS_POLITICA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_min_k_munic   = dplyr::if_else(HS_POLITICA >= (min(dplyr::lag(HS_POLITICA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_max_k_munic   = dplyr::if_else(HS_POLITICA <= (k * max(dplyr::lag(HS_POLITICA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_med_mov_munic = dplyr::if_else(HS_POLITICA <= (k * zoo::rollmedian(HS_POLITICA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_POLITICA_dif_munic     = dplyr::if_else(!compare_first_dif(HS_POLITICA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_politica}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_politica |> 
+  dplyr::select(!HS_POLITICA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_politica}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_politica}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_PLANOSAN
+
+```{r rules_dist_hs_planosan}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_planosan <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_PLANOSAN) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_PLANOSAN_hampel_munic  = dplyr::if_else(!hampel_filter(HS_PLANOSAN), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_out_munic     = dplyr::if_else(!outlier_function(HS_PLANOSAN), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_min_munic     = dplyr::if_else(HS_PLANOSAN >= (min(dplyr::lag(HS_PLANOSAN), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_max_munic     = dplyr::if_else(HS_PLANOSAN <= (max(dplyr::lag(HS_PLANOSAN), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_min_k_munic   = dplyr::if_else(HS_PLANOSAN >= (min(dplyr::lag(HS_PLANOSAN), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_max_k_munic   = dplyr::if_else(HS_PLANOSAN <= (k * max(dplyr::lag(HS_PLANOSAN), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_med_mov_munic = dplyr::if_else(HS_PLANOSAN <= (k * zoo::rollmedian(HS_PLANOSAN, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_PLANOSAN_dif_munic     = dplyr::if_else(!compare_first_dif(HS_PLANOSAN), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_planosan}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_planosan |> 
+  dplyr::select(!HS_PLANOSAN) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_planosan}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_planosan}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_CONSELHO
+
+```{r rules_dist_hs_conselho}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_conselho <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_CONSELHO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_CONSELHO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_CONSELHO), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_out_munic     = dplyr::if_else(!outlier_function(HS_CONSELHO), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_min_munic     = dplyr::if_else(HS_CONSELHO >= (min(dplyr::lag(HS_CONSELHO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_max_munic     = dplyr::if_else(HS_CONSELHO <= (max(dplyr::lag(HS_CONSELHO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_min_k_munic   = dplyr::if_else(HS_CONSELHO >= (min(dplyr::lag(HS_CONSELHO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_max_k_munic   = dplyr::if_else(HS_CONSELHO <= (k * max(dplyr::lag(HS_CONSELHO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_med_mov_munic = dplyr::if_else(HS_CONSELHO <= (k * zoo::rollmedian(HS_CONSELHO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_CONSELHO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_CONSELHO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_conselho}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_conselho |> 
+  dplyr::select(!HS_CONSELHO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_conselho}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_conselho}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_GESTAO
+
+```{r rules_dist_hs_gestao}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_gestao <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_GESTAO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_GESTAO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_GESTAO), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_out_munic     = dplyr::if_else(!outlier_function(HS_GESTAO), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_min_munic     = dplyr::if_else(HS_GESTAO >= (min(dplyr::lag(HS_GESTAO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_max_munic     = dplyr::if_else(HS_GESTAO <= (max(dplyr::lag(HS_GESTAO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_min_k_munic   = dplyr::if_else(HS_GESTAO >= (min(dplyr::lag(HS_GESTAO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_max_k_munic   = dplyr::if_else(HS_GESTAO <= (k * max(dplyr::lag(HS_GESTAO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_med_mov_munic = dplyr::if_else(HS_GESTAO <= (k * zoo::rollmedian(HS_GESTAO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_GESTAO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_GESTAO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_gestao}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_gestao |> 
+  dplyr::select(!HS_GESTAO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_gestao}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_gestao}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DEFICIT
+
+```{r rules_dist_hs_deficit}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_deficit <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DEFICIT) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DEFICIT_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DEFICIT), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_out_munic     = dplyr::if_else(!outlier_function(HS_DEFICIT), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_min_munic     = dplyr::if_else(HS_DEFICIT >= (min(dplyr::lag(HS_DEFICIT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_max_munic     = dplyr::if_else(HS_DEFICIT <= (max(dplyr::lag(HS_DEFICIT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_min_k_munic   = dplyr::if_else(HS_DEFICIT >= (min(dplyr::lag(HS_DEFICIT), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_max_k_munic   = dplyr::if_else(HS_DEFICIT <= (k * max(dplyr::lag(HS_DEFICIT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_med_mov_munic = dplyr::if_else(HS_DEFICIT <= (k * zoo::rollmedian(HS_DEFICIT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICIT_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DEFICIT), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_deficit}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_deficit |> 
+  dplyr::select(!HS_DEFICIT) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_deficit}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_deficit}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DEFICITREL
+
+```{r rules_dist_hs_deficitrel}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_deficitrel <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DEFICITREL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DEFICITREL_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DEFICITREL), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_out_munic     = dplyr::if_else(!outlier_function(HS_DEFICITREL), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_min_munic     = dplyr::if_else(HS_DEFICITREL >= (min(dplyr::lag(HS_DEFICITREL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_max_munic     = dplyr::if_else(HS_DEFICITREL <= (max(dplyr::lag(HS_DEFICITREL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_min_k_munic   = dplyr::if_else(HS_DEFICITREL >= (min(dplyr::lag(HS_DEFICITREL), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_max_k_munic   = dplyr::if_else(HS_DEFICITREL <= (k * max(dplyr::lag(HS_DEFICITREL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_med_mov_munic = dplyr::if_else(HS_DEFICITREL <= (k * zoo::rollmedian(HS_DEFICITREL, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DEFICITREL_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DEFICITREL), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_deficitrel}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_deficitrel |> 
+  dplyr::select(!HS_DEFICITREL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_deficitrel}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_deficitrel}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DPRECARIO
+
+```{r rules_dist_hs_dprecario}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_dprecario <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DPRECARIO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DPRECARIO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DPRECARIO), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_out_munic     = dplyr::if_else(!outlier_function(HS_DPRECARIO), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_min_munic     = dplyr::if_else(HS_DPRECARIO >= (min(dplyr::lag(HS_DPRECARIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_max_munic     = dplyr::if_else(HS_DPRECARIO <= (max(dplyr::lag(HS_DPRECARIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_min_k_munic   = dplyr::if_else(HS_DPRECARIO >= (min(dplyr::lag(HS_DPRECARIO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_max_k_munic   = dplyr::if_else(HS_DPRECARIO <= (k * max(dplyr::lag(HS_DPRECARIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_med_mov_munic = dplyr::if_else(HS_DPRECARIO <= (k * zoo::rollmedian(HS_DPRECARIO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DPRECARIO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DPRECARIO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_dprecario}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_dprecario |> 
+  dplyr::select(!HS_DPRECARIO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_dprecario}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_dprecario}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DCOAB
+
+```{r rules_dist_hs_dcoab}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_dcoab <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DCOAB) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DCOAB_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DCOAB), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_out_munic     = dplyr::if_else(!outlier_function(HS_DCOAB), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_min_munic     = dplyr::if_else(HS_DCOAB >= (min(dplyr::lag(HS_DCOAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_max_munic     = dplyr::if_else(HS_DCOAB <= (max(dplyr::lag(HS_DCOAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_min_k_munic   = dplyr::if_else(HS_DCOAB >= (min(dplyr::lag(HS_DCOAB), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_max_k_munic   = dplyr::if_else(HS_DCOAB <= (k * max(dplyr::lag(HS_DCOAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_med_mov_munic = dplyr::if_else(HS_DCOAB <= (k * zoo::rollmedian(HS_DCOAB, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DCOAB_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DCOAB), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_dcoab}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_dcoab |> 
+  dplyr::select(!HS_DCOAB) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_dcoab}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_dcoab}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DONUS
+
+```{r rules_dist_hs_donus}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_donus <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DONUS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DONUS_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DONUS), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_out_munic     = dplyr::if_else(!outlier_function(HS_DONUS), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_min_munic     = dplyr::if_else(HS_DONUS >= (min(dplyr::lag(HS_DONUS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_max_munic     = dplyr::if_else(HS_DONUS <= (max(dplyr::lag(HS_DONUS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_min_k_munic   = dplyr::if_else(HS_DONUS >= (min(dplyr::lag(HS_DONUS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_max_k_munic   = dplyr::if_else(HS_DONUS <= (k * max(dplyr::lag(HS_DONUS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_med_mov_munic = dplyr::if_else(HS_DONUS <= (k * zoo::rollmedian(HS_DONUS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DONUS_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DONUS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_donus}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_donus |> 
+  dplyr::select(!HS_DONUS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_donus}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_donus}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DADENS
+
+```{r rules_dist_hs_dadens}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_dadens <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DADENS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DADENS_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DADENS), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_out_munic     = dplyr::if_else(!outlier_function(HS_DADENS), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_min_munic     = dplyr::if_else(HS_DADENS >= (min(dplyr::lag(HS_DADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_max_munic     = dplyr::if_else(HS_DADENS <= (max(dplyr::lag(HS_DADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_min_k_munic   = dplyr::if_else(HS_DADENS >= (min(dplyr::lag(HS_DADENS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_max_k_munic   = dplyr::if_else(HS_DADENS <= (k * max(dplyr::lag(HS_DADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_med_mov_munic = dplyr::if_else(HS_DADENS <= (k * zoo::rollmedian(HS_DADENS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DADENS_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DADENS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_dadens}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_dadens |> 
+  dplyr::select(!HS_DADENS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_dadens}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_dadens}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DINADEQUADO
+
+```{r rules_dist_hs_dinadequado}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_dinadequado <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DINADEQUADO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DINADEQUADO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DINADEQUADO), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_out_munic     = dplyr::if_else(!outlier_function(HS_DINADEQUADO), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_min_munic     = dplyr::if_else(HS_DINADEQUADO >= (min(dplyr::lag(HS_DINADEQUADO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_max_munic     = dplyr::if_else(HS_DINADEQUADO <= (max(dplyr::lag(HS_DINADEQUADO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_min_k_munic   = dplyr::if_else(HS_DINADEQUADO >= (min(dplyr::lag(HS_DINADEQUADO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_max_k_munic   = dplyr::if_else(HS_DINADEQUADO <= (k * max(dplyr::lag(HS_DINADEQUADO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_med_mov_munic = dplyr::if_else(HS_DINADEQUADO <= (k * zoo::rollmedian(HS_DINADEQUADO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DINADEQUADO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DINADEQUADO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_dinadequado}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_dinadequado |> 
+  dplyr::select(!HS_DINADEQUADO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_dinadequado}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_dinadequado}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DSEMINFRA
+
+```{r rules_dist_hs_dseminfra}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_dseminfra <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DSEMINFRA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DSEMINFRA_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DSEMINFRA), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_out_munic     = dplyr::if_else(!outlier_function(HS_DSEMINFRA), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_min_munic     = dplyr::if_else(HS_DSEMINFRA >= (min(dplyr::lag(HS_DSEMINFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_max_munic     = dplyr::if_else(HS_DSEMINFRA <= (max(dplyr::lag(HS_DSEMINFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_min_k_munic   = dplyr::if_else(HS_DSEMINFRA >= (min(dplyr::lag(HS_DSEMINFRA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_max_k_munic   = dplyr::if_else(HS_DSEMINFRA <= (k * max(dplyr::lag(HS_DSEMINFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_med_mov_munic = dplyr::if_else(HS_DSEMINFRA <= (k * zoo::rollmedian(HS_DSEMINFRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DSEMINFRA_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DSEMINFRA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_dseminfra}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_dseminfra |> 
+  dplyr::select(!HS_DSEMINFRA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_dseminfra}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_dseminfra}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_SEMBANH
+
+```{r rules_dist_hs_sembanh}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_sembanh <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_SEMBANH) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_SEMBANH_hampel_munic  = dplyr::if_else(!hampel_filter(HS_SEMBANH), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_out_munic     = dplyr::if_else(!outlier_function(HS_SEMBANH), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_min_munic     = dplyr::if_else(HS_SEMBANH >= (min(dplyr::lag(HS_SEMBANH), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_max_munic     = dplyr::if_else(HS_SEMBANH <= (max(dplyr::lag(HS_SEMBANH), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_min_k_munic   = dplyr::if_else(HS_SEMBANH >= (min(dplyr::lag(HS_SEMBANH), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_max_k_munic   = dplyr::if_else(HS_SEMBANH <= (k * max(dplyr::lag(HS_SEMBANH), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_med_mov_munic = dplyr::if_else(HS_SEMBANH <= (k * zoo::rollmedian(HS_SEMBANH, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_SEMBANH_dif_munic     = dplyr::if_else(!compare_first_dif(HS_SEMBANH), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_sembanh}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_sembanh |> 
+  dplyr::select(!HS_SEMBANH) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_sembanh}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_sembanh}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_DDURBADENS
+
+```{r rules_dist_hs_ddurbadens}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_ddurbadens <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DDURBADENS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_DDURBADENS_hampel_munic  = dplyr::if_else(!hampel_filter(HS_DDURBADENS), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_out_munic     = dplyr::if_else(!outlier_function(HS_DDURBADENS), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_min_munic     = dplyr::if_else(HS_DDURBADENS >= (min(dplyr::lag(HS_DDURBADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_max_munic     = dplyr::if_else(HS_DDURBADENS <= (max(dplyr::lag(HS_DDURBADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_min_k_munic   = dplyr::if_else(HS_DDURBADENS >= (min(dplyr::lag(HS_DDURBADENS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_max_k_munic   = dplyr::if_else(HS_DDURBADENS <= (k * max(dplyr::lag(HS_DDURBADENS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_med_mov_munic = dplyr::if_else(HS_DDURBADENS <= (k * zoo::rollmedian(HS_DDURBADENS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_DDURBADENS_dif_munic     = dplyr::if_else(!compare_first_dif(HS_DDURBADENS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_ddurbadens}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_ddurbadens |> 
+  dplyr::select(!HS_DDURBADENS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_ddurbadens}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_ddurbadens}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### HS_TRATESGOTO
+
+```{r rules_dist_hs_tratesgoto}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_hs_tratesgoto <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_TRATESGOTO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_HS_TRATESGOTO_hampel_munic  = dplyr::if_else(!hampel_filter(HS_TRATESGOTO), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_out_munic     = dplyr::if_else(!outlier_function(HS_TRATESGOTO), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_min_munic     = dplyr::if_else(HS_TRATESGOTO >= (min(dplyr::lag(HS_TRATESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_max_munic     = dplyr::if_else(HS_TRATESGOTO <= (max(dplyr::lag(HS_TRATESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_min_k_munic   = dplyr::if_else(HS_TRATESGOTO >= (min(dplyr::lag(HS_TRATESGOTO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_max_k_munic   = dplyr::if_else(HS_TRATESGOTO <= (k * max(dplyr::lag(HS_TRATESGOTO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_med_mov_munic = dplyr::if_else(HS_TRATESGOTO <= (k * zoo::rollmedian(HS_TRATESGOTO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_HS_TRATESGOTO_dif_munic     = dplyr::if_else(!compare_first_dif(HS_TRATESGOTO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_hs_tratesgoto}
+
+## Transformação dos resultados
+df_sumario_dist_hs <- df_rules_dist_hs_tratesgoto |> 
+  dplyr::select(!HS_TRATESGOTO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_hs |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_hs_tratesgoto}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_hs_tratesgoto}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(variable = var, data = data))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+# Criar base com as observações que violaram uma ou mais regras de validade
+
+## Validade
+df_rules_valid_hs_cobagua <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_COBAGUA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_prestagua <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PRESTAGUA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_cobesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_COBESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_prestesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PRESTESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_esgotoad <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_ESGOTOAD")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_disposlixo <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DISPOSLIXO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+# df_rules_valid_hs_disposlixvalor <- df_rules_valid_hs_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("HS_DISPOSLIXVALOR")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_lixo <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_LIXO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_colseletiva <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_COLSELETIVA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_lixoad <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_LIXOAD")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_coblixo <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_COBLIXO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politicaexistencia <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICAEXISTENCIA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politicaagua <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICAAGUA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politicaesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICAESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politicaresiduossolidos <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICARESIDUOSSOLIDOS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politicadrenagem <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICADRENAGEM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_politica <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_POLITICA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosahsexistencia <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAHSEXISTENCIA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosahsagua <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAHSAGUA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosahsesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAHSESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosahsresiduossolidos <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAHSRESIDUOSSOLIDOS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosahsdrenagem <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAHSDRENAGEM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_planosan <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PLANOSAN")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_participacao <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_PARTICIPACAO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_conselho <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_CONSELHO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_gestao <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_GESTAO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_regulacaoagua <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_REGULACAOAGUA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_regulacaoesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_REGULACAOESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_regulacaoresiduos <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_REGULACAORESIDUOS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_regulacaodrenagem <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_REGULACAODRENAGEM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_deficit <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DEFICIT")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_deficitrel <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DEFICITREL")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_dprecario <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DPRECARIO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_dcoab <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DCOAB")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_donus <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DONUS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_dadens <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DADENS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_dinadequado <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DINADEQUADO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_dseminfra <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DSEMINFRA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_sembanh <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_SEMBANH")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_ddurbadens <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_DDURBADENS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_hs_tratesgoto <- df_rules_valid_hs_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("HS_TRATESGOTO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_valid}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "hs_cobagua"                  = df_rules_valid_hs_cobagua,
+  "hs_prestagua"                = df_rules_valid_hs_prestagua,
+  "hs_cobesgoto"                = df_rules_valid_hs_cobesgoto,
+  "hs_prestesgoto"              = df_rules_valid_hs_prestesgoto,
+  "hs_esgotoad"                 = df_rules_valid_hs_esgotoad,
+  "hs_disposlixo"               = df_rules_valid_hs_disposlixo,
+  # "hs_disposlixvalor" = df_rules_valid_hs_disposlixvalor,
+  "hs_lixo"                     = df_rules_valid_hs_lixo,
+  "hs_colseletiva"              = df_rules_valid_hs_colseletiva,
+  "hs_lixoad"                   = df_rules_valid_hs_lixoad,
+  "hs_coblixo"                  = df_rules_valid_hs_coblixo,
+  "hs_politicaexistencia"       = df_rules_valid_hs_politicaexistencia,
+  "hs_politicaagua"             = df_rules_valid_hs_politicaagua,
+  "hs_politicaesgoto"           = df_rules_valid_hs_politicaesgoto,
+  "hs_politicaresiduossoli"     = df_rules_valid_hs_politicaresiduossolidos,
+  "hs_politicadrenagem"         = df_rules_valid_hs_politicadrenagem,
+  "hs_politica"                 = df_rules_valid_hs_politica,
+  "hs_planosahsexistencia"      = df_rules_valid_hs_planosahsexistencia,
+  "hs_planosahsagua"            = df_rules_valid_hs_planosahsagua,
+  "hs_planosahsesgoto"          = df_rules_valid_hs_planosahsesgoto,
+  "hs_planosahsresiduossol"     = df_rules_valid_hs_planosahsresiduossolidos,
+  "hs_planosahsdrenagem"        = df_rules_valid_hs_planosahsdrenagem,
+  "hs_planosan"                 = df_rules_valid_hs_planosan,
+  "hs_participacao"             = df_rules_valid_hs_participacao,
+  "hs_conselho"                 = df_rules_valid_hs_conselho,
+  "hs_gestao"                   = df_rules_valid_hs_gestao,
+  "hs_regulacaoagua"            = df_rules_valid_hs_regulacaoagua,
+  "hs_regulacaoesgoto"          = df_rules_valid_hs_regulacaoesgoto,
+  "hs_regulacaoresiduos"        = df_rules_valid_hs_regulacaoresiduos,
+  "hs_regulacaodrenagem"        = df_rules_valid_hs_regulacaodrenagem,
+  "hs_deficit"                  = df_rules_valid_hs_deficit,
+  "hs_deficitrel"               = df_rules_valid_hs_deficitrel,
+  "hs_dprecario"                = df_rules_valid_hs_dprecario,
+  "hs_dcoab"                    = df_rules_valid_hs_dcoab,
+  "hs_donus"                    = df_rules_valid_hs_donus,
+  "hs_dadens"                   = df_rules_valid_hs_dadens,
+  "hs_dinadequado"              = df_rules_valid_hs_dinadequado,
+  "hs_dseminfra"                = df_rules_valid_hs_dseminfra,
+  "hs_sembanh"                  = df_rules_valid_hs_sembanh,
+  "hs_ddurbadens"               = df_rules_valid_hs_ddurbadens,
+  "hs_tratesgoto"               = df_rules_valid_hs_tratesgoto
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_valid_")
+  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_consist}
+
+# Criar base com as observacões que violaram uma ou mais regras de consistência
+
+## Consistência
+df_rules_consist_hs_gestao_total <- df_rules_consist_hs_all |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_consist}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "hs_gestao_total"  = df_rules_consist_hs_gestao_total
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_consist_")
+  openxlsx::addWorksheet(pt, paste0("consist - ", nome))
+  openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_dist}
+
+# Criar base com as observações que violaram uma ou mais regras de distribuição
+
+## Distribuição
+df_rules_dist_hs_cobagua <- df_rules_dist_hs_cobagua |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_cobesgoto <- df_rules_dist_hs_cobesgoto |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_esgotoad <- df_rules_dist_hs_esgotoad |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_lixo <- df_rules_dist_hs_lixo |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_lixoad <- df_rules_dist_hs_lixoad |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_coblixo <- df_rules_dist_hs_coblixo |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_politica <- df_rules_dist_hs_politica |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_planosan <- df_rules_dist_hs_planosan |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_conselho <- df_rules_dist_hs_conselho |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_gestao <- df_rules_dist_hs_gestao |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_deficit <- df_rules_dist_hs_deficit |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_deficitrel <- df_rules_dist_hs_deficitrel |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_dprecario <- df_rules_dist_hs_dprecario |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_dcoab <- df_rules_dist_hs_dcoab |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_donus <- df_rules_dist_hs_donus |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_dadens <- df_rules_dist_hs_dadens |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_dinadequado <- df_rules_dist_hs_dinadequado |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_dseminfra <- df_rules_dist_hs_dseminfra |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_sembanh <- df_rules_dist_hs_sembanh |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_ddurbadens <- df_rules_dist_hs_ddurbadens |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_hs_tratesgoto <- df_rules_dist_hs_tratesgoto |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_dist}
+
+lista_df <- list(
+  "hs_cobagua" = df_rules_dist_hs_cobagua,
+  "hs_cobesgoto"        = df_rules_dist_hs_cobesgoto,
+  "hs_esgotoad"       = df_rules_dist_hs_esgotoad,
+  "hs_lixo"      = df_rules_dist_hs_lixo,
+  "hs_lixoad"       = df_rules_dist_hs_lixoad,
+  "hs_coblixo"      = df_rules_dist_hs_coblixo,
+  "hs_politica"     = df_rules_dist_hs_politica,
+  "hs_planosan"      = df_rules_dist_hs_planosan,
+  "hs_conselho"  = df_rules_dist_hs_conselho,
+  "hs_gestao"      = df_rules_dist_hs_gestao,
+  "hs_deficit"      = df_rules_dist_hs_deficit,
+  "hs_deficitrel"      = df_rules_dist_hs_deficitrel,
+  "hs_dprecario"      = df_rules_dist_hs_dprecario,
+  "hs_dcoab"      = df_rules_dist_hs_dcoab,
+  "hs_donus"      = df_rules_dist_hs_donus,
+  "hs_dadens"      = df_rules_dist_hs_dadens,
+  "hs_dinadequado"      = df_rules_dist_hs_dinadequado,
+  "hs_dseminfra"      = df_rules_dist_hs_dseminfra,
+  "hs_sembanh"      = df_rules_dist_hs_sembanh,
+  "hs_ddurbadens"      = df_rules_dist_hs_ddurbadens,
+  "hs_tratesgoto"       = df_rules_dist_hs_tratesgoto
+)
+
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_dist_")
+  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+}
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_habitacao_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+
+rm(list = ls())
+gc()
+```

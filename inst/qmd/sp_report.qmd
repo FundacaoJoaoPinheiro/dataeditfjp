@@ -1,0 +1,4275 @@
+---
+title: FJP Dados
+subtitle: Segurança Pública
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#ff5353"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#ff5353"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/sp_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "sp_relatorio.html"
+---
+
+
+```{r setup, include=FALSE}
+
+table_descriptive <- function(variable, data){
+  res <- data |>
+    dplyr::group_by(ANO) |>
+    dplyr::summarise(
+      N = dplyr::n(),
+      `Mínimo`=dplyr::na_if(min(.data[[variable]], na.rm = TRUE), Inf),
+      `Média`  = mean(.data[[variable]], na.rm = TRUE),
+      Mediana  = median(.data[[variable]], na.rm = TRUE),
+      `Máximo` = dplyr::na_if(max(.data[[variable]], na.rm = TRUE), -Inf),
+      `D. P.`  = sd(.data[[variable]], na.rm = TRUE),
+      `C. V.`  = sd(.data[[variable]], na.rm = TRUE)/mean(.data[[variable]], na.rm = TRUE),
+      Zero     = sum(.data[[variable]] == 0, na.rm = T),
+      Ausentes  = sum(is.na(.data[[variable]])),
+      .groups = "drop")
+
+    return(res)
+}
+
+table_quantile <- function(variable, data){
+  result <- data  |>
+    dplyr::group_by(ANO)  |>
+    dplyr::summarise(value = stats::quantile(.data[[variable]], probs = c(.25, .75), na.rm = T),
+                     .groups  = "drop")  |>
+    dplyr::mutate(quantil = rep(c("25%", "75%"),length(unique(ANO))) ) |>
+    tidyr::pivot_wider(id_cols = ANO, values_from = value, names_from = quantil)
+  return(result)
+}
+
+chart_boxplot <- function(variable, data){
+  result <- data  |>
+    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x    = ggplot2::element_blank(),
+      axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+
+chart_histogram <- function(variable, data){
+  result <- data |>
+    dplyr::mutate(ANO = as.numeric(ANO)) |>
+    ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_histogram() +
+    ggplot2::scale_fill_viridis_c(option = "mako", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title      = ggplot2::element_blank(),
+      axis.ticks      = ggplot2::element_blank()
+    ) +
+    ggplot2::facet_wrap(~ANO, ncol = 4)
+
+  return(result)
+}
+
+chart_bar <- function(ano, n){
+  result <- data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+# Build horizontal bar chart
+chart_hbar <- function(ano, n){
+  result <-
+    data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+# Build vertical bar chart
+chart_vbar <- function(df){
+  result <-
+    df |>
+    dplyr::group_by(Regra) |>
+    dplyr::summarise(
+      Validada = round(sum(Validada) / sum(Total) * 100, 2),
+      Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
+      Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
+    ) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")) |>
+    tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
+    ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
+    ggplot2::geom_bar(position = "stack", stat = "identity") +
+    ggplot2::scale_fill_brewer(palette = "Set2") +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_percent(scale = 1, big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Percentual geral de classificação das observações por regra",
+      x     = NULL,
+      y     = "Regra\n",
+      fill  = NULL
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "top"
+    )
+
+  return(print(result))
+}
+
+# Build heatmap
+chart_heatmap <- function(df){
+  result <-
+    df |>
+    dplyr::mutate(
+      Ano   = as.character(Ano),
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
+    ggplot2::geom_tile() +
+    ggplot2::geom_text(ggplot2::aes(label = Suspeita), size = 3) +
+    ggplot2::scale_fill_distiller(palette = "OrRd", direction = 1) +
+    ggplot2::labs(
+      title = "Total de observações suspeitas por regra e ano",
+      x     = "\nRegra",
+      y     = "Ano\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "None",
+      axis.text.x     = ggplot2::element_text(angle = 45, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+difpercentual <- function(df, variable){
+  df |>
+    dplyr::group_by(ANO) |>
+    dplyr::mutate(total = sum({{variable}}, na.rm = TRUE)) |>
+    dplyr::ungroup() |>
+    dplyr::group_by(IBGE7) |>
+    dplyr::summarise(ANO = ANO,
+                     {{variable}} := {{variable}},
+                     part = {{variable}}/total,
+                     part_lag = dplyr::lag(part, n = 1),
+                     dif_prop = part - part_lag,
+                     .groups = "drop")
+}
+
+outlier_function <- function(variable, a=-4,b=3){
+  q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)
+  q3 <- stats::quantile(variable, probs = 0.75, na.rm = T, names = F)
+  iqr <- stats::IQR(variable, na.rm = T)
+  mc <- robustbase::mc(variable, na.rm = T)
+  inf <- q1 - 1.5*exp(a*mc)*iqr
+  sup <- q3 + 1.5*exp(b*mc)*iqr
+
+  check <- ifelse(variable < inf | variable > sup, T, F)
+
+  return(check)
+}
+
+hampel_filter <- function(variable){
+  limite_inf = stats::median(variable, na.rm = T) - 3 * stats::mad(variable, constant = 1, na.rm = T)
+  limite_sup = stats::median(variable, na.rm = T) + 3 * stats::mad(variable, constant = 1, na.rm = T)
+  result = (variable < limite_inf | variable > limite_sup)
+  return(result)
+}
+
+
+compare_first_dif <- function(var){
+  dif <- abs(round(c(NA_real_, diff(var)), 2))
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
+  check <- ifelse(dif > dif_max, TRUE, FALSE)
+
+  return(check)
+}
+
+compare_lag <- function(var){
+  return(var >= dplyr::lag(var, n = 1))
+}
+
+
+```
+
+
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+# Regras de crítica
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+-   Tipo
+
+    -   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+-   Validade
+
+    -   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+    -   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+-   Distribuição
+
+    -   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+    -   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+    -   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+    -   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+    -   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+    -   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+    -   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica.
+
+```{r get_cat}
+
+## Categorias variáveis dicotômicas
+cat_dic <- c(
+  "Sim",
+  "Não"
+)
+
+## Categorias encontradas na série histórica
+cat_natpm <- c(
+  "10ª Cia PM Ind",
+  "10ª RPM",
+  "10ª RPM e 15ª RPM",
+  "10º BPM",
+  "11ª Cia PM Ind",
+  "11ª RPM",
+  "11º BPM",
+  "12ª Cia PM Ind",
+  "12ª RPM",
+  "12º BPM",
+  "13ª CIA",
+  "13ª Cia PM Ind",
+  "13ª RPM",
+  "13º BPM",
+  "141ª CIA",
+  "14ª CIA",
+  "14ª Cia PM Ind",
+  "14ª RPM",
+  "14º BPM",
+  "15ª CIA",
+  "15ª RPM",
+  "15º BPM",
+  "16ª CIA",
+  "16ª Cia PM Ind",
+  "16ª RPM",
+  "17ª CIA",
+  "17ª Cia PM Ind",
+  "17ª RPM",
+  "18ª CIA",
+  "18ª RPM",
+  "18º BPM",
+  "19ª CIA",
+  "19ª Cia PM Ind",
+  "19º BPM",
+  "1ª CIA",
+  "1ª Cia PM Ind",
+  "1ª RPM",
+  "20ª CIA",
+  "20ª Cia PM Ind",
+  "20º BPM",
+  "21ª CIA",
+  "21ª Cia PM Ind",
+  "21ªª Cia PM Ind",
+  "21º BPM",
+  "22ª CIA",
+  "23ª CIA",
+  "23ª Cia PM Ind",
+  "23º BPM",
+  "24ª CIA",
+  "24ª Cia PM Ind",
+  "24º BPM",
+  "25ª CIA",
+  "25ª Cia PM Ind",
+  "25º BPM",
+  "26ª CIA",
+  "26ª Cia PM Ind",
+  "26º BPM",
+  "27ª CIA",
+  "27º BPM",
+  "28ª CIA",
+  "28º BPM",
+  "29º BPM",
+  "2ª CIA",
+  "2ª Cia PM Ind",
+  "2ª RPM",
+  "2º BPM",
+  "30º BPM",
+  "31º BPM",
+  "33º BPM",
+  "35º BPM",
+  "36º BPM",
+  "37º BPM",
+  "38º BPM",
+  "3ª CIA",
+  "3ª Cia PM Ind",
+  "3ª RPM",
+  "3ªCIA",
+  "3º BPM",
+  "40º BPM",
+  "42º BPM",
+  "43º BPM",
+  "44º BPM",
+  "45º BPM",
+  "46º BPM",
+  "47º BPM",
+  "48º BPM",
+  "4ª CIA",
+  "4ª Cia PM Ind",
+  "4ª RPM",
+  "4º BPM",
+  "50º BPM",
+  "51º BPM",
+  "52º BPM",
+  "53º BPM",
+  "54º BPM",
+  "55º BPM",
+  "56º BPM",
+  "57º BPM",
+  "58º BPM",
+  "59º BPM",
+  "5ª CIA",
+  "5ª Cia PM Ind",
+  "5ª RPM",
+  "60º BPM",
+  "61º BPM",
+  "62º BPM",
+  "63º BPM",
+  "64º BPM",
+  "65º BPM",
+  "67º BPM",
+  "6ª CIA",
+  "6ª Cia PM Ind",
+  "6ª RPM",
+  "6º BPM",
+  "7ª CIA",
+  "7ª Cia PM Ind",
+  "7ª RPM",
+  "7º BPM",
+  "8ª CIA",
+  "8ª RPM",
+  "8º BPM",
+  "9ª CIA",
+  "9ª Cia PM Ind",
+  "9ª RPM",
+  "9º BPM",
+  "Batalhão",
+  "Batalhão PMMG",
+  "Companhia",
+  "Companhia Independente",
+  "Companhia Pm Independente",
+  "Companhia PMMG",
+  "Companhia PMMG Ind",
+  "da 10ª RPM e do 15º BPM",
+  "Diversas Unidades",
+  "Grupamento",
+  "Grupamento PMMG",
+  "GrupamentoPelotão",
+  "Pelotão",
+  "Pelotão PMMG",
+  "Região",
+  "Região PMMG",
+  "Sede da 11ª RPM e do 10º BPM",
+  "Sede da 12ª RPM e do 14º BPM",
+  "Sede da 13ª RPM e do 9º BPM",
+  "Sede da 14ª RPM e do 42º BPM",
+  "Sede da 15ª RPM e do 19º BPM",
+  "Sede da 16ª RPM e do 28º BPM",
+  "Sede da 1ª RPM e do 1º, 5º, 13º, 16º, 22º,34º, 41º, 49º BPM",
+  "Sede da 2ª RPM e do 18º,39º BPM",
+  "Sede da 3ª RPM e do 36º BPM",
+  "Sede da 4ª RPM e do 2º, 27º BPM",
+  "Sede da 5ª RPM e do 4º BPM",
+  "Sede da 6ª RPM e do 8º BPM",
+  "Sede da 7ª RPM e do 23º BPM",
+  "Sede da 8ª RPM e do 6º, 43º BPM",
+  "Sede da 9ª RPM e do 17º, 32º BPM"
+)
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_SP_CV",               
+    "VI_SP_CVPA",             
+    "VI_SP_CVPE",            
+    "VI_SP_MPO",              
+    "VI_SP_HOMTX",            
+    "VI_SP_HOMI",             
+    "VI_SP_TENHOM",           
+    "VI_SP_LATROCINIO",       
+    "VI_SP_ROUBO",            
+    "VI_SP_TRAFICO",          
+    "VI_SP_POSSE",            
+    "VI_SP_ARMA",             
+    "VI_SP_ESTUPRO",          
+    "VI_SP_SUICIDIOSSIM",     
+    "VI_SP_MORTESTRANSIM",    
+    "VI_SP_HOMISIM",          
+    "VI_SP_HOMITXSIM",        
+    "VI_SP_HOMMENOR15SIM",    
+    "VI_SP_HOM15A24SIM",      
+    "VI_SP_HOM25A29SIM",      
+    "VI_SP_HOMMAIOR30SIM",    
+    "VI_SP_HOMBRANCASIM",     
+    "VI_SP_HOMPRETASIM",      
+    "VI_SP_HOMPARDASIM",      
+    "VI_SP_HOMOUTROSSIM",     
+    "VI_SP_HOMHOMEMSIM",      
+    "VI_SP_HOMMULHERSIM",    
+    "VI_SP_PM",               
+    "VF_SP_PM1",              
+    "VF_SP_PC1",              
+    "VI_SP_PMPC",             
+    "VI_SP_JUI2",             
+    "VI_SP_PRO2",             
+    "VI_SP_DEFP2",            
+    "VI_SP_NATPM",            
+    "VI_SP_DELEGACIA",        
+    "VI_SP_INF",              
+    "VI_SP_PEN",              
+    "VI_SP_PRESOSPC",         
+    "VI_SP_OCUPPC",           
+    "VI_SP_PRESOSSUAPI",      
+    "VI_SP_OCUPSUAPI",        
+    "VI_SP_COMARCA"          
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_SP_CV"            ~ desc_regra_valid[5],
+      "VI_SP_CVPA"          ~ desc_regra_valid[5],
+      "VI_SP_CVPE"          ~ desc_regra_valid[5],
+      "VI_SP_MPO"           ~ desc_regra_valid[5],
+      "VI_SP_HOMTX"         ~ desc_regra_valid[5],
+      "VI_SP_HOMI"          ~ desc_regra_valid[1],
+      "VI_SP_TENHOM"        ~ desc_regra_valid[1],
+      "VI_SP_LATROCINIO"    ~ desc_regra_valid[1],
+      "VI_SP_ROUBO"         ~ desc_regra_valid[1],
+      "VI_SP_TRAFICO"       ~ desc_regra_valid[1],
+      "VI_SP_POSSE"         ~ desc_regra_valid[1],
+      "VI_SP_ARMA"          ~ desc_regra_valid[1],
+      "VI_SP_ESTUPRO"       ~ desc_regra_valid[1],
+      "VI_SP_SUICIDIOSSIM"  ~ desc_regra_valid[1],
+      "VI_SP_MORTESTRANSIM" ~ desc_regra_valid[1],
+      "VI_SP_HOMISIM"       ~ desc_regra_valid[1],
+      "VI_SP_HOMITXSIM"     ~ desc_regra_valid[5],
+      "VI_SP_HOMMENOR15SIM" ~ desc_regra_valid[1],
+      "VI_SP_HOM15A24SIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOM25A29SIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMMAIOR30SIM" ~ desc_regra_valid[1],
+      "VI_SP_HOMBRANCASIM"  ~ desc_regra_valid[1],
+      "VI_SP_HOMPRETASIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMPARDASIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMOUTROSSIM"  ~ desc_regra_valid[1],
+      "VI_SP_HOMHOMEMSIM"   ~ desc_regra_valid[1],
+      "VI_SP_HOMMULHERSIM"  ~ desc_regra_valid[1],
+      "VI_SP_PM"            ~ desc_regra_valid[7],
+      "VF_SP_PM1"           ~ desc_regra_valid[8],
+      "VF_SP_PC1"           ~ desc_regra_valid[1],
+      "VI_SP_PMPC"          ~ desc_regra_valid[7],
+      "VI_SP_JUI2"          ~ desc_regra_valid[1],
+      "VI_SP_PRO2"          ~ desc_regra_valid[1],
+      "VI_SP_DEFP2"         ~ desc_regra_valid[1],
+      "VI_SP_NATPM"         ~ desc_regra_valid[2],
+      "VI_SP_DELEGACIA"     ~ desc_regra_valid[2],
+      "VI_SP_INF"           ~ desc_regra_valid[2],
+      "VI_SP_PEN"           ~ desc_regra_valid[2],
+      "VI_SP_PRESOSPC"      ~ desc_regra_valid[1],
+      "VI_SP_OCUPPC"        ~ desc_regra_valid[3],
+      "VI_SP_PRESOSSUAPI"   ~ desc_regra_valid[1],
+      "VI_SP_OCUPSUAPI"     ~ desc_regra_valid[3],
+      "VI_SP_COMARCA"       ~ desc_regra_valid[2]
+    )
+  )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_SP_CV            = is.numeric(SP_CV),
+  TI_SP_CVPA          = is.numeric(SP_CVPA),
+  TI_SP_CVPE          = is.numeric(SP_CVPE),
+  TI_SP_MPO           = is.numeric(SP_MPO),
+  TI_SP_HOMTX         = is.numeric(SP_HOMTX),
+  TI_SP_HOMI          = is.numeric(SP_HOMI),
+  TI_SP_TENHOM        = is.numeric(SP_TENHOM),
+  TI_SP_LATROCINIO    = is.numeric(SP_LATROCINIO),
+  TI_SP_ROUBO         = is.numeric(SP_ROUBO),
+  TI_SP_TRAFICO       = is.numeric(SP_TRAFICO),
+  TI_SP_POSSE         = is.numeric(SP_POSSE),
+  TI_SP_ARMA          = is.numeric(SP_ARMA),
+  TI_SP_ESTUPRO       = is.numeric(SP_ESTUPRO),
+  TI_SP_SUICIDIOSSIM  = is.numeric(SP_SUICIDIOSSIM),
+  TI_SP_MORTESTRANSIM = is.numeric(SP_MORTESTRANSIM),
+  TI_SP_HOMISIM       = is.numeric(SP_HOMISIM),
+  TI_SP_HOMITXSIM     = is.numeric(SP_HOMITXSIM),
+  TI_SP_HOMMENOR15SIM = is.numeric(SP_HOMMENOR15SIM),
+  TI_SP_HOM15A24SIM   = is.numeric(SP_HOM15A24SIM),
+  TI_SP_HOM25A29SIM   = is.numeric(SP_HOM25A29SIM),
+  TI_SP_HOMMAIOR30SIM = is.numeric(SP_HOMMAIOR30SIM),
+  TI_SP_HOMBRANCASIM  = is.numeric(SP_HOMBRANCASIM),
+  TI_SP_HOMPRETASIM   = is.numeric(SP_HOMPRETASIM),
+  TI_SP_HOMPARDASIM   = is.numeric(SP_HOMPARDASIM),
+  TI_SP_HOMOUTROSSIM  = is.numeric(SP_HOMOUTROSSIM),
+  TI_SP_HOMHOMEMSIM   = is.numeric(SP_HOMHOMEMSIM),
+  TI_SP_HOMMULHERSIM  = is.numeric(SP_HOMMULHERSIM),
+  TI_SP_PM            = is.numeric(SP_PM),
+  TI_SP_PM1           = is.numeric(SP_PM1),
+  TI_SP_PC1           = is.numeric(SP_PC1),
+  TI_SP_PMPC          = is.numeric(SP_PMPC),
+  TI_SP_JUI2          = is.numeric(SP_JUI2),
+  TI_SP_PRO2          = is.numeric(SP_PRO2),
+  TI_SP_DEFP2         = is.numeric(SP_DEFP2),
+  TI_SP_NATPM         = is.character(SP_NATPM),
+  TI_SP_DELEGACIA     = is.character(SP_DELEGACIA),
+  TI_SP_INF           = is.character(SP_INF),
+  TI_SP_PEN           = is.character(SP_PEN),
+  TI_SP_PRESOSPC      = is.numeric(SP_PRESOSPC),
+  TI_SP_OCUPPC        = is.numeric(SP_OCUPPC),
+  TI_SP_PRESOSSUAPI   = is.numeric(SP_PRESOSSUAPI),
+  TI_SP_OCUPSUAPI     = is.numeric(SP_OCUPSUAPI),
+  TI_SP_COMARCA       = is.character(SP_COMARCA)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_sp_all}
+
+df_rules_valid_sp_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("SP_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_SP_CV            = dplyr::if_else(!is.na(SP_CV), F, NA),
+    VI_NA_SP_CVPA          = dplyr::if_else(!is.na(SP_CVPA), F, NA),
+    VI_NA_SP_CVPE          = dplyr::if_else(!is.na(SP_CVPE), F, NA),
+    VI_NA_SP_MPO           = dplyr::if_else(!is.na(SP_MPO), F, NA),
+    VI_NA_SP_HOMTX         = dplyr::if_else(!is.na(SP_HOMTX), F, NA),
+    VI_NA_SP_HOMI          = dplyr::if_else(!is.na(SP_HOMI), F, NA),
+    VI_NA_SP_TENHOM        = dplyr::if_else(!is.na(SP_TENHOM), F, NA),
+    VI_NA_SP_LATROCINIO    = dplyr::if_else(!is.na(SP_LATROCINIO), F, NA),
+    VI_NA_SP_ROUBO         = dplyr::if_else(!is.na(SP_ROUBO), F, NA),
+    VI_NA_SP_TRAFICO       = dplyr::if_else(!is.na(SP_TRAFICO), F, NA),
+    VI_NA_SP_POSSE         = dplyr::if_else(!is.na(SP_POSSE), F, NA),
+    VI_NA_SP_ARMA          = dplyr::if_else(!is.na(SP_ARMA), F, NA),
+    VI_NA_SP_ESTUPRO       = dplyr::if_else(!is.na(SP_ESTUPRO), F, NA),
+    VI_NA_SP_SUICIDIOSSIM  = dplyr::if_else(!is.na(SP_SUICIDIOSSIM), F, NA),
+    VI_NA_SP_MORTESTRANSIM = dplyr::if_else(!is.na(SP_MORTESTRANSIM), F, NA),
+    VI_NA_SP_HOMISIM       = dplyr::if_else(!is.na(SP_HOMISIM), F, NA),
+    VI_NA_SP_HOMITXSIM     = dplyr::if_else(!is.na(SP_HOMITXSIM), F, NA),
+    VI_NA_SP_HOMMENOR15SIM = dplyr::if_else(!is.na(SP_HOMMENOR15SIM), F, NA),
+    VI_NA_SP_HOM15A24SIM   = dplyr::if_else(!is.na(SP_HOM15A24SIM), F, NA),
+    VI_NA_SP_HOM25A29SIM   = dplyr::if_else(!is.na(SP_HOM25A29SIM), F, NA),
+    VI_NA_SP_HOMMAIOR30SIM = dplyr::if_else(!is.na(SP_HOMMAIOR30SIM), F, NA),
+    VI_NA_SP_HOMBRANCASIM  = dplyr::if_else(!is.na(SP_HOMBRANCASIM), F, NA),
+    VI_NA_SP_HOMPRETASIM   = dplyr::if_else(!is.na(SP_HOMPRETASIM), F, NA),
+    VI_NA_SP_HOMPARDASIM   = dplyr::if_else(!is.na(SP_HOMPARDASIM), F, NA),
+    VI_NA_SP_HOMOUTROSSIM  = dplyr::if_else(!is.na(SP_HOMOUTROSSIM), F, NA),
+    VI_NA_SP_HOMHOMEMSIM   = dplyr::if_else(!is.na(SP_HOMHOMEMSIM), F, NA),
+    VI_NA_SP_HOMMULHERSIM  = dplyr::if_else(!is.na(SP_HOMMULHERSIM), F, NA),
+    VI_NA_SP_PM            = dplyr::if_else(!is.na(SP_PM), F, NA),
+    VI_NA_SP_PM1           = dplyr::if_else(!is.na(SP_PM1), F, NA),
+    VI_NA_SP_PC1           = dplyr::if_else(!is.na(SP_PC1), F, NA),
+    VI_NA_SP_PMPC          = dplyr::if_else(!is.na(SP_PMPC), F, NA),
+    VF_NA_SP_JUI2          = dplyr::if_else(!is.na(SP_JUI2), F, NA),
+    VF_NA_SP_PRO2          = dplyr::if_else(!is.na(SP_PRO2), F, NA),
+    VF_NA_SP_DEFP2         = dplyr::if_else(!is.na(SP_DEFP2), F, NA),
+    VI_NA_SP_NATPM         = dplyr::if_else(!is.na(SP_NATPM), F, NA),
+    VI_NA_SP_DELEGACIA     = dplyr::if_else(!is.na(SP_DELEGACIA), F, NA),
+    VI_NA_SP_INF           = dplyr::if_else(!is.na(SP_INF), F, NA),
+    VI_NA_SP_PEN           = dplyr::if_else(!is.na(SP_PEN), F, NA),
+    VI_NA_SP_PRESOSPC      = dplyr::if_else(!is.na(SP_PRESOSPC), F, NA),
+    VI_NA_SP_OCUPPC        = dplyr::if_else(!is.na(SP_OCUPPC), F, NA),
+    VI_NA_SP_PRESOSSUAPI   = dplyr::if_else(!is.na(SP_PRESOSSUAPI), F, NA),
+    VI_NA_SP_OCUPSUAPI     = dplyr::if_else(!is.na(SP_OCUPSUAPI), F, NA),
+    VI_NA_SP_COMARCA       = dplyr::if_else(!is.na(SP_COMARCA), F, NA),
+    # Others
+    VI_SP_CV               = dplyr::if_else(dplyr::between(SP_CV, 0, 10000), F, T),
+    VI_SP_CVPA             = dplyr::if_else(dplyr::between(SP_CVPA, 0, 10000), F, T),
+    VI_SP_CVPE             = dplyr::if_else(dplyr::between(SP_CVPE, 0, 10000), F, T),
+    VI_SP_MPO              = dplyr::if_else(dplyr::between(SP_MPO, 0, 10000), F, T),
+    VI_SP_HOMTX            = dplyr::if_else(dplyr::between(SP_HOMTX, 0, 10000), F, T),
+    VI_SP_HOMI             = dplyr::if_else(SP_HOMI >= 0, F, T),
+    VI_SP_TENHOM           = dplyr::if_else(SP_TENHOM >= 0, F, T),
+    VI_SP_LATROCINIO       = dplyr::if_else(SP_LATROCINIO >= 0, F, T),
+    VI_SP_ROUBO            = dplyr::if_else(SP_ROUBO >= 0, F, T),
+    VI_SP_TRAFICO          = dplyr::if_else(SP_TRAFICO >= 0, F, T),
+    VI_SP_POSSE            = dplyr::if_else(SP_POSSE >= 0, F, T),
+    VI_SP_ARMA             = dplyr::if_else(SP_ARMA >= 0, F, T),
+    VI_SP_ESTUPRO          = dplyr::if_else(SP_ESTUPRO >= 0, F, T),
+    VI_SP_SUICIDIOSSIM     = dplyr::if_else(SP_SUICIDIOSSIM >= 0, F, T),
+    VI_SP_MORTESTRANSIM    = dplyr::if_else(SP_MORTESTRANSIM >= 0, F, T),
+    VI_SP_HOMISIM          = dplyr::if_else(SP_HOMISIM >= 0, F, T),
+    VI_SP_HOMITXSIM        = dplyr::if_else(dplyr::between(SP_HOMITXSIM, 0, 10000), F, T),
+    VI_SP_HOMMENOR15SIM    = dplyr::if_else(SP_HOMMENOR15SIM >= 0, F, T),
+    VI_SP_HOM15A24SIM      = dplyr::if_else(SP_HOM15A24SIM >= 0, F, T),
+    VI_SP_HOM25A29SIM      = dplyr::if_else(SP_HOM25A29SIM >= 0, F, T),
+    VI_SP_HOMMAIOR30SIM    = dplyr::if_else(SP_HOMMAIOR30SIM >= 0, F, T),
+    VI_SP_HOMBRANCASIM     = dplyr::if_else(SP_HOMBRANCASIM >= 0, F, T),
+    VI_SP_HOMPRETASIM      = dplyr::if_else(SP_HOMPRETASIM >= 0, F, T),
+    VI_SP_HOMPARDASIM      = dplyr::if_else(SP_HOMPARDASIM >= 0, F, T),
+    VI_SP_HOMOUTROSSIM     = dplyr::if_else(SP_HOMOUTROSSIM >= 0, F, T),
+    VI_SP_HOMHOMEMSIM      = dplyr::if_else(SP_HOMHOMEMSIM >= 0, F, T),
+    VI_SP_HOMMULHERSIM     = dplyr::if_else(SP_HOMMULHERSIM >= 0, F, T),
+    VI_SP_PM               = dplyr::if_else(SP_PM >= 1, F, T),
+    VF_SP_PM1              = dplyr::if_else(SP_PM1 >= 8, F, T),
+    VF_SP_PC1              = dplyr::if_else(SP_PC1 >= 0, F, T),
+    VI_SP_PMPC             = dplyr::if_else(SP_PMPC >= 1, F, T),
+    VI_SP_JUI2             = dplyr::if_else(SP_JUI2 >= 0, F, T),
+    VI_SP_PRO2             = dplyr::if_else(SP_PRO2 >= 0, F, T),
+    VI_SP_DEFP2            = dplyr::if_else(SP_DEFP2 >= 0, F, T),
+    VI_SP_NATPM            = dplyr::if_else(SP_NATPM %in% cat_natpm, F, T),
+    VI_SP_DELEGACIA        = dplyr::if_else(SP_DELEGACIA %in% cat_dic, F, T),
+    VI_SP_INF              = dplyr::if_else(SP_INF %in% cat_dic, F, T),
+    VI_SP_PEN              = dplyr::if_else(SP_PEN %in% cat_dic, F, T),
+    VI_SP_PRESOSPC         = dplyr::if_else(SP_PRESOSPC >= 0, F, T),
+    VI_SP_OCUPPC           = dplyr::if_else(dplyr::between(SP_OCUPPC, 0, 100), F, T),
+    VI_SP_PRESOSSUAPI      = dplyr::if_else(SP_PRESOSSUAPI >= 0, F, T),
+    VI_SP_OCUPSUAPI        = dplyr::if_else(dplyr::between(SP_OCUPSUAPI, 0, 100), F, T),
+    VI_SP_COMARCA          = dplyr::if_else(SP_COMARCA %in% cat_dic, F, T)
+)
+```
+
+```{r data_wrangling_valid_sp_all}
+
+## Transformação dos resultados
+df_sumario_valid_sp <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_sp_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_sp_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### SP_CV
+
+```{r rules_dist_sp_cv}
+
+df_rules_dist_sp_cv <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CV) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_CV_hampel_munic  = dplyr::if_else(!hampel_filter(SP_CV), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_out_munic     = dplyr::if_else(!outlier_function(SP_CV), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_min_munic     = dplyr::if_else(SP_CV >= (min(dplyr::lag(SP_CV), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_max_munic     = dplyr::if_else(SP_CV <= (max(dplyr::lag(SP_CV), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_min_k_munic   = dplyr::if_else(SP_CV >= (min(dplyr::lag(SP_CV), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_max_k_munic   = dplyr::if_else(SP_CV <= (k * max(dplyr::lag(SP_CV), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_med_mov_munic = dplyr::if_else(SP_CV <= (k * zoo::rollmedian(SP_CV, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_CV_dif_munic     = dplyr::if_else(!compare_first_dif(SP_CV), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_cv}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_cv |> 
+  dplyr::select(!SP_CV) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_cv}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_cv}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_CVPA
+
+```{r rules_dist_sp_cvpa}
+
+df_rules_dist_sp_cvpa <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CVPA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_CVPA_hampel_munic  = dplyr::if_else(!hampel_filter(SP_CVPA), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_out_munic     = dplyr::if_else(!outlier_function(SP_CVPA), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_min_munic     = dplyr::if_else(SP_CVPA >= (min(dplyr::lag(SP_CVPA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_max_munic     = dplyr::if_else(SP_CVPA <= (max(dplyr::lag(SP_CVPA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_min_k_munic   = dplyr::if_else(SP_CVPA >= (min(dplyr::lag(SP_CVPA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_max_k_munic   = dplyr::if_else(SP_CVPA <= (k * max(dplyr::lag(SP_CVPA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_med_mov_munic = dplyr::if_else(SP_CVPA <= (k * zoo::rollmedian(SP_CVPA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPA_dif_munic     = dplyr::if_else(!compare_first_dif(SP_CVPA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_cvpa}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_cvpa |> 
+  dplyr::select(!SP_CVPA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_cvpa}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_cvpa}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_CVPE
+
+```{r rules_dist_sp_cvpe}
+
+df_rules_dist_sp_cvpe <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CVPE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_CVPE_hampel_munic  = dplyr::if_else(!hampel_filter(SP_CVPE), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_out_munic     = dplyr::if_else(!outlier_function(SP_CVPE), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_min_munic     = dplyr::if_else(SP_CVPE >= (min(dplyr::lag(SP_CVPE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_max_munic     = dplyr::if_else(SP_CVPE <= (max(dplyr::lag(SP_CVPE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_min_k_munic   = dplyr::if_else(SP_CVPE >= (min(dplyr::lag(SP_CVPE), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_max_k_munic   = dplyr::if_else(SP_CVPE <= (k * max(dplyr::lag(SP_CVPE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_med_mov_munic = dplyr::if_else(SP_CVPE <= (k * zoo::rollmedian(SP_CVPE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_CVPE_dif_munic     = dplyr::if_else(!compare_first_dif(SP_CVPE), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_cvpe}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_cvpe |> 
+  dplyr::select(!SP_CVPE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_cvpe}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_cvpe}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_MPO
+
+```{r rules_dist_sp_mpo}
+
+df_rules_dist_sp_mpo <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MPO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_MPO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_MPO), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_out_munic     = dplyr::if_else(!outlier_function(SP_MPO), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_min_munic     = dplyr::if_else(SP_MPO >= (min(dplyr::lag(SP_MPO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_max_munic     = dplyr::if_else(SP_MPO <= (max(dplyr::lag(SP_MPO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_min_k_munic   = dplyr::if_else(SP_MPO >= (min(dplyr::lag(SP_MPO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_max_k_munic   = dplyr::if_else(SP_MPO <= (k * max(dplyr::lag(SP_MPO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_med_mov_munic = dplyr::if_else(SP_MPO <= (k * zoo::rollmedian(SP_MPO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_MPO_dif_munic     = dplyr::if_else(!compare_first_dif(SP_MPO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_mpo}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_mpo |> 
+  dplyr::select(!SP_MPO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_mpo}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_mpo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMTX
+
+```{r rules_dist_sp_homtx}
+
+df_rules_dist_sp_homtx <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMTX) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMTX_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMTX), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_out_munic     = dplyr::if_else(!outlier_function(SP_HOMTX), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_min_munic     = dplyr::if_else(SP_HOMTX >= (min(dplyr::lag(SP_HOMTX), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_max_munic     = dplyr::if_else(SP_HOMTX <= (max(dplyr::lag(SP_HOMTX), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_min_k_munic   = dplyr::if_else(SP_HOMTX >= (min(dplyr::lag(SP_HOMTX), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_max_k_munic   = dplyr::if_else(SP_HOMTX <= (k * max(dplyr::lag(SP_HOMTX), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_med_mov_munic = dplyr::if_else(SP_HOMTX <= (k * zoo::rollmedian(SP_HOMTX, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMTX_dif_munic     = dplyr::if_else(!compare_first_dif(SP_HOMTX), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homtx}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homtx |> 
+  dplyr::select(!SP_HOMTX) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homtx}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homtx}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMI
+
+```{r rules_dist_sp_homi}
+
+df_rules_dist_sp_homi <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMI), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMI_out_munic     = dplyr::if_else(!outlier_function(SP_HOMI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homi}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homi |> 
+  dplyr::select(!SP_HOMI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homi}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_TENHOM
+
+```{r rules_dist_sp_tenhom}
+
+df_rules_dist_sp_tenhom <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TENHOM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_TENHOM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_TENHOM), F, T), # Longitudinal (município)
+    
+    DF_SP_TENHOM_out_munic     = dplyr::if_else(!outlier_function(SP_TENHOM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_tenhom}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_tenhom |> 
+  dplyr::select(!SP_TENHOM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_tenhom}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_tenhom}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_LATROCINIO
+
+```{r rules_dist_sp_latrocinio}
+
+df_rules_dist_sp_latrocinio <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_LATROCINIO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_LATROCINIO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_LATROCINIO), F, T), # Longitudinal (município)
+    
+    DF_SP_LATROCINIO_out_munic     = dplyr::if_else(!outlier_function(SP_LATROCINIO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_latrocinio}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_latrocinio |> 
+  dplyr::select(!SP_LATROCINIO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_latrocinio}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_latrocinio}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_ROUBO
+
+```{r rules_dist_sp_roubo}
+
+df_rules_dist_sp_roubo <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ROUBO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_ROUBO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ROUBO), F, T), # Longitudinal (município)
+    
+    DF_SP_ROUBO_out_munic     = dplyr::if_else(!outlier_function(SP_ROUBO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_roubo}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_roubo |> 
+  dplyr::select(!SP_ROUBO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_roubo}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_roubo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_TRAFICO
+
+```{r rules_dist_sp_trafico}
+
+df_rules_dist_sp_trafico <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TRAFICO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_TRAFICO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_TRAFICO), F, T), # Longitudinal (município)
+    
+    DF_SP_TRAFICO_out_munic     = dplyr::if_else(!outlier_function(SP_TRAFICO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_trafico}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_trafico |> 
+  dplyr::select(!SP_TRAFICO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_trafico}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_trafico}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_POSSE
+
+```{r rules_dist_sp_posse}
+
+df_rules_dist_sp_posse <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_POSSE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_POSSE_hampel_munic  = dplyr::if_else(!hampel_filter(SP_POSSE), F, T), # Longitudinal (município)
+    
+    DF_SP_POSSE_out_munic     = dplyr::if_else(!outlier_function(SP_POSSE), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_posse}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_posse |> 
+  dplyr::select(!SP_POSSE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_posse}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_posse}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_ARMA
+
+```{r rules_dist_sp_arma}
+
+df_rules_dist_sp_arma <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ARMA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_ARMA_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ARMA), F, T), # Longitudinal (município)
+    
+    DF_SP_ARMA_out_munic     = dplyr::if_else(!outlier_function(SP_ARMA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_arma}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_arma |> 
+  dplyr::select(!SP_ARMA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_arma}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_arma}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_ESTUPRO
+
+```{r rules_dist_sp_estupro}
+
+df_rules_dist_sp_estupro <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ESTUPRO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_ESTUPRO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ESTUPRO), F, T), # Longitudinal (município)
+    
+    DF_SP_ESTUPRO_out_munic     = dplyr::if_else(!outlier_function(SP_ESTUPRO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_estupro}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_estupro |> 
+  dplyr::select(!SP_ESTUPRO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_estupro}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_estupro}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_SUICIDIOSSIM
+
+```{r rules_dist_sp_suicidiossim}
+
+df_rules_dist_sp_suicidiossim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_SUICIDIOSSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_SUICIDIOSSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_SUICIDIOSSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_SUICIDIOSSIM_out_munic     = dplyr::if_else(!outlier_function(SP_SUICIDIOSSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_suicidiossim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_suicidiossim |> 
+  dplyr::select(!SP_SUICIDIOSSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_suicidiossim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_suicidiossim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_MORTESTRANSIM
+
+```{r rules_dist_sp_mortestransim}
+
+df_rules_dist_sp_mortestransim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MORTESTRANSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_MORTESTRANSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_MORTESTRANSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_MORTESTRANSIM_out_munic     = dplyr::if_else(!outlier_function(SP_MORTESTRANSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_mortestransim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_mortestransim |> 
+  dplyr::select(!SP_MORTESTRANSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_mortestransim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_mortestransim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMISIM
+
+```{r rules_dist_sp_homisim}
+
+df_rules_dist_sp_homisim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMISIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMISIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMISIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMISIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMISIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homisim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homisim |> 
+  dplyr::select(!SP_HOMISIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homisim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homisim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMITXSIM
+
+```{r rules_dist_sp_homitxsim}
+
+df_rules_dist_sp_homitxsim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMITXSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMITXSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMITXSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMITXSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_min_munic     = dplyr::if_else(SP_HOMITXSIM >= (min(dplyr::lag(SP_HOMITXSIM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_max_munic     = dplyr::if_else(SP_HOMITXSIM <= (max(dplyr::lag(SP_HOMITXSIM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_min_k_munic   = dplyr::if_else(SP_HOMITXSIM >= (min(dplyr::lag(SP_HOMITXSIM), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_max_k_munic   = dplyr::if_else(SP_HOMITXSIM <= (k * max(dplyr::lag(SP_HOMITXSIM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_med_mov_munic = dplyr::if_else(SP_HOMITXSIM <= (k * zoo::rollmedian(SP_HOMITXSIM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMITXSIM_dif_munic     = dplyr::if_else(!compare_first_dif(SP_HOMITXSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homitxsim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homitxsim |> 
+  dplyr::select(!SP_HOMITXSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homitxsim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homitxsim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMMENOR15SIM
+
+```{r rules_dist_sp_hommenor15sim}
+
+df_rules_dist_sp_hommenor15sim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMENOR15SIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMMENOR15SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMENOR15SIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMMENOR15SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMENOR15SIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hommenor15sim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hommenor15sim |> 
+  dplyr::select(!SP_HOMMENOR15SIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hommenor15sim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hommenor15sim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOM15A24SIM
+
+```{r rules_dist_sp_hom15a24sim}
+
+df_rules_dist_sp_hom15a24sim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM15A24SIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOM15A24SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOM15A24SIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOM15A24SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOM15A24SIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hom15a24sim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hom15a24sim |> 
+  dplyr::select(!SP_HOM15A24SIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hom15a24sim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hom15a24sim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOM25A29SIM
+
+```{r rules_dist_sp_hom25a29sim}
+
+df_rules_dist_sp_hom25a29sim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM25A29SIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOM25A29SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOM25A29SIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOM25A29SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOM25A29SIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hom25a29sim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hom25a29sim |> 
+  dplyr::select(!SP_HOM25A29SIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hom25a29sim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hom25a29sim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMMAIOR30SIM
+
+```{r rules_dist_sp_hommaior30sim}
+
+df_rules_dist_sp_hommaior30sim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMAIOR30SIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMMAIOR30SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMAIOR30SIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMMAIOR30SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMAIOR30SIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hommaior30sim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hommaior30sim |> 
+  dplyr::select(!SP_HOMMAIOR30SIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hommaior30sim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hommaior30sim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMBRANCASIM
+
+```{r rules_dist_sp_hombrancasim}
+
+df_rules_dist_sp_hombrancasim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMBRANCASIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMBRANCASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMBRANCASIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMBRANCASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMBRANCASIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hombrancasim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hombrancasim |> 
+  dplyr::select(!SP_HOMBRANCASIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hombrancasim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hombrancasim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMPRETASIM
+
+```{r rules_dist_sp_hompretasim}
+
+df_rules_dist_sp_hompretasim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPRETASIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMPRETASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMPRETASIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMPRETASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMPRETASIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hompretasim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hompretasim |> 
+  dplyr::select(!SP_HOMPRETASIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hompretasim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hompretasim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMPARDASIM
+
+```{r rules_dist_sp_hompardasim}
+
+df_rules_dist_sp_hompardasim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPARDASIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMPARDASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMPARDASIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMPARDASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMPARDASIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hompardasim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hompardasim |> 
+  dplyr::select(!SP_HOMPARDASIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hompardasim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hompardasim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMOUTROSSIM
+
+```{r rules_dist_sp_homoutrossim}
+
+df_rules_dist_sp_homoutrossim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMOUTROSSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMOUTROSSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMOUTROSSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMOUTROSSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMOUTROSSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homoutrossim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homoutrossim |> 
+  dplyr::select(!SP_HOMOUTROSSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homoutrossim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homoutrossim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMHOMEMSIM
+
+```{r rules_dist_sp_homhomemsim}
+
+df_rules_dist_sp_homhomemsim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMHOMEMSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMHOMEMSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMHOMEMSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMHOMEMSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMHOMEMSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_homhomemsim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_homhomemsim |> 
+  dplyr::select(!SP_HOMHOMEMSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_homhomemsim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_homhomemsim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_HOMMULHERSIM
+
+```{r rules_dist_sp_hommulhersim}
+
+df_rules_dist_sp_hommulhersim <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMULHERSIM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_HOMMULHERSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMULHERSIM), F, T), # Longitudinal (município)
+    
+    DF_SP_HOMMULHERSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMULHERSIM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_hommulhersim}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_hommulhersim |> 
+  dplyr::select(!SP_HOMMULHERSIM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_hommulhersim}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_hommulhersim}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PM
+
+```{r rules_dist_sp_pm}
+
+df_rules_dist_sp_pm <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PM), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_out_munic     = dplyr::if_else(!outlier_function(SP_PM), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_min_munic     = dplyr::if_else(SP_PM >= (min(dplyr::lag(SP_PM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_max_munic     = dplyr::if_else(SP_PM <= (max(dplyr::lag(SP_PM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_min_k_munic   = dplyr::if_else(SP_PM >= (min(dplyr::lag(SP_PM), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_max_k_munic   = dplyr::if_else(SP_PM <= (k * max(dplyr::lag(SP_PM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_med_mov_munic = dplyr::if_else(SP_PM <= (k * zoo::rollmedian(SP_PM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_PM_dif_munic     = dplyr::if_else(!compare_first_dif(SP_PM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_pm}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_pm |> 
+  dplyr::select(!SP_PM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_pm}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_pm}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PM1
+
+```{r rules_dist_sp_pm1}
+
+df_rules_dist_sp_pm1 <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PM1) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PM1_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PM1), F, T), # Longitudinal (município)
+    
+    DF_SP_PM1_out_munic     = dplyr::if_else(!outlier_function(SP_PM1), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_pm1}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_pm1 |> 
+  dplyr::select(!SP_PM1) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_pm1}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_pm1}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PC1
+
+```{r rules_dist_sp_pc1}
+
+df_rules_dist_sp_pc1 <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PC1) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PC1_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PC1), F, T), # Longitudinal (município)
+    
+    DF_SP_PC1_out_munic     = dplyr::if_else(!outlier_function(SP_PC1), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_pc1}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_pc1 |> 
+  dplyr::select(!SP_PC1) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_pc1}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_pc1}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PMPC
+
+```{r rules_dist_sp_pmpc}
+
+df_rules_dist_sp_pmpc <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PMPC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PMPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PMPC), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_out_munic     = dplyr::if_else(!outlier_function(SP_PMPC), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_min_munic     = dplyr::if_else(SP_PMPC >= (min(dplyr::lag(SP_PMPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_max_munic     = dplyr::if_else(SP_PMPC <= (max(dplyr::lag(SP_PMPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_min_k_munic   = dplyr::if_else(SP_PMPC >= (min(dplyr::lag(SP_PMPC), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_max_k_munic   = dplyr::if_else(SP_PMPC <= (k * max(dplyr::lag(SP_PMPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_med_mov_munic = dplyr::if_else(SP_PMPC <= (k * zoo::rollmedian(SP_PMPC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_PMPC_dif_munic     = dplyr::if_else(!compare_first_dif(SP_PMPC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_pmpc}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_pmpc |> 
+  dplyr::select(!SP_PMPC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_pmpc}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_pmpc}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_JUI2
+
+```{r rules_dist_sp_jui2}
+
+df_rules_dist_sp_jui2 <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_JUI2) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_JUI2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_JUI2), F, T), # Longitudinal (município)
+    
+    DF_SP_JUI2_out_munic     = dplyr::if_else(!outlier_function(SP_JUI2), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_jui2}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_jui2 |> 
+  dplyr::select(!SP_JUI2) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_jui2}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_jui2}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PRO2
+
+```{r rules_dist_sp_pro2}
+
+df_rules_dist_sp_pro2 <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRO2) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PRO2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRO2), F, T), # Longitudinal (município)
+    
+    DF_SP_PRO2_out_munic     = dplyr::if_else(!outlier_function(SP_PRO2), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_pro2}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_pro2 |> 
+  dplyr::select(!SP_PRO2) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_pro2}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_pro2}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_DEFP2
+
+```{r rules_dist_sp_defp2}
+
+df_rules_dist_sp_defp2 <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_DEFP2) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_DEFP2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_DEFP2), F, T), # Longitudinal (município)
+    
+    DF_SP_DEFP2_out_munic     = dplyr::if_else(!outlier_function(SP_DEFP2), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_defp2}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_defp2 |> 
+  dplyr::select(!SP_DEFP2) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_defp2}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_defp2}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PRESOSPC
+
+```{r rules_dist_sp_presospc}
+
+df_rules_dist_sp_presospc <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSPC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PRESOSPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRESOSPC), F, T), # Longitudinal (município)
+    
+    DF_SP_PRESOSPC_out_munic     = dplyr::if_else(!outlier_function(SP_PRESOSPC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_presospc}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_presospc |> 
+  dplyr::select(!SP_PRESOSPC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_presospc}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_presospc}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_OCUPPC
+
+```{r rules_dist_sp_ocuppc}
+
+df_rules_dist_sp_ocuppc <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPPC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_OCUPPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_OCUPPC), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_out_munic     = dplyr::if_else(!outlier_function(SP_OCUPPC), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_min_munic     = dplyr::if_else(SP_OCUPPC >= (min(dplyr::lag(SP_OCUPPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_max_munic     = dplyr::if_else(SP_OCUPPC <= (max(dplyr::lag(SP_OCUPPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_min_k_munic   = dplyr::if_else(SP_OCUPPC >= (min(dplyr::lag(SP_OCUPPC), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_max_k_munic   = dplyr::if_else(SP_OCUPPC <= (k * max(dplyr::lag(SP_OCUPPC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_med_mov_munic = dplyr::if_else(SP_OCUPPC <= (k * zoo::rollmedian(SP_OCUPPC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPPC_dif_munic     = dplyr::if_else(!compare_first_dif(SP_OCUPPC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_ocuppc}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_ocuppc |> 
+  dplyr::select(!SP_OCUPPC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_ocuppc}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_ocuppc}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_PRESOSSUAPI
+
+```{r rules_dist_sp_presossuapi}
+
+df_rules_dist_sp_presossuapi <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSSUAPI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_PRESOSSUAPI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRESOSSUAPI), F, T), # Longitudinal (município)
+    
+    DF_SP_PRESOSSUAPI_out_munic     = dplyr::if_else(!outlier_function(SP_PRESOSSUAPI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_presossuapi}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_presossuapi |> 
+  dplyr::select(!SP_PRESOSSUAPI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_presossuapi}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_presossuapi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SP_OCUPSUAPI
+
+```{r rules_dist_sp_ocupsuapi}
+
+df_rules_dist_sp_ocupsuapi <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPSUAPI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SP_OCUPSUAPI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_OCUPSUAPI), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_out_munic     = dplyr::if_else(!outlier_function(SP_OCUPSUAPI), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_min_munic     = dplyr::if_else(SP_OCUPSUAPI >= (min(dplyr::lag(SP_OCUPSUAPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_max_munic     = dplyr::if_else(SP_OCUPSUAPI <= (max(dplyr::lag(SP_OCUPSUAPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_min_k_munic   = dplyr::if_else(SP_OCUPSUAPI >= (min(dplyr::lag(SP_OCUPSUAPI), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_max_k_munic   = dplyr::if_else(SP_OCUPSUAPI <= (k * max(dplyr::lag(SP_OCUPSUAPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_med_mov_munic = dplyr::if_else(SP_OCUPSUAPI <= (k * zoo::rollmedian(SP_OCUPSUAPI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SP_OCUPSUAPI_dif_munic     = dplyr::if_else(!compare_first_dif(SP_OCUPSUAPI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_sp_ocupsuapi}
+
+## Transformação dos resultados
+df_sumario_dist_sp <- df_rules_dist_sp_ocupsuapi |> 
+  dplyr::select(!SP_OCUPSUAPI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_sp_ocupsuapi}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_sp_ocupsuapi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(variable = var, data = data))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+# Criar base com as observações que violaram uma ou mais regras de validade
+
+## Validade
+df_rules_valid_sp_cv <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_CV")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_cvpa <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_CVPA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_cvpe <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_CVPE")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_mpo <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_MPO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homtx <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMTX")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homi <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMI")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_tenhom <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_TENHOM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_latrocinio <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_LATROCINIO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_roubo <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_ROUBO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_trafico <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_TRAFICO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_posse <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_POSSE")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_arma <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_ARMA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_estupro <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_ESTUPRO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_suicidiossim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_SUICIDIOSSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_mortestransim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_MORTESTRANSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homisim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMISIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homitxsim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMITXSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hommenor15sim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMMENOR15SIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hom15a24sim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOM15A24SIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hom25a29sim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOM25A29SIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hommaior30sim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMMAIOR30SIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hombrancasim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMBRANCASIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hompretasim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMPRETASIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hompardasim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMPARDASIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homoutrossim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMOUTROSSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_homhomemsim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMHOMEMSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_hommulhersim <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_HOMMULHERSIM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pm <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pm1 <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PM1")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pc1 <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PC1")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pmpc <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PMPC")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_jui2 <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_JUI2")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pro2 <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PRO2")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_defp2 <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_DEFP2")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_natpm <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_NATPM")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_delegacia <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_DELEGACIA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_inf <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_INF")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_pen <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PEN")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_presospc <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PRESOSPC")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_ocuppc <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_OCUPPC")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_presossuapi <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_PRESOSSUAPI")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_ocupsuapi <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_OCUPSUAPI")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_sp_comarca <- df_rules_valid_sp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("SP_COMARCA")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_valid}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "sp_cv"            = df_rules_valid_sp_cv,
+  "sp_cvpa"          = df_rules_valid_sp_cvpa,
+  "sp_cvpe"          = df_rules_valid_sp_cvpe,
+  "sp_mpo"           = df_rules_valid_sp_mpo,
+  "sp_homtx"         = df_rules_valid_sp_homtx,
+  "sp_homi"          = df_rules_valid_sp_homi,
+  "sp_tenhom"        = df_rules_valid_sp_tenhom,
+  "sp_latrocinio"    = df_rules_valid_sp_latrocinio,
+  "sp_roubo"         = df_rules_valid_sp_roubo,
+  "sp_trafico"       = df_rules_valid_sp_trafico,
+  "sp_posse"         = df_rules_valid_sp_posse,
+  "sp_arma"          = df_rules_valid_sp_arma,
+  "sp_estupro"       = df_rules_valid_sp_estupro,
+  "sp_suicidiossim"  = df_rules_valid_sp_suicidiossim,
+  "sp_mortestransim" = df_rules_valid_sp_mortestransim,
+  "sp_homisim"       = df_rules_valid_sp_homisim,
+  "sp_homitxsim"     = df_rules_valid_sp_homitxsim,
+  "sp_hommenor15sim" = df_rules_valid_sp_hommenor15sim,
+  "sp_hom15a24sim"   = df_rules_valid_sp_hom15a24sim,
+  "sp_hom25a29sim"   = df_rules_valid_sp_hom25a29sim,
+  "sp_hommaior30sim" = df_rules_valid_sp_hommaior30sim,
+  "sp_hombrancasim"  = df_rules_valid_sp_hombrancasim,
+  "sp_hompretasim"   = df_rules_valid_sp_hompretasim,
+  "sp_hompardasim"   = df_rules_valid_sp_hompardasim,
+  "sp_homoutrossim"  = df_rules_valid_sp_homoutrossim,
+  "sp_homhomemsim"   = df_rules_valid_sp_homhomemsim,
+  "sp_hommulhersim"  = df_rules_valid_sp_hommulhersim,
+  "sp_pm"            = df_rules_valid_sp_pm,
+  "sp_pm1"           = df_rules_valid_sp_pm1,
+  "sp_pc1"           = df_rules_valid_sp_pc1,
+  "sp_pmpc"          = df_rules_valid_sp_pmpc,
+  "sp_jui2"          = df_rules_valid_sp_jui2,
+  "sp_pro2"          = df_rules_valid_sp_pro2,
+  "sp_defp2"         = df_rules_valid_sp_defp2,
+  "sp_natpm"         = df_rules_valid_sp_natpm,
+  "sp_delegacia"     = df_rules_valid_sp_delegacia,
+  "sp_inf"           = df_rules_valid_sp_inf,
+  "sp_pen"           = df_rules_valid_sp_pen,
+  "sp_presospc"      = df_rules_valid_sp_presospc,
+  "sp_ocuppc"        = df_rules_valid_sp_ocuppc,
+  "sp_presossuapi"   = df_rules_valid_sp_presossuapi,
+  "sp_ocupsuapi"     = df_rules_valid_sp_ocupsuapi,
+  "sp_comarca"       = df_rules_valid_sp_comarca
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_valid_")
+  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_dist}
+
+# Criar base com as observações que violaram uma ou mais regras de distribuição
+
+## Distribuição
+df_rules_dist_sp_cv <- df_rules_dist_sp_cv |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_cvpa <- df_rules_dist_sp_cvpa |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_cvpe <- df_rules_dist_sp_cvpe |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_mpo <- df_rules_dist_sp_mpo |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homtx <- df_rules_dist_sp_homtx |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homi <- df_rules_dist_sp_homi |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_tenhom <- df_rules_dist_sp_tenhom |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_latrocinio <- df_rules_dist_sp_latrocinio |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_roubo <- df_rules_dist_sp_roubo |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_trafico <- df_rules_dist_sp_trafico |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_posse <- df_rules_dist_sp_posse |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_arma <- df_rules_dist_sp_arma |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_estupro <- df_rules_dist_sp_estupro |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_suicidiossim <- df_rules_dist_sp_suicidiossim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_mortestransim <- df_rules_dist_sp_mortestransim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homisim <- df_rules_dist_sp_homisim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homitxsim <- df_rules_dist_sp_homitxsim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hommenor15sim <- df_rules_dist_sp_hommenor15sim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hom15a24sim <- df_rules_dist_sp_hom15a24sim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hom25a29sim <- df_rules_dist_sp_hom25a29sim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hommaior30sim <- df_rules_dist_sp_hommaior30sim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hombrancasim <- df_rules_dist_sp_hombrancasim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hompretasim <- df_rules_dist_sp_hompretasim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hompardasim <- df_rules_dist_sp_hompardasim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homoutrossim <- df_rules_dist_sp_homoutrossim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_homhomemsim <- df_rules_dist_sp_homhomemsim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_hommulhersim <- df_rules_dist_sp_hommulhersim |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_pm <- df_rules_dist_sp_pm |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_pm1 <- df_rules_dist_sp_pm1 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_pc1 <- df_rules_dist_sp_pc1 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_pmpc <- df_rules_dist_sp_pmpc |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_jui2 <- df_rules_dist_sp_jui2 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_pro2 <- df_rules_dist_sp_pro2 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_defp2 <- df_rules_dist_sp_defp2 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_presospc <- df_rules_dist_sp_presospc |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_ocuppc <- df_rules_dist_sp_ocuppc |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_presossuapi <- df_rules_dist_sp_presossuapi |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_sp_ocupsuapi <- df_rules_dist_sp_ocupsuapi |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SP_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_dist}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "sp_cv"            = df_rules_dist_sp_cv,
+  "sp_cvpa"          = df_rules_dist_sp_cvpa,
+  "sp_cvpe"          = df_rules_dist_sp_cvpe,
+  "sp_mpo"           = df_rules_dist_sp_mpo,
+  "sp_homtx"         = df_rules_dist_sp_homtx,
+  "sp_homi"          = df_rules_dist_sp_homi,
+  "sp_tenhom"        = df_rules_dist_sp_tenhom,
+  "sp_latrocinio"    = df_rules_dist_sp_latrocinio,
+  "sp_roubo"         = df_rules_dist_sp_roubo,
+  "sp_trafico"       = df_rules_dist_sp_trafico,
+  "sp_posse"         = df_rules_dist_sp_posse,
+  "sp_arma"          = df_rules_dist_sp_arma,
+  "sp_estupro"       = df_rules_dist_sp_estupro,
+  "sp_suicidiossim"  = df_rules_dist_sp_suicidiossim,
+  "sp_mortestransim" = df_rules_dist_sp_mortestransim,
+  "sp_homisim"       = df_rules_dist_sp_homisim,
+  "sp_homitxsim"     = df_rules_dist_sp_homitxsim,
+  "sp_hommenor15sim" = df_rules_dist_sp_hommenor15sim,
+  "sp_hom15a24sim"   = df_rules_dist_sp_hom15a24sim,
+  "sp_hom25a29sim"   = df_rules_dist_sp_hom25a29sim,
+  "sp_hommaior30sim" = df_rules_dist_sp_hommaior30sim,
+  "sp_hombrancasim"  = df_rules_dist_sp_hombrancasim,
+  "sp_hompretasim"   = df_rules_dist_sp_hompretasim,
+  "sp_hompardasim"   = df_rules_dist_sp_hompardasim,
+  "sp_homoutrossim"  = df_rules_dist_sp_homoutrossim,
+  "sp_homhomemsim"   = df_rules_dist_sp_homhomemsim,
+  "sp_hommulhersim"  = df_rules_dist_sp_hommulhersim,
+  "sp_pm"            = df_rules_dist_sp_pm,
+  "sp_pm1"           = df_rules_dist_sp_pm1,
+  "sp_pc1"           = df_rules_dist_sp_pc1,
+  "sp_pmpc"          = df_rules_dist_sp_pmpc,
+  "sp_jui2"          = df_rules_dist_sp_jui2,
+  "sp_pro2"          = df_rules_dist_sp_pro2,
+  "sp_defp2"         = df_rules_dist_sp_defp2,
+  "sp_presospc"      = df_rules_dist_sp_presospc,
+  "sp_ocuppc"        = df_rules_dist_sp_ocuppc,
+  "sp_presossuapi"   = df_rules_dist_sp_presossuapi,
+  "sp_ocupsuapi"     = df_rules_dist_sp_ocupsuapi
+)
+
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_dist_")
+  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+}
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_segurancapublica_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+
+rm(list = ls())
+gc()
+```

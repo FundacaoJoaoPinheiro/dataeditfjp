@@ -21,9 +21,11 @@ create_report <- function(){
   path_list <- c(
     "MA" = system.file("qmd", "ma_report.qmd", package = "criticaldatafjp"),
     "AS" = system.file("qmd", "as_report.qmd", package = "criticaldatafjp"),
-    "EE" = system.file("qmd", "ee_report.qmd", package = "criticaldatafjp"),
     "EA" = system.file("qmd", "ea_report.qmd", package = "criticaldatafjp"),
-    "SE" = system.file("qmd", "se_report.qmd", package = "criticaldatafjp")
+    "SE" = system.file("qmd", "se_report.qmd", package = "criticaldatafjp"),
+    "HS" = system.file("qmd", "hs_report.qmd", package = "criticaldatafjp"),
+    "SP" = system.file("qmd", "sp_report.qmd", package = "criticaldatafjp"),
+    "DA" = system.file("qmd", "da_report.qmd", package = "criticaldatafjp")
   )
 
 

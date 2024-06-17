@@ -4593,7 +4593,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(var), 
+    table_descriptive(variable = var,data = data), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -4618,7 +4618,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(var))
+  print(chart_boxplot(variable = var,data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -4632,7 +4632,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(var))
+  print(chart_histogram(variable = var,data = data))
   cat("\\pagebreak\n")
 }
 ```

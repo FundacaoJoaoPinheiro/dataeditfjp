@@ -39,9 +39,6 @@ output-file: "as_relatorio.html"
 
 ```{r setup, include=FALSE}
 
-# source(sistem.file("R", "aux_functions.R"), package = "criticaldatafjp")
-#source(here::here("R", "aux_functions.R"))
-
 table_descriptive <- function(variable, data){
   res <- data |>
     dplyr::group_by(ANO) |>
@@ -261,6 +258,7 @@ compare_lag <- function(var){
 
 ```
 
+
 ```{r set_param_global}
 
 k1 <- 2 
@@ -274,6 +272,11 @@ chart_title <- "Sumário da validação por regra estabelecida"
 chart_label <- c("Suspeita", "Validada", "Ausente", "Total")
 chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
 chart_xlab <- ""
+
+
+k <- 1.5 
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
@@ -290,6 +293,13 @@ var_numeric <- data |>
   ) |> 
   colnames() |> 
   unlist()
+
+qualitative_var <- c("AS_ORGGESTOR","AS_PFMPMUAS","AS_PSENOR","AS_ORGCADU","AS_LEIMAS","AS_IPROBA")
+
+deleted_var <- c("AS_IMINST","AS_IPROME","AS_PLANOAS","AS_FINFEES","AS_FUNCON","AS_DELIOR","AS_EXESOC","AS_SAMAS","AS_PUSIMOAVAS","AS_IRHAS","AS_RHPOSGRA","AS_PMOSESOAS", "AS_CONSDELIB","AS_RHGIPOAS","AS_EXEORCA","AS_IMINSTI","AS_FUNDOAS","AS_GESTSUAS","AS_MOSESOAS","AS_REGULAOFERTA","AS_PREVORCAS","AS_POLITICAAS","AS_USIMOAVAS")
+
+var_numeric <- var_numeric[!(var_numeric %in% c(qualitative_var,deleted_var))]
+
 ```
 
 ```{r get_var_character}
@@ -301,6 +311,9 @@ var_char <- data |>
   ) |> 
   colnames() |> 
   unlist()
+
+var_char <- c(qualitative_var, var_char[!(var_char %in% c(deleted_var))])
+
 ```
 
 # Introdução
@@ -346,41 +359,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, met
 
 ```{r get_cat}
 
-## Categorias varíaveis dicotômicas
-cat_fundoas <- c(
-  "Sim",
-  "Não"
-)
-
-cat_prevorcas <- c(
-  "Sim",
-  "Não"
-)
-
-cat_politicaas <- c(
-  "Sim",
-  "Não"
-)
-
-cat_regularog <- c(
-  "Sim",
-  "Não"
-)
-
-cat_regulaoferta <- c(
-  "Sim",
-  "Não"
-)
-
-cat_usimoavas <- c(
-  "Sim",
-  "Não"
-)
-
-cat_mosesoas <- c(
-  "Sim",
-  "Não"
-)
+## variaveis Categoricas
 
 ## Categorias politomica
 cat_gestsuas <- c(
@@ -394,8 +373,187 @@ cat_orggestor <- c(0,1,2,3)
 cat_iminst <- seq(0,28,1)
 cat_pfmpmuas <- c(1,0.80,0.60,0.30,0.20,0.05,0)
 cat_psenor <- c(0,1,2)
+cat_orgcadu <- c(0,1,2,3)
+cat_leimas <- c(0,1,2)
+cat_iproba <- c(1,2,3)
+cat_regulaprog <- c("Sim", "Não")
 
 ```
+
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 1)",
+  `4` = "Valor está dentro da faixa esperada (0 a 10)",
+  `5` = "Valor está dentro da faixa esperada (0 a 100)",
+  `6` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `7` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `8` = "Valor está dentro da faixa esperada (1 a 5)",
+  # Casos especiais
+  `9` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `10` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_AS_INDCRAS",      
+    "VI_AS_IDCRASME",       
+    "VI_AS_IDCREASNOR",             
+    "VI_AS_IDCONSELHO",             
+    "VI_AS_IGDM",        
+    "VI_AS_IGDSUASM",           
+    "VI_AS_NCRAS",
+    "VI_AS_NCREAS",
+    "VI_AS_FCADMEIOSAL",
+    "VI_AS_RHTOTALA",
+    "VI_AS_RHTOTALB",
+    "VI_AS_RHAS",
+    "VI_AS_RHPSI",
+    "VI_AS_RHENME",
+    "VI_AS_RHCURSU",
+    "VI_AS_RHTOEST",
+    "VI_AS_RHTOCEL",          
+    "VI_AS_BPCDEF",
+    "VI_AS_BPCID",
+    "VI_AS_BPC",
+    "VI_AS_RHTPOASPH",
+    "VI_AS_BPCIDPOPI",
+    "VI_AS_POPCADUNICO",
+    "VI_AS_COBBF",
+    "VI_AS_POPIDCADSPOP",
+    "VI_AS_POPRURALPOP",
+    "VI_AS_POPPOBEXTRPOB",
+    "VI_AS_PCOBBFMEIOSAL",
+    "VI_AS_POPPOBEXTRCAD",
+    "VI_AS_POPIDPOBEXTRCAD",
+    "VI_AS_IDOSOPOBEXTRPOBCADS",
+    "VI_AS_DEFPOBEXTRCAD",
+    "VI_AS_CRIANADOLEPOBEXTRPOP",
+    "VI_AS_POPIDPOBEXTRCADS",
+    "VI_AS_POPIDCADS",
+    "VI_AS_EFINCOMPCAD",
+    "VI_AS_PENLECAD",      
+    "VI_AS_POPINDIGENACADS",
+    "VI_AS_POPPRETAPARDACADS",      
+    "VI_AS_PVULSANEACAD",
+    "VI_AS_SANEACAD",  
+    "VI_AS_POPRURALCADS",        
+    "VI_AS_IGDMCONDE",        
+    "VI_AS_IGDMCONDS",
+    "VI_AS_IGDMATU",    
+    "VI_AS_IGDMCOBCAD",
+    "VI_AS_BPCPID",
+    "VI_AS_BPCPDEF",
+    "VI_AS_RHASPS",
+    "VI_AS_RHPSIPS",
+    "VI_AS_RHVPOAAS",
+    "VI_AS_RHVINEST",
+    "VI_AS_ORGGESTOR",
+    "VI_AS_PFMPMUAS", 
+    "VI_AS_IPROBA",
+    "VI_AS_PSENOR",
+    "VI_AS_ORGCADU",
+    "VI_AS_REGULAPROG"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_AS_INDCRAS"              ~ desc_regra_valid[8],      
+      "VI_AS_IDCRASME"             ~ desc_regra_valid[3],       
+      "VI_AS_IDCREASNOR"           ~ desc_regra_valid[3],             
+      "VI_AS_IDCONSELHO"           ~ desc_regra_valid[3],             
+      "VI_AS_IGDM"                 ~ desc_regra_valid[3],        
+      "VI_AS_IGDSUASM"             ~ desc_regra_valid[3],           
+      "VI_AS_NCRAS"                ~ desc_regra_valid[1],
+      "VI_AS_NCREAS"               ~ desc_regra_valid[1],
+      "VI_AS_FCADMEIOSAL"          ~ desc_regra_valid[1],
+      "VI_AS_RHTOTALA"             ~ desc_regra_valid[1],
+      "VI_AS_RHTOTALB"             ~ desc_regra_valid[1],
+      "VI_AS_RHAS"                 ~ desc_regra_valid[1],
+      "VI_AS_RHPSI"                ~ desc_regra_valid[1],
+      "VI_AS_RHENME"               ~ desc_regra_valid[1],
+      "VI_AS_RHCURSU"              ~ desc_regra_valid[1],
+      "VI_AS_RHTOEST"              ~ desc_regra_valid[1],
+      "VI_AS_RHTOCEL"              ~ desc_regra_valid[1],          
+      "VI_AS_BPCDEF"               ~ desc_regra_valid[6],
+      "VI_AS_BPCID"                ~ desc_regra_valid[1],
+      "VI_AS_BPC"                  ~ desc_regra_valid[1],
+      "VI_AS_RHTPOASPH"            ~ desc_regra_valid[7],
+      "VI_AS_BPCIDPOPI"            ~ desc_regra_valid[5],
+      "VI_AS_POPCADUNICO"          ~ desc_regra_valid[5],
+      "VI_AS_COBBF"                ~ desc_regra_valid[5],
+      "VI_AS_POPIDCADSPOP"         ~ desc_regra_valid[5],
+      "VI_AS_POPRURALPOP"          ~ desc_regra_valid[5],
+      "VI_AS_POPPOBEXTRPOB"        ~ desc_regra_valid[5],
+      "VI_AS_PCOBBFMEIOSAL"        ~ desc_regra_valid[5],
+      "VI_AS_POPPOBEXTRCAD"        ~ desc_regra_valid[5],
+      "VI_AS_POPIDPOBEXTRCAD"      ~ desc_regra_valid[5],
+      "VI_AS_IDOSOPOBEXTRPOBCADS"  ~ desc_regra_valid[5],
+      "VI_AS_DEFPOBEXTRCAD"        ~ desc_regra_valid[5],
+      "VI_AS_CRIANADOLEPOBEXTRPOP" ~ desc_regra_valid[5],
+      "VI_AS_POPIDPOBEXTRCADS"     ~ desc_regra_valid[5],
+      "VI_AS_POPIDCADS"            ~ desc_regra_valid[5],
+      "VI_AS_EFINCOMPCAD"          ~ desc_regra_valid[5],
+      "VI_AS_PENLECAD"             ~ desc_regra_valid[5],      
+      "VI_AS_POPINDIGENACADS"      ~ desc_regra_valid[5],
+      "VI_AS_POPPRETAPARDACADS"    ~ desc_regra_valid[5],      
+      "VI_AS_PVULSANEACAD"         ~ desc_regra_valid[5],
+      "VI_AS_SANEACAD"             ~ desc_regra_valid[5],  
+      "VI_AS_POPRURALCADS"         ~ desc_regra_valid[5],        
+      "VI_AS_IGDMCONDE"            ~ desc_regra_valid[5],        
+      "VI_AS_IGDMCONDS"            ~ desc_regra_valid[5],
+      "VI_AS_IGDMATU"              ~ desc_regra_valid[5],    
+      "VI_AS_IGDMCOBCAD"           ~ desc_regra_valid[5],
+      "VI_AS_BPCPID"               ~ desc_regra_valid[5],
+      "VI_AS_BPCPDEF"              ~ desc_regra_valid[5],
+      "VI_AS_RHASPS"               ~ desc_regra_valid[5],
+      "VI_AS_RHPSIPS"              ~ desc_regra_valid[5],
+      "VI_AS_RHVPOAAS"             ~ desc_regra_valid[5],
+      "VI_AS_RHVINEST"             ~ desc_regra_valid[5],
+      "VI_AS_ORGGESTOR"            ~ desc_regra_valid[2],
+      "VI_AS_PFMPMUAS"             ~ desc_regra_valid[2], 
+      "VI_AS_IPROBA"               ~ desc_regra_valid[2],
+      "VI_AS_PSENOR"               ~ desc_regra_valid[2],
+      "VI_AS_ORGCADU"              ~ desc_regra_valid[2],
+      "VI_AS_REGULAPROG"           ~ desc_regra_valid[2]
+    )
+  )
+```
+
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma BPCID e BPCDEF é igual a BPC" ,
+  `2` = "A soma BPCPID e BPCPDEF é aproximadamente 100%"
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CF_AS_BPC_total_year",
+    "CF_AS_BPCP_total_year"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CF_AS_BPC_total_year" ~ desc_regra_consist[1],
+      "CF_AS_BPCP_total_year" ~ desc_regra_consist[2]
+    )
+  )
+```
+
+
+
 
 ## Tipo
 
@@ -408,6 +566,8 @@ rules_type <- validate::validator(
   TI_AS_IDCRASME             = is.numeric(AS_IDCRASME),
   TI_AS_IDCREASNOR           = is.numeric(AS_IDCREASNOR),
   TI_AS_IDCONSELHO           = is.numeric(AS_IDCONSELHO),
+  TI_AS_IGDM                 = is.numeric(AS_IGDM),
+  TI_AS_AS_IGDSUASM          = is.numeric(AS_IGDSUASM),
   TI_AS_NCRAS                = is.numeric(AS_NCRAS),
   TI_AS_NCREAS               = is.numeric(AS_NCREAS),
   TI_AS_FCADMEIOSAL          = is.numeric(AS_FCADMEIOSAL),
@@ -417,7 +577,7 @@ rules_type <- validate::validator(
   TI_AS_RHPSI                = is.numeric(AS_RHPSI),
   TI_AS_RHENME               = is.numeric(AS_RHENME),
   TI_AS_RHCURSU              = is.numeric(AS_RHCURSU),
-  TI_AS_RHTOEST              = is.numeric(AS_RHTOEST),
+  TI_as_rhtoest              = is.numeric(AS_RHTOEST),
   TI_AS_RHTOCEL              = is.numeric(AS_RHTOCEL),
   TI_AS_BPCDEF               = is.numeric(AS_BPCDEF),
   TI_AS_BPCID                = is.numeric(AS_BPCID),
@@ -431,30 +591,35 @@ rules_type <- validate::validator(
   TI_AS_POPPOBEXTRPOB        = is.numeric(AS_POPPOBEXTRPOB),
   TI_AS_PCOBBFMEIOSAL        = is.numeric(AS_PCOBBFMEIOSAL),
   TI_AS_POPPOBEXTRCAD        = is.numeric(AS_POPPOBEXTRCAD),
-  TI_AS_DEFPOBEXTRCAD        = is.numeric(AS_DEFPOBEXTRCAD),
   TI_AS_POPIDPOBEXTRCAD      = is.numeric(AS_POPIDPOBEXTRCAD),
+  TI_AS_IDOSOPOBEXTRPOBCADS  = is.numeric(AS_IDOSOPOBEXTRPOBCADS),
+  TI_AS_DEFPOBEXTRCAD        = is.numeric(AS_DEFPOBEXTRCAD),
+  TI_AS_CRIANADOLEPOBEXTRPOP = is.numeric(AS_CRIANADOLEPOBEXTRPOP),
   TI_AS_POPIDPOBEXTRCADS     = is.numeric(AS_POPIDPOBEXTRCADS),
   TI_AS_POPIDCADS            = is.numeric(AS_POPIDCADS),
-  TI_AS_IDOSOPOBEXTRPOBCADS  = is.numeric(AS_IDOSOPOBEXTRPOBCADS),
   TI_AS_EFINCOMPCAD          = is.numeric(AS_EFINCOMPCAD),
-  TI_AS_CRIANADOLEPOBEXTRPOP = is.numeric(AS_CRIANADOLEPOBEXTRPOP),
+  TI_AS_PENLECAD             = is.numeric(AS_PENLECAD),
   TI_AS_POPINDIGENACADS      = is.numeric(AS_POPINDIGENACADS),
   TI_AS_POPPRETAPARDACADS    = is.numeric(AS_POPPRETAPARDACADS),
-  TI_AS_PENLECAD             = is.numeric(AS_PENLECAD),
   TI_AS_PVULSANEACAD         = is.numeric(AS_PVULSANEACAD),
   TI_AS_SANEACAD             = is.numeric(AS_SANEACAD),
   TI_AS_POPRURALCADS         = is.numeric(AS_POPRURALCADS),
+  TI_AS_IGDMCONDE            = is.numeric(AS_IGDMCONDE),
+  TI_AS_IGDMCONDS            = is.numeric(AS_IGDMCONDS),
+  TI_AS_IGDMATU              = is.numeric(AS_IGDMATU),
+  TI_AS_IGDMCOBCAD           = is.numeric(AS_IGDMCOBCAD),
   TI_AS_BPCPID               = is.numeric(AS_BPCPID),
   TI_AS_BPCPDEF              = is.numeric(AS_BPCPDEF),
   TI_AS_RHASPS               = is.numeric(AS_RHASPS),
   TI_AS_RHPSIPS              = is.numeric(AS_RHPSIPS),
   TI_AS_RHVPOAAS             = is.numeric(AS_RHVPOAAS),
-  TI_AS_RHVINEST             = is.numeric(AS_RHVINEST),
-  TI_AS_ORGGESTOR            = is.numeric(AS_ORGGESTOR), ### categorica
-  TI_AS_PFMPMUAS             = is.numeric(AS_PFMPMUAS), ### categorica. Eh quantitativa
-  TI_AS_PSENOR               = is.numeric(AS_PSENOR) ### categorica
+  TI_AS_RHVINEST             = is.numeric(AS_RHVINEST)#,
+#  TI_AS_ORGGESTOR            = is.numeric(AS_ORGGESTOR), ### categorica
+#  TI_AS_PFMPMUAS             = is.numeric(AS_PFMPMUAS), ### categorica. Eh quantitativa
+#  TI_AS_PSENOR               = is.numeric(AS_PSENOR) ### categorica
 )
 ```
+
 
 ```{r confront_type}
 
@@ -464,21 +629,19 @@ check_type <- validate::confront(data, rules_type)
 validate::summary(check_type) |> 
   dplyr::select(
     Regra    = name,
-    Total    = items,
-    Validada = passes,
-    Suspeita = fails,
-    Ausente  = nNA
+    Validada = passes
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
+
 ## Validade
 
-```{r data_rules_valid_ma_all}
+```{r data_rules_valid_as_all}
 
 ## df com o resultado das aplicações das regras
-df_rules_valid_ma_all <- data |> 
+df_rules_valid_as_all <- data |> 
   dplyr::select(
     Ano   = ANO, 
     ibge7 = IBGE7, 
@@ -486,11 +649,12 @@ df_rules_valid_ma_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_AS_INDCRAS             = dplyr::if_else(!is.na(AS_INDCRAS), F, T),
-    VI_NA_AS_IDCRASME            = dplyr::if_else(!is.na(AS_IDCRASME), F, T),
-    VI_NA_AS_IDCREASNOR          = dplyr::if_else(!is.na(AS_IDCREASNOR), F, T),
-   # VI_NA_AS_IDCONSELHO          = dplyr::if_else(!is.na(AS_IDCONSELHO), F, T),
-    
+    VI_NA_AS_INDCRAS              = dplyr::if_else(!is.na(AS_INDCRAS), F, T),
+    VI_NA_AS_IDCRASME             = dplyr::if_else(!is.na(AS_IDCRASME), F, T),
+    VI_NA_AS_IDCREASNOR           = dplyr::if_else(!is.na(AS_IDCREASNOR), F, T),
+    VI_NA_AS_IDCONSELHO           = dplyr::if_else(!is.na(AS_IDCONSELHO), F, T),
+    VI_NA_AS_IGDM                 = dplyr::if_else(!is.na(AS_IGDM), F, T),
+    VI_NA_AS_IGDSUASM             = dplyr::if_else(!is.na(AS_IGDSUASM), F, T),
     VI_NA_AS_NCRAS                = dplyr::if_else(!is.na(AS_NCRAS), F, T),
     VI_NA_AS_NCREAS               = dplyr::if_else(!is.na(AS_NCREAS), F, T),
     VI_NA_AS_FCADMEIOSAL          = dplyr::if_else(!is.na(AS_FCADMEIOSAL), F, T),
@@ -514,89 +678,103 @@ df_rules_valid_ma_all <- data |>
     VI_NA_AS_POPPOBEXTRPOB        = dplyr::if_else(!is.na(AS_POPPOBEXTRPOB), F, T),
     VI_NA_AS_PCOBBFMEIOSAL        = dplyr::if_else(!is.na(AS_PCOBBFMEIOSAL), F, T),
     VI_NA_AS_POPPOBEXTRCAD        = dplyr::if_else(!is.na(AS_POPPOBEXTRCAD), F, T),
+    VI_NA_AS_POPIDPOBEXTRCAD      = dplyr::if_else(!is.na(AS_POPIDPOBEXTRCAD), F, T),  
+    VI_NA_AS_IDOSOPOBEXTRPOBCADS  = dplyr::if_else(!is.na(AS_IDOSOPOBEXTRPOBCADS), F, T),
     VI_NA_AS_DEFPOBEXTRCAD        = dplyr::if_else(!is.na(AS_DEFPOBEXTRCAD), F, T),
-    VI_NA_AS_POPIDPOBEXTRCAD      = dplyr::if_else(!is.na(AS_POPIDPOBEXTRCAD), F, T),
+    VI_NA_AS_CRIANADOLEPOBEXTRPOP = dplyr::if_else(!is.na(AS_CRIANADOLEPOBEXTRPOP), F, T),
     VI_NA_AS_POPIDPOBEXTRCADS     = dplyr::if_else(!is.na(AS_POPIDPOBEXTRCADS), F, T),
     VI_NA_AS_POPIDCADS            = dplyr::if_else(!is.na(AS_POPIDCADS), F, T),
-    VI_NA_AS_IDOSOPOBEXTRPOBCADS  = dplyr::if_else(!is.na(AS_IDOSOPOBEXTRPOBCADS), F, T),
     VI_NA_AS_EFINCOMPCAD          = dplyr::if_else(!is.na(AS_EFINCOMPCAD), F, T),
-    VI_NA_AS_CRIANADOLEPOBEXTRPOP = dplyr::if_else(!is.na(AS_CRIANADOLEPOBEXTRPOP), F, T),
+    VI_NA_AS_PENLECAD             = dplyr::if_else(!is.na(AS_PENLECAD), F, T),
     VI_NA_AS_POPINDIGENACADS      = dplyr::if_else(!is.na(AS_POPINDIGENACADS), F, T),
     VI_NA_AS_POPPRETAPARDACADS    = dplyr::if_else(!is.na(AS_POPPRETAPARDACADS), F, T),
-    VI_NA_AS_PENLECAD             = dplyr::if_else(!is.na(AS_PENLECAD), F, T),
     VI_NA_AS_PVULSANEACAD         = dplyr::if_else(!is.na(AS_PVULSANEACAD), F, T),
     VI_NA_AS_SANEACAD             = dplyr::if_else(!is.na(AS_SANEACAD), F, T),
     VI_NA_AS_POPRURALCADS         = dplyr::if_else(!is.na(AS_POPRURALCADS), F, T),
+    VI_NA_AS_IGDMCONDE            = dplyr::if_else(!is.na(AS_IGDMCONDE), F, T),
+    VI_NA_AS_IGDMCONDS            = dplyr::if_else(!is.na(AS_IGDMCONDS), F, T),
+    VI_NA_AS_IGDMATU              = dplyr::if_else(!is.na(AS_IGDMATU), F, T),
+    VI_NA_AS_IGDMCOBCAD           = dplyr::if_else(!is.na(AS_IGDMCOBCAD), F, T),
     VI_NA_AS_BPCPID               = dplyr::if_else(!is.na(AS_BPCPID), F, T),
     VI_NA_AS_BPCPDEF              = dplyr::if_else(!is.na(AS_BPCPDEF), F, T),
     VI_NA_AS_RHASPS               = dplyr::if_else(!is.na(AS_RHASPS), F, T),
     VI_NA_AS_RHPSIPS              = dplyr::if_else(!is.na(AS_RHPSIPS), F, T),
     VI_NA_AS_RHVPOAAS             = dplyr::if_else(!is.na(AS_RHVPOAAS), F, T),
     VI_NA_AS_RHVINEST             = dplyr::if_else(!is.na(AS_RHVINEST), F, T),
+    
     VI_NA_AS_ORGGESTOR            = dplyr::if_else(!is.na(AS_ORGGESTOR), F, T),
     VI_NA_AS_PFMPMUAS             = dplyr::if_else(!is.na(AS_PFMPMUAS), F, T),
+    VI_NA_AS_IPROBA               = dplyr::if_else(!is.na(AS_IPROBA), F, T), 
     VI_NA_AS_PSENOR               = dplyr::if_else(!is.na(AS_PSENOR), F, T),
+    VI_NA_AS_ORGCADU              = dplyr::if_else(!is.na(AS_ORGCADU) , F, T),
+    VI_NA_AS_REGULAPROG           = dplyr::if_else(!is.na(AS_REGULAPROG), F, T),
+    
     # between 0 and 1, and rules with variables between 1 and 5 or between 0 and 100 or between 0 and 1000
-    VI_AS_INDCRAS              = dplyr::if_else(dplyr::between(AS_INDCRAS, 1, 5), F, T),
-    VI_AS_IDCRASME             = dplyr::if_else(dplyr::between(AS_IDCRASME, 1, 5), F, T),
-    VI_AS_IDCREASNOR           = dplyr::if_else(dplyr::between(AS_IDCREASNOR, 0, 1), F, T),
-    VI_AS_IDCONSELHO           = dplyr::if_else(dplyr::between(AS_IDCONSELHO, 0, 1), F, T),
-    VI_AS_BPCIDPOPI            = dplyr::if_else(dplyr::between(AS_BPCIDPOPI, 0, 1000), F, T),
-    VI_AS_POPCADUNICO          = dplyr::if_else(dplyr::between(AS_POPCADUNICO , 0, 100), F, T),
-    VI_AS_COBBF                = dplyr::if_else(dplyr::between(AS_COBBF, 0, 100), F, T),
-    VI_AS_POPIDCADSPOP         = dplyr::if_else(dplyr::between(AS_POPIDCADSPOP, 0, 100), F, T),
-    VI_AS_POPRURALPOP          = dplyr::if_else(dplyr::between(AS_POPRURALPOP, 0, 100), F, T),
-    VI_AS_POPPOBEXTRPOB        = dplyr::if_else(dplyr::between(AS_POPPOBEXTRPOB , 0, 100), F, T),
-    VI_AS_PCOBBFMEIOSAL        = dplyr::if_else(dplyr::between(AS_PCOBBFMEIOSAL, 0, 100), F, T),
-    VI_AS_POPPOBEXTRCAD        = dplyr::if_else(dplyr::between(AS_POPPOBEXTRCAD, 0, 100), F, T),
-    VI_AS_DEFPOBEXTRCAD        = dplyr::if_else(dplyr::between(AS_DEFPOBEXTRCAD, 0, 100), F, T),
-    VI_AS_POPIDPOBEXTRCAD      = dplyr::if_else(dplyr::between(AS_POPIDPOBEXTRCAD, 0, 100), F, T),
-    VI_AS_POPIDPOBEXTRCADS     = dplyr::if_else(dplyr::between(AS_POPIDPOBEXTRCADS, 0, 100), F, T),
-    VI_AS_POPIDCADS            = dplyr::if_else(dplyr::between(AS_POPIDCADS, 0, 100), F, T),
-    VI_AS_IDOSOPOBEXTRPOBCADS  = dplyr::if_else(dplyr::between(AS_IDOSOPOBEXTRPOBCADS, 0, 100), F, T),
-    VI_AS_EFINCOMPCAD          = dplyr::if_else(dplyr::between(AS_EFINCOMPCAD, 0, 100), F, T),
-    VI_AS_CRIANADOLEPOBEXTRPOP = dplyr::if_else(dplyr::between(AS_CRIANADOLEPOBEXTRPOP, 0, 100), F, T),
-    VI_AS_POPINDIGENACADS      = dplyr::if_else(dplyr::between(AS_POPINDIGENACADS, 0, 100), F, T),
-    VI_AS_POPPRETAPARDACADS    = dplyr::if_else(dplyr::between(AS_POPPRETAPARDACADS, 0, 100), F, T),
-    VI_AS_PENLECAD             = dplyr::if_else(dplyr::between(AS_PENLECAD, 0, 100), F, T),
-    VI_AS_PVULSANEACAD         = dplyr::if_else(dplyr::between(AS_PVULSANEACAD, 0, 100), F, T),
-    VI_AS_SANEACAD             = dplyr::if_else(dplyr::between(AS_SANEACAD, 0, 100), F, T),
-    VI_AS_POPRURALCADS         = dplyr::if_else(dplyr::between(AS_POPRURALCADS, 0, 100), F, T),
-    VI_AS_BPCPID               = dplyr::if_else(dplyr::between(AS_BPCPID, 0, 100), F, T),
-    VI_AS_BPCPDEF              = dplyr::if_else(dplyr::between(AS_BPCPDEF, 0, 100), F, T),
-    VI_AS_RHASPS               = dplyr::if_else(dplyr::between(AS_RHASPS, 0, 100), F, T),
-    VI_AS_RHPSIPS              = dplyr::if_else(dplyr::between(AS_RHPSIPS, 0, 100), F, T),
-    VI_AS_RHVPOAAS             = dplyr::if_else(dplyr::between(AS_RHVPOAAS, 0, 100), F, T),
-    VI_AS_RHVINEST             = dplyr::if_else(dplyr::between(AS_RHVINEST, 0, 100), F, T),   
+    VI_AS_INDCRAS                 = dplyr::if_else(dplyr::between(AS_INDCRAS, 1, 5), F, T),
+    VI_AS_IDCRASME                = dplyr::if_else(dplyr::between(AS_IDCRASME, 1, 5), F, T),
+    VI_AS_IDCREASNOR              = dplyr::if_else(dplyr::between(AS_IDCREASNOR, 0, 1), F, T),
+    VI_AS_IDCONSELHO              = dplyr::if_else(dplyr::between(AS_IDCONSELHO, 0, 1), F, T),
+    VI_AS_IGDM                    = dplyr::if_else(dplyr::between(AS_IGDM, 0, 1) , F, T), ## muda de 0 a 100 para 0 a 1
+    VI_AS_IGDSUASM                = dplyr::if_else(dplyr::between(AS_IGDSUASM, 0, 1) , F, T),
+    VI_AS_BPCIDPOPI               = dplyr::if_else(dplyr::between(AS_BPCIDPOPI, 0, 1000), F, T),
+    VI_AS_POPCADUNICO             = dplyr::if_else(dplyr::between(AS_POPCADUNICO , 0, 100), F, T),
+    VI_AS_COBBF                   = dplyr::if_else(dplyr::between(AS_COBBF, 0, 100), F, T),
+    VI_AS_POPIDCADSPOP            = dplyr::if_else(dplyr::between(AS_POPIDCADSPOP, 0, 100), F, T),
+    VI_AS_POPRURALPOP             = dplyr::if_else(dplyr::between(AS_POPRURALPOP, 0, 100), F, T),
+    VI_AS_POPPOBEXTRPOB           = dplyr::if_else(dplyr::between(AS_POPPOBEXTRPOB , 0, 100), F, T),
+    VI_AS_PCOBBFMEIOSAL           = dplyr::if_else(dplyr::between(AS_PCOBBFMEIOSAL, 0, 100), F, T),
+    VI_AS_POPPOBEXTRCAD           = dplyr::if_else(dplyr::between(AS_POPPOBEXTRCAD, 0, 100), F, T),
+    VI_AS_DEFPOBEXTRCAD           = dplyr::if_else(dplyr::between(AS_DEFPOBEXTRCAD, 0, 100), F, T),
+    VI_AS_POPIDPOBEXTRCAD         = dplyr::if_else(dplyr::between(AS_POPIDPOBEXTRCAD, 0, 100), F, T),
+    VI_AS_POPIDPOBEXTRCADS        = dplyr::if_else(dplyr::between(AS_POPIDPOBEXTRCADS, 0, 100), F, T),
+    VI_AS_POPIDCADS               = dplyr::if_else(dplyr::between(AS_POPIDCADS, 0, 100), F, T),
+    VI_AS_IDOSOPOBEXTRPOBCADS     = dplyr::if_else(dplyr::between(AS_IDOSOPOBEXTRPOBCADS, 0, 100), F, T),
+    VI_AS_EFINCOMPCAD             = dplyr::if_else(dplyr::between(AS_EFINCOMPCAD, 0, 100), F, T),
+    VI_AS_CRIANADOLEPOBEXTRPOP    = dplyr::if_else(dplyr::between(AS_CRIANADOLEPOBEXTRPOP, 0, 100), F, T),
+    VI_AS_POPINDIGENACADS         = dplyr::if_else(dplyr::between(AS_POPINDIGENACADS, 0, 100), F, T),
+    VI_AS_POPPRETAPARDACADS       = dplyr::if_else(dplyr::between(AS_POPPRETAPARDACADS, 0, 100), F, T),
+    VI_AS_PENLECAD                = dplyr::if_else(dplyr::between(AS_PENLECAD, 0, 100), F, T),
+    VI_AS_PVULSANEACAD            = dplyr::if_else(dplyr::between(AS_PVULSANEACAD, 0, 100), F, T),
+    VI_AS_SANEACAD                = dplyr::if_else(dplyr::between(AS_SANEACAD, 0, 100), F, T),
+    VI_AS_POPRURALCADS            = dplyr::if_else(dplyr::between(AS_POPRURALCADS, 0, 100), F, T),
+    VI_AS_BPCPID                  = dplyr::if_else(dplyr::between(AS_BPCPID, 0, 100), F, T),
+    VI_AS_BPCPDEF                 = dplyr::if_else(dplyr::between(AS_BPCPDEF, 0, 100), F, T),
+    VI_AS_RHASPS                  = dplyr::if_else(dplyr::between(AS_RHASPS, 0, 100), F, T),
+    VI_AS_RHPSIPS                 = dplyr::if_else(dplyr::between(AS_RHPSIPS, 0, 100), F, T),
+    VI_AS_RHVPOAAS                = dplyr::if_else(dplyr::between(AS_RHVPOAAS, 0, 100), F, T),
+    VI_AS_RHVINEST                = dplyr::if_else(dplyr::between(AS_RHVINEST, 0, 100), F, T),   
     # no negative 0 
-    VI_AS_NCRAS              = dplyr::if_else(AS_NCRAS >= 0, F, T),
-    VI_AS_NCREAS             = dplyr::if_else(AS_NCREAS >= 0, F, T),
-    VI_AS_FCADMEIOSAL        = dplyr::if_else(AS_FCADMEIOSAL >= 0, F, T),
-    VI_AS_RHTOTALA           = dplyr::if_else(AS_RHTOTALA >= 0, F, T),
-    VI_AS_RHTOTALB           = dplyr::if_else(AS_RHTOTALB >= 0, F, T),
-    VI_AS_RHAS               = dplyr::if_else(AS_RHAS >= 0, F, T),
-    VI_AS_RHPSI              = dplyr::if_else(AS_RHPSI >= 0, F, T),
-    VI_AS_RHENME             = dplyr::if_else(AS_RHENME >= 0, F, T),
-    VI_AS_RHCURSU            = dplyr::if_else(AS_RHCURSU >= 0, F, T),
-    VI_AS_RHTOEST            = dplyr::if_else(AS_RHTOEST >= 0, F, T),
-    VI_AS_RHTOCEL            = dplyr::if_else(AS_RHTOCEL >= 0, F, T),
-    VI_AS_BPCDEF             = dplyr::if_else(AS_BPCDEF >= 0, F, T),
-    VI_AS_BPCID              = dplyr::if_else(AS_BPCID >= 0, F, T),
-    VI_AS_BPC                = dplyr::if_else(AS_BPC >= 0, F, T),
-    VI_AS_RHTPOASPH          = dplyr::if_else(AS_RHTPOASPH >= 0, F, T),
-    VI_AS_BPCIDPOPI          = dplyr::if_else(AS_BPCIDPOPI >= 0, F, T),
+    VI_AS_NCRAS                   = dplyr::if_else(AS_NCRAS >= 0, F, T),
+    VI_AS_NCREAS                  = dplyr::if_else(AS_NCREAS >= 0, F, T),
+    VI_AS_FCADMEIOSAL             = dplyr::if_else(AS_FCADMEIOSAL >= 0, F, T),
+    VI_AS_RHTOTALA                = dplyr::if_else(AS_RHTOTALA >= 0, F, T),
+    VI_AS_RHTOTALB                = dplyr::if_else(AS_RHTOTALB >= 0, F, T),
+    VI_AS_RHAS                    = dplyr::if_else(AS_RHAS >= 0, F, T),
+    VI_AS_RHPSI                   = dplyr::if_else(AS_RHPSI >= 0, F, T),
+    VI_AS_RHENME                  = dplyr::if_else(AS_RHENME >= 0, F, T),
+    VI_AS_RHCURSU                 = dplyr::if_else(AS_RHCURSU >= 0, F, T),
+    VI_AS_RHTOEST                 = dplyr::if_else(AS_RHTOEST >= 0, F, T),
+    VI_AS_RHTOCEL                 = dplyr::if_else(AS_RHTOCEL >= 0, F, T),
+    VI_AS_BPCDEF                  = dplyr::if_else(AS_BPCDEF >= 0, F, T),
+    VI_AS_BPCID                   = dplyr::if_else(AS_BPCID >= 0, F, T),
+    VI_AS_BPC                     = dplyr::if_else(AS_BPC >= 0, F, T),
+    VI_AS_RHTPOASPH               = dplyr::if_else(AS_RHTPOASPH >= 0, F, T),
+    VI_AS_BPCIDPOPI               = dplyr::if_else(AS_BPCIDPOPI >= 0, F, T),
     # categorical variable
-    VI_AS_OGESTOR       = dplyr::if_else(AS_ORGGESTOR %in% cat_orggestor, F, T),
-    VI_AS_PFMPMUAS      = dplyr::if_else(AS_PFMPMUAS  %in% cat_pfmpmuas, F, T),
-    VI_AS_IPROBA        = dplyr::if_else(dplyr::between(AS_IPROBA, 0, 3), F, T), # tratei como quantitativa 
-    VI_AS_PSENOR        = dplyr::if_else(AS_PSENOR  %in% cat_psenor, F, T)
+    VI_AS_OGESTOR                 = dplyr::if_else(AS_ORGGESTOR %in% cat_orggestor, F, T),
+    VI_AS_PFMPMUAS                = dplyr::if_else(AS_PFMPMUAS  %in% cat_pfmpmuas, F, T),
+    VI_AS_IPROBA                  = dplyr::if_else(AS_IPROBA %in% cat_iproba, F, T), 
+    VI_AS_PSENOR                  = dplyr::if_else(AS_PSENOR  %in% cat_psenor, F, T),
+    VI_AS_ORGCADU                 = dplyr::if_else(AS_ORGCADU  %in% cat_orgcadu, F, T),
+    VI_AS_REGULAPROG              = dplyr::if_else(AS_REGULAPROG  %in% cat_regulaprog, F, T)
+    
   )
 ```
 
-```{r data_wrangling_valid_ma_all}
+```{r data_wrangling_valid_as_all}
 
 ## Transformação dos resultados
-df_sumario_valid_ma <- df_rules_valid_ma_all |> 
+df_sumario_valid_as <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano, 
     ibge7, 
@@ -604,8 +782,8 @@ df_sumario_valid_ma <- df_rules_valid_ma_all |>
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
-## df com um sumário dos resultados
-df_sumario <- df_sumario_valid_ma |> 
+## df com um sumario dos resultados
+df_sumario <- df_sumario_valid_as |> 
   dplyr::group_by(Ano, Regra) |> 
   dplyr::summarise(
     Total        = dplyr::n(),
@@ -621,9 +799,10 @@ df_sumario <- df_sumario_valid_ma |>
 
 ### Todos os indicadores - Valores ausentes
 
-```{r table_valid_ma_na_all}
+```{r table_valid_as_na_all}
 
 df_sumario |>
+    dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -635,7 +814,8 @@ df_sumario |>
 
 ### Todos os indicadores - Demais regras
 
-```{r table_valid_ma_all}
+```{r table_valid_as_all}
+#| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(
@@ -644,16 +824,18 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
+
 ## Consistência
 
-```{r data_rules_consist_ma_all}
+```{r data_rules_consist_as_all}
 
 ## df com o resultado das aplicações das regras
-df_rules_consist_ma_all <- data |> 
+df_rules_consist_as_all <- data |> 
   dplyr::select(
     Ano   = ANO, 
     ibge7 = IBGE7, 
@@ -678,12 +860,12 @@ df_rules_consist_ma_all <- data |>
 ```{r data_wrangling_consist_ma_all}
 
 ## Tranformação dos resultados
-df_sumario_consist_ma <- df_rules_consist_ma_all |> 
+df_sumario_consist_as <- df_rules_consist_as_all |> 
   #dplyr::select(!c()) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_consist_ma |> 
+df_sumario <- df_sumario_consist_as |> 
   dplyr::group_by(Ano, Regra) |> 
   dplyr::summarise(
     Total        = dplyr::n(),
@@ -699,11 +881,13 @@ df_sumario <- df_sumario_consist_ma |>
 
 ### Todos os indicadores
 
-```{r table_consist_ma_all}
+```{r table_consist_as_all}
+#| column: screen-inset-right
 
 df_sumario |> 
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -897,7 +1081,7 @@ df_rules_dist_as_idconselho <- data |>
 
 ## Transformação dos resultados
 df_sumario_dist_as <- df_rules_dist_as_idconselho |> 
-  dplyr::select(!as_idconselho) |> 
+  dplyr::select(!AS_IDCONSELHO) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -934,38 +1118,139 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_NCRAS
+### AS_IGDM
 
-```{r rules_dist_ma_cana}
+```{r rules_dist_as_igdm}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_cana <- data |> 
+df_rules_dist_as_igdm <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_AS_IGDM_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDM), F, T), # Longitudinal (município)
+    
+    DF_AS_IGDM_out_munic     = dplyr::if_else(!outlier_function(AS_IGDM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_igdm}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_igdm |> 
+  dplyr::select(!AS_IGDM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdm}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdm}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_IGDSUASM
+
+```{r rules_dist_as_igdsuasm}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_igdsuasm <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDSUASM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_AS_IGDSUASM_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDSUASM), F, T), # Longitudinal (município)
+    
+    DF_AS_IGDSUASM_out_munic     = dplyr::if_else(!outlier_function(AS_IGDSUASM), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_igdsuasm}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_igdsuasm |> 
+  dplyr::select(!AS_IGDSUASM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdsuasm}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdsuasm}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_NCRAS
+
+
+```{r rules_dist_as_ncras}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_ncras <- data |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_NCRAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_AS_NCRAS_hampel_munic  = dplyr::if_else(!hampel_filter(AS_NCRAS), F, T), # Longitudinal (município)
+    DF_as_ncras_hampel_munic  = dplyr::if_else(!hampel_filter(AS_NCRAS), F, T), # Longitudinal (município)
     
-    DF_AS_NCRAS_out_munic     = dplyr::if_else(!outlier_function(AS_NCRAS), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_min_munic     = dplyr::if_else(AS_NCRAS >= (min(dplyr::lag(AS_NCRAS), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_max_munic     = dplyr::if_else(AS_NCRAS <= (max(dplyr::lag(AS_NCRAS), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_min_k_munic   = dplyr::if_else(AS_NCRAS >= (min(dplyr::lag(AS_NCRAS), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_max_k_munic   = dplyr::if_else(AS_NCRAS <= (k * max(dplyr::lag(AS_NCRAS), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_med_mov_munic = dplyr::if_else(AS_NCRAS <= (k * zoo::rollmedian(AS_NCRAS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_AS_NCRAS_dif_munic     = dplyr::if_else(!compare_first_dif(AS_NCRAS), F, T) # Longitudinal (município)
+    DF_as_ncras_out_munic     = dplyr::if_else(!outlier_function(AS_NCRAS), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_cana}
+```{r data_wrangling_dist_as_ncras}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_cana |> 
-  dplyr::select(!MA_CANA) |> 
+df_sumario_dist_as <- df_rules_dist_as_ncras |> 
+  dplyr::select(!AS_NCRAS) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -983,7 +1268,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_cana}
+```{r table_dist_as_ncras}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -993,7 +1278,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_cana}
+```{r chart_dist_as_ncras}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1002,108 +1287,27 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### MA_FROTA
 
-```{r rules_dist_ma_frota}
+### AS_NCREAS
+
+```{r rules_dist_as_ncreas}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_frota <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FROTA) |> 
+df_rules_dist_as_ncreas <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_NCREAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_MA_FROTA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_FROTA), F, T), # Longitudinal (município)
+    DF_as_ncreas_hampel_munic  = dplyr::if_else(!hampel_filter(AS_NCREAS), F, T), # Longitudinal (município)
     
-    DF_MA_FROTA_out_munic     = dplyr::if_else(!outlier_function(MA_FROTA), F, T), # Longitudinal (município)
-    
-     DF_MA_FROTA_min_munic    = dplyr::if_else(MA_FROTA >= (min(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_max_munic     = dplyr::if_else(MA_FROTA <= (max(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_min_k_munic   = dplyr::if_else(MA_FROTA >= (min(dplyr::lag(MA_FROTA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_max_k_munic   = dplyr::if_else(MA_FROTA <= (k * max(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_med_mov_munic = dplyr::if_else(MA_FROTA <= (k * zoo::rollmedian(MA_FROTA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_FROTA), F, T), # Longitudinal (município)
-    
-    DF_MA_FROTA_estoque_munic = dplyr::if_else(MA_FROTA >= dplyr::lag(MA_FROTA), F, T) # Longitudinal (município)
+    DF_as_ncreas_out_munic     = dplyr::if_else(!outlier_function(AS_NCREAS), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_frota}
-
-## Tranformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_frota |> 
-  dplyr::select(!MA_FROTA) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_as |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_ma_frota}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_ma_frota}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### MA_BOVINO
-
-```{r rules_dist_ma_bovino}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_ma_bovino <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_BOVINO) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_MA_BOVINO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_BOVINO), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_out_munic     = dplyr::if_else(!outlier_function(MA_BOVINO), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_min_munic     = dplyr::if_else(MA_BOVINO >= (min(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_max_munic     = dplyr::if_else(MA_BOVINO <= (max(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_min_k_munic   = dplyr::if_else(MA_BOVINO >= (min(dplyr::lag(MA_BOVINO), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_max_k_munic   = dplyr::if_else(MA_BOVINO <= (k * max(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_med_mov_munic = dplyr::if_else(MA_BOVINO <= (k * zoo::rollmedian(MA_BOVINO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_BOVINO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_BOVINO), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_ma_bovino}
+```{r data_wrangling_dist_as_ncreas}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_bovino |> 
-  dplyr::select(!MA_BOVINO) |> 
+df_sumario_dist_as <- df_rules_dist_as_ncreas |> 
+  dplyr::select(!AS_NCREAS) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -1121,7 +1325,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_bovino}
+```{r table_dist_as_ncreas}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1131,7 +1335,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_bovino}
+```{r chart_dist_as_ncreas}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1140,38 +1344,27 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### MA_REFLO
 
-```{r rules_dist_ma_reflo}
+### AS_FCADMEIOSAL
+
+```{r rules_dist_as_fcadmeiosal}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_reflo <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_REFLO) |> 
+df_rules_dist_as_fcadmeiosal <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_FCADMEIOSAL) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_MA_REFLO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_REFLO), F, T), # Longitudinal (município)
+    DF_as_fcadmeiosal_hampel_munic  = dplyr::if_else(!hampel_filter(AS_FCADMEIOSAL), F, T), # Longitudinal (município)
     
-    DF_MA_REFLO_out_munic     = dplyr::if_else(!outlier_function(MA_REFLO), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_min_munic     = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_max_munic     = dplyr::if_else(MA_REFLO <= (max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_min_k_munic   = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_max_k_munic   = dplyr::if_else(MA_REFLO <= (k * max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_med_mov_munic = dplyr::if_else(MA_REFLO <= (k * zoo::rollmedian(MA_REFLO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_REFLO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_REFLO), F, T) # Longitudinal (município)
+    DF_as_fcadmeiosal_out_munic     = dplyr::if_else(!outlier_function(AS_FCADMEIOSAL), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_reflo}
+```{r data_wrangling_dist_as_fcadmeiosal}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_reflo |> 
-  dplyr::select(!MA_REFLO) |> 
+df_sumario_dist_as <- df_rules_dist_as_fcadmeiosal |> 
+  dplyr::select(!AS_FCADMEIOSAL) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -1189,7 +1382,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_reflo}
+```{r table_dist_as_fcadmeiosal}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1199,7 +1392,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_reflo}
+```{r chart_dist_as_fcadmeiosal}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1208,38 +1401,27 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### MA_FLONATIVA
+### AS_RHTOTALA
 
-```{r rules_dist_ma_flonativa}
+
+```{r rules_dist_as_rhtotala}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_flonativa <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FLONATIVA) |> 
+df_rules_dist_as_rhtotala <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHTOTALA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_MA_FLONATIVA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_FLONATIVA), F, T), # Longitudinal (município)
+    DF_as_rhtotala_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHTOTALA), F, T), # Longitudinal (município)
     
-    DF_MA_FLONATIVA_out_munic     = dplyr::if_else(!outlier_function(MA_FLONATIVA), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_min_munic     = dplyr::if_else(MA_FLONATIVA >= (min(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_max_munic     = dplyr::if_else(MA_FLONATIVA <= (max(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_min_k_munic   = dplyr::if_else(MA_FLONATIVA >= (min(dplyr::lag(MA_FLONATIVA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_max_k_munic   = dplyr::if_else(MA_FLONATIVA <= (k * max(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_med_mov_munic = dplyr::if_else(MA_FLONATIVA <= (k * zoo::rollmedian(MA_FLONATIVA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_FLONATIVA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_FLONATIVA), F, T) # Longitudinal (município)
+    DF_as_rhtotala_out_munic     = dplyr::if_else(!outlier_function(AS_RHTOTALA), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_flonativa}
+```{r data_wrangling_dist_as_rhtotala}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_flonativa |> 
-  dplyr::select(!MA_FLONATIVA) |> 
+df_sumario_dist_as <- df_rules_dist_as_rhtotala |> 
+  dplyr::select(!AS_RHTOTALA) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -1257,7 +1439,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_flonativa}
+```{r table_dist_as_rhtotala}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1267,7 +1449,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_flonativa}
+```{r chart_dist_as_rhtotala}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1276,38 +1458,27 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### MA_INFRA
+### AS_RHTOTALB
 
-```{r rules_dist_ma_infra}
+
+```{r rules_dist_as_rhtotalb}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_infra <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_INFRA) |> 
+df_rules_dist_as_rhtotalb <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHTOTALB) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_MA_INFRA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_INFRA), F, T), # Longitudinal (município)
+    DF_as_rhtotalb_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHTOTALB), F, T), # Longitudinal (município)
     
-    DF_MA_INFRA_out_munic     = dplyr::if_else(!outlier_function(MA_INFRA), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_min_munic     = dplyr::if_else(MA_INFRA >= (min(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_max_munic     = dplyr::if_else(MA_INFRA <= (max(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_min_k_munic   = dplyr::if_else(MA_INFRA >= (min(dplyr::lag(MA_INFRA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_max_k_munic   = dplyr::if_else(MA_INFRA <= (k * max(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_med_mov_munic = dplyr::if_else(MA_INFRA <= (k * zoo::rollmedian(MA_INFRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_INFRA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_INFRA), F, T) # Longitudinal (município)
+    DF_as_rhtotalb_out_munic     = dplyr::if_else(!outlier_function(AS_RHTOTALB), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_infra}
+```{r data_wrangling_dist_as_rhtotalb}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_infra |> 
-  dplyr::select(!MA_INFRA) |> 
+df_sumario_dist_as <- df_rules_dist_as_rhtotalb |> 
+  dplyr::select(!AS_RHTOTALB) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -1325,7 +1496,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_infra}
+```{r table_dist_as_rhtotalb}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1335,7 +1506,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_infra}
+```{r chart_dist_as_rhtotalb}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1344,38 +1515,28 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### MA_AGRO
 
-```{r rules_dist_ma_agro}
+### AS_RHAS
+
+
+```{r rules_dist_as_rhas}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_agro <- data |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_AGRO) |> 
+df_rules_dist_as_rhas <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_MA_AGRO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_AGRO), F, T), # Longitudinal (município)
+    DF_as_rhas_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHAS), F, T), # Longitudinal (município)
     
-    DF_MA_AGRO_out_munic     = dplyr::if_else(!outlier_function(MA_AGRO), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_min_munic     = dplyr::if_else(MA_AGRO >= (min(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_max_munic     = dplyr::if_else(MA_AGRO <= (max(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_min_k_munic   = dplyr::if_else(MA_AGRO >= (min(dplyr::lag(MA_AGRO), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_max_k_munic   = dplyr::if_else(MA_AGRO <= (k * max(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_med_mov_munic = dplyr::if_else(MA_AGRO <= (k * zoo::rollmedian(MA_AGRO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_MA_AGRO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_AGRO), F, T) # Longitudinal (município)
+    DF_as_rhas_out_munic     = dplyr::if_else(!outlier_function(AS_RHAS), F, T) # Longitudinal (município)
   )
 ```
 
-```{r data_wrangling_dist_ma_agro}
+```{r data_wrangling_dist_as_rhas}
 
 ## Transformação dos resultados
-df_sumario_dist_as <- df_rules_dist_ma_agro |> 
-  dplyr::select(!MA_AGRO) |> 
+df_sumario_dist_as <- df_rules_dist_as_rhas |> 
+  dplyr::select(!AS_RHAS) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -1393,7 +1554,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_ma_agro}
+```{r table_dist_as_rhas}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1403,7 +1564,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_ma_agro}
+```{r chart_dist_as_rhas}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1411,6 +1572,2698 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
+### AS_RHPSI
+
+
+```{r rules_dist_as_rhpsi}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhpsi <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHPSI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhpsi_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHPSI), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsi_out_munic     = dplyr::if_else(!outlier_function(AS_RHPSI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_rhpsi}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhpsi |> 
+  dplyr::select(!AS_RHPSI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhpsi}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhpsi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_RHENME
+
+
+```{r rules_dist_as_rhenme}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhenme <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHENME) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhenme_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHENME), F, T), # Longitudinal (município)
+    
+    DF_as_rhenme_out_munic     = dplyr::if_else(!outlier_function(AS_RHENME), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_rhenme}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhenme |> 
+  dplyr::select(!AS_RHENME) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhenme}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhenme}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_RHCURSU
+
+
+```{r rules_dist_as_rhcursu}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhcursu <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHCURSU) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhcursu_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHCURSU), F, T), # Longitudinal (município)
+    
+    DF_as_rhcursu_out_munic     = dplyr::if_else(!outlier_function(AS_RHCURSU), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_rhcursu}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhcursu |> 
+  dplyr::select(!AS_RHCURSU) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhcursu}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+
+```{r chart_dist_as_rhcursu}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+ 
+### AS_RHTOEST
+
+```{r rules_dist_as_rhtoest}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhtoest <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHTOEST) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhtoest_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHTOEST), F, T), # Longitudinal (município)
+    
+    DF_as_rhtoest_out_munic     = dplyr::if_else(!outlier_function(AS_RHTOEST), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_rhtoest}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhtoest |> 
+  dplyr::select(!AS_RHTOEST) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhtoest}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhtoest}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_RHTOCEL
+
+
+```{r rules_dist_as_rhtocel}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhtocel <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHTOCEL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_AS_RHTOCEL_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHTOCEL), F, T), # Longitudinal (município)
+    
+    DF_AS_RHTOCEL_out_munic     = dplyr::if_else(!outlier_function(AS_RHTOCEL), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_rhtocel}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhtocel |> 
+  dplyr::select(!AS_RHTOCEL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhtocel}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhtocel}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_BPCDEF
+
+
+```{r rules_dist_as_bpcdef}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpcdef <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCDEF) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpcdef_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPCDEF), F, T), # Longitudinal (município)
+    
+    DF_as_bpcdef_out_munic     = dplyr::if_else(!outlier_function(AS_BPCDEF), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_bpcdef}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_bpcdef |> 
+  dplyr::select(!AS_BPCDEF) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_bpcdef}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpcdef}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_BPCID
+
+
+```{r rules_dist_as_bpcid}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpcid <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCID) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpcid_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPCID), F, T), # Longitudinal (município)
+    
+    DF_as_bpcid_out_munic     = dplyr::if_else(!outlier_function(AS_BPCID), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_bpcid}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_bpcid |> 
+  dplyr::select(!AS_BPCID) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+
+```{r table_dist_as_bpcid}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpcid}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_BPC
+
+
+```{r rules_dist_as_bpc}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpc <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpc_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPC), F, T), # Longitudinal (município)
+    
+    DF_as_bpc_out_munic     = dplyr::if_else(!outlier_function(AS_BPC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_bpc}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_bpc |> 
+  dplyr::select(!AS_BPC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_bpc}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpc}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_RHTPOASPH
+
+
+```{r rules_dist_as_rhtpoasph}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhtpoasph <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHTPOASPH) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhtpoasph_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHTPOASPH), F, T), # Longitudinal (município)
+    
+    DF_as_rhtpoasph_out_munic     = dplyr::if_else(!outlier_function(AS_RHTPOASPH), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_rhtpoasph}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_rhtpoasph |> 
+  dplyr::select(!AS_RHTPOASPH) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhtpoasph}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhtpoasph}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_BPCIDPOPI
+
+```{r rules_dist_as_bpcidpopi}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpcidpopi <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCIDPOPI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpcidpopi_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPCIDPOPI), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_out_munic     = dplyr::if_else(!outlier_function(AS_BPCIDPOPI), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_min_munic     = dplyr::if_else(AS_BPCIDPOPI >= (min(dplyr::lag(AS_BPCIDPOPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_max_munic     = dplyr::if_else(AS_BPCIDPOPI <= (max(dplyr::lag(AS_BPCIDPOPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_min_k_munic   = dplyr::if_else(AS_BPCIDPOPI >= (min(dplyr::lag(AS_BPCIDPOPI), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_max_k_munic   = dplyr::if_else(AS_BPCIDPOPI <= (k * max(dplyr::lag(AS_BPCIDPOPI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_med_mov_munic = dplyr::if_else(AS_BPCIDPOPI <= (k * zoo::rollmedian(AS_BPCIDPOPI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_bpcidpopi_dif_munic     = dplyr::if_else(!compare_first_dif(AS_BPCIDPOPI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_bpcidpopi}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_bpcidpopi |> 
+  dplyr::select(!AS_BPCIDPOPI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_bpcidpopi}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpcidpopi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPCADUNICO
+
+
+```{r rules_dist_as_popcadunico}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popcadunico <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPCADUNICO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popcadunico_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPCADUNICO), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_out_munic     = dplyr::if_else(!outlier_function(AS_POPCADUNICO), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_min_munic     = dplyr::if_else(AS_POPCADUNICO >= (min(dplyr::lag(AS_POPCADUNICO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_max_munic     = dplyr::if_else(AS_POPCADUNICO <= (max(dplyr::lag(AS_POPCADUNICO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_min_k_munic   = dplyr::if_else(AS_POPCADUNICO >= (min(dplyr::lag(AS_POPCADUNICO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_max_k_munic   = dplyr::if_else(AS_POPCADUNICO <= (k * max(dplyr::lag(AS_POPCADUNICO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_med_mov_munic = dplyr::if_else(AS_POPCADUNICO <= (k * zoo::rollmedian(AS_POPCADUNICO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popcadunico_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPCADUNICO), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popcadunico}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popcadunico |> 
+  dplyr::select(!AS_POPCADUNICO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popcadunico}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popcadunico}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_COBBF
+
+```{r rules_dist_as_cobbf}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_cobbf <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_COBBF) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_cobbf_hampel_munic  = dplyr::if_else(!hampel_filter(AS_COBBF), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_out_munic     = dplyr::if_else(!outlier_function(AS_COBBF), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_min_munic     = dplyr::if_else(AS_COBBF >= (min(dplyr::lag(AS_COBBF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_max_munic     = dplyr::if_else(AS_COBBF <= (max(dplyr::lag(AS_COBBF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_min_k_munic   = dplyr::if_else(AS_COBBF >= (min(dplyr::lag(AS_COBBF), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_max_k_munic   = dplyr::if_else(AS_COBBF <= (k * max(dplyr::lag(AS_COBBF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_med_mov_munic = dplyr::if_else(AS_COBBF <= (k * zoo::rollmedian(AS_COBBF, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_cobbf_dif_munic     = dplyr::if_else(!compare_first_dif(AS_COBBF), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_cobbf}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_cobbf |> 
+  dplyr::select(!AS_COBBF) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_cobbf}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_cobbf}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPIDCADSPOP
+
+
+```{r rules_dist_as_popidcadspop}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popidcadspop <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPIDCADSPOP) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popidcadspop_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPIDCADSPOP), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_out_munic     = dplyr::if_else(!outlier_function(AS_POPIDCADSPOP), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_min_munic     = dplyr::if_else(AS_POPIDCADSPOP >= (min(dplyr::lag(AS_POPIDCADSPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_max_munic     = dplyr::if_else(AS_POPIDCADSPOP <= (max(dplyr::lag(AS_POPIDCADSPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_min_k_munic   = dplyr::if_else(AS_POPIDCADSPOP >= (min(dplyr::lag(AS_POPIDCADSPOP), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_max_k_munic   = dplyr::if_else(AS_POPIDCADSPOP <= (k * max(dplyr::lag(AS_POPIDCADSPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_med_mov_munic = dplyr::if_else(AS_POPIDCADSPOP <= (k * zoo::rollmedian(AS_POPIDCADSPOP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popidcadspop_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDCADSPOP), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_popidcadspop}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popidcadspop |> 
+  dplyr::select(!AS_POPIDCADSPOP) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popidcadspop}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popidcadspop}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPRURALPOP
+
+
+```{r rules_dist_as_popruralpop}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popruralpop <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPRURALPOP) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popruralpop_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPRURALPOP), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_out_munic     = dplyr::if_else(!outlier_function(AS_POPRURALPOP), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_min_munic     = dplyr::if_else(AS_POPRURALPOP >= (min(dplyr::lag(AS_POPRURALPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_max_munic     = dplyr::if_else(AS_POPRURALPOP <= (max(dplyr::lag(AS_POPRURALPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_min_k_munic   = dplyr::if_else(AS_POPRURALPOP >= (min(dplyr::lag(AS_POPRURALPOP), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_max_k_munic   = dplyr::if_else(AS_POPRURALPOP <= (k * max(dplyr::lag(AS_POPRURALPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_med_mov_munic = dplyr::if_else(AS_POPRURALPOP <= (k * zoo::rollmedian(AS_POPRURALPOP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popruralpop_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPRURALPOP), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_popruralpop}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popruralpop |> 
+  dplyr::select(!AS_POPRURALPOP) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popruralpop}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popruralpop}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPPOBEXTRPOB
+
+
+```{r rules_dist_as_poppobextrpob}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_poppobextrpob <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPPOBEXTRPOB) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_poppobextrpob_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPPOBEXTRPOB), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_out_munic     = dplyr::if_else(!outlier_function(AS_POPPOBEXTRPOB), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_min_munic     = dplyr::if_else(AS_POPPOBEXTRPOB >= (min(dplyr::lag(AS_POPPOBEXTRPOB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_max_munic     = dplyr::if_else(AS_POPPOBEXTRPOB <= (max(dplyr::lag(AS_POPPOBEXTRPOB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_min_k_munic   = dplyr::if_else(AS_POPPOBEXTRPOB >= (min(dplyr::lag(AS_POPPOBEXTRPOB), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_max_k_munic   = dplyr::if_else(AS_POPPOBEXTRPOB <= (k * max(dplyr::lag(AS_POPPOBEXTRPOB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_med_mov_munic = dplyr::if_else(AS_POPPOBEXTRPOB <= (k * zoo::rollmedian(AS_POPPOBEXTRPOB, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrpob_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPPOBEXTRPOB), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_as_poppobextrpob}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_poppobextrpob |> 
+  dplyr::select(!AS_POPPOBEXTRPOB) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_poppobextrpob}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_poppobextrpob}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_PCOBBFMEIOSAL
+
+
+```{r rules_dist_as_pcobbfmeiosal}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_pcobbfmeiosal <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_PCOBBFMEIOSAL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_pcobbfmeiosal_hampel_munic  = dplyr::if_else(!hampel_filter(AS_PCOBBFMEIOSAL), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_out_munic     = dplyr::if_else(!outlier_function(AS_PCOBBFMEIOSAL), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_min_munic     = dplyr::if_else(AS_PCOBBFMEIOSAL >= (min(dplyr::lag(AS_PCOBBFMEIOSAL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_max_munic     = dplyr::if_else(AS_PCOBBFMEIOSAL <= (max(dplyr::lag(AS_PCOBBFMEIOSAL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_min_k_munic   = dplyr::if_else(AS_PCOBBFMEIOSAL >= (min(dplyr::lag(AS_PCOBBFMEIOSAL), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_max_k_munic   = dplyr::if_else(AS_PCOBBFMEIOSAL <= (k * max(dplyr::lag(AS_PCOBBFMEIOSAL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_med_mov_munic = dplyr::if_else(AS_PCOBBFMEIOSAL <= (k * zoo::rollmedian(AS_PCOBBFMEIOSAL, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_pcobbfmeiosal_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PCOBBFMEIOSAL), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_pcobbfmeiosal}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_pcobbfmeiosal |> 
+  dplyr::select(!AS_PCOBBFMEIOSAL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_pcobbfmeiosal}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_pcobbfmeiosal}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPPOBEXTRCAD
+
+
+```{r rules_dist_as_poppobextrcad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_poppobextrcad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPPOBEXTRCAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_poppobextrcad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_out_munic     = dplyr::if_else(!outlier_function(AS_POPPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_min_munic     = dplyr::if_else(AS_POPPOBEXTRCAD >= (min(dplyr::lag(AS_POPPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_max_munic     = dplyr::if_else(AS_POPPOBEXTRCAD <= (max(dplyr::lag(AS_POPPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_min_k_munic   = dplyr::if_else(AS_POPPOBEXTRCAD >= (min(dplyr::lag(AS_POPPOBEXTRCAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_max_k_munic   = dplyr::if_else(AS_POPPOBEXTRCAD <= (k * max(dplyr::lag(AS_POPPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_med_mov_munic = dplyr::if_else(AS_POPPOBEXTRCAD <= (k * zoo::rollmedian(AS_POPPOBEXTRCAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_poppobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPPOBEXTRCAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_poppobextrcad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_poppobextrcad |> 
+  dplyr::select(!AS_POPPOBEXTRCAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_poppobextrcad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_poppobextrcad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### POPIDPOBEXTRCAD
+
+
+```{r rules_dist_as_popidpobextrcad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popidpobextrcad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPIDPOBEXTRCAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popidpobextrcad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPIDPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_out_munic     = dplyr::if_else(!outlier_function(AS_POPIDPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_min_munic     = dplyr::if_else(AS_POPIDPOBEXTRCAD >= (min(dplyr::lag(AS_POPIDPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_max_munic     = dplyr::if_else(AS_POPIDPOBEXTRCAD <= (max(dplyr::lag(AS_POPIDPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_min_k_munic   = dplyr::if_else(AS_POPIDPOBEXTRCAD >= (min(dplyr::lag(AS_POPIDPOBEXTRCAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_max_k_munic   = dplyr::if_else(AS_POPIDPOBEXTRCAD <= (k * max(dplyr::lag(AS_POPIDPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_med_mov_munic = dplyr::if_else(AS_POPIDPOBEXTRCAD <= (k * zoo::rollmedian(AS_POPIDPOBEXTRCAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDPOBEXTRCAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popidpobextrcad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popidpobextrcad |> 
+  dplyr::select(!AS_POPIDPOBEXTRCAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popidpobextrcad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popidpobextrcad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_IDOSOPOBEXTRPOBCADS
+
+
+```{r rules_dist_as_idosopobextrpobcads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_idosopobextrpobcads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IDOSOPOBEXTRPOBCADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_idosopobextrpobcads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IDOSOPOBEXTRPOBCADS), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_out_munic     = dplyr::if_else(!outlier_function(AS_IDOSOPOBEXTRPOBCADS), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_min_munic     = dplyr::if_else(AS_IDOSOPOBEXTRPOBCADS >= (min(dplyr::lag(AS_IDOSOPOBEXTRPOBCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_max_munic     = dplyr::if_else(AS_IDOSOPOBEXTRPOBCADS <= (max(dplyr::lag(AS_IDOSOPOBEXTRPOBCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_min_k_munic   = dplyr::if_else(AS_IDOSOPOBEXTRPOBCADS >= (min(dplyr::lag(AS_IDOSOPOBEXTRPOBCADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_max_k_munic   = dplyr::if_else(AS_IDOSOPOBEXTRPOBCADS <= (k * max(dplyr::lag(AS_IDOSOPOBEXTRPOBCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_med_mov_munic = dplyr::if_else(AS_IDOSOPOBEXTRPOBCADS <= (k * zoo::rollmedian(AS_IDOSOPOBEXTRPOBCADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_idosopobextrpobcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IDOSOPOBEXTRPOBCADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_idosopobextrpobcads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_idosopobextrpobcads |> 
+  dplyr::select(!AS_IDOSOPOBEXTRPOBCADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_idosopobextrpobcads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_idosopobextrpobcads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_DEFPOBEXTRCAD
+
+
+```{r rules_dist_as_defpobextrcad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_defpobextrcad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_DEFPOBEXTRCAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_defpobextrcad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_DEFPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_out_munic     = dplyr::if_else(!outlier_function(AS_DEFPOBEXTRCAD), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_min_munic     = dplyr::if_else(AS_DEFPOBEXTRCAD >= (min(dplyr::lag(AS_DEFPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_max_munic     = dplyr::if_else(AS_DEFPOBEXTRCAD <= (max(dplyr::lag(AS_DEFPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_min_k_munic   = dplyr::if_else(AS_DEFPOBEXTRCAD >= (min(dplyr::lag(AS_DEFPOBEXTRCAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_max_k_munic   = dplyr::if_else(AS_DEFPOBEXTRCAD <= (k * max(dplyr::lag(AS_DEFPOBEXTRCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_med_mov_munic = dplyr::if_else(AS_DEFPOBEXTRCAD <= (k * zoo::rollmedian(AS_DEFPOBEXTRCAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_defpobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_DEFPOBEXTRCAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_defpobextrcad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_defpobextrcad |> 
+  dplyr::select(!AS_DEFPOBEXTRCAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_defpobextrcad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_defpobextrcad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_CRIANADOLEPOBEXTRPOP
+
+
+```{r rules_dist_as_crianadolepobextrpop}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_crianadolepobextrpop <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_CRIANADOLEPOBEXTRPOP) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_crianadolepobextrpop_hampel_munic  = dplyr::if_else(!hampel_filter(AS_CRIANADOLEPOBEXTRPOP), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_out_munic     = dplyr::if_else(!outlier_function(AS_CRIANADOLEPOBEXTRPOP), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_min_munic     = dplyr::if_else(AS_CRIANADOLEPOBEXTRPOP >= (min(dplyr::lag(AS_CRIANADOLEPOBEXTRPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_max_munic     = dplyr::if_else(AS_CRIANADOLEPOBEXTRPOP <= (max(dplyr::lag(AS_CRIANADOLEPOBEXTRPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_min_k_munic   = dplyr::if_else(AS_CRIANADOLEPOBEXTRPOP >= (min(dplyr::lag(AS_CRIANADOLEPOBEXTRPOP), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_max_k_munic   = dplyr::if_else(AS_CRIANADOLEPOBEXTRPOP <= (k * max(dplyr::lag(AS_CRIANADOLEPOBEXTRPOP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_med_mov_munic = dplyr::if_else(AS_CRIANADOLEPOBEXTRPOP <= (k * zoo::rollmedian(AS_CRIANADOLEPOBEXTRPOP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_crianadolepobextrpop_dif_munic     = dplyr::if_else(!compare_first_dif(AS_CRIANADOLEPOBEXTRPOP), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_crianadolepobextrpop}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_crianadolepobextrpop |> 
+  dplyr::select(!AS_CRIANADOLEPOBEXTRPOP) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_crianadolepobextrpop}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_crianadolepobextrpop}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPIDPOBEXTRCADS
+
+
+```{r rules_dist_as_popidpobextrcads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popidpobextrcads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPIDPOBEXTRCADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popidpobextrcads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPIDPOBEXTRCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_out_munic     = dplyr::if_else(!outlier_function(AS_POPIDPOBEXTRCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_min_munic     = dplyr::if_else(AS_POPIDPOBEXTRCADS >= (min(dplyr::lag(AS_POPIDPOBEXTRCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_max_munic     = dplyr::if_else(AS_POPIDPOBEXTRCADS <= (max(dplyr::lag(AS_POPIDPOBEXTRCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_min_k_munic   = dplyr::if_else(AS_POPIDPOBEXTRCADS >= (min(dplyr::lag(AS_POPIDPOBEXTRCADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_max_k_munic   = dplyr::if_else(AS_POPIDPOBEXTRCADS <= (k * max(dplyr::lag(AS_POPIDPOBEXTRCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_med_mov_munic = dplyr::if_else(AS_POPIDPOBEXTRCADS <= (k * zoo::rollmedian(AS_POPIDPOBEXTRCADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popidpobextrcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDPOBEXTRCADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popidpobextrcads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popidpobextrcads |> 
+  dplyr::select(!AS_POPIDPOBEXTRCADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popidpobextrcads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popidpobextrcads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPIDCADS
+
+
+```{r rules_dist_as_popidcads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popidcads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPIDCADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popidcads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPIDCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_out_munic     = dplyr::if_else(!outlier_function(AS_POPIDCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_min_munic     = dplyr::if_else(AS_POPIDCADS >= (min(dplyr::lag(AS_POPIDCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_max_munic     = dplyr::if_else(AS_POPIDCADS <= (max(dplyr::lag(AS_POPIDCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_min_k_munic   = dplyr::if_else(AS_POPIDCADS >= (min(dplyr::lag(AS_POPIDCADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_max_k_munic   = dplyr::if_else(AS_POPIDCADS <= (k * max(dplyr::lag(AS_POPIDCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_med_mov_munic = dplyr::if_else(AS_POPIDCADS <= (k * zoo::rollmedian(AS_POPIDCADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popidcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDCADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popidcads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popidcads |> 
+  dplyr::select(!AS_POPIDCADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popidcads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popidcads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_EFINCOMPCAD
+
+
+```{r rules_dist_as_efincompcad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_efincompcad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_EFINCOMPCAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_efincompcad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_EFINCOMPCAD), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_out_munic     = dplyr::if_else(!outlier_function(AS_EFINCOMPCAD), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_min_munic     = dplyr::if_else(AS_EFINCOMPCAD >= (min(dplyr::lag(AS_EFINCOMPCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_max_munic     = dplyr::if_else(AS_EFINCOMPCAD <= (max(dplyr::lag(AS_EFINCOMPCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_min_k_munic   = dplyr::if_else(AS_EFINCOMPCAD >= (min(dplyr::lag(AS_EFINCOMPCAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_max_k_munic   = dplyr::if_else(AS_EFINCOMPCAD <= (k * max(dplyr::lag(AS_EFINCOMPCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_med_mov_munic = dplyr::if_else(AS_EFINCOMPCAD <= (k * zoo::rollmedian(AS_EFINCOMPCAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_efincompcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_EFINCOMPCAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_efincompcad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_efincompcad |> 
+  dplyr::select(!AS_EFINCOMPCAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_efincompcad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_efincompcad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_PENLECAD
+
+
+```{r rules_dist_as_penlecad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_penlecad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_PENLECAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_penlecad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_PENLECAD), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_out_munic     = dplyr::if_else(!outlier_function(AS_PENLECAD), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_min_munic     = dplyr::if_else(AS_PENLECAD >= (min(dplyr::lag(AS_PENLECAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_max_munic     = dplyr::if_else(AS_PENLECAD <= (max(dplyr::lag(AS_PENLECAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_min_k_munic   = dplyr::if_else(AS_PENLECAD >= (min(dplyr::lag(AS_PENLECAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_max_k_munic   = dplyr::if_else(AS_PENLECAD <= (k * max(dplyr::lag(AS_PENLECAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_med_mov_munic = dplyr::if_else(AS_PENLECAD <= (k * zoo::rollmedian(AS_PENLECAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_penlecad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PENLECAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_penlecad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_penlecad |> 
+  dplyr::select(!AS_PENLECAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_penlecad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_penlecad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPINDIGENACADS
+
+
+```{r rules_dist_as_popindigenacads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popindigenacads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPINDIGENACADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popindigenacads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPINDIGENACADS), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_out_munic     = dplyr::if_else(!outlier_function(AS_POPINDIGENACADS), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_min_munic     = dplyr::if_else(AS_POPINDIGENACADS >= (min(dplyr::lag(AS_POPINDIGENACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_max_munic     = dplyr::if_else(AS_POPINDIGENACADS <= (max(dplyr::lag(AS_POPINDIGENACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_min_k_munic   = dplyr::if_else(AS_POPINDIGENACADS >= (min(dplyr::lag(AS_POPINDIGENACADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_max_k_munic   = dplyr::if_else(AS_POPINDIGENACADS <= (k * max(dplyr::lag(AS_POPINDIGENACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_med_mov_munic = dplyr::if_else(AS_POPINDIGENACADS <= (k * zoo::rollmedian(AS_POPINDIGENACADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popindigenacads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPINDIGENACADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popindigenacads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popindigenacads |> 
+  dplyr::select(!AS_POPINDIGENACADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popindigenacads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popindigenacads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPPRETAPARDACADS
+
+
+```{r rules_dist_as_poppretapardacads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_poppretapardacads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPPRETAPARDACADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_poppretapardacads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPPRETAPARDACADS), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_out_munic     = dplyr::if_else(!outlier_function(AS_POPPRETAPARDACADS), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_min_munic     = dplyr::if_else(AS_POPPRETAPARDACADS >= (min(dplyr::lag(AS_POPPRETAPARDACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_max_munic     = dplyr::if_else(AS_POPPRETAPARDACADS <= (max(dplyr::lag(AS_POPPRETAPARDACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_min_k_munic   = dplyr::if_else(AS_POPPRETAPARDACADS >= (min(dplyr::lag(AS_POPPRETAPARDACADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_max_k_munic   = dplyr::if_else(AS_POPPRETAPARDACADS <= (k * max(dplyr::lag(AS_POPPRETAPARDACADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_med_mov_munic = dplyr::if_else(AS_POPPRETAPARDACADS <= (k * zoo::rollmedian(AS_POPPRETAPARDACADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_poppretapardacads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPPRETAPARDACADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_poppretapardacads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_poppretapardacads |> 
+  dplyr::select(!AS_POPPRETAPARDACADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_poppretapardacads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_poppretapardacads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_PVULSANEACAD
+
+
+```{r rules_dist_as_pvulsaneacad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_pvulsaneacad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_PVULSANEACAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_pvulsaneacad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_PVULSANEACAD), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_out_munic     = dplyr::if_else(!outlier_function(AS_PVULSANEACAD), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_min_munic     = dplyr::if_else(AS_PVULSANEACAD >= (min(dplyr::lag(AS_PVULSANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_max_munic     = dplyr::if_else(AS_PVULSANEACAD <= (max(dplyr::lag(AS_PVULSANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_min_k_munic   = dplyr::if_else(AS_PVULSANEACAD >= (min(dplyr::lag(AS_PVULSANEACAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_max_k_munic   = dplyr::if_else(AS_PVULSANEACAD <= (k * max(dplyr::lag(AS_PVULSANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_med_mov_munic = dplyr::if_else(AS_PVULSANEACAD <= (k * zoo::rollmedian(AS_PVULSANEACAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_pvulsaneacad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PVULSANEACAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_pvulsaneacad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_pvulsaneacad |> 
+  dplyr::select(!AS_PVULSANEACAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_pvulsaneacad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_pvulsaneacad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_SANEACAD
+
+
+```{r rules_dist_as_saneacad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_saneacad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_SANEACAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_saneacad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_SANEACAD), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_out_munic     = dplyr::if_else(!outlier_function(AS_SANEACAD), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_min_munic     = dplyr::if_else(AS_SANEACAD >= (min(dplyr::lag(AS_SANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_max_munic     = dplyr::if_else(AS_SANEACAD <= (max(dplyr::lag(AS_SANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_min_k_munic   = dplyr::if_else(AS_SANEACAD >= (min(dplyr::lag(AS_SANEACAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_max_k_munic   = dplyr::if_else(AS_SANEACAD <= (k * max(dplyr::lag(AS_SANEACAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_med_mov_munic = dplyr::if_else(AS_SANEACAD <= (k * zoo::rollmedian(AS_SANEACAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_saneacad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_SANEACAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_saneacad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_saneacad |> 
+  dplyr::select(!AS_SANEACAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_saneacad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_saneacad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_POPRURALCADS
+
+
+```{r rules_dist_as_popruralcads}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_popruralcads <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPRURALCADS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_popruralcads_hampel_munic  = dplyr::if_else(!hampel_filter(AS_POPRURALCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_out_munic     = dplyr::if_else(!outlier_function(AS_POPRURALCADS), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_min_munic     = dplyr::if_else(AS_POPRURALCADS >= (min(dplyr::lag(AS_POPRURALCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_max_munic     = dplyr::if_else(AS_POPRURALCADS <= (max(dplyr::lag(AS_POPRURALCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_min_k_munic   = dplyr::if_else(AS_POPRURALCADS >= (min(dplyr::lag(AS_POPRURALCADS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_max_k_munic   = dplyr::if_else(AS_POPRURALCADS <= (k * max(dplyr::lag(AS_POPRURALCADS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_med_mov_munic = dplyr::if_else(AS_POPRURALCADS <= (k * zoo::rollmedian(AS_POPRURALCADS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_popruralcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPRURALCADS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_popruralcads}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_popruralcads |> 
+  dplyr::select(!AS_POPRURALCADS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_popruralcads}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_popruralcads}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_IGDMCONDE
+
+
+```{r rules_dist_as_igdmconde}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_igdmconde <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCONDE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_igdmconde_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDMCONDE), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_out_munic     = dplyr::if_else(!outlier_function(AS_IGDMCONDE), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_min_munic     = dplyr::if_else(AS_IGDMCONDE >= (min(dplyr::lag(AS_IGDMCONDE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_max_munic     = dplyr::if_else(AS_IGDMCONDE <= (max(dplyr::lag(AS_IGDMCONDE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_min_k_munic   = dplyr::if_else(AS_IGDMCONDE >= (min(dplyr::lag(AS_IGDMCONDE), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_max_k_munic   = dplyr::if_else(AS_IGDMCONDE <= (k * max(dplyr::lag(AS_IGDMCONDE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_med_mov_munic = dplyr::if_else(AS_IGDMCONDE <= (k * zoo::rollmedian(AS_IGDMCONDE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconde_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCONDE), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_igdmconde}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_igdmconde |> 
+  dplyr::select(!AS_IGDMCONDE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdmconde}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdmconde}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_IGDMCONDS
+
+
+```{r rules_dist_as_igdmconds}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_igdmconds <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCONDS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_igdmconds_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDMCONDS), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_out_munic     = dplyr::if_else(!outlier_function(AS_IGDMCONDS), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_min_munic     = dplyr::if_else(AS_IGDMCONDS >= (min(dplyr::lag(AS_IGDMCONDS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_max_munic     = dplyr::if_else(AS_IGDMCONDS <= (max(dplyr::lag(AS_IGDMCONDS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_min_k_munic   = dplyr::if_else(AS_IGDMCONDS >= (min(dplyr::lag(AS_IGDMCONDS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_max_k_munic   = dplyr::if_else(AS_IGDMCONDS <= (k * max(dplyr::lag(AS_IGDMCONDS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_med_mov_munic = dplyr::if_else(AS_IGDMCONDS <= (k * zoo::rollmedian(AS_IGDMCONDS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_igdmconds_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCONDS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_igdmconds}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_igdmconds |> 
+  dplyr::select(!AS_IGDMCONDS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdmconds}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdmconds}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_IGDMATU
+
+
+```{r rules_dist_as_igdmatu}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_igdmatu <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMATU) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_igdmatu_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDMATU), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_out_munic     = dplyr::if_else(!outlier_function(AS_IGDMATU), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_min_munic     = dplyr::if_else(AS_IGDMATU >= (min(dplyr::lag(AS_IGDMATU), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_max_munic     = dplyr::if_else(AS_IGDMATU <= (max(dplyr::lag(AS_IGDMATU), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_min_k_munic   = dplyr::if_else(AS_IGDMATU >= (min(dplyr::lag(AS_IGDMATU), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_max_k_munic   = dplyr::if_else(AS_IGDMATU <= (k * max(dplyr::lag(AS_IGDMATU), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_med_mov_munic = dplyr::if_else(AS_IGDMATU <= (k * zoo::rollmedian(AS_IGDMATU, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_igdmatu_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMATU), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_igdmatu}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_igdmatu |> 
+  dplyr::select(!AS_IGDMATU) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdmatu}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdmatu}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_IGDMCOBCAD
+
+
+```{r rules_dist_as_igdmcobcad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_igdmcobcad <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCOBCAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_igdmcobcad_hampel_munic  = dplyr::if_else(!hampel_filter(AS_IGDMCOBCAD), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_out_munic     = dplyr::if_else(!outlier_function(AS_IGDMCOBCAD), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_min_munic     = dplyr::if_else(AS_IGDMCOBCAD >= (min(dplyr::lag(AS_IGDMCOBCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_max_munic     = dplyr::if_else(AS_IGDMCOBCAD <= (max(dplyr::lag(AS_IGDMCOBCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_min_k_munic   = dplyr::if_else(AS_IGDMCOBCAD >= (min(dplyr::lag(AS_IGDMCOBCAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_max_k_munic   = dplyr::if_else(AS_IGDMCOBCAD <= (k * max(dplyr::lag(AS_IGDMCOBCAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_med_mov_munic = dplyr::if_else(AS_IGDMCOBCAD <= (k * zoo::rollmedian(AS_IGDMCOBCAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_igdmcobcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCOBCAD), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_igdmcobcad}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_igdmcobcad |> 
+  dplyr::select(!AS_IGDMCOBCAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_igdmcobcad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_igdmcobcad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_BPCPID
+
+
+```{r rules_dist_as_bpcpid}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpcpid <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCPID) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpcpid_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPCPID), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_out_munic     = dplyr::if_else(!outlier_function(AS_BPCPID), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_min_munic     = dplyr::if_else(AS_BPCPID >= (min(dplyr::lag(AS_BPCPID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_max_munic     = dplyr::if_else(AS_BPCPID <= (max(dplyr::lag(AS_BPCPID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_min_k_munic   = dplyr::if_else(AS_BPCPID >= (min(dplyr::lag(AS_BPCPID), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_max_k_munic   = dplyr::if_else(AS_BPCPID <= (k * max(dplyr::lag(AS_BPCPID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_med_mov_munic = dplyr::if_else(AS_BPCPID <= (k * zoo::rollmedian(AS_BPCPID, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpid_dif_munic     = dplyr::if_else(!compare_first_dif(AS_BPCPID), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_bpcpid}
+
+## Transformação dos resultados
+df_sumario_dist_as <- df_rules_dist_as_bpcpid |> 
+  dplyr::select(!AS_BPCPID) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_as |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_bpcpid}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpcpid}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### AS_BPCPDEF
+
+
+```{r rules_dist_as_bpcpdef}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_bpcpdef <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCPDEF) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_bpcpdef_hampel_munic  = dplyr::if_else(!hampel_filter(AS_BPCPDEF), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_out_munic     = dplyr::if_else(!outlier_function(AS_BPCPDEF), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_min_munic     = dplyr::if_else(AS_BPCPDEF >= (min(dplyr::lag(AS_BPCPDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_max_munic     = dplyr::if_else(AS_BPCPDEF <= (max(dplyr::lag(AS_BPCPDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_min_k_munic   = dplyr::if_else(AS_BPCPDEF >= (min(dplyr::lag(AS_BPCPDEF), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_max_k_munic   = dplyr::if_else(AS_BPCPDEF <= (k * max(dplyr::lag(AS_BPCPDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_med_mov_munic = dplyr::if_else(AS_BPCPDEF <= (k * zoo::rollmedian(AS_BPCPDEF, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_bpcpdef_dif_munic     = dplyr::if_else(!compare_first_dif(AS_BPCPDEF), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_bpcpdef}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_bpcpdef |> 
+  dplyr::select(!AS_BPCPDEF) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_bpcpdef}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_bpcpdef}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_RHASPS
+
+```{r rules_dist_as_rhasps}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhasps <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHASPS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhasps_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHASPS), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_out_munic     = dplyr::if_else(!outlier_function(AS_RHASPS), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_min_munic     = dplyr::if_else(AS_RHASPS >= (min(dplyr::lag(AS_RHASPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_max_munic     = dplyr::if_else(AS_RHASPS <= (max(dplyr::lag(AS_RHASPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_min_k_munic   = dplyr::if_else(AS_RHASPS >= (min(dplyr::lag(AS_RHASPS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_max_k_munic   = dplyr::if_else(AS_RHASPS <= (k * max(dplyr::lag(AS_RHASPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_med_mov_munic = dplyr::if_else(AS_RHASPS <= (k * zoo::rollmedian(AS_RHASPS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_rhasps_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHASPS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_rhasps}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_rhasps |> 
+  dplyr::select(!AS_RHASPS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhasps}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhasps}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_RHPSIPS
+
+```{r rules_dist_as_rhpsips}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhpsips <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHPSIPS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhpsips_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHPSIPS), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_out_munic     = dplyr::if_else(!outlier_function(AS_RHPSIPS), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_min_munic     = dplyr::if_else(AS_RHPSIPS >= (min(dplyr::lag(AS_RHPSIPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_max_munic     = dplyr::if_else(AS_RHPSIPS <= (max(dplyr::lag(AS_RHPSIPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_min_k_munic   = dplyr::if_else(AS_RHPSIPS >= (min(dplyr::lag(AS_RHPSIPS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_max_k_munic   = dplyr::if_else(AS_RHPSIPS <= (k * max(dplyr::lag(AS_RHPSIPS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_med_mov_munic = dplyr::if_else(AS_RHPSIPS <= (k * zoo::rollmedian(AS_RHPSIPS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_rhpsips_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHPSIPS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_rhpsips}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_rhpsips |> 
+  dplyr::select(!AS_RHPSIPS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhpsips}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhpsips}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_RHVPOAAS
+
+
+```{r rules_dist_as_rhvpoaas}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhvpoaas <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHVPOAAS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhvpoaas_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHVPOAAS), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_out_munic     = dplyr::if_else(!outlier_function(AS_RHVPOAAS), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_min_munic     = dplyr::if_else(AS_RHVPOAAS >= (min(dplyr::lag(AS_RHVPOAAS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_max_munic     = dplyr::if_else(AS_RHVPOAAS <= (max(dplyr::lag(AS_RHVPOAAS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_min_k_munic   = dplyr::if_else(AS_RHVPOAAS >= (min(dplyr::lag(AS_RHVPOAAS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_max_k_munic   = dplyr::if_else(AS_RHVPOAAS <= (k * max(dplyr::lag(AS_RHVPOAAS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_med_mov_munic = dplyr::if_else(AS_RHVPOAAS <= (k * zoo::rollmedian(AS_RHVPOAAS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_rhvpoaas_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHVPOAAS), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_rhvpoaas}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_rhvpoaas |> 
+  dplyr::select(!AS_RHVPOAAS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhvpoaas}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhvpoaas}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+### AS_RHVINEST
+
+
+```{r rules_dist_as_rhvinest}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_as_rhvinest <- data |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHVINEST) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_as_rhvinest_hampel_munic  = dplyr::if_else(!hampel_filter(AS_RHVINEST), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_out_munic     = dplyr::if_else(!outlier_function(AS_RHVINEST), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_min_munic     = dplyr::if_else(AS_RHVINEST >= (min(dplyr::lag(AS_RHVINEST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_max_munic     = dplyr::if_else(AS_RHVINEST <= (max(dplyr::lag(AS_RHVINEST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_min_k_munic   = dplyr::if_else(AS_RHVINEST >= (min(dplyr::lag(AS_RHVINEST), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_max_k_munic   = dplyr::if_else(AS_RHVINEST <= (k * max(dplyr::lag(AS_RHVINEST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_med_mov_munic = dplyr::if_else(AS_RHVINEST <= (k * zoo::rollmedian(AS_RHVINEST, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_as_rhvinest_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHVINEST), F, T) # Longitudinal (município)
+  )
+```
+
+
+```{r data_wrangling_dist_as_rhvinest}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_as_rhvinest |> 
+  dplyr::select(!AS_RHVINEST) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_as_rhvinest}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_as_rhvinest}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
 
 # Análise descritiva
 
@@ -1427,7 +4280,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(var), 
+    table_descriptive(variable = var,data = data), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -1452,10 +4305,11 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(var))
+  print(chart_boxplot(variable = var,data = data))
   cat("\\pagebreak\n")
 }
 ```
+
 
 ```{r show_hist_chart, results='asis'}
 #| out-width: 100%
@@ -1466,30 +4320,31 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(var))
+  print(chart_histogram(variable = var,data = data))
   cat("\\pagebreak\n")
 }
 ```
 
-```{r excel_create_wb}
+
+```{r excel_create_wb, eval=FALSE}
 
 ## Criar pasta de trabalho
 pt <- openxlsx::createWorkbook()
 ```
 
-```{r df_build_viol_valid}
+```{r df_build_viol_valid, eval=FALSE}
 
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_as_indcras <- df_rules_valid_ma_all |> 
+df_rules_valid_as_indcras <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_ICMSECOLOG")
+    dplyr::contains("_INDCRAS")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1497,14 +4352,14 @@ df_rules_valid_as_indcras <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_crh <- df_rules_valid_ma_all |> 
+df_rules_valid_as_crh <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_CRH")
+    dplyr::contains("_IDCRASME")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1512,14 +4367,14 @@ df_rules_valid_ma_crh <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_as_idcreasnor <- df_rules_valid_ma_all |> 
+df_rules_valid_as_idcreasnor <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_CFEM")
+    dplyr::contains("_IDCREASNOR")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1527,14 +4382,14 @@ df_rules_valid_as_idcreasnor <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_ogestor <- df_rules_valid_ma_all |> 
+df_rules_valid_as_ogestor <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_OGESTOR")
+    dplyr::contains("_IDCONSELHO")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1542,14 +4397,14 @@ df_rules_valid_ma_ogestor <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_fmma <- df_rules_valid_ma_all |> 
+df_rules_valid_as_fmma <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FMMA")
+    dplyr::contains("_IGDM")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1557,14 +4412,14 @@ df_rules_valid_ma_fmma <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_legisl <- df_rules_valid_ma_all |> 
+df_rules_valid_as_legisl <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_LEGISL")
+    dplyr::contains("_IGDSUASM")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1572,14 +4427,14 @@ df_rules_valid_ma_legisl <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_comite <- df_rules_valid_ma_all |> 
+df_rules_valid_as_comite <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_COMITE")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1587,14 +4442,14 @@ df_rules_valid_ma_comite <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_as_idconselho <- df_rules_valid_ma_all |> 
+df_rules_valid_as_idconselho <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_FOCOS")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1602,14 +4457,14 @@ df_rules_valid_as_idconselho <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_cana <- df_rules_valid_ma_all |> 
+df_rules_valid_as_cana <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_CANA")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1617,14 +4472,14 @@ df_rules_valid_ma_cana <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_frota <- df_rules_valid_ma_all |> 
+df_rules_valid_as_frota <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_FROTA")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1632,14 +4487,14 @@ df_rules_valid_ma_frota <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_bovino <- df_rules_valid_ma_all |> 
+df_rules_valid_as_bovino <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_BOVINO")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1647,14 +4502,14 @@ df_rules_valid_ma_bovino <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_reflo <- df_rules_valid_ma_all |> 
+df_rules_valid_as_reflo <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_REFLO")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1662,14 +4517,14 @@ df_rules_valid_ma_reflo <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_flonativa <- df_rules_valid_ma_all |> 
+df_rules_valid_as_flonativa <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_FLONATIVA")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1677,14 +4532,14 @@ df_rules_valid_ma_flonativa <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_infra <- df_rules_valid_ma_all |> 
+df_rules_valid_as_infra <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_INFRA")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1692,14 +4547,14 @@ df_rules_valid_ma_infra <- df_rules_valid_ma_all |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_valid_ma_agro <- df_rules_valid_ma_all |> 
+df_rules_valid_as_agro <- df_rules_valid_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::contains("_AGRO")
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1708,25 +4563,25 @@ df_rules_valid_ma_agro <- df_rules_valid_ma_all |>
   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_valid}
+```{r df_export_viol_valid, eval=FALSE}
 
 ## Lista com os dfs por indicador
 lista_df <- list(
   "ma_icmsecolog" = df_rules_valid_as_indcras,
-  "ma_crh"        = df_rules_valid_ma_crh,
+  "ma_crh"        = df_rules_valid_as_crh,
   "ma_cfem"       = df_rules_valid_as_idcreasnor,
-  "ma_ogestor"    = df_rules_valid_ma_ogestor,
-  "ma_fmma"       = df_rules_valid_ma_fmma,
-  "ma_legisl"     = df_rules_valid_ma_legisl,
-  "ma_comite"     = df_rules_valid_ma_comite,
-  "as_idconselho"      = df_rules_valid_as_idconselho,
-  "ma_cana"       = df_rules_valid_ma_cana,
-  "ma_frota"      = df_rules_valid_ma_frota,
-  "ma_bovino"     = df_rules_valid_ma_bovino,
-  "ma_reflo"      = df_rules_valid_ma_reflo,
-  "ma_flonativa"  = df_rules_valid_ma_flonativa,
-  "ma_infra"      = df_rules_valid_ma_infra,
-  "ma_agro"       = df_rules_valid_ma_agro
+  "ma_ogestor"    = df_rules_valid_as_ogestor,
+  "ma_fmma"       = df_rules_valid_as_fmma,
+  "ma_legisl"     = df_rules_valid_as_legisl,
+  "ma_comite"     = df_rules_valid_as_comite,
+  "as_idconselho" = df_rules_valid_as_idconselho,
+  "ma_cana"       = df_rules_valid_as_cana,
+  "ma_frota"      = df_rules_valid_as_frota,
+  "ma_bovino"     = df_rules_valid_as_bovino,
+  "ma_reflo"      = df_rules_valid_as_reflo,
+  "ma_flonativa"  = df_rules_valid_as_flonativa,
+  "ma_infra"      = df_rules_valid_as_infra,
+  "ma_agro"       = df_rules_valid_as_agro
 )
 
 ## Add dados à pasta de trabalho
@@ -1737,12 +4592,12 @@ for(i in names(lista_df)){
 }
 ```
 
-```{r df_build_viol_consist}
+```{r df_build_viol_consist, eval=FALSE}
 
 # Criar base com as observações que violaram uma ou mais regras de consistência
 
 ## Consistência
-df_rules_consist_as_idconselho <- df_rules_consist_ma_all |> 
+df_rules_consist_as_idconselho <- df_rules_consist_as_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -1758,11 +4613,11 @@ df_rules_consist_as_idconselho <- df_rules_consist_ma_all |>
   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_consist}
+```{r df_export_viol_consist, eval=FALSE}
 
 ## Lista com os dfs por indicador
 lista_df <- list(
-  "as_idconselho" = df_rules_valid_as_idconselho
+  "as_idconselho" = df_rules_consist_as_idconselho
 )
 
 ## Add dados à pasta de trabalho
@@ -1773,14 +4628,14 @@ for(i in names(lista_df)){
 }
 ```
 
-```{r df_build_viol_dist}
+```{r df_build_viol_dist, eval=FALSE}
 
 # Criar base com as observações que violaram uma ou mais regras de distribuição
 
 ## Distribuição
 df_rules_dist_as_indcras <- df_rules_dist_as_indcras |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1788,9 +4643,9 @@ df_rules_dist_as_indcras <- df_rules_dist_as_indcras |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_crh <- df_rules_dist_ma_crh |> 
+df_rules_dist_as_crh <- df_rules_dist_as_crh |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1800,7 +4655,7 @@ df_rules_dist_ma_crh <- df_rules_dist_ma_crh |>
 
 df_rules_dist_as_idcreasnor <- df_rules_dist_as_idcreasnor |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1810,7 +4665,7 @@ df_rules_dist_as_idcreasnor <- df_rules_dist_as_idcreasnor |>
 
 df_rules_dist_as_idconselho <- df_rules_dist_as_idconselho |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1818,9 +4673,9 @@ df_rules_dist_as_idconselho <- df_rules_dist_as_idconselho |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_cana <- df_rules_dist_ma_cana |> 
+df_rules_dist_as_cana <- df_rules_dist_as_cana |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1828,9 +4683,9 @@ df_rules_dist_ma_cana <- df_rules_dist_ma_cana |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_frota <- df_rules_dist_ma_frota |> 
+df_rules_dist_as_frota <- df_rules_dist_as_frota |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1838,9 +4693,9 @@ df_rules_dist_ma_frota <- df_rules_dist_ma_frota |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_bovino <- df_rules_dist_ma_bovino |> 
+df_rules_dist_as_bovino <- df_rules_dist_as_bovino |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1848,9 +4703,9 @@ df_rules_dist_ma_bovino <- df_rules_dist_ma_bovino |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |> 
+df_rules_dist_as_reflo <- df_rules_dist_as_reflo |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1858,9 +4713,9 @@ df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_flonativa <- df_rules_dist_ma_flonativa |> 
+df_rules_dist_as_flonativa <- df_rules_dist_as_flonativa |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1868,9 +4723,9 @@ df_rules_dist_ma_flonativa <- df_rules_dist_ma_flonativa |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_infra <- df_rules_dist_ma_infra |> 
+df_rules_dist_as_infra <- df_rules_dist_as_infra |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1878,9 +4733,9 @@ df_rules_dist_ma_infra <- df_rules_dist_ma_infra |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_agro <- df_rules_dist_ma_agro |> 
+df_rules_dist_as_agro <- df_rules_dist_as_agro |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
     names_to  = "regra", 
     values_to = "obs_suspeita"
   ) |> 
@@ -1889,20 +4744,20 @@ df_rules_dist_ma_agro <- df_rules_dist_ma_agro |>
   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_dist}
+```{r df_export_viol_dist, eval=FALSE}
 
 lista_df <- list(
   "ma_icmsecolog" = df_rules_dist_as_indcras,
-  "ma_crh"        = df_rules_dist_ma_crh,
+  "ma_crh"        = df_rules_dist_as_crh,
   "ma_cfem"       = df_rules_dist_as_idcreasnor,
   "as_idconselho"      = df_rules_dist_as_idconselho,
-  "ma_cana"       = df_rules_dist_ma_cana,
-  "ma_frota"      = df_rules_dist_ma_frota,
-  "ma_bovino"     = df_rules_dist_ma_bovino,
-  "ma_reflo"      = df_rules_dist_ma_reflo,
-  "ma_flonativa"  = df_rules_dist_ma_flonativa,
-  "ma_infra"      = df_rules_dist_ma_infra,
-  "ma_agro"       = df_rules_dist_ma_agro
+  "ma_cana"       = df_rules_dist_as_cana,
+  "ma_frota"      = df_rules_dist_as_frota,
+  "ma_bovino"     = df_rules_dist_as_bovino,
+  "ma_reflo"      = df_rules_dist_as_reflo,
+  "ma_flonativa"  = df_rules_dist_as_flonativa,
+  "ma_infra"      = df_rules_dist_as_infra,
+  "ma_agro"       = df_rules_dist_as_agro
 )
 
 for(i in names(lista_df)){
@@ -1912,9 +4767,9 @@ for(i in names(lista_df)){
 }
 ```
 
-```{r excel_save_wb}
+```{r excel_save_wb, eval=FALSE}
 
-openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T)
+openxlsx::saveWorkbook(pt, "fjpdados_assistenciasocial_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
