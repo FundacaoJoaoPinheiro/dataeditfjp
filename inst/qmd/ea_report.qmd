@@ -37,6 +37,7 @@ params:
 output-file: "ea_relatorio.html"
 ---
 
+
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -257,18 +258,13 @@ compare_lag <- function(var){
 
 ```
 
+
 ```{r set_param_global}
 
 k <- 1.5 
 
 ## "Truque" para setar "k" como uma constante
 lockBinding("k", globalenv())
-
-## Parâmetros para os gráficos do validate::
-chart_title <- "Resultado das validações por regra estabelecida"
-chart_label <- c("Erros", "Sucessos", "Missing", "Total")
-chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
-chart_xlab <- ""
 ```
 
 ```{r import_data}
@@ -338,6 +334,181 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, met
     -   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
     -   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_EA_BFFAM",    
+    "VI_EA_TRFAM",    
+    "VI_EA_TRPF",     
+    "VI_EA_BPCDEF",   
+    "VI_EA_BPCIDO",   
+    "VI_EA_BFBPC",    
+    "VI_EA_TRBPCDEF",
+    "VI_EA_TRBPCIDO", 
+    "VI_EA_TRBPC",    
+    "VI_EA_TRBPCPB",  
+    "VI_EA_TRBFBPC",  
+    "VI_EA_TRPC",     
+    "VI_EA_TRPCBF",   
+    "VI_EA_TRPCBPC",  
+    "VI_EA_VAAGR",    
+    "VI_EA_VAIND",    
+    "VI_EA_VAADM",    
+    "VI_EA_VASERV",   
+    "VI_EA_PVAAGR",  
+    "VI_EA_PVAIND",   
+    "VI_EA_PVAADM",   
+    "VI_EA_PVASERV", 
+    "VI_EA_VATOT",   
+    "VI_EA_IMPLIQ",   
+    "VI_EA_PIB",      
+    "VI_EA_PIBPC",    
+    "VI_EA_VAFAG",    
+    "VI_EA_VAF",      
+    "VI_EA_VAFMI",    
+    "VI_EA_VAFIT",    
+    "VI_EA_VAFIC",    
+    "VI_EA_VAFUP",    
+    "VI_EA_VAFCV",    
+    "VI_EA_VAFCA",    
+    "VI_EA_VAFSE",    
+    "VI_EA_VAFO",     
+    "VI_EA_PVAFAG",   
+    "VI_EA_PVAFMI",   
+    "VI_EA_PVAFIT",   
+    "VI_EA_PVAFIC",   
+    "VI_EA_PVAFUP",   
+    "VI_EA_PVAFCV",   
+    "VI_EA_PVAFCA",   
+    "VI_EA_PVAFSE",   
+    "VI_EA_PVAFO",   
+    "VI_EA_VAFPC",    
+    "VI_EA_VAFCVPC",  
+    "VI_EA_EMPRSF",   
+    "VI_EA_EMPRSFTX", 
+    "VI_EA_RENSF",    
+    "VI_EA_RENPCSF",  
+    "VI_EA_EMPRSFAG", 
+    "VI_EA_EMPRSFMI", 
+    "VI_EA_EMPRSFIT", 
+    "VI_EA_EMPRSFUP", 
+    "VI_EA_EMPRSFIC", 
+    "VI_EA_EMPRSFCO", 
+    "VI_EA_EMPRSFSE"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_EA_BFFAM"    ~ desc_regra_valid[1],
+      "VI_EA_TRFAM"    ~ desc_regra_valid[1],
+      "VI_EA_TRPF"     ~ desc_regra_valid[1],
+      "VI_EA_BPCDEF"   ~ desc_regra_valid[1],
+      "VI_EA_BPCIDO"   ~ desc_regra_valid[1],
+      "VI_EA_BFBPC"    ~ desc_regra_valid[1],
+      "VI_EA_TRBPCDEF" ~ desc_regra_valid[1],
+      "VI_EA_TRBPCIDO" ~ desc_regra_valid[1],
+      "VI_EA_TRBPC"    ~ desc_regra_valid[1],
+      "VI_EA_TRBPCPB"  ~ desc_regra_valid[1],
+      "VI_EA_TRBFBPC"  ~ desc_regra_valid[1],
+      "VI_EA_TRPC"     ~ desc_regra_valid[1],
+      "VI_EA_TRPCBF"   ~ desc_regra_valid[1],
+      "VI_EA_TRPCBPC"  ~ desc_regra_valid[1],
+      "VI_EA_VAAGR"    ~ desc_regra_valid[1],
+      "VI_EA_VAIND"    ~ desc_regra_valid[1],
+      "VI_EA_VAADM"    ~ desc_regra_valid[1],
+      "VI_EA_VASERV"   ~ desc_regra_valid[1],
+      "VI_EA_PVAAGR"   ~ desc_regra_valid[3],
+      "VI_EA_PVAIND"   ~ desc_regra_valid[3],
+      "VI_EA_PVAADM"   ~ desc_regra_valid[3],
+      "VI_EA_PVASERV"  ~ desc_regra_valid[3],
+      "VI_EA_VATOT"    ~ desc_regra_valid[1],
+      "VI_EA_IMPLIQ"   ~ desc_regra_valid[1],
+      "VI_EA_PIB"      ~ desc_regra_valid[1],
+      "VI_EA_PIBPC"    ~ desc_regra_valid[1],
+      "VI_EA_VAFAG"    ~ desc_regra_valid[1],
+      "VI_EA_VAF"      ~ desc_regra_valid[1],
+      "VI_EA_VAFMI"    ~ desc_regra_valid[1],
+      "VI_EA_VAFIT"    ~ desc_regra_valid[1],
+      "VI_EA_VAFIC"    ~ desc_regra_valid[1],
+      "VI_EA_VAFUP"    ~ desc_regra_valid[1],
+      "VI_EA_VAFCV"    ~ desc_regra_valid[1],
+      "VI_EA_VAFCA"    ~ desc_regra_valid[1],
+      "VI_EA_VAFSE"    ~ desc_regra_valid[1],
+      "VI_EA_VAFO"     ~ desc_regra_valid[1],
+      "VI_EA_PVAFAG"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFMI"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFIT"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFIC"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFUP"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFCV"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFCA"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFSE"   ~ desc_regra_valid[3],
+      "VI_EA_PVAFO"    ~ desc_regra_valid[3],
+      "VI_EA_VAFPC"    ~ desc_regra_valid[1],
+      "VI_EA_VAFCVPC"  ~ desc_regra_valid[1],
+      "VI_EA_EMPRSF"   ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFTX" ~ desc_regra_valid[3],
+      "VI_EA_RENSF"    ~ desc_regra_valid[1],
+      "VI_EA_RENPCSF"  ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFAG" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFMI" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFIT" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFUP" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFIC" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFCO" ~ desc_regra_valid[1],
+      "VI_EA_EMPRSFSE" ~ desc_regra_valid[1]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma da proporção anual é igual a 100%", # MA_FOCOS
+  `2` = "A soma de EA_BPCDEF e EA_BPCIDO é igual a EA_BFBPC",
+  `3` = "A soma de EA_TRBPCDEF e EA_TRBPCIDO é igual a EA_TRBPC",
+  `4` = "A soma de EA_PVAAGR, EA_PVAIND, EA_PVAADM e EA_PVASERV é igual a 100%",
+  `5` = "A soma de EA_PVAFAG, EA_PVAFMI, EA_PVAFIT, EA_PVAFIC, EA_PVAFUP, EA_PVAFCV, EA_PVAFCA, EA_PVAFSE e EA_PVAFO é igual a 100%"
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CI_BPC_total_munic",
+    "CI_TRBPC_total_munic",
+    "CI_VAF_total_munic",
+    "CI_VA_total_munic"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CI_BPC_total_munic"   ~ desc_regra_consist[2],
+      "CI_TRBPC_total_munic" ~ desc_regra_consist[3],
+      "CI_VAF_total_munic"   ~ desc_regra_consist[4],
+      "CI_VA_total_munic"    ~ desc_regra_consist[5]
+    )
+  )
+```
 
 ## Tipo
 
@@ -414,11 +585,8 @@ check_type <- validate::confront(data, rules_type)
 
 validate::summary(check_type) |> 
   dplyr::select(
-    Regra         = name,
-    `Observações` = items,
-    Sucessos      = passes,
-    Erros         = fails,
-    Missing       = nNA
+    Regra    = name,
+    Validada = passes
   ) |> 
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
@@ -436,64 +604,64 @@ df_rules_valid_ea_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_EA_BFFAM    = dplyr::if_else(!is.na(EA_BFFAM), F, T),
-    VI_NA_EA_TRFAM    = dplyr::if_else(!is.na(EA_TRFAM), F, T),
-    VI_NA_EA_TRPF     = dplyr::if_else(!is.na(EA_TRPF), F, T),
-    VI_NA_EA_BPCDEF   = dplyr::if_else(!is.na(EA_BPCDEF), F, T),
-    VI_NA_EA_BPCIDO   = dplyr::if_else(!is.na(EA_BPCIDO), F, T),
-    VI_NA_EA_BFBPC    = dplyr::if_else(!is.na(EA_BFBPC), F, T),
-    VI_NA_EA_TRBPCDEF = dplyr::if_else(!is.na(EA_TRBPCDEF), F, T),
-    VI_NA_EA_TRBPCIDO = dplyr::if_else(!is.na(EA_TRBPCIDO), F, T),
-    VI_NA_EA_TRBPC    = dplyr::if_else(!is.na(EA_TRBPC), F, T),
-    VI_NA_EA_TRBPCPB  = dplyr::if_else(!is.na(EA_TRBPCPB), F, T),
-    VI_NA_EA_TRBFBPC  = dplyr::if_else(!is.na(EA_TRBFBPC), F, T),
-    VI_NA_EA_TRPC     = dplyr::if_else(!is.na(EA_TRPC), F, T),
-    VI_NA_EA_TRPCBF   = dplyr::if_else(!is.na(EA_TRPCBF), F, T),
-    VI_NA_EA_TRPCBPC  = dplyr::if_else(!is.na(EA_TRPCBPC), F, T),
-    VI_NA_EA_VAAGR    = dplyr::if_else(!is.na(EA_VAAGR), F, T),
-    VI_NA_EA_VAIND    = dplyr::if_else(!is.na(EA_VAIND), F, T),
-    VI_NA_EA_VAADM    = dplyr::if_else(!is.na(EA_VAADM), F, T),
-    VI_NA_EA_VASERV   = dplyr::if_else(!is.na(EA_VASERV), F, T),
-    VI_NA_EA_PVAAGR   = dplyr::if_else(!is.na(EA_PVAAGR), F, T),
-    VI_NA_EA_PVAIND   = dplyr::if_else(!is.na(EA_PVAIND), F, T),
-    VI_NA_EA_PVAADM   = dplyr::if_else(!is.na(EA_PVAADM), F, T),
-    VI_NA_EA_PVASERV  = dplyr::if_else(!is.na(EA_PVASERV), F, T),
-    VI_NA_EA_VATOT    = dplyr::if_else(!is.na(EA_VATOT), F, T),
-    VI_NA_EA_IMPLIQ   = dplyr::if_else(!is.na(EA_IMPLIQ), F, T),
-    VI_NA_EA_PIB      = dplyr::if_else(!is.na(EA_PIB), F, T),
-    VI_NA_EA_PIBPC    = dplyr::if_else(!is.na(EA_PIBPC), F, T),
-    VI_NA_EA_VAFAG    = dplyr::if_else(!is.na(EA_VAFAG), F, T),
-    VI_NA_EA_VAF      = dplyr::if_else(!is.na(EA_VAF), F, T),
-    VI_NA_EA_VAFMI    = dplyr::if_else(!is.na(EA_VAFMI), F, T),
-    VI_NA_EA_VAFIT    = dplyr::if_else(!is.na(EA_VAFIT), F, T),
-    VI_NA_EA_VAFIC    = dplyr::if_else(!is.na(EA_VAFIC), F, T),
-    VI_NA_EA_VAFUP    = dplyr::if_else(!is.na(EA_VAFUP), F, T),
-    VI_NA_EA_VAFCV    = dplyr::if_else(!is.na(EA_VAFCV), F, T),
-    VI_NA_EA_VAFCA    = dplyr::if_else(!is.na(EA_VAFCA), F, T),
-    VI_NA_EA_VAFSE    = dplyr::if_else(!is.na(EA_VAFSE), F, T),
-    VI_NA_EA_VAFO     = dplyr::if_else(!is.na(EA_VAFO), F, T),
-    VI_NA_EA_PVAFAG   = dplyr::if_else(!is.na(EA_PVAFAG), F, T),
-    VI_NA_EA_PVAFMI   = dplyr::if_else(!is.na(EA_PVAFMI), F, T),
-    VI_NA_EA_PVAFIT   = dplyr::if_else(!is.na(EA_PVAFIT), F, T),
-    VI_NA_EA_PVAFIC   = dplyr::if_else(!is.na(EA_PVAFIC), F, T),
-    VI_NA_EA_PVAFUP   = dplyr::if_else(!is.na(EA_PVAFUP), F, T),
-    VI_NA_EA_PVAFCV   = dplyr::if_else(!is.na(EA_PVAFCV), F, T),
-    VI_NA_EA_PVAFCA   = dplyr::if_else(!is.na(EA_PVAFCA), F, T),
-    VI_NA_EA_PVAFSE   = dplyr::if_else(!is.na(EA_PVAFSE), F, T),
-    VI_NA_EA_PVAFO    = dplyr::if_else(!is.na(EA_PVAFO), F, T),
-    VI_NA_EA_VAFPC    = dplyr::if_else(!is.na(EA_VAFPC), F, T),
-    VI_NA_EA_VAFCVPC  = dplyr::if_else(!is.na(EA_VAFCVPC), F, T),
-    VI_NA_EA_EMPRSF   = dplyr::if_else(!is.na(EA_EMPRSF), F, T),
-    VI_NA_EA_EMPRSFTX = dplyr::if_else(!is.na(EA_EMPRSFTX), F, T),
-    VI_NA_EA_RENSF    = dplyr::if_else(!is.na(EA_RENSF), F, T),
-    VI_NA_EA_RENPCSF  = dplyr::if_else(!is.na(EA_RENPCSF), F, T),
-    VI_NA_EA_EMPRSFAG = dplyr::if_else(!is.na(EA_EMPRSFAG), F, T),
-    VI_NA_EA_EMPRSFMI = dplyr::if_else(!is.na(EA_EMPRSFMI), F, T),
-    VI_NA_EA_EMPRSFIT = dplyr::if_else(!is.na(EA_EMPRSFIT), F, T),
-    VI_NA_EA_EMPRSFUP = dplyr::if_else(!is.na(EA_EMPRSFUP), F, T),
-    VI_NA_EA_EMPRSFIC = dplyr::if_else(!is.na(EA_EMPRSFIC), F, T),
-    VI_NA_EA_EMPRSFCO = dplyr::if_else(!is.na(EA_EMPRSFCO), F, T),
-    VI_NA_EA_EMPRSFSE = dplyr::if_else(!is.na(EA_EMPRSFSE), F, T),
+    VI_NA_EA_BFFAM    = dplyr::if_else(!is.na(EA_BFFAM), F, NA),
+    VI_NA_EA_TRFAM    = dplyr::if_else(!is.na(EA_TRFAM), F, NA),
+    VI_NA_EA_TRPF     = dplyr::if_else(!is.na(EA_TRPF), F, NA),
+    VI_NA_EA_BPCDEF   = dplyr::if_else(!is.na(EA_BPCDEF), F, NA),
+    VI_NA_EA_BPCIDO   = dplyr::if_else(!is.na(EA_BPCIDO), F, NA),
+    VI_NA_EA_BFBPC    = dplyr::if_else(!is.na(EA_BFBPC), F, NA),
+    VI_NA_EA_TRBPCDEF = dplyr::if_else(!is.na(EA_TRBPCDEF), F, NA),
+    VI_NA_EA_TRBPCIDO = dplyr::if_else(!is.na(EA_TRBPCIDO), F, NA),
+    VI_NA_EA_TRBPC    = dplyr::if_else(!is.na(EA_TRBPC), F, NA),
+    VI_NA_EA_TRBPCPB  = dplyr::if_else(!is.na(EA_TRBPCPB), F, NA),
+    VI_NA_EA_TRBFBPC  = dplyr::if_else(!is.na(EA_TRBFBPC), F, NA),
+    VI_NA_EA_TRPC     = dplyr::if_else(!is.na(EA_TRPC), F, NA),
+    VI_NA_EA_TRPCBF   = dplyr::if_else(!is.na(EA_TRPCBF), F, NA),
+    VI_NA_EA_TRPCBPC  = dplyr::if_else(!is.na(EA_TRPCBPC), F, NA),
+    VI_NA_EA_VAAGR    = dplyr::if_else(!is.na(EA_VAAGR), F, NA),
+    VI_NA_EA_VAIND    = dplyr::if_else(!is.na(EA_VAIND), F, NA),
+    VI_NA_EA_VAADM    = dplyr::if_else(!is.na(EA_VAADM), F, NA),
+    VI_NA_EA_VASERV   = dplyr::if_else(!is.na(EA_VASERV), F, NA),
+    VI_NA_EA_PVAAGR   = dplyr::if_else(!is.na(EA_PVAAGR), F, NA),
+    VI_NA_EA_PVAIND   = dplyr::if_else(!is.na(EA_PVAIND), F, NA),
+    VI_NA_EA_PVAADM   = dplyr::if_else(!is.na(EA_PVAADM), F, NA),
+    VI_NA_EA_PVASERV  = dplyr::if_else(!is.na(EA_PVASERV), F, NA),
+    VI_NA_EA_VATOT    = dplyr::if_else(!is.na(EA_VATOT), F, NA),
+    VI_NA_EA_IMPLIQ   = dplyr::if_else(!is.na(EA_IMPLIQ), F, NA),
+    VI_NA_EA_PIB      = dplyr::if_else(!is.na(EA_PIB), F, NA),
+    VI_NA_EA_PIBPC    = dplyr::if_else(!is.na(EA_PIBPC), F, NA),
+    VI_NA_EA_VAFAG    = dplyr::if_else(!is.na(EA_VAFAG), F, NA),
+    VI_NA_EA_VAF      = dplyr::if_else(!is.na(EA_VAF), F, NA),
+    VI_NA_EA_VAFMI    = dplyr::if_else(!is.na(EA_VAFMI), F, NA),
+    VI_NA_EA_VAFIT    = dplyr::if_else(!is.na(EA_VAFIT), F, NA),
+    VI_NA_EA_VAFIC    = dplyr::if_else(!is.na(EA_VAFIC), F, NA),
+    VI_NA_EA_VAFUP    = dplyr::if_else(!is.na(EA_VAFUP), F, NA),
+    VI_NA_EA_VAFCV    = dplyr::if_else(!is.na(EA_VAFCV), F, NA),
+    VI_NA_EA_VAFCA    = dplyr::if_else(!is.na(EA_VAFCA), F, NA),
+    VI_NA_EA_VAFSE    = dplyr::if_else(!is.na(EA_VAFSE), F, NA),
+    VI_NA_EA_VAFO     = dplyr::if_else(!is.na(EA_VAFO), F, NA),
+    VI_NA_EA_PVAFAG   = dplyr::if_else(!is.na(EA_PVAFAG), F, NA),
+    VI_NA_EA_PVAFMI   = dplyr::if_else(!is.na(EA_PVAFMI), F, NA),
+    VI_NA_EA_PVAFIT   = dplyr::if_else(!is.na(EA_PVAFIT), F, NA),
+    VI_NA_EA_PVAFIC   = dplyr::if_else(!is.na(EA_PVAFIC), F, NA),
+    VI_NA_EA_PVAFUP   = dplyr::if_else(!is.na(EA_PVAFUP), F, NA),
+    VI_NA_EA_PVAFCV   = dplyr::if_else(!is.na(EA_PVAFCV), F, NA),
+    VI_NA_EA_PVAFCA   = dplyr::if_else(!is.na(EA_PVAFCA), F, NA),
+    VI_NA_EA_PVAFSE   = dplyr::if_else(!is.na(EA_PVAFSE), F, NA),
+    VI_NA_EA_PVAFO    = dplyr::if_else(!is.na(EA_PVAFO), F, NA),
+    VI_NA_EA_VAFPC    = dplyr::if_else(!is.na(EA_VAFPC), F, NA),
+    VI_NA_EA_VAFCVPC  = dplyr::if_else(!is.na(EA_VAFCVPC), F, NA),
+    VI_NA_EA_EMPRSF   = dplyr::if_else(!is.na(EA_EMPRSF), F, NA),
+    VI_NA_EA_EMPRSFTX = dplyr::if_else(!is.na(EA_EMPRSFTX), F, NA),
+    VI_NA_EA_RENSF    = dplyr::if_else(!is.na(EA_RENSF), F, NA),
+    VI_NA_EA_RENPCSF  = dplyr::if_else(!is.na(EA_RENPCSF), F, NA),
+    VI_NA_EA_EMPRSFAG = dplyr::if_else(!is.na(EA_EMPRSFAG), F, NA),
+    VI_NA_EA_EMPRSFMI = dplyr::if_else(!is.na(EA_EMPRSFMI), F, NA),
+    VI_NA_EA_EMPRSFIT = dplyr::if_else(!is.na(EA_EMPRSFIT), F, NA),
+    VI_NA_EA_EMPRSFUP = dplyr::if_else(!is.na(EA_EMPRSFUP), F, NA),
+    VI_NA_EA_EMPRSFIC = dplyr::if_else(!is.na(EA_EMPRSFIC), F, NA),
+    VI_NA_EA_EMPRSFCO = dplyr::if_else(!is.na(EA_EMPRSFCO), F, NA),
+    VI_NA_EA_EMPRSFSE = dplyr::if_else(!is.na(EA_EMPRSFSE), F, NA),
     # Others
     VI_EA_BFFAM    = dplyr::if_else(EA_BFFAM >= 0, F, T),
     VI_EA_TRFAM    = dplyr::if_else(EA_TRFAM >= 0, F, T),
@@ -580,7 +748,7 @@ df_sumario_valid_ea <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with("VI_")
+    dplyr::starts_with(c("VI_", "VF_"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
@@ -604,6 +772,7 @@ df_sumario <- df_sumario_valid_ea |>
 ```{r table_valid_ea_na_all}
 
 df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -616,6 +785,7 @@ df_sumario |>
 ### Todos os indicadores - Demais regras
 
 ```{r table_valid_ea_all}
+#| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(
@@ -624,6 +794,7 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -682,10 +853,12 @@ df_sumario <- df_sumario_consist_ea |>
 ### Todos os indicadores
 
 ```{r table_consist_ea_all}
+#| column: screen-inset-right
 
 df_sumario |> 
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -4593,7 +4766,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(variable = var,data = data), 
+    table_descriptive(variable = var, data = data), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -4618,7 +4791,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(variable = var,data = data))
+  print(chart_boxplot(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -4632,7 +4805,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var,data = data))
+  print(chart_histogram(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -4652,7 +4825,7 @@ df_rules_valid_ea_bffam <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_BFFAM")
+    dplyr::ends_with("EA_BFFAM")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4667,7 +4840,7 @@ df_rules_valid_ea_trfam <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRFAM")
+    dplyr::ends_with("EA_TRFAM")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4682,7 +4855,7 @@ df_rules_valid_ea_trpf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRPF")
+    dplyr::ends_with("EA_TRPF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4697,7 +4870,7 @@ df_rules_valid_ea_bpcdef <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_BPCDEF")
+    dplyr::ends_with("EA_BPCDEF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4712,7 +4885,7 @@ df_rules_valid_ea_bpcido <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_BPCIDO")
+    dplyr::ends_with("EA_BPCIDO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4727,7 +4900,7 @@ df_rules_valid_ea_bfbpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_BFBPC")
+    dplyr::ends_with("EA_BFBPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4742,7 +4915,7 @@ df_rules_valid_ea_trbpcdef <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRBPCDEF")
+    dplyr::ends_with("EA_TRBPCDEF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4757,7 +4930,7 @@ df_rules_valid_ea_trbpcido <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRBPCIDO")
+    dplyr::ends_with("EA_TRBPCIDO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4772,7 +4945,7 @@ df_rules_valid_ea_trbpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRBPC")
+    dplyr::ends_with("EA_TRBPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4787,7 +4960,7 @@ df_rules_valid_ea_trbpcpb <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRBPCPB")
+    dplyr::ends_with("EA_TRBPCPB")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4802,7 +4975,7 @@ df_rules_valid_ea_trbfbpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRBFBPC")
+    dplyr::ends_with("EA_TRBFBPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4817,7 +4990,7 @@ df_rules_valid_ea_trpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRPC")
+    dplyr::ends_with("EA_TRPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4832,7 +5005,7 @@ df_rules_valid_ea_trpcbf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRPCBF")
+    dplyr::ends_with("EA_TRPCBF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4847,7 +5020,7 @@ df_rules_valid_ea_trpcbpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_TRPCBPC")
+    dplyr::ends_with("EA_TRPCBPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4862,7 +5035,7 @@ df_rules_valid_ea_vaagr <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAAGR")
+    dplyr::ends_with("EA_VAAGR")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4877,7 +5050,7 @@ df_rules_valid_ea_vaind <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAIND")
+    dplyr::ends_with("EA_VAIND")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4892,7 +5065,7 @@ df_rules_valid_ea_vaadm <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAADM")
+    dplyr::ends_with("EA_VAADM")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4907,7 +5080,7 @@ df_rules_valid_ea_vaserv <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VASERV")
+    dplyr::ends_with("EA_VASERV")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4922,7 +5095,7 @@ df_rules_valid_ea_pvaagr <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAAGR")
+    dplyr::ends_with("EA_PVAAGR")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4937,7 +5110,7 @@ df_rules_valid_ea_pvaind <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAIND")
+    dplyr::ends_with("EA_PVAIND")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4952,7 +5125,7 @@ df_rules_valid_ea_pvaadm <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAADM")
+    dplyr::ends_with("EA_PVAADM")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4967,7 +5140,7 @@ df_rules_valid_ea_pvaserv <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVASERV")
+    dplyr::ends_with("EA_PVASERV")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4982,7 +5155,7 @@ df_rules_valid_ea_vatot <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VATOT")
+    dplyr::ends_with("EA_VATOT")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -4997,7 +5170,7 @@ df_rules_valid_ea_impliq <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_IMPLIQ")
+    dplyr::ends_with("EA_IMPLIQ")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5012,7 +5185,7 @@ df_rules_valid_ea_pib <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PIB")
+    dplyr::ends_with("EA_PIB")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5027,7 +5200,7 @@ df_rules_valid_ea_pibpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PIBPC")
+    dplyr::ends_with("EA_PIBPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5042,7 +5215,7 @@ df_rules_valid_ea_vafag <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFAG")
+    dplyr::ends_with("EA_VAFAG")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5057,7 +5230,7 @@ df_rules_valid_ea_vaf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAF")
+    dplyr::ends_with("EA_VAF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5072,7 +5245,7 @@ df_rules_valid_ea_vafmi <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFMI")
+    dplyr::ends_with("EA_VAFMI")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5087,7 +5260,7 @@ df_rules_valid_ea_vafit <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFIT")
+    dplyr::ends_with("EA_VAFIT")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5102,7 +5275,7 @@ df_rules_valid_ea_vafic <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFIC")
+    dplyr::ends_with("EA_VAFIC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5117,7 +5290,7 @@ df_rules_valid_ea_vafup <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFUP")
+    dplyr::ends_with("EA_VAFUP")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5132,7 +5305,7 @@ df_rules_valid_ea_vafcv <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFCV")
+    dplyr::ends_with("EA_VAFCV")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5147,7 +5320,7 @@ df_rules_valid_ea_vafca <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFCA")
+    dplyr::ends_with("EA_VAFCA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5162,7 +5335,7 @@ df_rules_valid_ea_vafse <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFSE")
+    dplyr::ends_with("EA_VAFSE")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5177,7 +5350,7 @@ df_rules_valid_ea_vafo <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFO")
+    dplyr::ends_with("EA_VAFO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5192,7 +5365,7 @@ df_rules_valid_ea_pvafag <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFAG")
+    dplyr::ends_with("EA_PVAFAG")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5207,7 +5380,7 @@ df_rules_valid_ea_pvafmi <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFMI")
+    dplyr::ends_with("EA_PVAFMI")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5222,7 +5395,7 @@ df_rules_valid_ea_pvafit <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFIT")
+    dplyr::ends_with("EA_PVAFIT")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5237,7 +5410,7 @@ df_rules_valid_ea_pvafic <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFIC")
+    dplyr::ends_with("EA_PVAFIC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5252,7 +5425,7 @@ df_rules_valid_ea_pvafup <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFUP")
+    dplyr::ends_with("EA_PVAFUP")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5267,7 +5440,7 @@ df_rules_valid_ea_pvafcv <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFCV")
+    dplyr::ends_with("EA_PVAFCV")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5282,7 +5455,7 @@ df_rules_valid_ea_pvafca <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFCA")
+    dplyr::ends_with("EA_PVAFCA")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5297,7 +5470,7 @@ df_rules_valid_ea_pvafse <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFSE")
+    dplyr::ends_with("EA_PVAFSE")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5312,7 +5485,7 @@ df_rules_valid_ea_pvafo <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_PVAFO")
+    dplyr::ends_with("EA_PVAFO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5327,7 +5500,7 @@ df_rules_valid_ea_vafpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFPC")
+    dplyr::ends_with("EA_VAFPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5342,7 +5515,7 @@ df_rules_valid_ea_vafcvpc <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_VAFCVPC")
+    dplyr::ends_with("EA_VAFCVPC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5357,7 +5530,7 @@ df_rules_valid_ea_emprsf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSF")
+    dplyr::ends_with("EA_EMPRSF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5372,7 +5545,7 @@ df_rules_valid_ea_emprsftx <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFTX")
+    dplyr::ends_with("EA_EMPRSFTX")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5387,7 +5560,7 @@ df_rules_valid_ea_rensf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_RENSF")
+    dplyr::ends_with("EA_RENSF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5402,7 +5575,7 @@ df_rules_valid_ea_renpcsf <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_RENPCSF")
+    dplyr::ends_with("EA_RENPCSF")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5417,7 +5590,7 @@ df_rules_valid_ea_emprsfag <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFAG")
+    dplyr::ends_with("EA_EMPRSFAG")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5432,7 +5605,7 @@ df_rules_valid_ea_emprsfmi <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFMI")
+    dplyr::ends_with("EA_EMPRSFMI")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5447,7 +5620,7 @@ df_rules_valid_ea_emprsfit <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFIT")
+    dplyr::ends_with("EA_EMPRSFIT")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5462,7 +5635,7 @@ df_rules_valid_ea_emprsfup <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFUP")
+    dplyr::ends_with("EA_EMPRSFUP")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5477,7 +5650,7 @@ df_rules_valid_ea_emprsfic <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFIC")
+    dplyr::ends_with("EA_EMPRSFIC")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5492,7 +5665,7 @@ df_rules_valid_ea_emprsfco <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFCO")
+    dplyr::ends_with("EA_EMPRSFCO")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
@@ -5507,7 +5680,7 @@ df_rules_valid_ea_emprsfse <- df_rules_valid_ea_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_EMPRSFSE")
+    dplyr::ends_with("EA_EMPRSFSE")
   ) |> 
   tidyr::pivot_longer(
     cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
