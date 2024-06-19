@@ -131,6 +131,21 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "SP_PM1" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
+
 ```{r get_cat}
 
 ## Categorias variáveis dicotômicas
@@ -648,6 +663,12 @@ df_sumario |>
 ```{r rules_dist_sp_cv}
 
 df_rules_dist_sp_cv <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_CV" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_CV"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CV) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -715,6 +736,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_cvpa}
 
 df_rules_dist_sp_cvpa <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_CVPA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_CVPA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CVPA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -782,6 +809,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_cvpe}
 
 df_rules_dist_sp_cvpe <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_CVPE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_CVPE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CVPE) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -849,6 +882,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_mpo}
 
 df_rules_dist_sp_mpo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_MPO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_MPO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MPO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -916,6 +955,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homtx}
 
 df_rules_dist_sp_homtx <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMTX" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMTX"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMTX) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -983,6 +1028,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homi}
 
 df_rules_dist_sp_homi <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMI) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1038,6 +1089,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_tenhom}
 
 df_rules_dist_sp_tenhom <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_TENHOM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_TENHOM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TENHOM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1093,6 +1150,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_latrocinio}
 
 df_rules_dist_sp_latrocinio <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_LATROCINIO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_LATROCINIO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_LATROCINIO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1148,6 +1211,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_roubo}
 
 df_rules_dist_sp_roubo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_ROUBO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ROUBO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ROUBO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1203,6 +1272,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_trafico}
 
 df_rules_dist_sp_trafico <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_TRAFICO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_TRAFICO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TRAFICO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1258,6 +1333,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_posse}
 
 df_rules_dist_sp_posse <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_POSSE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_POSSE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_POSSE) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1313,6 +1394,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_arma}
 
 df_rules_dist_sp_arma <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_ARMA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ARMA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ARMA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1368,6 +1455,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_estupro}
 
 df_rules_dist_sp_estupro <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_ESTUPRO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ESTUPRO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ESTUPRO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1423,6 +1516,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_suicidiossim}
 
 df_rules_dist_sp_suicidiossim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_SUICIDIOSSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_SUICIDIOSSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_SUICIDIOSSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1478,6 +1577,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_mortestransim}
 
 df_rules_dist_sp_mortestransim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_MORTESTRANSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_MORTESTRANSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MORTESTRANSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1533,6 +1638,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homisim}
 
 df_rules_dist_sp_homisim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMISIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMISIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMISIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1588,6 +1699,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homitxsim}
 
 df_rules_dist_sp_homitxsim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMITXSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMITXSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMITXSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1655,6 +1772,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hommenor15sim}
 
 df_rules_dist_sp_hommenor15sim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMMENOR15SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMENOR15SIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMENOR15SIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1710,6 +1833,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hom15a24sim}
 
 df_rules_dist_sp_hom15a24sim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOM15A24SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOM15A24SIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM15A24SIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1765,6 +1894,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hom25a29sim}
 
 df_rules_dist_sp_hom25a29sim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOM25A29SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOM25A29SIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM25A29SIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1820,6 +1955,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hommaior30sim}
 
 df_rules_dist_sp_hommaior30sim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMMAIOR30SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMAIOR30SIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMAIOR30SIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1875,6 +2016,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hombrancasim}
 
 df_rules_dist_sp_hombrancasim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMBRANCASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMBRANCASIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMBRANCASIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1930,6 +2077,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hompretasim}
 
 df_rules_dist_sp_hompretasim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMPRETASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMPRETASIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPRETASIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1985,6 +2138,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hompardasim}
 
 df_rules_dist_sp_hompardasim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMPARDASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMPARDASIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPARDASIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2040,6 +2199,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homoutrossim}
 
 df_rules_dist_sp_homoutrossim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMOUTROSSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMOUTROSSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMOUTROSSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2095,6 +2260,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_homhomemsim}
 
 df_rules_dist_sp_homhomemsim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMHOMEMSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMHOMEMSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMHOMEMSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2150,6 +2321,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_hommulhersim}
 
 df_rules_dist_sp_hommulhersim <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_HOMMULHERSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMULHERSIM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMULHERSIM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2205,6 +2382,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_pm}
 
 df_rules_dist_sp_pm <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2272,6 +2455,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_pm1}
 
 df_rules_dist_sp_pm1 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PM1" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PM1"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PM1) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2327,6 +2516,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_pc1}
 
 df_rules_dist_sp_pc1 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PC1" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PC1"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PC1) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2382,6 +2577,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_pmpc}
 
 df_rules_dist_sp_pmpc <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PMPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PMPC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PMPC) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2449,6 +2650,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_jui2}
 
 df_rules_dist_sp_jui2 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_JUI2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_JUI2"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_JUI2) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2504,6 +2711,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_pro2}
 
 df_rules_dist_sp_pro2 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PRO2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRO2"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRO2) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2559,6 +2772,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_defp2}
 
 df_rules_dist_sp_defp2 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_DEFP2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_DEFP2"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_DEFP2) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2614,6 +2833,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_presospc}
 
 df_rules_dist_sp_presospc <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PRESOSPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRESOSPC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSPC) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2669,6 +2894,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_ocuppc}
 
 df_rules_dist_sp_ocuppc <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_OCUPPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_OCUPPC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPPC) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2736,6 +2967,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_presossuapi}
 
 df_rules_dist_sp_presossuapi <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_PRESOSSUAPI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRESOSSUAPI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSSUAPI) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2791,6 +3028,12 @@ chart_vbar(df_sumario)
 ```{r rules_dist_sp_ocupsuapi}
 
 df_rules_dist_sp_ocupsuapi <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SP_OCUPSUAPI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_OCUPSUAPI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPSUAPI) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(

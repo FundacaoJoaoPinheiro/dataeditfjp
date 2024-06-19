@@ -131,6 +131,21 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+ano_base_alter <- c(
+  "MA_ICMSECOLOG" = 2010
+)
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
+```
+
 ```{r get_cat}
 
 ## Categorias variáveis dicotômicas
@@ -436,6 +451,12 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_icmsecolog <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_ICMSECOLOG" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_ICMSECOLOG"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_ICMSECOLOG) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -504,6 +525,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_crh <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CRH" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CRH"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CRH) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -572,6 +599,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_cfem <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CFEM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CFEM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CFEM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -640,6 +673,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_focos <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FOCOS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FOCOS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FOCOS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -707,7 +746,13 @@ chart_vbar(df_sumario)
 ```{r rules_dist_ma_cana}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_cana <- data |> 
+df_rules_dist_ma_cana <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CANA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CANA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CANA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -776,6 +821,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_frota <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FROTA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FROTA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FROTA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -845,7 +896,13 @@ chart_vbar(df_sumario)
 ```{r rules_dist_ma_bovino}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_ma_bovino <- data |> 
+df_rules_dist_ma_bovino <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_BOVINO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_BOVINO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_BOVINO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -914,6 +971,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_reflo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_REFLO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_REFLO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_REFLO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -982,6 +1045,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_flonativa <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FLONATIVA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FLONATIVA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FLONATIVA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1050,6 +1119,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_infra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_INFRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_INFRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_INFRA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1118,6 +1193,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_ma_agro <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_AGRO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_AGRO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_AGRO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
