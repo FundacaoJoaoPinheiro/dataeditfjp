@@ -37,7 +37,8 @@ params:
 output-file: "se_relatorio.html"
 ---
 
-```{r setup, include=FALSE}
+
+```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
   res <- data |>
@@ -160,7 +161,7 @@ chart_vbar <- function(df){
       Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
       Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
     ) |>
-    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")) |>
     tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
     ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
     ggplot2::geom_bar(position = "stack", stat = "identity") +
@@ -188,7 +189,7 @@ chart_heatmap <- function(df){
     df |>
     dplyr::mutate(
       Ano   = as.character(Ano),
-      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
     ) |>
     ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
     ggplot2::geom_tile() +
@@ -255,8 +256,9 @@ compare_lag <- function(var){
   return(var >= dplyr::lag(var, n = 1))
 }
 
-
 ```
+
+
 
 ```{r set_param_global}
 
@@ -275,6 +277,7 @@ lockBinding("k", globalenv())
 ```{r import_data}
 
 data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
 ```
 
 ```{r get_var_numeric}
@@ -300,45 +303,53 @@ var_char <- data |>
 ```
 
 # Introdução
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
 
 # Regras de crítica
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados. A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
 
--   Tipo
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
 
-    -   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+**Classificação por finalidade**
 
--   Validade
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
 
-    -   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
-    -   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+-   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
 
--   Consistência
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes;
 
-    -   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+-   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
 
--   Distribuição
+-   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
 
-    -   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
-    -   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
 
-    -   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
-    -   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica; - **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
 
-    -   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
-    -   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
-    -   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
 
-    -   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
-    -   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+-   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
 ```{r get_cat}
 
@@ -3342,7 +3353,34 @@ chart_vbar(df_sumario)
 
 # Análise descritiva
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
 
 ## Tabelas
 

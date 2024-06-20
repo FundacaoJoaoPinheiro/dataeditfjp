@@ -275,6 +275,7 @@ lockBinding("k", globalenv())
 ```{r import_data}
 
 data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
 ```
 
 ```{r get_var_numeric}

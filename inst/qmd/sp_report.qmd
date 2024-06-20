@@ -38,7 +38,7 @@ output-file: "sp_relatorio.html"
 ---
 
 
-```{r setup, include=FALSE}
+```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
   res <- data |>
@@ -70,7 +70,7 @@ table_quantile <- function(variable, data){
 
 chart_boxplot <- function(variable, data){
   result <- data  |>
-    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = ANO)) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(
@@ -161,7 +161,7 @@ chart_vbar <- function(df){
       Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
       Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
     ) |>
-    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")) |>
     tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
     ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
     ggplot2::geom_bar(position = "stack", stat = "identity") +
@@ -189,7 +189,7 @@ chart_heatmap <- function(df){
     df |>
     dplyr::mutate(
       Ano   = as.character(Ano),
-      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:upper:]]+_")
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
     ) |>
     ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
     ggplot2::geom_tile() +
@@ -256,7 +256,6 @@ compare_lag <- function(var){
   return(var >= dplyr::lag(var, n = 1))
 }
 
-
 ```
 
 
@@ -270,8 +269,8 @@ lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
-
 data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
 ```
 
 ```{r get_var_numeric}
@@ -3055,7 +3054,34 @@ chart_vbar(df_sumario)
 
 # Análise descritiva
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sollicitudin, metus nec rhoncus posuere, leo dolor auctor neque, ut consectetur massa sem et nibh. Vivamus aliquam arcu sed ligula tincidunt, vel iaculis felis accumsan. Fusce in pellentesque erat. In vel euismod justo. Suspendisse imperdiet nulla eget dolor ornare, in viverra massa congue. Suspendisse nec vestibulum lectus. Phasellus venenatis vel turpis ut finibus. Vivamus vehicula neque sem, at ullamcorper magna finibus at. Praesent pulvinar, enim id pellentesque ultricies, magna nibh suscipit magna, at viverra dolor neque vel dolor. Quisque vestibulum orci et ex pharetra, vitae feugiat nulla sollicitudin. Suspendisse posuere aliquet.
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
 
 ## Tabelas
 
