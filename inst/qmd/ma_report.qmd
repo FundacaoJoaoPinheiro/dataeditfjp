@@ -37,7 +37,6 @@ params:
 output-file: "ma_relatorio.html"
 ---
 
-
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -257,8 +256,6 @@ compare_lag <- function(var){
 }
 
 ```
-
-
 
 ```{r set_param_global}
 
