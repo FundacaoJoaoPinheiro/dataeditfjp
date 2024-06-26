@@ -1517,7 +1517,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(var), 
+    table_descriptive(variable = var, data = data), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,

@@ -1,0 +1,2604 @@
+---
+title: FJP Dados
+subtitle: Educação
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#68bb59"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#68bb59"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/ma_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "eo_relatorio.html"
+---
+
+```{r  setup, include=FALSE}
+
+table_descriptive <- function(variable, data){
+  res <- data |>
+    dplyr::group_by(ANO) |>
+    dplyr::summarise(
+      N = dplyr::n(),
+      `Mínimo`=dplyr::na_if(min(.data[[variable]], na.rm = TRUE), Inf),
+      `Média`  = mean(.data[[variable]], na.rm = TRUE),
+      Mediana  = median(.data[[variable]], na.rm = TRUE),
+      `Máximo` = dplyr::na_if(max(.data[[variable]], na.rm = TRUE), -Inf),
+      `D. P.`  = sd(.data[[variable]], na.rm = TRUE),
+      `C. V.`  = sd(.data[[variable]], na.rm = TRUE)/mean(.data[[variable]], na.rm = TRUE),
+      Zero     = sum(.data[[variable]] == 0, na.rm = T),
+      Ausentes  = sum(is.na(.data[[variable]])),
+      .groups = "drop")
+
+    return(res)
+}
+
+table_quantile <- function(variable, data){
+  result <- data  |>
+    dplyr::group_by(ANO)  |>
+    dplyr::summarise(value = stats::quantile(.data[[variable]], probs = c(.25, .75), na.rm = T),
+                     .groups  = "drop")  |>
+    dplyr::mutate(quantil = rep(c("25%", "75%"),length(unique(ANO))) ) |>
+    tidyr::pivot_wider(id_cols = ANO, values_from = value, names_from = quantil)
+  return(result)
+}
+
+chart_boxplot <- function(variable, data){
+  result <- data  |>
+    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x    = ggplot2::element_blank(),
+      axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+
+chart_histogram <- function(variable, data){
+  result <- data |>
+    dplyr::mutate(ANO = as.numeric(ANO)) |>
+    ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_histogram() +
+    ggplot2::scale_fill_viridis_c(option = "mako", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title      = ggplot2::element_blank(),
+      axis.ticks      = ggplot2::element_blank()
+    ) +
+    ggplot2::facet_wrap(~ANO, ncol = 4)
+
+  return(result)
+}
+
+chart_bar <- function(ano, n){
+  result <- data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+# Build horizontal bar chart
+chart_hbar <- function(ano, n){
+  result <-
+    data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+# Build vertical bar chart
+chart_vbar <- function(df){
+  result <-
+    df |>
+    dplyr::group_by(Regra) |>
+    dplyr::summarise(
+      Validada = round(sum(Validada) / sum(Total) * 100, 2),
+      Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
+      Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
+    ) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")) |>
+    tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
+    ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
+    ggplot2::geom_bar(position = "stack", stat = "identity") +
+    ggplot2::scale_fill_brewer(palette = "Set2") +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_percent(scale = 1, big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Percentual geral de classificação das observações por regra",
+      x     = NULL,
+      y     = "Regra\n",
+      fill  = NULL
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "top"
+    )
+
+  return(print(result))
+}
+
+# Build heatmap
+chart_heatmap <- function(df){
+  result <-
+    df |>
+    dplyr::mutate(
+      Ano   = as.character(Ano),
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
+    ggplot2::geom_tile() +
+    ggplot2::geom_text(ggplot2::aes(label = Suspeita), size = 3) +
+    ggplot2::scale_fill_distiller(palette = "OrRd", direction = 1) +
+    ggplot2::labs(
+      title = "Total de observações suspeitas por regra e ano",
+      x     = "\nRegra",
+      y     = "Ano\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "None",
+      axis.text.x     = ggplot2::element_text(angle = 45, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+difpercentual <- function(df, variable){
+  df |>
+    dplyr::group_by(ANO) |>
+    dplyr::mutate(total = sum({{variable}}, na.rm = TRUE)) |>
+    dplyr::ungroup() |>
+    dplyr::group_by(IBGE7) |>
+    dplyr::summarise(ANO = ANO,
+                     {{variable}} := {{variable}},
+                     part = {{variable}}/total,
+                     part_lag = dplyr::lag(part, n = 1),
+                     dif_prop = part - part_lag,
+                     .groups = "drop")
+}
+
+outlier_function <- function(variable, a=-4,b=3){
+  q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)
+  q3 <- stats::quantile(variable, probs = 0.75, na.rm = T, names = F)
+  iqr <- stats::IQR(variable, na.rm = T)
+  mc <- robustbase::mc(variable, na.rm = T)
+  inf <- q1 - 1.5*exp(a*mc)*iqr
+  sup <- q3 + 1.5*exp(b*mc)*iqr
+
+  check <- ifelse(variable < inf | variable > sup, T, F)
+
+  return(check)
+}
+
+hampel_filter <- function(variable){
+  limite_inf = stats::median(variable, na.rm = T) - 3 * stats::mad(variable, constant = 1, na.rm = T)
+  limite_sup = stats::median(variable, na.rm = T) + 3 * stats::mad(variable, constant = 1, na.rm = T)
+  result = (variable < limite_inf | variable > limite_sup)
+  return(result)
+}
+
+
+compare_first_dif <- function(var){
+  dif <- abs(round(c(NA_real_, diff(var)), 2))
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
+  check <- ifelse(dif > dif_max, TRUE, FALSE)
+
+  return(check)
+}
+
+compare_lag <- function(var){
+  return(var >= dplyr::lag(var, n = 1))
+}
+
+```
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
+
+# Regras de crítica
+
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
+
+A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
+
+**Classificação por finalidade**
+
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
+
+-   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+
+-   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+-   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
+
+-   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+-   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+-   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+-   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+-   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "EO_ALUNOSP8" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
+
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 1)",
+  `4` = "Valor está dentro da faixa esperada (0 a 10)",
+  `5` = "Valor está dentro da faixa esperada (0 a 100)")
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_EO_ALUNOSP8",
+    "VI_EO_ALUNOSM8",
+    "VI_EO_ALUNOSM11",
+    "VI_EO_ALUNOSP11",
+    "VI_EO_ESCOLAEFAI",
+    "VI_EO_ESCOLAEFAF",
+    "VI_EO_ESCOLAEFCO",
+    "VI_EO_ESCOLAME",
+    "VI_EO_IDEBFU1a5",
+    "VI_EO_IDEBFU6a9",
+    "VI_EO_IQEP11",
+    "VI_EO_IQEM4",
+    "VI_EO_IQEM8",
+    "VI_EO_IQEM11",
+    "VI_EO_IQEP4",
+    "VI_EO_IQEP8",
+    "VI_EO_IQE4",
+    "VI_EO_IQE8",
+    "VI_EO_IQE11",
+    "VI_EO_IQE",
+    "VI_EO_PC15",
+    "VI_EO_PC18",
+    "VI_EO_EJAFU15",
+    "VI_EO_EJAME18",
+    "VI_EO_TAXA0A3",
+    "VI_EO_TAXA4A5",
+    "VI_EO_TAXA15A17",
+    "VI_EO_TXATBASICA",
+    #"VI_ANALF10",
+    #"VI_ANALF",
+    #"VI_ANALF15a17",
+    #"VI_ANALF18a24",
+    #"VI_ANALF25",
+    #"VI_FUND15",
+    #"VI_FUND25M",
+    #"VI_EO_MED25M",
+    "VI_EO_TAXA6A14",
+    "VI_EO_TAXALIQ7",
+    "VI_EO_TAXA15",
+    "VI_EO_TAXALIQ15",
+    "VI_EO_DISTEM",
+    "VI_EO_TXAPROV1a5",
+    "VI_EO_TXAPROV1a9",
+    "VI_EO_TXAPROV6a9",
+    "VI_EO_TXAPROV10a12",
+    "VI_EO_TXREP1a9",
+    "VI_EO_TXREP1a5",
+    "VI_EO_TXREP10a12",
+    "VI_EO_TXREP6a9",
+    "VI_EO_TXABA1a9",
+    "VI_EO_TXABA1a5",
+    "VI_EO_TXABA6a9",
+    "VI_EO_TXABA10a12",
+    "VI_EO_DISTEF",
+    "VI_EO_DISTEFAI",
+    "VI_EO_DISTEFAF",
+    "VI_EO_PCINF",
+    "VI_EO_PCITF",
+    "VI_EO_PCINFM",
+    "VI_EO_PCITM",
+    "VI_EO_PCAPM8",
+    "VI_EO_PCAPM11",
+    "VI_EO_PCAPP8",
+    "VI_EO_PCAPP11",
+    "VI_EO_ALUNOSM8",
+    "VI_EO_ALUNOSP8",
+    "VI_EO_PALUNOSM11",
+    "VI_EO_ANALF25_B",
+    "VI_EO_ANALF25_PP",
+    "VI_EO_FUND25_B",
+    "VI_EO_FUND25_PP",
+    "VI_EO_MED25M_B",
+    "VI_EO_MED25M_PP",
+    "VI_EO_DOCSUPEI",
+    "VI_EO_DOCSUPEF",
+    "VI_EO_DOCSUPEFAF",
+    "VI_EO_DOCSUPEFAI",
+    "VI_EO_DOCSUPEM",
+    "VI_EO_ADEDG1EI",
+    "VI_EO_ADEDG2EI",
+    "VI_EO_ADEDG3EI",
+    "VI_EO_ADEDG4EI",
+    "VI_EO_ADEDG5EI",
+    "VI_EO_ADEDG1EF",
+    "VI_EO_ADEDG2EF",
+    "VI_EO_ADEDG3EF",
+    "VI_EO_ADEDG4EF",
+    "VI_EO_ADEDG5EF",
+    "VI_EO_ADEDG1EFAI",
+    "VI_EO_ADEDG2EFAI",
+    "VI_EO_ADEDG3EFAI",
+    "VI_EO_ADEDG4EFAI",
+    "VI_EO_ADEDG5EFAI",
+    "VI_EO_ADEDG1EFAF",
+    "VI_EO_ADEDG2EFAF",
+    "VI_EO_ADEDG3EFAF",
+    "VI_EO_ADEDG4EFAF",
+    "VI_EO_ADEDG5EFAF",
+    "VI_EO_ADEDG1EM",
+    "VI_EO_ADEDG2EM",
+    "VI_EO_ADEDG3EM",
+    "VI_EO_ADEDG4EM",
+    "VI_EO_ADEDG5EM",
+    "VI_EO_ADEDG1EJAF",
+    "VI_EO_ADEDG2EJAF",
+    "VI_EO_ADEDG3EJAF",
+    "VI_EO_ADEDG4EJAF",
+    "VI_EO_ADEDG5EFAF",
+    "VI_EO_ADEDG1EJAM",
+    "VI_EO_ADEDG2EJAM",
+    "VI_EO_ADEDG3EJAM",
+    "VI_EO_ADEDG4EJAM",
+    "VI_EO_ADEDG5EJAM",
+    "VI_EO_MATFEI",
+    "VI_EO_MATEEI",
+    "VI_EO_MATMEI",
+    "VI_EO_MATPEI",
+    "VI_EO_MATFEF",
+    "VI_EO_MATEEF",
+    "VI_EO_MATMEF",
+    "VI_EO_MATPEF",
+    "VI_EO_MATFEFAI",
+    "VI_EO_MATEEFAI",
+    "VI_EO_MATMEFAI",
+    "VI_EO_MATPEFAI",
+    "VI_EO_MATFEFAF",
+    "VI_EO_MATEEFAF",
+    "VI_EO_MATMEFAF",
+    "VI_EO_MATPEFAF",
+    "VI_EO_MATFEM",
+    "VI_EO_MATEEM",
+    "VI_EO_MATMEM",
+    "VI_EO_MATPEM",
+    "VI_EO_MATTICR",
+    "VI_EO_MATTIPE",
+    "VI_EO_MATTIEFAI",
+    "VI_EO_MATTIEFAF",
+    "VI_EO_MATTIEM"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_EO_ALUNOSP8"        ~ desc_regra_valid[1],
+      "VI_EO_ALUNOSM8"        ~ desc_regra_valid[1],
+      "VI_EO_ALUNOSM11"       ~ desc_regra_valid[1],
+      "VI_EO_ALUNOSP11"       ~ desc_regra_valid[1],
+      "VI_EO_ESCOLAEFAI"      ~ desc_regra_valid[1],
+      "VI_EO_ESCOLAEFAF"      ~ desc_regra_valid[1],
+      "VI_EO_ESCOLAEFCO"      ~ desc_regra_valid[1],
+      "VI_EO_ESCOLAME"        ~ desc_regra_valid[1],
+      "VI_EO_IDEBFU1a5"       ~ desc_regra_valid[4],
+      "VI_EO_IDEBFU6a9"       ~ desc_regra_valid[4],
+      "VI_EO_IQEP11"          ~ desc_regra_valid[3],
+      "VI_EO_IQEM4"           ~ desc_regra_valid[3],
+      "VI_EO_IQEM8"           ~ desc_regra_valid[3],
+      "VI_EO_IQEM11"          ~ desc_regra_valid[3],
+      "VI_EO_IQEP4"           ~ desc_regra_valid[3],
+      "VI_EO_IQEP8"           ~ desc_regra_valid[3],
+      "VI_EO_IQE4"            ~ desc_regra_valid[3],
+      "VI_EO_IQE8"            ~ desc_regra_valid[3],
+      "VI_EO_IQE11"           ~ desc_regra_valid[3],
+      "VI_EO_IQE"             ~ desc_regra_valid[3],
+      "VI_EO_PC15"            ~ desc_regra_valid[5],
+      "VI_EO_PC18"            ~ desc_regra_valid[5],
+      "VI_EO_EJAFU15"         ~ desc_regra_valid[5],
+      "VI_EO_EJAME18"         ~ desc_regra_valid[5],
+      "VI_EO_TAXA0A3"         ~ desc_regra_valid[5],
+      "VI_EO_TAXA4A5"         ~ desc_regra_valid[5],
+      "VI_EO_TAXA15A17"       ~ desc_regra_valid[5],
+      "VI_EO_TXATBASICA"      ~ desc_regra_valid[5],
+      #"VI_ANALF10"           ~ desc_regra_valid[5],
+      #"VI_ANALF"             ~ desc_regra_valid[5],
+      #"VI_ANALF15a17"        ~ desc_regra_valid[5],
+      #"VI_ANALF18a24"        ~ desc_regra_valid[5],
+      #"VI_ANALF25"           ~ desc_regra_valid[5],
+      #"VI_FUND15"            ~ desc_regra_valid[5],
+      #"VI_FUND25M"           ~ desc_regra_valid[5],
+      #"VI_EO_MED25M"         ~ desc_regra_valid[5],
+      "VI_EO_TAXA6A14"        ~ desc_regra_valid[5],
+      "VI_EO_TAXALIQ7"        ~ desc_regra_valid[5],
+      "VI_EO_TAXA15"          ~ desc_regra_valid[5],
+      "VI_EO_TAXALIQ15"       ~ desc_regra_valid[5],
+      "VI_EO_DISTEM"          ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV1a5"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV1a9"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV6a9"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV10a12"    ~ desc_regra_valid[5],
+      "VI_EO_TXREP1a9"        ~ desc_regra_valid[5],
+      "VI_EO_TXREP1a5"        ~ desc_regra_valid[5],
+      "VI_EO_TXREP10a12"      ~ desc_regra_valid[5],
+      "VI_EO_TXREP6a9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA1a9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA1a5"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA6a9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA10a12"      ~ desc_regra_valid[5],
+      "VI_EO_DISTEF"          ~ desc_regra_valid[5],
+      "VI_EO_DISTEFAI"        ~ desc_regra_valid[5],
+      "VI_EO_DISTEFAF"        ~ desc_regra_valid[5],
+      "VI_EO_PCINF"           ~ desc_regra_valid[5],
+      "VI_EO_PCITF"           ~ desc_regra_valid[5],
+      "VI_EO_PCINFM"          ~ desc_regra_valid[5],
+      "VI_EO_PCITM"           ~ desc_regra_valid[5],
+      "VI_EO_PCAPM8"          ~ desc_regra_valid[5],
+      "VI_EO_PCAPM11"         ~ desc_regra_valid[5],
+      "VI_EO_PCAPP8"          ~ desc_regra_valid[5],
+      "VI_EO_PCAPP11"         ~ desc_regra_valid[5],
+      "VI_EO_ALUNOSM8"        ~ desc_regra_valid[5],
+      "VI_EO_ALUNOSP8"        ~ desc_regra_valid[5],
+      "VI_EO_PALUNOSM11"      ~ desc_regra_valid[5],
+      "VI_EO_ANALF25_B"       ~ desc_regra_valid[5],
+      "VI_EO_ANALF25_PP"      ~ desc_regra_valid[5],
+      "VI_EO_FUND25_B"        ~ desc_regra_valid[5],
+      "VI_EO_FUND25_PP"       ~ desc_regra_valid[5],
+      "VI_EO_MED25M_B"        ~ desc_regra_valid[5],
+      "VI_EO_MED25M_PP"       ~ desc_regra_valid[5],
+      "VI_EO_DOCSUPEI"        ~ desc_regra_valid[5],
+      "VI_EO_DOCSUPEF"        ~ desc_regra_valid[5],
+      "VI_EO_DOCSUPEFAF"      ~ desc_regra_valid[5],
+      "VI_EO_DOCSUPEFAI"      ~ desc_regra_valid[5],
+      "VI_EO_DOCSUPEM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EI"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EI"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EI"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EI"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EI"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EF"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EF"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EF"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EF"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EF"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EFAI"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EFAI"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EFAI"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EFAI"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EFAI"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EM"        ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EJAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EJAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EJAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EJAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EFAF"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG1EJAM"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG2EJAM"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG3EJAM"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG4EJAM"      ~ desc_regra_valid[5],
+      "VI_EO_ADEDG5EJAM"      ~ desc_regra_valid[5],
+      "VI_EO_MATFEI"          ~ desc_regra_valid[5],
+      "VI_EO_MATEEI"          ~ desc_regra_valid[5],
+      "VI_EO_MATMEI"          ~ desc_regra_valid[5],
+      "VI_EO_MATPEI"          ~ desc_regra_valid[5],
+      "VI_EO_MATFEF"          ~ desc_regra_valid[5],
+      "VI_EO_MATEEF"          ~ desc_regra_valid[5],
+      "VI_EO_MATMEF"          ~ desc_regra_valid[5],
+      "VI_EO_MATPEF"          ~ desc_regra_valid[5],
+      "VI_EO_MATFEFAI"        ~ desc_regra_valid[5],
+      "VI_EO_MATEEFAI"        ~ desc_regra_valid[5],
+      "VI_EO_MATMEFAI"        ~ desc_regra_valid[5],
+      "VI_EO_MATPEFAI"        ~ desc_regra_valid[5],
+      "VI_EO_MATFEFAF"        ~ desc_regra_valid[5],
+      "VI_EO_MATEEFAF"        ~ desc_regra_valid[5],
+      "VI_EO_MATMEFAF"        ~ desc_regra_valid[5],
+      "VI_EO_MATPEFAF"        ~ desc_regra_valid[5],
+      "VI_EO_MATFEM"          ~ desc_regra_valid[5],
+      "VI_EO_MATEEM"          ~ desc_regra_valid[5],
+      "VI_EO_MATMEM"          ~ desc_regra_valid[5],
+      "VI_EO_MATPEM"          ~ desc_regra_valid[5],
+      "VI_EO_MATTICR"         ~ desc_regra_valid[5],
+      "VI_EO_MATTIPE"         ~ desc_regra_valid[5],
+      "VI_EO_MATTIEFAI"       ~ desc_regra_valid[5],
+      "VI_EO_MATTIEFAF"       ~ desc_regra_valid[5],
+      "VI_EO_MATTIEM"         ~ desc_regra_valid[5]
+    )
+  )
+```
+
+```{r map_consist_desc, eval=FALSE}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma da proporção anual é igual a 100%" # EO_ESCOLAME
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CF_EO_ESCOLAME_total_year"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CF_EO_ESCOLAME_total_year" ~ desc_regra_consist[1]
+    )
+  )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_EO_ALUNOSP8        = is.numeric(EO_ALUNOSP8),
+  TI_EO_ALUNOSM8        = is.numeric(EO_ALUNOSM8),
+  TI_EO_ALUNOSM11       = is.numeric(EO_ALUNOSM11),
+  TI_EO_ALUNOSP11       = is.character(EO_ALUNOSP11),
+  TI_EO_ESCOLAEFAI      = is.character(EO_ESCOLAEFAI),
+  TI_EO_ESCOLAEFAF      = is.character(EO_ESCOLAEFAF),
+  TI_EO_ESCOLAEFCO      = is.character(EO_ESCOLAEFCO),
+  TI_EO_ESCOLAME        = is.numeric(EO_ESCOLAME),
+  TI_EO_IDEBFU1a5       = is.numeric(EO_IDEBFU1a5),
+  TI_EO_IDEBFU6a9       = is.numeric(EO_IDEBFU6a9),
+  TI_EO_IQEP11          = is.numeric(EO_IQEP11),
+  TI_MA_REFLO           = is.numeric(MA_REFLO),
+  TI_EO_IQEM4           = is.numeric(EO_IQEM4),
+  TI_EO_IQEM8           = is.numeric(EO_IQEM8),
+  TI_EO_IQEM11          = is.numeric(EO_IQEM11),
+  TI_EO_IQEP4           = is.numeric(EO_IQEP4),
+  TI_EO_IQEP8           = is.numeric(EO_IQEP8),
+  TI_EO_IQE4            = is.numeric(EO_IQE4),
+  TI_EO_IQE8            = is.numeric(EO_IQE8),
+  TI_EO_IQE11           = is.numeric(EO_IQE11),
+  TI_EO_IQE             = is.numeric(EO_IQE),
+  TI_EO_PC15            = is.numeric(EO_PC15),
+  TI_EO_PC18            = is.numeric(EO_PC18),
+  TI_EO_EJAFU15         = is.numeric(EO_EJAFU15),
+  TI_EO_EJAME18         = is.numeric(EO_EJAME18),
+  TI_EO_TAXA0A3         = is.numeric(EO_TAXA0A3),
+  TI_EO_TAXA4A5         = is.numeric(EO_TAXA4A5),
+  TI_EO_TAXA15A17       = is.numeric(EO_TAXA15A17),
+  TI_EO_TXATBASICA      = is.numeric(EO_TXATBASICA),
+  #TI_EO_ANALF10           = is.numeric(EO_ANALF10),
+  #TI_EO_ANALF             = is.numeric(EO_ANALF),
+  #TI_EO_ANALF15a17        = is.numeric(EO_ANALF15a17),
+  #TI_EO_ANALF18a24        = is.numeric(EO_ANALF18a24),
+  #TI_EO_ANALF25           = is.numeric(EO_ANALF25),
+  #TI_EO_FUND15            = is.numeric(EO_FUND15),
+  #TI_EO_FUND25M           = is.numeric(EO_FUND25M),
+  #TI_EO_MED25M         = is.numeric(EO_MED25M),
+  TI_EO_TAXA6A14        = is.numeric(EO_TAXA6A14),
+  TI_EO_TAXALIQ7        = is.numeric(EO_TAXALIQ7),
+  TI_EO_TAXA15          = is.numeric(EO_TAXA15),
+  TI_EO_TAXALIQ15       = is.numeric(EO_TAXALIQ15),
+  TI_EO_DISTEM          = is.numeric(EO_DISTEM), 
+  TI_EO_TXAPROV1a5      = is.numeric(EO_TXAPROV1a5),
+  TI_EO_TXAPROV1a9      = is.numeric(EO_TXAPROV1a9),
+  TI_EO_TXAPROV6a9      = is.numeric(EO_TXAPROV6a9),
+  TI_EO_TXAPROV10a12    = is.numeric(EO_TXAPROV10a12),
+  TI_EO_TXREP1a9        = is.numeric(EO_TXREP1a9),
+  TI_EO_TXREP1a5        = is.numeric(EO_TXREP1a5),
+  TI_EO_TXREP10a12      = is.numeric(EO_TXREP10a12),
+  TI_EO_TXREP6a9        = is.numeric(EO_TXREP6a9),
+  TI_EO_TXABA1a9        = is.numeric(EO_TXABA1a9),
+  TI_EO_TXABA1a5        = is.numeric(EO_TXABA1a5),
+  TI_EO_TXABA6a9        = is.numeric(EO_TXABA6a9),
+  TI_EO_TXABA10a12      = is.numeric(EO_TXABA10a12),
+  TI_EO_DISTEF          = is.numeric(EO_DISTEF),
+  TI_EO_DISTEFAI        = is.numeric(EO_DISTEFAI),
+  TI_EO_DISTEFAF        = is.numeric(EO_DISTEFAF),
+  TI_EO_PCINF           = is.numeric(EO_PCINF),
+  TI_EO_PCITF           = is.numeric(EO_PCITF),
+  TI_EO_PCINFM          = is.numeric(EO_PCINFM),
+  TI_EO_PCITM           = is.numeric(EO_PCITM),
+  TI_EO_PCAPM8          = is.numeric(EO_PCAPM8),
+  TI_EO_PCAPM11         = is.numeric(EO_PCAPM11),
+  TI_EO_PCAPP8          = is.numeric(EO_PCAPP8),
+  TI_EO_PCAPP11         = is.numeric(EO_PCAPP11),
+  TI_EO_ALUNOSM8        = is.numeric(EO_ALUNOSM8),
+  TI_EO_ALUNOSP8        = is.numeric(EO_ALUNOSP8),
+  TI_EO_PALUNOSM11      = is.numeric(EO_PALUNOSM11),
+  TI_EO_ANALF25_B       = is.numeric(EO_ANALF25_B),
+  TI_EO_ANALF25_PP      = is.numeric(EO_ANALF25_PP),
+  TI_EO_FUND25_B        = is.numeric(EO_FUND25_B),
+  TI_EO_FUND25_PP       = is.numeric(EO_FUND25_PP),
+  TI_EO_MED25M_B        = is.numeric(EO_MED25M_B),
+  TI_EO_MED25M_PP       = is.numeric(EO_MED25M_PP),
+  TI_EO_DOCSUPEI        = is.numeric(EO_DOCSUPEI),
+  TI_EO_DOCSUPEF        = is.numeric(EO_DOCSUPEF),
+  TI_EO_DOCSUPEFAF      = is.numeric(EO_DOCSUPEFAF),
+  TI_EO_DOCSUPEFAI      = is.numeric(EO_DOCSUPEFAI),
+  TI_EO_DOCSUPEM        = is.numeric(EO_DOCSUPEM),
+  TI_EO_ADEDG1EI        = is.numeric(EO_ADEDG1EI),
+  TI_EO_ADEDG2EI        = is.numeric(EO_ADEDG2EI),
+  TI_EO_ADEDG3EI        = is.numeric(EO_ADEDG3EI),
+  TI_EO_ADEDG4EI        = is.numeric(EO_ADEDG4EI),
+  TI_EO_ADEDG5EI        = is.numeric(EO_ADEDG5EI),
+  TI_EO_ADEDG1EF        = is.numeric(EO_ADEDG1EF),
+  TI_EO_ADEDG2EF        = is.numeric(EO_ADEDG2EF),
+  TI_EO_ADEDG3EF        = is.numeric(EO_ADEDG3EF),
+  TI_EO_ADEDG4EF        = is.numeric(EO_ADEDG4EF),
+  TI_EO_ADEDG5EF        = is.numeric(EO_ADEDG5EF),
+  TI_EO_ADEDG1EFAI      = is.numeric(EO_ADEDG1EFAI),
+  TI_EO_ADEDG2EFAI      = is.numeric(EO_ADEDG2EFAI),
+  TI_EO_ADEDG3EFAI      = is.numeric(EO_ADEDG3EFAI),
+  TI_EO_ADEDG4EFAI      = is.numeric(EO_ADEDG4EFAI),
+  TI_EO_ADEDG5EFAI      = is.numeric(EO_ADEDG5EFAI),
+  TI_EO_ADEDG1EFAF      = is.numeric(EO_ADEDG1EFAF),
+  TI_EO_ADEDG2EFAF      = is.numeric(EO_ADEDG2EFAF),
+  TI_EO_ADEDG3EFAF      = is.numeric(EO_ADEDG3EFAF),
+  TI_EO_ADEDG4EFAF      = is.numeric(EO_ADEDG4EFAF),
+  TI_EO_ADEDG5EFAF      = is.numeric(EO_ADEDG5EFAF),
+  TI_EO_ADEDG1EM        = is.numeric(EO_ADEDG1EM),
+  TI_EO_ADEDG2EM        = is.numeric(EO_ADEDG2EM),
+  TI_EO_ADEDG3EM        = is.numeric(EO_ADEDG3EM),
+  TI_EO_ADEDG4EM        = is.numeric(EO_ADEDG4EM),
+  TI_EO_ADEDG5EM        = is.numeric(EO_ADEDG5EM),
+  TI_EO_ADEDG1EJAF      = is.numeric(EO_ADEDG1EFAF),
+  TI_EO_ADEDG2EJAF      = is.numeric(EO_ADEDG2EFAF),
+  TI_EO_ADEDG3EJAF      = is.numeric(EO_ADEDG3EFAF),
+  TI_EO_ADEDG4EJAF      = is.numeric(EO_ADEDG4EFAF),
+  TI_EO_ADEDG5EFAF      = is.numeric(EO_ADEDG5EFAF),
+  TI_EO_ADEDG1EJAM      = is.numeric(EO_ADEDG1EJAM),
+  TI_EO_ADEDG2EJAM      = is.numeric(EO_ADEDG2EJAM),
+  TI_EO_ADEDG3EJAM      = is.numeric(EO_ADEDG3EJAM),
+  TI_EO_ADEDG4EJAM      = is.numeric(EO_ADEDG4EJAM),
+  TI_EO_ADEDG5EJAM      = is.numeric(EO_ADEDG5EJAM),
+  TI_EO_MATFEI          = is.numeric(EO_MATFEI),
+  TI_EO_MATEEI          = is.numeric(EO_MATEEI),
+  TI_EO_MATMEI          = is.numeric(EO_MATMEI),
+  TI_EO_MATPEI          = is.numeric(EO_MATPEI),
+  TI_EO_MATFEF          = is.numeric(EO_MATFEF),
+  TI_EO_MATEEF          = is.numeric(EO_MATEEF),
+  TI_EO_MATMEF          = is.numeric(EO_MATMEF),
+  TI_EO_MATPEF          = is.numeric(EO_MATPEF),
+  TI_EO_MATFEFAI        = is.numeric(EO_MATFEFAI),
+  TI_EO_MATEEFAI        = is.numeric(EO_MATEEFAI),
+  TI_EO_MATMEFAI        = is.numeric(EO_MATMEFAI),
+  TI_EO_MATPEFAI        = is.numeric(EO_MATPEFAI),
+  TI_EO_MATFEFAF        = is.numeric(EO_MATFEFAF),
+  TI_EO_MATEEFAF        = is.numeric(EO_MATEEFAF),
+  TI_EO_MATMEFAF        = is.numeric(EO_MATMEFAF),
+  TI_EO_MATPEFAF        = is.numeric(EO_MATPEFAF),
+  TI_EO_MATFEM          = is.numeric(EO_MATFEM),
+  TI_EO_MATEEM          = is.numeric(EO_MATEEM),
+  TI_EO_MATMEM          = is.numeric(EO_MATMEM),
+  TI_EO_MATPEM          = is.numeric(EO_MATPEM),
+  TI_EO_MATTICR         = is.numeric(EO_MATTICR),
+  TI_EO_MATTIPE         = is.numeric(EO_MATTIPE),
+  TI_EO_MATTIEFAI       = is.numeric(EO_MATTIEFAI),
+  TI_EO_MATTIEFAF       = is.numeric(EO_MATTIEFAF),
+  TI_EO_MATTIEM         = is.numeric(EO_MATTIEM)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_eo_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_eo_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("EO_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_EO_ALUNOSP8        = dplyr::if_else(!is.na(EO_ALUNOSP8), F, NA),
+    VI_NA_EO_ALUNOSM8        = dplyr::if_else(!is.na(EO_ALUNOSM8), F, NA),
+    VI_NA_EO_ALUNOSM11       = dplyr::if_else(!is.na(EO_ALUNOSM11), F, NA),
+    VI_NA_EO_ESCOLAME        = dplyr::if_else(!is.na(EO_ESCOLAME), F, NA),
+    VI_NA_EO_IDEBFU1a5       = dplyr::if_else(!is.na(EO_IDEBFU1a5), F, NA),
+    VI_NA_EO_IDEBFU6a9       = dplyr::if_else(!is.na(EO_IDEBFU6a9), F, NA),
+    VI_NA_EO_IQEP11          = dplyr::if_else(!is.na(EO_IQEP11), F, NA),
+    VI_NA_MA_REFLO           = dplyr::if_else(!is.na(MA_REFLO), F, NA),
+    VI_NA_EO_IQEM4           = dplyr::if_else(!is.na(EO_IQEM4), F, NA),
+    VI_NA_EO_IQEM8           = dplyr::if_else(!is.na(EO_IQEM8), F, NA),
+    VI_NA_EO_IQEM11          = dplyr::if_else(!is.na(EO_IQEM11), F, NA),
+    VI_NA_EO_IQEP4           = dplyr::if_else(!is.na(EO_IQEP4), F, NA),
+    VI_NA_EO_IQEP8           = dplyr::if_else(!is.na(EO_IQEP8), F, NA),
+    VI_NA_EO_IQE4            = dplyr::if_else(!is.na(EO_IQE4), F, NA),
+    VI_NA_EO_IQE8            = dplyr::if_else(!is.na(EO_IQE8), F, NA),
+    VI_NA_EO_IQE11           = dplyr::if_else(!is.na(EO_IQE11), F, NA),
+    VI_NA_EO_IQE             = dplyr::if_else(!is.na(EO_IQE), F, NA),
+    VI_NA_EO_PC15            = dplyr::if_else(!is.na(EO_PC15), F, NA),
+    VI_NA_EO_PC18            = dplyr::if_else(!is.na(EO_PC18), F, NA),
+    VI_NA_EO_EJAFU15         = dplyr::if_else(!is.na(EO_EJAFU15), F, NA),
+    VI_NA_EO_EJAME18         = dplyr::if_else(!is.na(EO_EJAME18), F, NA),
+    VI_NA_EO_TAXA0A3         = dplyr::if_else(!is.na(EO_TAXA0A3), F, NA),
+    VI_NA_EO_TAXA4A5         = dplyr::if_else(!is.na(EO_TAXA4A5), F, NA),
+    VI_NA_EO_TAXA15A17       = dplyr::if_else(!is.na(EO_TAXA15A17), F, NA),
+    VI_NA_EO_TXATBASICA      = dplyr::if_else(!is.na(EO_TXATBASICA), F, NA),
+    #VI_NA_EO_ANALF10        = dplyr::if_else(!is.na(EO_ANALF10), F, NA),
+    #VI_NA_EO_ANALF          = dplyr::if_else(!is.na(EO_ANALF), F, NA),
+    #VI_NA_EO_ANALF15a17     = dplyr::if_else(!is.na(EO_ANALF15a17), F, NA),
+    #VI_NA_EO_ANALF18a24     = dplyr::if_else(!is.na(EO_ANALF18a24), F, NA),
+    #VI_NA_EO_ANALF25        = dplyr::if_else(!is.na(EO_ANALF25), F, NA),
+    #VI_NA_EO_FUND15         = dplyr::if_else(!is.na(EO_FUND15), F, NA),
+    #VI_NA_EO_FUND25M        = dplyr::if_else(!is.na(EO_FUND25M), F, NA),
+    #VI_NA_EO_MED25M         = dplyr::if_else(!is.na(EO_MED25M), F, NA),
+    VI_NA_EO_TAXA6A14        = dplyr::if_else(!is.na(EO_TAXA6A14), F, NA),
+    VI_NA_EO_TAXALIQ7        = dplyr::if_else(!is.na(EO_TAXALIQ7), F, NA),
+    VI_NA_EO_TAXA15          = dplyr::if_else(!is.na(EO_TAXA15), F, NA),
+    VI_NA_EO_TAXALIQ15       = dplyr::if_else(!is.na(EO_TAXALIQ15), F, NA),
+    VI_NA_EO_DISTEM          = dplyr::if_else(!is.na(EO_DISTEM), F, NA), 
+    VI_NA_EO_TXAPROV1a5      = dplyr::if_else(!is.na(EO_TXAPROV1a5), F, NA),
+    VI_NA_EO_TXAPROV1a9      = dplyr::if_else(!is.na(EO_TXAPROV1a9), F, NA),
+    VI_NA_EO_TXAPROV6a9      = dplyr::if_else(!is.na(EO_TXAPROV6a9), F, NA),
+    VI_NA_EO_TXAPROV10a12    = dplyr::if_else(!is.na(EO_TXAPROV10a12), F, NA),
+    VI_NA_EO_TXREP1a9        = dplyr::if_else(!is.na(EO_TXREP1a9), F, NA),
+    VI_NA_EO_TXREP1a5        = dplyr::if_else(!is.na(EO_TXREP1a5), F, NA),
+    VI_NA_EO_TXREP10a12      = dplyr::if_else(!is.na(EO_TXREP10a12), F, NA),
+    VI_NA_EO_TXREP6a9        = dplyr::if_else(!is.na(EO_TXREP6a9), F, NA),
+    VI_NA_EO_TXABA1a9        = dplyr::if_else(!is.na(EO_TXABA1a9), F, NA),
+    VI_NA_EO_TXABA1a5        = dplyr::if_else(!is.na(EO_TXABA1a5), F, NA),
+    VI_NA_EO_TXABA6a9        = dplyr::if_else(!is.na(EO_TXABA6a9), F, NA),
+    VI_NA_EO_TXABA10a12      = dplyr::if_else(!is.na(EO_TXABA10a12), F, NA),
+    VI_NA_EO_DISTEF          = dplyr::if_else(!is.na(EO_DISTEF), F, NA),
+    VI_NA_EO_DISTEFAI        = dplyr::if_else(!is.na(EO_DISTEFAI), F, NA),
+    VI_NA_EO_DISTEFAF        = dplyr::if_else(!is.na(EO_DISTEFAF), F, NA),
+    VI_NA_EO_PCINF           = dplyr::if_else(!is.na(EO_PCINF), F, NA),
+    VI_NA_EO_PCITF           = dplyr::if_else(!is.na(EO_PCITF), F, NA),
+    VI_NA_EO_PCINFM          = dplyr::if_else(!is.na(EO_PCINFM), F, NA),
+    VI_NA_EO_PCITM           = dplyr::if_else(!is.na(EO_PCITM), F, NA),
+    VI_NA_EO_PCAPM8          = dplyr::if_else(!is.na(EO_PCAPM8), F, NA),
+    VI_NA_EO_PCAPM11         = dplyr::if_else(!is.na(EO_PCAPM11), F, NA),
+    VI_NA_EO_PCAPP8          = dplyr::if_else(!is.na(EO_PCAPP8), F, NA),
+    VI_NA_EO_PCAPP11         = dplyr::if_else(!is.na(EO_PCAPP11), F, NA),
+    VI_NA_EO_ALUNOSM8        = dplyr::if_else(!is.na(EO_ALUNOSM8), F, NA),
+    VI_NA_EO_ALUNOSP8        = dplyr::if_else(!is.na(EO_ALUNOSP8), F, NA),
+    VI_NA_EO_PALUNOSM11      = dplyr::if_else(!is.na(EO_PALUNOSM11), F, NA),
+    VI_NA_EO_ANALF25_B       = dplyr::if_else(!is.na(EO_ANALF25_B), F, NA),
+    VI_NA_EO_ANALF25_PP      = dplyr::if_else(!is.na(EO_ANALF25_PP), F, NA),
+    VI_NA_EO_FUND25_B        = dplyr::if_else(!is.na(EO_FUND25_B), F, NA),
+    VI_NA_EO_FUND25_PP       = dplyr::if_else(!is.na(EO_FUND25_PP), F, NA),
+    VI_NA_EO_MED25M_B        = dplyr::if_else(!is.na(EO_MED25M_B), F, NA),
+    VI_NA_EO_MED25M_PP       = dplyr::if_else(!is.na(EO_MED25M_PP), F, NA),
+    VI_NA_EO_DOCSUPEI        = dplyr::if_else(!is.na(EO_DOCSUPEI), F, NA),
+    VI_NA_EO_DOCSUPEF        = dplyr::if_else(!is.na(EO_DOCSUPEF), F, NA),
+    VI_NA_EO_DOCSUPEFAF      = dplyr::if_else(!is.na(EO_DOCSUPEFAF), F, NA),
+    VI_NA_EO_DOCSUPEFAI      = dplyr::if_else(!is.na(EO_DOCSUPEFAI), F, NA),
+    VI_NA_EO_DOCSUPEM        = dplyr::if_else(!is.na(EO_DOCSUPEM), F, NA),
+    VI_NA_EO_ADEDG1EI        = dplyr::if_else(!is.na(EO_ADEDG1EI), F, NA),
+    VI_NA_EO_ADEDG2EI        = dplyr::if_else(!is.na(EO_ADEDG2EI), F, NA),
+    VI_NA_EO_ADEDG3EI        = dplyr::if_else(!is.na(EO_ADEDG3EI), F, NA),
+    VI_NA_EO_ADEDG4EI        = dplyr::if_else(!is.na(EO_ADEDG4EI), F, NA),
+    VI_NA_EO_ADEDG5EI        = dplyr::if_else(!is.na(EO_ADEDG5EI), F, NA),
+    VI_NA_EO_ADEDG1EF        = dplyr::if_else(!is.na(EO_ADEDG1EF), F, NA),
+    VI_NA_EO_ADEDG2EF        = dplyr::if_else(!is.na(EO_ADEDG2EF), F, NA),
+    VI_NA_EO_ADEDG3EF        = dplyr::if_else(!is.na(EO_ADEDG3EF), F, NA),
+    VI_NA_EO_ADEDG4EF        = dplyr::if_else(!is.na(EO_ADEDG4EF), F, NA),
+    VI_NA_EO_ADEDG5EF        = dplyr::if_else(!is.na(EO_ADEDG5EF), F, NA),
+    VI_NA_EO_ADEDG1EFAI      = dplyr::if_else(!is.na(EO_ADEDG1EFAI), F, NA),
+    VI_NA_EO_ADEDG2EFAI      = dplyr::if_else(!is.na(EO_ADEDG2EFAI), F, NA),
+    VI_NA_EO_ADEDG3EFAI      = dplyr::if_else(!is.na(EO_ADEDG3EFAI), F, NA),
+    VI_NA_EO_ADEDG4EFAI      = dplyr::if_else(!is.na(EO_ADEDG4EFAI), F, NA),
+    VI_NA_EO_ADEDG5EFAI      = dplyr::if_else(!is.na(EO_ADEDG5EFAI), F, NA),
+    VI_NA_EO_ADEDG1EFAF      = dplyr::if_else(!is.na(EO_ADEDG1EFAF), F, NA),
+    VI_NA_EO_ADEDG2EFAF      = dplyr::if_else(!is.na(EO_ADEDG2EFAF), F, NA),
+    VI_NA_EO_ADEDG3EFAF      = dplyr::if_else(!is.na(EO_ADEDG3EFAF), F, NA),
+    VI_NA_EO_ADEDG4EFAF      = dplyr::if_else(!is.na(EO_ADEDG4EFAF), F, NA),
+    VI_NA_EO_ADEDG5EFAF      = dplyr::if_else(!is.na(EO_ADEDG5EFAF), F, NA),
+    VI_NA_EO_ADEDG1EM        = dplyr::if_else(!is.na(EO_ADEDG1EM), F, NA),
+    VI_NA_EO_ADEDG2EM        = dplyr::if_else(!is.na(EO_ADEDG2EM), F, NA),
+    VI_NA_EO_ADEDG3EM        = dplyr::if_else(!is.na(EO_ADEDG3EM), F, NA),
+    VI_NA_EO_ADEDG4EM        = dplyr::if_else(!is.na(EO_ADEDG4EM), F, NA),
+    VI_NA_EO_ADEDG5EM        = dplyr::if_else(!is.na(EO_ADEDG5EM), F, NA),
+    VI_NA_EO_ADEDG1EJAF      = dplyr::if_else(!is.na(EO_ADEDG1EFAF), F, NA),
+    VI_NA_EO_ADEDG2EJAF      = dplyr::if_else(!is.na(EO_ADEDG2EFAF), F, NA),
+    VI_NA_EO_ADEDG3EJAF      = dplyr::if_else(!is.na(EO_ADEDG3EFAF), F, NA),
+    VI_NA_EO_ADEDG4EJAF      = dplyr::if_else(!is.na(EO_ADEDG4EFAF), F, NA),
+    VI_NA_EO_ADEDG5EFAF      = dplyr::if_else(!is.na(EO_ADEDG5EFAF), F, NA),
+    VI_NA_EO_ADEDG1EJAM      = dplyr::if_else(!is.na(EO_ADEDG1EJAM), F, NA),
+    VI_NA_EO_ADEDG2EJAM      = dplyr::if_else(!is.na(EO_ADEDG2EJAM), F, NA),
+    VI_NA_EO_ADEDG3EJAM      = dplyr::if_else(!is.na(EO_ADEDG3EJAM), F, NA),
+    VI_NA_EO_ADEDG4EJAM      = dplyr::if_else(!is.na(EO_ADEDG4EJAM), F, NA),
+    VI_NA_EO_ADEDG5EJAM      = dplyr::if_else(!is.na(EO_ADEDG5EJAM), F, NA),
+    VI_NA_EO_MATFEI          = dplyr::if_else(!is.na(EO_MATFEI), F, NA),
+    VI_NA_EO_MATEEI          = dplyr::if_else(!is.na(EO_MATEEI), F, NA),
+    VI_NA_EO_MATMEI          = dplyr::if_else(!is.na(EO_MATMEI), F, NA),
+    VI_NA_EO_MATPEI          = dplyr::if_else(!is.na(EO_MATPEI), F, NA),
+    VI_NA_EO_MATFEF          = dplyr::if_else(!is.na(EO_MATFEF), F, NA),
+    VI_NA_EO_MATEEF          = dplyr::if_else(!is.na(EO_MATEEF), F, NA),
+    VI_NA_EO_MATMEF          = dplyr::if_else(!is.na(EO_MATMEF), F, NA),
+    VI_NA_EO_MATPEF          = dplyr::if_else(!is.na(EO_MATPEF), F, NA),
+    VI_NA_EO_MATFEFAI        = dplyr::if_else(!is.na(EO_MATFEFAI), F, NA),
+    VI_NA_EO_MATEEFAI        = dplyr::if_else(!is.na(EO_MATEEFAI), F, NA),
+    VI_NA_EO_MATMEFAI        = dplyr::if_else(!is.na(EO_MATMEFAI), F, NA),
+    VI_NA_EO_MATPEFAI        = dplyr::if_else(!is.na(EO_MATPEFAI), F, NA),
+    VI_NA_EO_MATFEFAF        = dplyr::if_else(!is.na(EO_MATFEFAF), F, NA),
+    VI_NA_EO_MATEEFAF        = dplyr::if_else(!is.na(EO_MATEEFAF), F, NA),
+    VI_NA_EO_MATMEFAF        = dplyr::if_else(!is.na(EO_MATMEFAF), F, NA),
+    VI_NA_EO_MATPEFAF        = dplyr::if_else(!is.na(EO_MATPEFAF), F, NA),
+    VI_NA_EO_MATFEM          = dplyr::if_else(!is.na(EO_MATFEM), F, NA),
+    VI_NA_EO_MATEEM          = dplyr::if_else(!is.na(EO_MATEEM), F, NA),
+    VI_NA_EO_MATMEM          = dplyr::if_else(!is.na(EO_MATMEM), F, NA),
+    VI_NA_EO_MATPEM          = dplyr::if_else(!is.na(EO_MATPEM), F, NA),
+    VI_NA_EO_MATTICR         = dplyr::if_else(!is.na(EO_MATTICR), F, NA),
+    VI_NA_EO_MATTIPE         = dplyr::if_else(!is.na(EO_MATTIPE), F, NA),
+    VI_NA_EO_MATTIEFAI       = dplyr::if_else(!is.na(EO_MATTIEFAI), F, NA),
+    VI_NA_EO_MATTIEFAF       = dplyr::if_else(!is.na(EO_MATTIEFAF), F, NA),
+    VI_NA_EO_MATTIEM         = dplyr::if_else(!is.na(EO_MATTIEM), F, NA),
+                                              
+    # Others
+    VI_EO_ALUNOSP8      = dplyr::if_else(EO_ALUNOSP8 >= 0, F, T),
+    VI_EO_ALUNOSM8      = dplyr::if_else(EO_ALUNOSM8 >= 0, F, T),
+    VI_EO_ALUNOSM11     = dplyr::if_else(EO_ALUNOSM11 >= 0, F, T),
+    VI_EO_ALUNOSP11     = dplyr::if_else(EO_ALUNOSP11 %in% cat_ogestor, F, T),
+    VI_EO_ESCOLAEFAI    = dplyr::if_else(EO_ESCOLAEFAI %in% cat_dic, F, T),
+    VI_EO_ESCOLAEFAF    = dplyr::if_else(EO_ESCOLAEFAF %in% cat_dic, F, T),
+    VI_EO_ESCOLAEFCO    = dplyr::if_else(EO_ESCOLAEFCO %in% cat_dic, F, T),
+    VI_EO_ESCOLAME      = dplyr::if_else(dplyr::between(EO_ESCOLAME, 0, 100), F, T),
+    VI_EO_IDEBFU1a5     = dplyr::if_else(dplyr::between(EO_IDEBFU1a5, 0, 100), F, T),
+    VI_EO_IDEBFU6a9     = dplyr::if_else(EO_IDEBFU6a9 >= 0, F, T),
+    VI_EO_IQEP11        = dplyr::if_else(EO_IQEP11 >= 0, F, T),
+    VI_MA_REFLO         = dplyr::if_else(dplyr::between(MA_REFLO, 0, 100), F, T),
+    VI_EO_IQEM4         = dplyr::if_else(dplyr::between(EO_IQEM4, 0, 100), F, T),
+    VI_EO_IQEM8         = dplyr::if_else(dplyr::between(EO_IQEM8, 0, 100), F, T),
+    VI_EO_IQEM11        = dplyr::if_else(dplyr::between(EO_IQEM11, 0, 100), F, T),
+    TI_EO_IQEP4         = dplyr::if_else(dplyr::between(EO_IQEP4, 0, 100), F, T),
+    TI_EO_IQEP8         = dplyr::if_else(dplyr::between(EO_IQEP8, 0, 100), F, T),
+    TI_EO_IQE4          = dplyr::if_else(dplyr::between(EO_IQE4, 0, 100), F, T),
+    TI_EO_IQE8          = dplyr::if_else(dplyr::between(EO_IQE8, 0, 100), F, T),
+    TI_EO_IQE11         = dplyr::if_else(dplyr::between(EO_IQE11, 0, 100), F, T),
+    TI_EO_IQE           = dplyr::if_else(dplyr::between(EO_IQE, 0, 100), F, T),
+    TI_EO_PC15          = dplyr::if_else(dplyr::between(EO_PC15, 0, 100), F, T),
+    TI_EO_PC18          = dplyr::if_else(dplyr::between(EO_PC18, 0, 100), F, T),
+    TI_EO_EJAFU15       = dplyr::if_else(dplyr::between(EO_EJAFU15, 0, 100), F, T),
+    TI_EO_EJAME18       = dplyr::if_else(dplyr::between(EO_EJAME18, 0, 100), F, T),
+    TI_EO_TAXA0A3       = dplyr::if_else(dplyr::between(EO_TAXA0A3, 0, 100), F, T),
+    TI_EO_TAXA4A5       = dplyr::if_else(dplyr::between(EO_TAXA4A5, 0, 100), F, T),
+    TI_EO_TAXA15A17     = dplyr::if_else(dplyr::between(EO_TAXA15A17, 0, 100), F, T),
+    TI_EO_TXATBASICA    = dplyr::if_else(dplyr::between(EO_TXATBASICA, 0, 100), F, T),
+    #TI_EO_ANALF10      = dplyr::if_else(dplyr::between(EO_ANALF10, 0, 100), F, T),
+    #TI_EO_ANALF        = dplyr::if_else(dplyr::between(EO_ANALF, 0, 100), F, T),
+    #TI_EO_ANALF15a17   = dplyr::if_else(dplyr::between(EO_ANALF15a17, 0, 100), F, T),
+    #TI_EO_ANALF18a24   = dplyr::if_else(dplyr::between(EO_ANALF18a24, 0, 100), F, T),
+    #TI_EO_ANALF25      = dplyr::if_else(dplyr::between(EO_ANALF25, 0, 100), F, T),
+    #TI_EO_FUND15       = dplyr::if_else(dplyr::between(EO_FUND15, 0, 100), F, T),
+    #TI_EO_FUND25M      = dplyr::if_else(dplyr::between(EO_FUND25M, 0, 100), F, T),
+    #TI_EO_MED25M       = dplyr::if_else(dplyr::between(EO_MED25M, 0, 100), F, T),
+    TI_EO_TAXA6A14      = dplyr::if_else(dplyr::between(EO_TAXA6A14, 0, 100), F, T),
+    TI_EO_TAXALIQ7      = dplyr::if_else(dplyr::between(EO_TAXALIQ7, 0, 100), F, T),
+    TI_EO_TAXA15        = dplyr::if_else(dplyr::between(EO_TAXA15, 0, 100), F, T),
+    TI_EO_TAXALIQ15     = dplyr::if_else(dplyr::between(EO_TAXALIQ15, 0, 100), F, T),
+    TI_EO_DISTEM        = dplyr::if_else(dplyr::between(EO_DISTEM, 0, 100), F, T), 
+    TI_EO_TXAPROV1a5    = dplyr::if_else(dplyr::between(EO_TXAPROV1a5, 0, 100), F, T),
+    TI_EO_TXAPROV1a9    = dplyr::if_else(dplyr::between(EO_TXAPROV1a9, 0, 100), F, T),
+    TI_EO_TXAPROV6a9    = dplyr::if_else(dplyr::between(EO_TXAPROV6a9, 0, 100), F, T),
+    TI_EO_TXAPROV10a12  = dplyr::if_else(dplyr::between(EO_TXAPROV10a12, 0, 100), F, T),
+    TI_EO_TXREP1a9      = dplyr::if_else(dplyr::between(EO_TXREP1a9, 0, 100), F, T),
+    TI_EO_TXREP1a5      = dplyr::if_else(dplyr::between(EO_TXREP1a5, 0, 100), F, T),
+    TI_EO_TXREP10a12    = dplyr::if_else(dplyr::between(EO_TXREP10a12, 0, 100), F, T),
+    TI_EO_TXREP6a9      = dplyr::if_else(dplyr::between(EO_TXREP6a9, 0, 100), F, T),
+    TI_EO_TXABA1a9      = dplyr::if_else(dplyr::between(EO_TXABA1a9, 0, 100), F, T),
+    TI_EO_TXABA1a5      = dplyr::if_else(dplyr::between(EO_TXABA1a5, 0, 100), F, T),
+    TI_EO_TXABA6a9      = dplyr::if_else(dplyr::between(EO_TXABA6a9, 0, 100), F, T),
+    TI_EO_TXABA10a12    = dplyr::if_else(dplyr::between(EO_TXABA10a12, 0, 100), F, T),
+    TI_EO_DISTEF        = dplyr::if_else(dplyr::between(EO_DISTEF, 0, 100), F, T),
+    TI_EO_DISTEFAI      = dplyr::if_else(dplyr::between(EO_DISTEFAI, 0, 100), F, T),
+    TI_EO_DISTEFAF      = dplyr::if_else(dplyr::between(EO_DISTEFAF, 0, 100), F, T),
+    TI_EO_PCINF         = dplyr::if_else(dplyr::between(EO_PCINF, 0, 100), F, T),
+    TI_EO_PCITF         = dplyr::if_else(dplyr::between(EO_PCITF, 0, 100), F, T),
+    TI_EO_PCINFM        = dplyr::if_else(dplyr::between(EO_PCINFM, 0, 100), F, T),
+    TI_EO_PCITM         = dplyr::if_else(dplyr::between(EO_PCITM, 0, 100), F, T),
+    TI_EO_PCAPM8        = dplyr::if_else(dplyr::between(EO_PCAPM8, 0, 100), F, T),
+    TI_EO_PCAPM11       = dplyr::if_else(dplyr::between(EO_PCAPM11, 0, 100), F, T),
+    TI_EO_PCAPP8        = dplyr::if_else(dplyr::between(EO_PCAPP8, 0, 100), F, T),
+    TI_EO_PCAPP11       = dplyr::if_else(dplyr::between(EO_PCAPP11, 0, 100), F, T),
+    TI_EO_ALUNOSM8      = dplyr::if_else(dplyr::between(EO_ALUNOSM8, 0, 100), F, T),
+    TI_EO_ALUNOSP8      = dplyr::if_else(dplyr::between(EO_ALUNOSP8, 0, 100), F, T),
+    TI_EO_PALUNOSM11    = dplyr::if_else(dplyr::between(EO_PALUNOSM11, 0, 100), F, T),
+    TI_EO_ANALF25_B     = dplyr::if_else(dplyr::between(EO_ANALF25_B, 0, 100), F, T),
+    TI_EO_ANALF25_PP    = dplyr::if_else(dplyr::between(EO_ANALF25_PP, 0, 100), F, T),
+    TI_EO_FUND25_B      = dplyr::if_else(dplyr::between(EO_FUND25_B, 0, 100), F, T),
+    TI_EO_FUND25_PP     = dplyr::if_else(dplyr::between(EO_FUND25_PP, 0, 100), F, T),
+    TI_EO_MED25M_B      = dplyr::if_else(dplyr::between(EO_MED25M_B, 0, 100), F, T),
+    TI_EO_MED25M_PP     = dplyr::if_else(dplyr::between(EO_MED25M_PP, 0, 100), F, T),
+    TI_EO_DOCSUPEI      = dplyr::if_else(dplyr::between(EO_DOCSUPEI, 0, 100), F, T),
+    TI_EO_DOCSUPEF      = dplyr::if_else(dplyr::between(EO_DOCSUPEF, 0, 100), F, T),
+    TI_EO_DOCSUPEFAF    = dplyr::if_else(dplyr::between(EO_DOCSUPEFAF, 0, 100), F, T),
+    TI_EO_DOCSUPEFAI    = dplyr::if_else(dplyr::between(EO_DOCSUPEFAI, 0, 100), F, T),
+    TI_EO_DOCSUPEM      = dplyr::if_else(dplyr::between(EO_DOCSUPEM, 0, 100), F, T),
+    TI_EO_ADEDG1EI      = dplyr::if_else(dplyr::between(EO_ADEDG1EI, 0, 100), F, T),
+    TI_EO_ADEDG2EI      = dplyr::if_else(dplyr::between(EO_ADEDG2EI, 0, 100), F, T),
+    TI_EO_ADEDG3EI      = dplyr::if_else(dplyr::between(EO_ADEDG3EI, 0, 100), F, T),
+    TI_EO_ADEDG4EI      = dplyr::if_else(dplyr::between(EO_ADEDG4EI, 0, 100), F, T),
+    TI_EO_ADEDG5EI      = dplyr::if_else(dplyr::between(EO_ADEDG5EI, 0, 100), F, T),
+    TI_EO_ADEDG1EF      = dplyr::if_else(dplyr::between(EO_ADEDG1EF, 0, 100), F, T),
+    TI_EO_ADEDG2EF      = dplyr::if_else(dplyr::between(EO_ADEDG2EF, 0, 100), F, T),
+    TI_EO_ADEDG3EF      = dplyr::if_else(dplyr::between(EO_ADEDG3EF, 0, 100), F, T),
+    TI_EO_ADEDG4EF      = dplyr::if_else(dplyr::between(EO_ADEDG4EF, 0, 100), F, T),
+    TI_EO_ADEDG5EF      = dplyr::if_else(dplyr::between(EO_ADEDG5EF, 0, 100), F, T),
+    TI_EO_ADEDG1EFAI    = dplyr::if_else(dplyr::between(EO_ADEDG1EFAI, 0, 100), F, T),
+    TI_EO_ADEDG2EFAI    = dplyr::if_else(dplyr::between(EO_ADEDG2EFAI, 0, 100), F, T),
+    TI_EO_ADEDG3EFAI    = dplyr::if_else(dplyr::between(EO_ADEDG3EFAI, 0, 100), F, T),
+    TI_EO_ADEDG4EFAI    = dplyr::if_else(dplyr::between(EO_ADEDG4EFAI, 0, 100), F, T),
+    TI_EO_ADEDG5EFAI    = dplyr::if_else(dplyr::between(EO_ADEDG5EFAI, 0, 100), F, T),
+    TI_EO_ADEDG1EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG1EFAF, 0, 100), F, T),
+    TI_EO_ADEDG2EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG2EFAF, 0, 100), F, T),
+    TI_EO_ADEDG3EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG3EFAF, 0, 100), F, T),
+    TI_EO_ADEDG4EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG4EFAF, 0, 100), F, T),
+    TI_EO_ADEDG5EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG5EFAF, 0, 100), F, T),
+    TI_EO_ADEDG1EM      = dplyr::if_else(dplyr::between(EO_ADEDG1EM, 0, 100), F, T),
+    TI_EO_ADEDG2EM      = dplyr::if_else(dplyr::between(EO_ADEDG2EM, 0, 100), F, T),
+    TI_EO_ADEDG3EM      = dplyr::if_else(dplyr::between(EO_ADEDG3EM, 0, 100), F, T),
+    TI_EO_ADEDG4EM      = dplyr::if_else(dplyr::between(EO_ADEDG4EM, 0, 100), F, T),
+    TI_EO_ADEDG5EM      = dplyr::if_else(dplyr::between(EO_ADEDG5EM, 0, 100), F, T),
+    TI_EO_ADEDG1EJAF    = dplyr::if_else(dplyr::between(EO_ADEDG1EFAF, 0, 100), F, T),
+    TI_EO_ADEDG2EJAF    = dplyr::if_else(dplyr::between(EO_ADEDG2EFAF, 0, 100), F, T),
+    TI_EO_ADEDG3EJAF    = dplyr::if_else(dplyr::between(EO_ADEDG3EFAF, 0, 100), F, T),
+    TI_EO_ADEDG4EJAF    = dplyr::if_else(dplyr::between(EO_ADEDG4EFAF, 0, 100), F, T),
+    TI_EO_ADEDG5EFAF    = dplyr::if_else(dplyr::between(EO_ADEDG5EFAF, 0, 100), F, T),
+    TI_EO_ADEDG1EJAM    = dplyr::if_else(dplyr::between(EO_ADEDG1EJAM, 0, 100), F, T),
+    TI_EO_ADEDG2EJAM    = dplyr::if_else(dplyr::between(EO_ADEDG2EJAM, 0, 100), F, T),
+    TI_EO_ADEDG3EJAM    = dplyr::if_else(dplyr::between(EO_ADEDG3EJAM, 0, 100), F, T),
+    TI_EO_ADEDG4EJAM    = dplyr::if_else(dplyr::between(EO_ADEDG4EJAM, 0, 100), F, T),
+    TI_EO_ADEDG5EJAM    = dplyr::if_else(dplyr::between(EO_ADEDG5EJAM, 0, 100), F, T),
+    TI_EO_MATFEI        = dplyr::if_else(dplyr::between(EO_MATFEI, 0, 100), F, T),
+    TI_EO_MATEEI        = dplyr::if_else(dplyr::between(EO_MATEEI, 0, 100), F, T),
+    TI_EO_MATMEI        = dplyr::if_else(dplyr::between(EO_MATMEI, 0, 100), F, T),
+    TI_EO_MATPEI        = dplyr::if_else(dplyr::between(EO_MATPEI, 0, 100), F, T),
+    TI_EO_MATFEF        = dplyr::if_else(dplyr::between(EO_MATFEF, 0, 100), F, T),
+    TI_EO_MATEEF        = dplyr::if_else(dplyr::between(EO_MATEEF, 0, 100), F, T),
+    TI_EO_MATMEF        = dplyr::if_else(dplyr::between(EO_MATMEF, 0, 100), F, T),
+    TI_EO_MATPEF        = dplyr::if_else(dplyr::between(EO_MATPEF, 0, 100), F, T),
+    TI_EO_MATFEFAI      = dplyr::if_else(dplyr::between(EO_MATFEFAI, 0, 100), F, T),
+    TI_EO_MATEEFAI      = dplyr::if_else(dplyr::between(EO_MATEEFAI, 0, 100), F, T),
+    TI_EO_MATMEFAI      = dplyr::if_else(dplyr::between(EO_MATMEFAI, 0, 100), F, T),
+    TI_EO_MATPEFAI      = dplyr::if_else(dplyr::between(EO_MATPEFAI, 0, 100), F, T),
+    TI_EO_MATFEFAF      = dplyr::if_else(dplyr::between(EO_MATFEFAF, 0, 100), F, T),
+    TI_EO_MATEEFAF      = dplyr::if_else(dplyr::between(EO_MATEEFAF, 0, 100), F, T),
+    TI_EO_MATMEFAF      = dplyr::if_else(dplyr::between(EO_MATMEFAF, 0, 100), F, T),
+    TI_EO_MATPEFAF      = dplyr::if_else(dplyr::between(EO_MATPEFAF, 0, 100), F, T),
+    TI_EO_MATFEM        = dplyr::if_else(dplyr::between(EO_MATFEM, 0, 100), F, T),
+    TI_EO_MATEEM        = dplyr::if_else(dplyr::between(EO_MATEEM, 0, 100), F, T),
+    TI_EO_MATMEM        = dplyr::if_else(dplyr::between(EO_MATMEM, 0, 100), F, T),
+    TI_EO_MATPEM        = dplyr::if_else(dplyr::between(EO_MATPEM, 0, 100), F, T),
+    TI_EO_MATTICR       = dplyr::if_else(dplyr::between(EO_MATTICR, 0, 100), F, T),
+    TI_EO_MATTIPE       = dplyr::if_else(dplyr::between(EO_MATTIPE, 0, 100), F, T),
+    TI_EO_MATTIEFAI     = dplyr::if_else(dplyr::between(EO_MATTIEFAI, 0, 100), F, T),
+    TI_EO_MATTIEFAF     = dplyr::if_else(dplyr::between(EO_MATTIEFAF, 0, 100), F, T),
+    TI_EO_MATTIEM       = dplyr::if_else(dplyr::between(EO_MATTIEM, 0, 100), F, T)
+  )
+```
+
+```{r data_wrangling_valid_eo_all}
+
+## Transformação dos resultados
+df_sumario_valid_eo <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_eo |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_eo_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_eo_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Consistência
+
+```{r data_rules_consist_eo_all}
+
+## df com o resultado das aplicações das regras
+df_rules_consist_eo_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    EO_ESCOLAME
+  ) |> 
+  dplyr::group_by(Ano) |> 
+  dplyr::mutate(
+    CF_EO_ESCOLAME_total_year = dplyr::if_else(
+      dplyr::between(sum(EO_ESCOLAME, na.rm = T), 99, 101), F, T)
+  )
+```
+
+```{r data_wrangling_consist_eo_all}
+
+## Tranformação dos resultados
+df_sumario_consist_eo <- df_rules_consist_eo_all |> 
+  dplyr::select(!EO_ESCOLAME) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_consist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores
+
+```{r table_consist_eo_all}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### EO_ALUNOSP8
+
+```{r data_rules_dist_eo_alunosp8}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_ALUNOSP8 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_ALUNOSP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSP8"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_ALUNOSP8) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_ALUNOSP8_hampel_munic  = dplyr::if_else(!hampel_filter(EO_ALUNOSP8), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSP8_out_munic     = dplyr::if_else(!outlier_function(EO_ALUNOSP8), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSP8_min_munic     = dplyr::if_else(EO_ALUNOSP8 >= (min(dplyr::lag(EO_ALUNOSP8), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_EO_ALUNOSP8_max_munic     = dplyr::if_else(EO_ALUNOSP8 <= (max(dplyr::lag(EO_ALUNOSP8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSP8_min_k_munic   = dplyr::if_else(EO_ALUNOSP8 >= (min(dplyr::lag(EO_ALUNOSP8), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_EO_ALUNOSP8_max_k_munic   = dplyr::if_else(EO_ALUNOSP8 <= (k * max(dplyr::lag(EO_ALUNOSP8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSP8_med_mov_munic = dplyr::if_else(EO_ALUNOSP8 <= (k * zoo::rollmedian(EO_ALUNOSP8, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSP8_dif_munic     = dplyr::if_else(!compare_first_dif(EO_ALUNOSP8), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_EO_ALUNOSP8}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_ALUNOSP8 |> 
+  dplyr::select(!EO_ALUNOSP8) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_ALUNOSP8}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_ALUNOSP8}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_ALUNOSM8
+
+```{r rules_dist_EO_ALUNOSM8}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_ALUNOSM8 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_ALUNOSM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSM8"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_ALUNOSM8) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_ALUNOSM8_hampel_munic  = dplyr::if_else(!hampel_filter(EO_ALUNOSM8), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_out_munic     = dplyr::if_else(!outlier_function(EO_ALUNOSM8), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_min_munic     = dplyr::if_else(EO_ALUNOSM8 >= (min(dplyr::lag(EO_ALUNOSM8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_max_munic     = dplyr::if_else(EO_ALUNOSM8 <= (max(dplyr::lag(EO_ALUNOSM8), na.rm = T)), F, T), # Longitudinal (município)
+  
+    DF_EO_ALUNOSM8_min_k_munic   = dplyr::if_else(EO_ALUNOSM8 >= (min(dplyr::lag(EO_ALUNOSM8), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_max_k_munic   = dplyr::if_else(EO_ALUNOSM8 <= (k * max(dplyr::lag(EO_ALUNOSM8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_med_mov_munic = dplyr::if_else(EO_ALUNOSM8 <= (k * zoo::rollmedian(EO_ALUNOSM8, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM8_dif_munic     = dplyr::if_else(!compare_first_dif(EO_ALUNOSM8), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_EO_ALUNOSM8}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_ALUNOSM8 |> 
+  dplyr::select(!EO_ALUNOSM8) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_ALUNOSM8}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_ALUNOSM8}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_ALUNOSM11
+
+```{r rules_dist_EO_ALUNOSM11}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_ALUNOSM11 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_ALUNOSM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSM11"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_ALUNOSM11) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_ALUNOSM11_hampel_munic  = dplyr::if_else(!hampel_filter(EO_ALUNOSM11), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_out_munic     = dplyr::if_else(!outlier_function(EO_ALUNOSM11), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_min_munic     = dplyr::if_else(EO_ALUNOSM11 >= (min(dplyr::lag(EO_ALUNOSM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_max_munic     = dplyr::if_else(EO_ALUNOSM11 <= (max(dplyr::lag(EO_ALUNOSM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_min_k_munic   = dplyr::if_else(EO_ALUNOSM11 >= (min(dplyr::lag(EO_ALUNOSM11), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_max_k_munic   = dplyr::if_else(EO_ALUNOSM11 <= (k * max(dplyr::lag(EO_ALUNOSM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_med_mov_munic = dplyr::if_else(EO_ALUNOSM11 <= (k * zoo::rollmedian(EO_ALUNOSM11, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_ALUNOSM11_dif_munic     = dplyr::if_else(!compare_first_dif(EO_ALUNOSM11), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_ALUNOSM11}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_ALUNOSM11 |> 
+  dplyr::select(!EO_ALUNOSM11) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_ALUNOSM11}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_ALUNOSM11}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_ESCOLAME
+
+```{r rules_dist_EO_ESCOLAME}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_ESCOLAME <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_ESCOLAME" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ESCOLAME"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_ESCOLAME) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_ESCOLAME_hampel_munic  = dplyr::if_else(!hampel_filter(EO_ESCOLAME), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_out_munic     = dplyr::if_else(!outlier_function(EO_ESCOLAME), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_min_munic     = dplyr::if_else(EO_ESCOLAME >= (min(dplyr::lag(EO_ESCOLAME), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_max_munic     = dplyr::if_else(EO_ESCOLAME <= (max(dplyr::lag(EO_ESCOLAME), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_min_k_munic   = dplyr::if_else(EO_ESCOLAME >= (min(dplyr::lag(EO_ESCOLAME), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_max_k_munic   = dplyr::if_else(EO_ESCOLAME <= (k * max(dplyr::lag(EO_ESCOLAME), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_med_mov_munic = dplyr::if_else(EO_ESCOLAME <= (k * zoo::rollmedian(EO_ESCOLAME, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_ESCOLAME_dif_munic     = dplyr::if_else(!compare_first_dif(EO_ESCOLAME), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_ESCOLAME}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_ESCOLAME |> 
+  dplyr::select(!EO_ESCOLAME) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_ESCOLAME}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_ESCOLAME}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IDEBFU1a5
+
+```{r rules_dist_EO_IDEBFU1a5}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IDEBFU1a5 <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IDEBFU1a5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU1a5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU1a5) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IDEBFU1a5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU1a5), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU1a5), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_min_munic     = dplyr::if_else(EO_IDEBFU1a5 >= (min(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_max_munic     = dplyr::if_else(EO_IDEBFU1a5 <= (max(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_min_k_munic   = dplyr::if_else(EO_IDEBFU1a5 >= (min(dplyr::lag(EO_IDEBFU1a5), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_max_k_munic   = dplyr::if_else(EO_IDEBFU1a5 <= (k * max(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_med_mov_munic = dplyr::if_else(EO_IDEBFU1a5 <= (k * zoo::rollmedian(EO_IDEBFU1a5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU1a5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU1a5), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IDEBFU1a5}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IDEBFU1a5 |> 
+  dplyr::select(!EO_IDEBFU1a5) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IDEBFU1a5}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IDEBFU1a5}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IDEBFU6a9
+
+```{r rules_dist_EO_IDEBFU6a9}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IDEBFU6a9 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IDEBFU6a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU6a9"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU6a9) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IDEBFU6a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    
+     DF_EO_IDEBFU6a9_min_munic    = dplyr::if_else(EO_IDEBFU6a9 >= (min(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_max_munic     = dplyr::if_else(EO_IDEBFU6a9 <= (max(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_min_k_munic   = dplyr::if_else(EO_IDEBFU6a9 >= (min(dplyr::lag(EO_IDEBFU6a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_max_k_munic   = dplyr::if_else(EO_IDEBFU6a9 <= (k * max(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_med_mov_munic = dplyr::if_else(EO_IDEBFU6a9 <= (k * zoo::rollmedian(EO_IDEBFU6a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    
+    DF_EO_IDEBFU6a9_estoque_munic = dplyr::if_else(EO_IDEBFU6a9 >= dplyr::lag(EO_IDEBFU6a9), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IDEBFU6a9}
+
+## Tranformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IDEBFU6a9 |> 
+  dplyr::select(!EO_IDEBFU6a9) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IDEBFU6a9}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IDEBFU6a9}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IQEP11
+
+```{r rules_dist_EO_IQEP11}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IQEP11 <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IQEP11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP11"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IQEP11) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IQEP11_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IQEP11), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_out_munic     = dplyr::if_else(!outlier_function(EO_IQEP11), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_min_munic     = dplyr::if_else(EO_IQEP11 >= (min(dplyr::lag(EO_IQEP11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_max_munic     = dplyr::if_else(EO_IQEP11 <= (max(dplyr::lag(EO_IQEP11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_min_k_munic   = dplyr::if_else(EO_IQEP11 >= (min(dplyr::lag(EO_IQEP11), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_max_k_munic   = dplyr::if_else(EO_IQEP11 <= (k * max(dplyr::lag(EO_IQEP11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_med_mov_munic = dplyr::if_else(EO_IQEP11 <= (k * zoo::rollmedian(EO_IQEP11, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEP11_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IQEP11), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IQEP11}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IQEP11 |> 
+  dplyr::select(!EO_IQEP11) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IQEP11}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IQEP11}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_REFLO
+
+```{r rules_dist_ma_reflo}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_reflo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_REFLO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_REFLO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_REFLO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_REFLO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_REFLO), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_out_munic     = dplyr::if_else(!outlier_function(MA_REFLO), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_min_munic     = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_max_munic     = dplyr::if_else(MA_REFLO <= (max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_min_k_munic   = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_max_k_munic   = dplyr::if_else(MA_REFLO <= (k * max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_med_mov_munic = dplyr::if_else(MA_REFLO <= (k * zoo::rollmedian(MA_REFLO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_REFLO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_reflo}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_reflo |> 
+  dplyr::select(!MA_REFLO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_reflo}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_reflo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IQEM4
+
+```{r rules_dist_EO_IQEM4}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IQEM4 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IQEM4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM4"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IQEM4) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IQEM4_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IQEM4), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_out_munic     = dplyr::if_else(!outlier_function(EO_IQEM4), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_min_munic     = dplyr::if_else(EO_IQEM4 >= (min(dplyr::lag(EO_IQEM4), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_max_munic     = dplyr::if_else(EO_IQEM4 <= (max(dplyr::lag(EO_IQEM4), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_min_k_munic   = dplyr::if_else(EO_IQEM4 >= (min(dplyr::lag(EO_IQEM4), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_max_k_munic   = dplyr::if_else(EO_IQEM4 <= (k * max(dplyr::lag(EO_IQEM4), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_med_mov_munic = dplyr::if_else(EO_IQEM4 <= (k * zoo::rollmedian(EO_IQEM4, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM4_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IQEM4), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IQEM4}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IQEM4 |> 
+  dplyr::select(!EO_IQEM4) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IQEM4}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IQEM4}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IQEM8
+
+```{r rules_dist_EO_IQEM8}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IQEM8 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IQEM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM8"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IQEM8) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IQEM8_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IQEM8), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_out_munic     = dplyr::if_else(!outlier_function(EO_IQEM8), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_min_munic     = dplyr::if_else(EO_IQEM8 >= (min(dplyr::lag(EO_IQEM8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_max_munic     = dplyr::if_else(EO_IQEM8 <= (max(dplyr::lag(EO_IQEM8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_min_k_munic   = dplyr::if_else(EO_IQEM8 >= (min(dplyr::lag(EO_IQEM8), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_max_k_munic   = dplyr::if_else(EO_IQEM8 <= (k * max(dplyr::lag(EO_IQEM8), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_med_mov_munic = dplyr::if_else(EO_IQEM8 <= (k * zoo::rollmedian(EO_IQEM8, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM8_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IQEM8), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IQEM8}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IQEM8 |> 
+  dplyr::select(!EO_IQEM8) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IQEM8}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IQEM8}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EO_IQEM11
+
+```{r rules_dist_EO_IQEM11}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_EO_IQEM11 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EO_IQEM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM11"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IQEM11) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EO_IQEM11_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IQEM11), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_out_munic     = dplyr::if_else(!outlier_function(EO_IQEM11), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_min_munic     = dplyr::if_else(EO_IQEM11 >= (min(dplyr::lag(EO_IQEM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_max_munic     = dplyr::if_else(EO_IQEM11 <= (max(dplyr::lag(EO_IQEM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_min_k_munic   = dplyr::if_else(EO_IQEM11 >= (min(dplyr::lag(EO_IQEM11), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_max_k_munic   = dplyr::if_else(EO_IQEM11 <= (k * max(dplyr::lag(EO_IQEM11), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_med_mov_munic = dplyr::if_else(EO_IQEM11 <= (k * zoo::rollmedian(EO_IQEM11, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EO_IQEM11_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IQEM11), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_EO_IQEM11}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_EO_IQEM11 |> 
+  dplyr::select(!EO_IQEM11) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_EO_IQEM11}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_EO_IQEM11}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+# Criar base com as observações que violaram uma ou mais regras de validade
+
+## Validade
+df_rules_valid_EO_ALUNOSP8 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ALUNOSP8")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ALUNOSM8 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ALUNOSM8")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ALUNOSM11 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ALUNOSM11")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ALUNOSP11 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ALUNOSP11")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ESCOLAEFAI <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ESCOLAEFAI")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ESCOLAEFAF <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ESCOLAEFAF")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ESCOLAEFCO <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ESCOLAEFCO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_ESCOLAME <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_ESCOLAME")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IDEBFU1a5 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IDEBFU1a5")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IDEBFU6a9 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IDEBFU6a9")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IQEP11 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IQEP11")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_ma_reflo <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("MA_REFLO")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IQEM4 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IQEM4")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IQEM8 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IQEM8")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_EO_IQEM11 <- df_rules_valid_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EO_IQEM11")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_valid}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "EO_ALUNOSP8" = df_rules_valid_EO_ALUNOSP8,
+  "EO_ALUNOSM8"        = df_rules_valid_EO_ALUNOSM8,
+  "EO_ALUNOSM11"       = df_rules_valid_EO_ALUNOSM11,
+  "EO_ALUNOSP11"    = df_rules_valid_EO_ALUNOSP11,
+  "EO_ESCOLAEFAI"       = df_rules_valid_EO_ESCOLAEFAI,
+  "EO_ESCOLAEFAF"     = df_rules_valid_EO_ESCOLAEFAF,
+  "EO_ESCOLAEFCO"     = df_rules_valid_EO_ESCOLAEFCO,
+  "EO_ESCOLAME"      = df_rules_valid_EO_ESCOLAME,
+  "EO_IDEBFU1a5"       = df_rules_valid_EO_IDEBFU1a5,
+  "EO_IDEBFU6a9"      = df_rules_valid_EO_IDEBFU6a9,
+  "EO_IQEP11"     = df_rules_valid_EO_IQEP11,
+  "ma_reflo"      = df_rules_valid_ma_reflo,
+  "EO_IQEM4"  = df_rules_valid_EO_IQEM4,
+  "EO_IQEM8"      = df_rules_valid_EO_IQEM8,
+  "EO_IQEM11"       = df_rules_valid_EO_IQEM11
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_valid_")
+  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_consist}
+
+# Criar base com as observações que violaram uma ou mais regras de consistência
+
+## Consistência
+df_rules_consist_EO_ESCOLAME <- df_rules_consist_eo_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::contains("_FOCOS")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_consist}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "EO_ESCOLAME" = df_rules_valid_EO_ESCOLAME
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_consist_")
+  openxlsx::addWorksheet(pt, paste0("consist - ", nome))
+  openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_dist}
+
+# Criar base com as observações que violaram uma ou mais regras de distribuição
+
+## Distribuição
+df_rules_dist_EO_ALUNOSP8 <- df_rules_dist_EO_ALUNOSP8 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_ALUNOSM8 <- df_rules_dist_EO_ALUNOSM8 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_ALUNOSM11 <- df_rules_dist_EO_ALUNOSM11 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_ESCOLAME <- df_rules_dist_EO_ESCOLAME |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IDEBFU1a5 <- df_rules_dist_EO_IDEBFU1a5 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IDEBFU6a9 <- df_rules_dist_EO_IDEBFU6a9 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IQEP11 <- df_rules_dist_EO_IQEP11 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IQEM4 <- df_rules_dist_EO_IQEM4 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IQEM8 <- df_rules_dist_EO_IQEM8 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_EO_IQEM11 <- df_rules_dist_EO_IQEM11 |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_dist}
+
+lista_df <- list(
+  "EO_ALUNOSP8" = df_rules_dist_EO_ALUNOSP8,
+  "EO_ALUNOSM8"        = df_rules_dist_EO_ALUNOSM8,
+  "EO_ALUNOSM11"       = df_rules_dist_EO_ALUNOSM11,
+  "EO_ESCOLAME"      = df_rules_dist_EO_ESCOLAME,
+  "EO_IDEBFU1a5"       = df_rules_dist_EO_IDEBFU1a5,
+  "EO_IDEBFU6a9"      = df_rules_dist_EO_IDEBFU6a9,
+  "EO_IQEP11"     = df_rules_dist_EO_IQEP11,
+  "ma_reflo"      = df_rules_dist_ma_reflo,
+  "EO_IQEM4"  = df_rules_dist_EO_IQEM4,
+  "EO_IQEM8"      = df_rules_dist_EO_IQEM8,
+  "EO_IQEM11"       = df_rules_dist_EO_IQEM11
+)
+
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_dist_")
+  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+}
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+
+rm(list = ls())
+gc()
+```

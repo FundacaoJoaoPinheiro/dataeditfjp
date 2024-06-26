@@ -37,7 +37,6 @@ params:
 output-file: "se_relatorio.html"
 ---
 
-
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -258,8 +257,6 @@ compare_lag <- function(var){
 
 ```
 
-
-
 ```{r set_param_global}
 
 k <- 1.5 
@@ -303,6 +300,7 @@ var_char <- data |>
 ```
 
 # Introdução
+
 A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
 
 # Regras de crítica
@@ -3380,7 +3378,6 @@ As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, 
 -   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
-
 
 ## Tabelas
 

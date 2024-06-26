@@ -37,7 +37,6 @@ params:
 output-file: "sp_relatorio.html"
 ---
 
-
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -257,8 +256,6 @@ compare_lag <- function(var){
 }
 
 ```
-
-
 
 ```{r set_param_global}
 
@@ -3081,7 +3078,6 @@ As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, 
 -   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
-
 
 ## Tabelas
 
