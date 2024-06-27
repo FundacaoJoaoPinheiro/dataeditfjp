@@ -37,11 +37,228 @@ params:
 output-file: "el_relatorio.html"
 ---
 
-```{r source_functions}
 
-# source(sistem.file("R", "aux_functions.R"), package = "criticaldatafjp")
-source(here::here("R", "aux_functions.R"))
+```{r  setup, include=FALSE}
+
+table_descriptive <- function(variable, data){
+  res <- data |>
+    dplyr::group_by(ANO) |>
+    dplyr::summarise(
+      N = dplyr::n(),
+      `Mínimo`=dplyr::na_if(min(.data[[variable]], na.rm = TRUE), Inf),
+      `Média`  = mean(.data[[variable]], na.rm = TRUE),
+      Mediana  = median(.data[[variable]], na.rm = TRUE),
+      `Máximo` = dplyr::na_if(max(.data[[variable]], na.rm = TRUE), -Inf),
+      `D. P.`  = sd(.data[[variable]], na.rm = TRUE),
+      `C. V.`  = sd(.data[[variable]], na.rm = TRUE)/mean(.data[[variable]], na.rm = TRUE),
+      Zero     = sum(.data[[variable]] == 0, na.rm = T),
+      Ausentes  = sum(is.na(.data[[variable]])),
+      .groups = "drop")
+
+    return(res)
+}
+
+table_quantile <- function(variable, data){
+  result <- data  |>
+    dplyr::group_by(ANO)  |>
+    dplyr::summarise(value = stats::quantile(.data[[variable]], probs = c(.25, .75), na.rm = T),
+                     .groups  = "drop")  |>
+    dplyr::mutate(quantil = rep(c("25%", "75%"),length(unique(ANO))) ) |>
+    tidyr::pivot_wider(id_cols = ANO, values_from = value, names_from = quantil)
+  return(result)
+}
+
+chart_boxplot <- function(variable, data){
+  result <- data  |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title.x    = ggplot2::element_blank(),
+      axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+
+chart_histogram <- function(variable, data){
+  result <- data |>
+    dplyr::mutate(ANO = as.numeric(ANO)) |>
+    ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::geom_histogram() +
+    ggplot2::scale_fill_viridis_c(option = "mako", direction = -1) + # G: mako
+    ggplot2::labs(
+      y = paste0("Escala logarítmica de ", variable)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.title      = ggplot2::element_blank(),
+      axis.ticks      = ggplot2::element_blank()
+    ) +
+    ggplot2::facet_wrap(~ANO, ncol = 4)
+
+  return(result)
+}
+
+chart_bar <- function(ano, n){
+  result <- data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(result)
+}
+
+# Build horizontal bar chart
+chart_hbar <- function(ano, n){
+  result <-
+    data.frame(ano, n) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ano), y = as.integer(n))) +
+    ggplot2::geom_bar(stat = "identity", fill = "#cccccc") +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Observações suspeitas por ano",
+      y     = "Total\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+       legend.position = "none",
+       axis.title.x    = ggplot2::element_blank(),
+       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+# Build vertical bar chart
+chart_vbar <- function(df){
+  result <-
+    df |>
+    dplyr::group_by(Regra) |>
+    dplyr::summarise(
+      Validada = round(sum(Validada) / sum(Total) * 100, 2),
+      Suspeita = round(sum(Suspeita) / sum(Total) * 100, 2),
+      Ausente  = round(sum(Ausente) / sum(Total) * 100, 2)
+    ) |>
+    dplyr::mutate(Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")) |>
+    tidyr::pivot_longer(cols = !Regra, names_to = "categoria", values_to = "pct") |>
+    ggplot2::ggplot(ggplot2::aes(x = pct, y = Regra, fill = categoria)) +
+    ggplot2::geom_bar(position = "stack", stat = "identity") +
+    ggplot2::scale_fill_brewer(palette = "Set2") +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_percent(scale = 1, big.mark = ".", decimal.mark = ",")
+    ) +
+    ggplot2::labs(
+      title = "Percentual geral de classificação das observações por regra",
+      x     = NULL,
+      y     = "Regra\n",
+      fill  = NULL
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "top"
+    )
+
+  return(print(result))
+}
+
+# Build heatmap
+chart_heatmap <- function(df){
+  result <-
+    df |>
+    dplyr::mutate(
+      Ano   = as.character(Ano),
+      Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
+    ggplot2::geom_tile() +
+    ggplot2::geom_text(ggplot2::aes(label = Suspeita), size = 3) +
+    ggplot2::scale_fill_distiller(palette = "OrRd", direction = 1) +
+    ggplot2::labs(
+      title = "Total de observações suspeitas por regra e ano",
+      x     = "\nRegra",
+      y     = "Ano\n"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = "None",
+      axis.text.x     = ggplot2::element_text(angle = 45, hjust = 1)
+    )
+
+  return(print(result))
+}
+
+difpercentual <- function(df, variable){
+  df |>
+    dplyr::group_by(ANO) |>
+    dplyr::mutate(total = sum({{variable}}, na.rm = TRUE)) |>
+    dplyr::ungroup() |>
+    dplyr::group_by(IBGE7) |>
+    dplyr::summarise(ANO = ANO,
+                     {{variable}} := {{variable}},
+                     part = {{variable}}/total,
+                     part_lag = dplyr::lag(part, n = 1),
+                     dif_prop = part - part_lag,
+                     .groups = "drop")
+}
+
+outlier_function <- function(variable, a=-4,b=3){
+  q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)
+  q3 <- stats::quantile(variable, probs = 0.75, na.rm = T, names = F)
+  iqr <- stats::IQR(variable, na.rm = T)
+  mc <- robustbase::mc(variable, na.rm = T)
+  inf <- q1 - 1.5*exp(a*mc)*iqr
+  sup <- q3 + 1.5*exp(b*mc)*iqr
+
+  check <- ifelse(variable < inf | variable > sup, T, F)
+
+  return(check)
+}
+
+hampel_filter <- function(variable){
+  limite_inf = stats::median(variable, na.rm = T) - 3 * stats::mad(variable, constant = 1, na.rm = T)
+  limite_sup = stats::median(variable, na.rm = T) + 3 * stats::mad(variable, constant = 1, na.rm = T)
+  result = (variable < limite_inf | variable > limite_sup)
+  return(result)
+}
+
+
+compare_first_dif <- function(var){
+  dif <- abs(round(c(NA_real_, diff(var)), 2))
+  dif_max <- max(dplyr::lag(dif), na.rm = T)
+  check <- ifelse(dif > dif_max, TRUE, FALSE)
+
+  return(check)
+}
+
+compare_lag <- function(var){
+  return(var >= dplyr::lag(var, n = 1))
+}
+
 ```
+
+
 
 ```{r set_param_global}
 
@@ -435,7 +652,7 @@ df_rules_dist_el_quant <- data |>
   dplyr::mutate(
     DF_EL_QUANT_hampel_munic  = dplyr::if_else(!hampel_filter(EL_QUANT), F, T), # Longitudinal (município)
     
-    DF_EL_QUANT_out_munic     = dplyr::if_else(!outlier_detection(EL_QUANT), F, T), # Longitudinal (município)
+    DF_EL_QUANT_out_munic     = dplyr::if_else(!outlier_function(EL_QUANT), F, T), # Longitudinal (município)
     
     DF_EL_QUANT_min_munic     = dplyr::if_else(EL_QUANT >= (min(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
      
@@ -509,7 +726,7 @@ df_rules_dist_el_proge <- data |>
   dplyr::mutate(
     DF_EL_PROGE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_PROGE), F, T), # Longitudinal (município)
     
-    DF_EL_PROGE_out_munic     = dplyr::if_else(!outlier_detection(EL_PROGE), F, T), # Longitudinal (município)
+    DF_EL_PROGE_out_munic     = dplyr::if_else(!outlier_function(EL_PROGE), F, T), # Longitudinal (município)
     
     DF_EL_PROGE_min_munic     = dplyr::if_else(EL_PROGE >= (min(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
      
@@ -583,7 +800,7 @@ df_rules_dist_el_espesc <- data |>
   dplyr::mutate(
     DF_EL_ESPESC_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ESPESC), F, T), # Longitudinal (município)
     
-    DF_EL_ESPESC_out_munic     = dplyr::if_else(!outlier_detection(EL_ESPESC), F, T), # Longitudinal (município)
+    DF_EL_ESPESC_out_munic     = dplyr::if_else(!outlier_function(EL_ESPESC), F, T), # Longitudinal (município)
     
     DF_EL_ESPESC_min_munic     = dplyr::if_else(EL_ESPESC >= (min(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
      
@@ -657,7 +874,7 @@ df_rules_dist_el_ilrhe <- data |>
   dplyr::mutate(
     DF_EL_ILRHE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ILRHE), F, T), # Longitudinal (município)
     
-    DF_EL_ILRHE_out_munic     = dplyr::if_else(!outlier_detection(EL_ILRHE), F, T), # Longitudinal (município)
+    DF_EL_ILRHE_out_munic     = dplyr::if_else(!outlier_function(EL_ILRHE), F, T), # Longitudinal (município)
     
     DF_EL_ILRHE_min_munic     = dplyr::if_else(EL_ILRHE >= (min(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
      
@@ -755,7 +972,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(var), 
+    table_descriptive(variable = var, data = data), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -780,7 +997,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(var))
+  print(chart_boxplot(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -794,7 +1011,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(var))
+  print(chart_histogram(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
