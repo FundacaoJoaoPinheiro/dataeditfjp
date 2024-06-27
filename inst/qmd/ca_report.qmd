@@ -69,7 +69,7 @@ table_quantile <- function(variable, data){
 
 chart_boxplot <- function(variable, data){
   result <- data  |>
-    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(
@@ -255,20 +255,6 @@ compare_lag <- function(var){
   return(var >= dplyr::lag(var, n = 1))
 }
 
-```
-
-```{r set_param_global}
-
-k <- 1.5 
-
-## "Truque" para setar "k" como uma constante
-lockBinding("k", globalenv())
-
-## Parâmetros para os gráficos do validate::
-# chart_title <- "Sumário da validação por regra estabelecida"
-# chart_label <- c("Suspeita", "Validada", "Ausente", "Total")
-# chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
-# chart_xlab <- ""
 ```
 
 ```{r set_param_global}
