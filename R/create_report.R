@@ -28,7 +28,9 @@ create_report <- function(){
     "DA" = system.file("qmd", "da_report.qmd", package = "criticaldatafjp"),
     "EO" = system.file("qmd", "eo_report.qmd", package = "criticaldatafjp"),
     "GP" = system.file("qmd", "gp_report.qmd", package = "criticaldatafjp"),
-    "CA" = system.file("qmd", "ca_report.qmd", package = "criticaldatafjp")
+    "CA" = system.file("qmd", "ca_report.qmd", package = "criticaldatafjp"),
+    "EL" = system.file("qmd", "el_report.qmd", package = "criticaldatafjp"),
+    "FS" = system.file("qmd", "fs_report.qmd", package = "criticaldatafjp")
   )
 
 

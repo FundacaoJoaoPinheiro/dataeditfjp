@@ -37,7 +37,7 @@ params:
 output-file: "hs_relatorio.html"
 ---
 
-```{r setup, include=FALSE}
+```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
   res <- data |>
@@ -71,7 +71,7 @@ chart_boxplot <- function(variable, data){
   result <- data  |>
     ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
-    ggplot2::scale_fill_viridis_d(option = "mako", direction = -1) + # G: mako
+    ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(
       y = paste0("Escala logarítmica de ", variable)
     ) +
@@ -255,7 +255,6 @@ compare_lag <- function(var){
   return(var >= dplyr::lag(var, n = 1))
 }
 
-
 ```
 
 ```{r set_param_global}
@@ -272,10 +271,10 @@ lockBinding("k", globalenv())
 # chart_xlab <- ""
 ```
 
+
 ```{r import_data}
 
 data <- openxlsx::read.xlsx(params$data)
-data$ANO <- as.character(data$ANO)
 ```
 
 ```{r get_var_numeric}
@@ -306,9 +305,7 @@ A **crítica de dados** refere-se ao processo de verificação e validação da 
 
 # Regras de crítica
 
-As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
-
-A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados. A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
 
 *1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
 
@@ -318,20 +315,19 @@ Tipo (T): refere-se a classe da variável, são realizadas verificações no sen
 
 -   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
 
-Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes;
 
 -   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+
 -   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
 -   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
 
-Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
--   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
-
--   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica; - **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
 
 -   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
@@ -352,6 +348,21 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 -   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
 
 ```{r get_cat}
 
@@ -582,46 +593,46 @@ df_rules_valid_hs_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_HS_COBAGUA             = dplyr::if_else(!is.na(HS_COBAGUA), F, T),
-    VI_NA_HS_PRESTAGUA           = dplyr::if_else(!is.na(HS_PRESTAGUA), F, T),
-    VI_NA_HS_COBESGOTO           = dplyr::if_else(!is.na(HS_COBESGOTO), F, T),
-    VI_NA_HS_PRESTESGOTO         = dplyr::if_else(!is.na(HS_PRESTESGOTO), F, T),
-    VI_NA_HS_ESGOTOAD            = dplyr::if_else(!is.na(HS_ESGOTOAD), F, T),
-    VI_NA_HS_DISPOSLIXO          = dplyr::if_else(!is.na(HS_DISPOSLIXO), F, T),
-    VI_NA_HS_LIXO                = dplyr::if_else(!is.na(HS_LIXO), F, T),
-    VI_NA_HS_COLSELETIVA         = dplyr::if_else(!is.na(HS_COLSELETIVA), F, T),
-    VI_NA_HS_LIXOAD              = dplyr::if_else(!is.na(HS_LIXOAD), F, T),
-    VI_NA_HS_COBLIXO             = dplyr::if_else(!is.na(HS_COBLIXO), F, T),
-    VI_NA_HS_POLITICAEXISTENCIA  = dplyr::if_else(!is.na(HS_POLITICAEXISTENCIA), F, T),
-    VI_NA_HS_POLITICAAGUA        = dplyr::if_else(!is.na(HS_POLITICAAGUA), F, T),
-    VI_NA_HS_POLITICAESGOTO      = dplyr::if_else(!is.na(HS_POLITICAESGOTO), F, T),
-    VI_NA_HS_POLITICARESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_POLITICARESIDUOSSOLIDOS), F, T),
-    VI_NA_HS_POLITICADRENAGEM    = dplyr::if_else(!is.na(HS_POLITICADRENAGEM), F, T),
-    VI_NA_HS_POLITICA            = dplyr::if_else(!is.na(HS_POLITICA), F, T),
-    VI_NA_HS_PLANOSAHSEXISTENCIA = dplyr::if_else(!is.na(HS_PLANOSAHSEXISTENCIA), F, T),
-    VI_NA_HS_PLANOSAHSAGUA       = dplyr::if_else(!is.na(HS_PLANOSAHSAGUA), F, T),
-    VI_NA_HS_PLANOSAHSESGOTO     = dplyr::if_else(!is.na(HS_PLANOSAHSESGOTO), F, T),
-    VI_NA_HS_PLANOSAHSRESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_PLANOSAHSRESIDUOSSOLIDOS), F, T),
-    VI_NA_HS_PLANOSAHSDRENAGEM   = dplyr::if_else(!is.na(HS_PLANOSAHSDRENAGEM), F, T),
-    VI_NA_HS_PLANOSAN            = dplyr::if_else(!is.na(HS_PLANOSAN), F, T),
-    VI_NA_HS_PARTICIPACAO        = dplyr::if_else(!is.na(HS_PARTICIPACAO), F, T),
-    VI_NA_HS_CONSELHO            = dplyr::if_else(!is.na(HS_CONSELHO), F, T),
-    VI_NA_HS_GESTAO              = dplyr::if_else(!is.na(HS_GESTAO), F, T),
-    VI_NA_HS_REGULACAOAGUA       = dplyr::if_else(!is.na(HS_REGULACAOAGUA), F, T),
-    VI_NA_HS_REGULACAOESGOTO     = dplyr::if_else(!is.na(HS_REGULACAOESGOTO), F, T),
-    VI_NA_HS_REGULACAORESIDUOS   = dplyr::if_else(!is.na(HS_REGULACAORESIDUOS), F, T),
-    VI_NA_HS_REGULACAODRENAGEM   = dplyr::if_else(!is.na(HS_REGULACAODRENAGEM), F, T),
-    VI_NA_HS_DEFICIT             = dplyr::if_else(!is.na(HS_DEFICIT), F, T),
-    VI_NA_HS_DEFICITREL          = dplyr::if_else(!is.na(HS_DEFICITREL), F, T),
-    VI_NA_HS_DPRECARIO           = dplyr::if_else(!is.na(HS_DPRECARIO), F, T),
-    VI_NA_HS_DCOAB               = dplyr::if_else(!is.na(HS_DCOAB), F, T),
-    VI_NA_HS_DONUS               = dplyr::if_else(!is.na(HS_DONUS), F, T),
-    VI_NA_HS_DADENS              = dplyr::if_else(!is.na(HS_DADENS), F, T),
-    VI_NA_HS_DINADEQUADO         = dplyr::if_else(!is.na(HS_DINADEQUADO), F, T),
-    VI_NA_HS_DSEMINFRA           = dplyr::if_else(!is.na(HS_DSEMINFRA), F, T),
-    VI_NA_HS_SEMBANH             = dplyr::if_else(!is.na(HS_SEMBANH), F, T),
-    VI_NA_HS_DDURBADENS          = dplyr::if_else(!is.na(HS_DDURBADENS), F, T),
-    VI_NA_HS_TRATESGOTO          = dplyr::if_else(!is.na(HS_TRATESGOTO), F, T),
+    VI_NA_HS_COBAGUA             = dplyr::if_else(!is.na(HS_COBAGUA), F, NA),
+    VI_NA_HS_PRESTAGUA           = dplyr::if_else(!is.na(HS_PRESTAGUA), F, NA),
+    VI_NA_HS_COBESGOTO           = dplyr::if_else(!is.na(HS_COBESGOTO), F, NA),
+    VI_NA_HS_PRESTESGOTO         = dplyr::if_else(!is.na(HS_PRESTESGOTO), F, NA),
+    VI_NA_HS_ESGOTOAD            = dplyr::if_else(!is.na(HS_ESGOTOAD), F, NA),
+    VI_NA_HS_DISPOSLIXO          = dplyr::if_else(!is.na(HS_DISPOSLIXO), F, NA),
+    VI_NA_HS_LIXO                = dplyr::if_else(!is.na(HS_LIXO), F, NA),
+    VI_NA_HS_COLSELETIVA         = dplyr::if_else(!is.na(HS_COLSELETIVA), F, NA),
+    VI_NA_HS_LIXOAD              = dplyr::if_else(!is.na(HS_LIXOAD), F, NA),
+    VI_NA_HS_COBLIXO             = dplyr::if_else(!is.na(HS_COBLIXO), F, NA),
+    VI_NA_HS_POLITICAEXISTENCIA  = dplyr::if_else(!is.na(HS_POLITICAEXISTENCIA), F, NA),
+    VI_NA_HS_POLITICAAGUA        = dplyr::if_else(!is.na(HS_POLITICAAGUA), F, NA),
+    VI_NA_HS_POLITICAESGOTO      = dplyr::if_else(!is.na(HS_POLITICAESGOTO), F, NA),
+    VI_NA_HS_POLITICARESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_POLITICARESIDUOSSOLIDOS), F, NA),
+    VI_NA_HS_POLITICADRENAGEM    = dplyr::if_else(!is.na(HS_POLITICADRENAGEM), F, NA),
+    VI_NA_HS_POLITICA            = dplyr::if_else(!is.na(HS_POLITICA), F, NA),
+    VI_NA_HS_PLANOSAHSEXISTENCIA = dplyr::if_else(!is.na(HS_PLANOSAHSEXISTENCIA), F, NA),
+    VI_NA_HS_PLANOSAHSAGUA       = dplyr::if_else(!is.na(HS_PLANOSAHSAGUA), F, NA),
+    VI_NA_HS_PLANOSAHSESGOTO     = dplyr::if_else(!is.na(HS_PLANOSAHSESGOTO), F, NA),
+    VI_NA_HS_PLANOSAHSRESIDUOSSOLIDOS = dplyr::if_else(!is.na(HS_PLANOSAHSRESIDUOSSOLIDOS), F, NA),
+    VI_NA_HS_PLANOSAHSDRENAGEM   = dplyr::if_else(!is.na(HS_PLANOSAHSDRENAGEM), F, NA),
+    VI_NA_HS_PLANOSAN            = dplyr::if_else(!is.na(HS_PLANOSAN), F, NA),
+    VI_NA_HS_PARTICIPACAO        = dplyr::if_else(!is.na(HS_PARTICIPACAO), F, NA),
+    VI_NA_HS_CONSELHO            = dplyr::if_else(!is.na(HS_CONSELHO), F, NA),
+    VI_NA_HS_GESTAO              = dplyr::if_else(!is.na(HS_GESTAO), F, NA),
+    VI_NA_HS_REGULACAOAGUA       = dplyr::if_else(!is.na(HS_REGULACAOAGUA), F, NA),
+    VI_NA_HS_REGULACAOESGOTO     = dplyr::if_else(!is.na(HS_REGULACAOESGOTO), F, NA),
+    VI_NA_HS_REGULACAORESIDUOS   = dplyr::if_else(!is.na(HS_REGULACAORESIDUOS), F, NA),
+    VI_NA_HS_REGULACAODRENAGEM   = dplyr::if_else(!is.na(HS_REGULACAODRENAGEM), F, NA),
+    VI_NA_HS_DEFICIT             = dplyr::if_else(!is.na(HS_DEFICIT), F, NA),
+    VI_NA_HS_DEFICITREL          = dplyr::if_else(!is.na(HS_DEFICITREL), F, NA),
+    VI_NA_HS_DPRECARIO           = dplyr::if_else(!is.na(HS_DPRECARIO), F, NA),
+    VI_NA_HS_DCOAB               = dplyr::if_else(!is.na(HS_DCOAB), F, NA),
+    VI_NA_HS_DONUS               = dplyr::if_else(!is.na(HS_DONUS), F, NA),
+    VI_NA_HS_DADENS              = dplyr::if_else(!is.na(HS_DADENS), F, NA),
+    VI_NA_HS_DINADEQUADO         = dplyr::if_else(!is.na(HS_DINADEQUADO), F, NA),
+    VI_NA_HS_DSEMINFRA           = dplyr::if_else(!is.na(HS_DSEMINFRA), F, NA),
+    VI_NA_HS_SEMBANH             = dplyr::if_else(!is.na(HS_SEMBANH), F, NA),
+    VI_NA_HS_DDURBADENS          = dplyr::if_else(!is.na(HS_DDURBADENS), F, NA),
+    VI_NA_HS_TRATESGOTO          = dplyr::if_else(!is.na(HS_TRATESGOTO), F, NA),
     # Others
     VI_HS_COBAGUA     = dplyr::if_else(dplyr::between(HS_COBAGUA, 0, 100), F, T),
     VI_HS_COBESGOTO   = dplyr::if_else(dplyr::between(HS_COBESGOTO, 0, 100), F, T),
@@ -696,6 +707,7 @@ df_sumario <- df_sumario_valid_hs |>
 ```{r table_valid_hs_na_all}
 
 df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -708,7 +720,6 @@ df_sumario |>
 ### Todos os indicadores - Demais regras
 
 ```{r table_valid_hs_all}
-
 #| column: screen-inset-right
 
 df_sumario |>
@@ -737,6 +748,7 @@ df_rules_consist_hs_all <- data |>
     HS_CONSELHO,
     HS_GESTAO
   ) |> 
+  dplyr::group_by(Ano) |> 
   dplyr::mutate(
     CI_GESTAO_munic = dplyr::if_else(rowSums(dplyr::across(c(HS_POLITICA, HS_PLANOSAN, HS_CONSELHO)), na.rm = T) == (HS_GESTAO), F, T)
 )
@@ -774,7 +786,8 @@ df_sumario <- df_sumario_consist_hs |>
 ### Todos os indicadores
 
 ```{r table_consist_hs_all}
-# 
+#| column: screen-inset-right
+
 df_sumario |> 
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
@@ -791,6 +804,12 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_cobagua <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_COBAGUA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_COBAGUA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBAGUA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -859,6 +878,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_cobesgoto <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_COBESGOTO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_COBESGOTO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBESGOTO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -927,6 +952,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_esgotoad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_ESGOTOAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_ESGOTOAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_ESGOTOAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1063,6 +1094,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_lixo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_LIXO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_LIXO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_LIXO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1131,6 +1168,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_lixoad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_LIXOAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_LIXOAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_LIXOAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1199,6 +1242,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_coblixo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_COBLIXO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_COBLIXO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_COBLIXO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1267,6 +1316,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_politica <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_POLITICA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_POLITICA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_POLITICA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1335,6 +1390,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_planosan <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_PLANOSAN" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_PLANOSAN"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_PLANOSAN) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1403,6 +1464,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_conselho <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_CONSELHO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_CONSELHO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_CONSELHO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1471,6 +1538,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_gestao <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_GESTAO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_GESTAO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_GESTAO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1539,6 +1612,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_deficit <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DEFICIT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DEFICIT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DEFICIT) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1607,6 +1686,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_deficitrel <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DEFICITREL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DEFICITREL"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DEFICITREL) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1675,6 +1760,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_dprecario <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DPRECARIO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DPRECARIO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DPRECARIO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1743,6 +1834,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_dcoab <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DCOAB" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DCOAB"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DCOAB) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1811,6 +1908,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_donus <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DONUS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DONUS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DONUS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1879,6 +1982,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_dadens <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DADENS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DADENS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DADENS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1947,6 +2056,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_dinadequado <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DINADEQUADO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DINADEQUADO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DINADEQUADO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2015,6 +2130,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_dseminfra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DSEMINFRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DSEMINFRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DSEMINFRA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2083,6 +2204,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_sembanh <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_SEMBANH" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_SEMBANH"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_SEMBANH) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2151,6 +2278,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_ddurbadens <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_DDURBADENS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_DDURBADENS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_DDURBADENS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2219,6 +2352,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_hs_tratesgoto <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "HS_TRATESGOTO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["HS_TRATESGOTO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, HS_TRATESGOTO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(

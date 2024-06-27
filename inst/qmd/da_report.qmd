@@ -37,7 +37,6 @@ params:
 output-file: "da_relatorio.html"
 ---
 
-
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -70,7 +69,7 @@ table_quantile <- function(variable, data){
 
 chart_boxplot <- function(variable, data){
   result <- data  |>
-    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(
@@ -258,8 +257,6 @@ compare_lag <- function(var){
 
 ```
 
-
-
 ```{r set_param_global}
 
 k <- 1.5 
@@ -275,8 +272,8 @@ lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
+
 data <- openxlsx::read.xlsx(params$data)
-data$ANO <- as.character(data$ANO)
 ```
 
 ```{r get_var_numeric}
@@ -351,6 +348,20 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
 
 ```{r get_cat}
 
@@ -719,91 +730,177 @@ df_rules_valid_da_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_DA_POPT       = dplyr::if_else(!is.na(DA_POPT), F, T),
-    VI_NA_DA_POPTA      = dplyr::if_else(!is.na(DA_POPTA), F, T),
-    VI_NA_DA_POPP0      = dplyr::if_else(!is.na(DA_POPP0), F, T),
-    VI_NA_DA_POPP1A4    = dplyr::if_else(!is.na(DA_POPP1A4), F, T),
-    VI_NA_DA_POPP4      = dplyr::if_else(!is.na(DA_POPP4), F, T),
-    VI_NA_DA_POPP5      = dplyr::if_else(!is.na(DA_POPP5), F, T),
-    VI_NA_DA_POPP4E5    = dplyr::if_else(!is.na(DA_POPP4E5), F, T),
-    VI_NA_DA_POPP5A9    = dplyr::if_else(!is.na(DA_POPP5A9), F, T),
-    VI_NA_DA_POPP6A14   = dplyr::if_else(!is.na(DA_POPP6A14), F, T),
-    VI_NA_DA_POPP10A14  = dplyr::if_else(!is.na(DA_POPP10A14), F, T),
-    VI_NA_DA_POPP15     = dplyr::if_else(!is.na(DA_POPP15), F, T),
-    VI_NA_DA_POPP15A17  = dplyr::if_else(!is.na(DA_POPP15A17), F, T),
-    VI_NA_DA_POPP15A19  = dplyr::if_else(!is.na(DA_POPP15A19), F, T),
-    VI_NA_DA_POPP15M    = dplyr::if_else(!is.na(DA_POPP15M), F, T),
-    VI_NA_DA_POPP16A19  = dplyr::if_else(!is.na(DA_POPP16A19), F, T),
-    VI_NA_DA_POPP16A64  = dplyr::if_else(!is.na(DA_POPP16A64), F, T),
-    VI_NA_DA_POPP18M    = dplyr::if_else(!is.na(DA_POPP18M), F, T),
-    VI_NA_DA_POPP20A24  = dplyr::if_else(!is.na(DA_POPP20A24), F, T),
-    VI_NA_DA_POPP25A29  = dplyr::if_else(!is.na(DA_POPP25A29), F, T),
-    VI_NA_DA_POPP30A34  = dplyr::if_else(!is.na(DA_POPP30A34), F, T),
-    VI_NA_DA_POPP35A39  = dplyr::if_else(!is.na(DA_POPP35A39), F, T),
-    VI_NA_DA_POPP40A44  = dplyr::if_else(!is.na(DA_POPP40A44), F, T),
-    VI_NA_DA_POPP45A49  = dplyr::if_else(!is.na(DA_POPP45A49), F, T),
-    VI_NA_DA_POPP50A54  = dplyr::if_else(!is.na(DA_POPP50A54), F, T),
-    VI_NA_DA_POPP55A59  = dplyr::if_else(!is.na(DA_POPP55A59), F, T),
-    VI_NA_DA_POPP60A64  = dplyr::if_else(!is.na(DA_POPP60A64), F, T),
-    VI_NA_DA_POPP65A69  = dplyr::if_else(!is.na(DA_POPP65A69), F, T),
-    VI_NA_DA_POPP70A74  = dplyr::if_else(!is.na(DA_POPP70A74), F, T),
-    VI_NA_DA_POPP75A79  = dplyr::if_else(!is.na(DA_POPP75A79), F, T),
-    VI_NA_DA_POPP80M    = dplyr::if_else(!is.na(DA_POPP80M), F, T),
-    VI_NA_DA_DENSP      = dplyr::if_else(!is.na(DA_DENSP), F, T),
-    VI_NA_DA_PROPP4E5   = dplyr::if_else(!is.na(DA_PROPP4E5), F, T),
-    VI_NA_DA_PROPP0A5   = dplyr::if_else(!is.na(DA_PROPP0A5), F, T),
-    VI_NA_DA_PROPP6A17  = dplyr::if_else(!is.na(DA_PROPP6A17), F, T),
-    VI_NA_DA_RDEPP      = dplyr::if_else(!is.na(DA_RDEPP), F, T),
-    VI_NA_DA_PROPP15N   = dplyr::if_else(!is.na(DA_PROPP15N), F, T),
-    VI_NA_DA_PROPP65M   = dplyr::if_else(!is.na(DA_PROPP65M), F, T),
-    VI_NA_DA_INDENVE    = dplyr::if_else(!is.na(DA_INDENVE), F, T),
-    VI_NA_DA_POPPURB    = dplyr::if_else(!is.na(DA_POPPURB), F, T),
-    VI_NA_DA_TFT        = dplyr::if_else(!is.na(DA_TFT), F, T),
-    VI_NA_DA_TMI        = dplyr::if_else(!is.na(DA_TMI), F, T),
-    VI_NA_DA_ESPVIDA    = dplyr::if_else(!is.na(DA_ESPVIDA), F, T),
-    VI_NA_DA_TBM        = dplyr::if_else(!is.na(DA_TBM), F, T),
-    VI_NA_DA_TBN        = dplyr::if_else(!is.na(DA_TBN), F, T),
-    VI_NA_DA_TCV        = dplyr::if_else(!is.na(DA_TCV), F, T),
-    VI_NA_DA_TLM        = dplyr::if_else(!is.na(DA_TLM), F, T),
-    VI_NA_DA_TCD        = dplyr::if_else(!is.na(DA_TCD), F, T),
-    VI_NA_DA_EMIGRA     = dplyr::if_else(!is.na(DA_EMIGRA), F, T),
-    VI_NA_DA_IMIGRA     = dplyr::if_else(!is.na(DA_IMIGRA), F, T),
-    VI_NA_DA_HOMEM0A4   = dplyr::if_else(!is.na(DA_HOMEM0A4), F, T),
-    VI_NA_DA_HOMEM5A9   = dplyr::if_else(!is.na(DA_HOMEM5A9), F, T),
-    VI_NA_DA_HOMEM10A14 = dplyr::if_else(!is.na(DA_HOMEM10A14), F, T),
-    VI_NA_DA_HOMEM15A19 = dplyr::if_else(!is.na(DA_HOMEM15A19), F, T),
-    VI_NA_DA_HOMEM20A24 = dplyr::if_else(!is.na(DA_HOMEM20A24), F, T),
-    VI_NA_DA_HOMEM25A29 = dplyr::if_else(!is.na(DA_HOMEM25A29), F, T),
-    VI_NA_DA_HOMEM30A34 = dplyr::if_else(!is.na(DA_HOMEM30A34), F, T),
-    VI_NA_DA_HOMEM35A39 = dplyr::if_else(!is.na(DA_HOMEM35A39), F, T),
-    VI_NA_DA_HOMEM40A44 = dplyr::if_else(!is.na(DA_HOMEM40A44), F, T),
-    VI_NA_DA_HOMEM45A49 = dplyr::if_else(!is.na(DA_HOMEM45A49), F, T),
-    VI_NA_DA_HOMEM50A54 = dplyr::if_else(!is.na(DA_HOMEM50A54), F, T),
-    VI_NA_DA_HOMEM55A59 = dplyr::if_else(!is.na(DA_HOMEM55A59), F, T),
-    VI_NA_DA_HOMEM60A64 = dplyr::if_else(!is.na(DA_HOMEM60A64), F, T),
-    VI_NA_DA_HOMEM65A69 = dplyr::if_else(!is.na(DA_HOMEM65A69), F, T),
-    VI_NA_DA_HOMEM70A74 = dplyr::if_else(!is.na(DA_HOMEM70A74), F, T),
-    VI_NA_DA_HOMEM75A79 = dplyr::if_else(!is.na(DA_HOMEM75A79), F, T),
-    VI_NA_DA_HOMEM80    = dplyr::if_else(!is.na(DA_HOMEM80), F, T),
-    VI_NA_DA_MULH0A4    = dplyr::if_else(!is.na(DA_MULH0A4), F, T),
-    VI_NA_DA_MULH5A9    = dplyr::if_else(!is.na(DA_MULH5A9), F, T),
-    VI_NA_DA_MULH10A14  = dplyr::if_else(!is.na(DA_MULH10A14), F, T),
-    VI_NA_DA_MULH15A19  = dplyr::if_else(!is.na(DA_MULH15A19), F, T),
-    VI_NA_DA_MULH20A24  = dplyr::if_else(!is.na(DA_MULH20A24), F, T),
-    VI_NA_DA_MULH25A29  = dplyr::if_else(!is.na(DA_MULH25A29), F, T),
-    VI_NA_DA_MULH30A34  = dplyr::if_else(!is.na(DA_MULH30A34), F, T),
-    VI_NA_DA_MULH35A39  = dplyr::if_else(!is.na(DA_MULH35A39), F, T),
-    VI_NA_DA_MULH40A44  = dplyr::if_else(!is.na(DA_MULH40A44), F, T),
-    VI_NA_DA_MULH45A49  = dplyr::if_else(!is.na(DA_MULH45A49), F, T),
-    VI_NA_DA_MULH50A54  = dplyr::if_else(!is.na(DA_MULH50A54), F, T),
-    VI_NA_DA_MULH55A59  = dplyr::if_else(!is.na(DA_MULH55A59), F, T),
-    VI_NA_DA_MULH60A64  = dplyr::if_else(!is.na(DA_MULH60A64), F, T),
-    VI_NA_DA_MULH65A69  = dplyr::if_else(!is.na(DA_MULH65A69), F, T),
-    VI_NA_DA_MULH70A74  = dplyr::if_else(!is.na(DA_MULH70A74), F, T),
-    VI_NA_DA_MULH75A79  = dplyr::if_else(!is.na(DA_MULH75A79), F, T),
-    VI_NA_DA_MULHER80   = dplyr::if_else(!is.na(DA_MULHER80), F, T),
-    VI_NA_DA_HOMEMTOT   = dplyr::if_else(!is.na(DA_HOMEMTOT), F, T),
-    VI_NA_DA_MULHERTOT  = dplyr::if_else(!is.na(DA_MULHERTOT), F, T)
+    VI_NA_DA_POPT       = dplyr::if_else(!is.na(DA_POPT), F, NA),
+    VI_NA_DA_POPTA      = dplyr::if_else(!is.na(DA_POPTA), F, NA),
+    VI_NA_DA_POPP0      = dplyr::if_else(!is.na(DA_POPP0), F, NA),
+    VI_NA_DA_POPP1A4    = dplyr::if_else(!is.na(DA_POPP1A4), F, NA),
+    VI_NA_DA_POPP4      = dplyr::if_else(!is.na(DA_POPP4), F, NA),
+    VI_NA_DA_POPP5      = dplyr::if_else(!is.na(DA_POPP5), F, NA),
+    VI_NA_DA_POPP4E5    = dplyr::if_else(!is.na(DA_POPP4E5), F, NA),
+    VI_NA_DA_POPP5A9    = dplyr::if_else(!is.na(DA_POPP5A9), F, NA),
+    VI_NA_DA_POPP6A14   = dplyr::if_else(!is.na(DA_POPP6A14), F, NA),
+    VI_NA_DA_POPP10A14  = dplyr::if_else(!is.na(DA_POPP10A14), F, NA),
+    VI_NA_DA_POPP15     = dplyr::if_else(!is.na(DA_POPP15), F, NA),
+    VI_NA_DA_POPP15A17  = dplyr::if_else(!is.na(DA_POPP15A17), F, NA),
+    VI_NA_DA_POPP15A19  = dplyr::if_else(!is.na(DA_POPP15A19), F, NA),
+    VI_NA_DA_POPP15M    = dplyr::if_else(!is.na(DA_POPP15M), F, NA),
+    VI_NA_DA_POPP16A19  = dplyr::if_else(!is.na(DA_POPP16A19), F, NA),
+    VI_NA_DA_POPP16A64  = dplyr::if_else(!is.na(DA_POPP16A64), F, NA),
+    VI_NA_DA_POPP18M    = dplyr::if_else(!is.na(DA_POPP18M), F, NA),
+    VI_NA_DA_POPP20A24  = dplyr::if_else(!is.na(DA_POPP20A24), F, NA),
+    VI_NA_DA_POPP25A29  = dplyr::if_else(!is.na(DA_POPP25A29), F, NA),
+    VI_NA_DA_POPP30A34  = dplyr::if_else(!is.na(DA_POPP30A34), F, NA),
+    VI_NA_DA_POPP35A39  = dplyr::if_else(!is.na(DA_POPP35A39), F, NA),
+    VI_NA_DA_POPP40A44  = dplyr::if_else(!is.na(DA_POPP40A44), F, NA),
+    VI_NA_DA_POPP45A49  = dplyr::if_else(!is.na(DA_POPP45A49), F, NA),
+    VI_NA_DA_POPP50A54  = dplyr::if_else(!is.na(DA_POPP50A54), F, NA),
+    VI_NA_DA_POPP55A59  = dplyr::if_else(!is.na(DA_POPP55A59), F, NA),
+    VI_NA_DA_POPP60A64  = dplyr::if_else(!is.na(DA_POPP60A64), F, NA),
+    VI_NA_DA_POPP65A69  = dplyr::if_else(!is.na(DA_POPP65A69), F, NA),
+    VI_NA_DA_POPP70A74  = dplyr::if_else(!is.na(DA_POPP70A74), F, NA),
+    VI_NA_DA_POPP75A79  = dplyr::if_else(!is.na(DA_POPP75A79), F, NA),
+    VI_NA_DA_POPP80M    = dplyr::if_else(!is.na(DA_POPP80M), F, NA),
+    VI_NA_DA_DENSP      = dplyr::if_else(!is.na(DA_DENSP), F, NA),
+    VI_NA_DA_PROPP4E5   = dplyr::if_else(!is.na(DA_PROPP4E5), F, NA),
+    VI_NA_DA_PROPP0A5   = dplyr::if_else(!is.na(DA_PROPP0A5), F, NA),
+    VI_NA_DA_PROPP6A17  = dplyr::if_else(!is.na(DA_PROPP6A17), F, NA),
+    VI_NA_DA_RDEPP      = dplyr::if_else(!is.na(DA_RDEPP), F, NA),
+    VI_NA_DA_PROPP15N   = dplyr::if_else(!is.na(DA_PROPP15N), F, NA),
+    VI_NA_DA_PROPP65M   = dplyr::if_else(!is.na(DA_PROPP65M), F, NA),
+    VI_NA_DA_INDENVE    = dplyr::if_else(!is.na(DA_INDENVE), F, NA),
+    VI_NA_DA_POPPURB    = dplyr::if_else(!is.na(DA_POPPURB), F, NA),
+    VI_NA_DA_TFT        = dplyr::if_else(!is.na(DA_TFT), F, NA),
+    VI_NA_DA_TMI        = dplyr::if_else(!is.na(DA_TMI), F, NA),
+    VI_NA_DA_ESPVIDA    = dplyr::if_else(!is.na(DA_ESPVIDA), F, NA),
+    VI_NA_DA_TBM        = dplyr::if_else(!is.na(DA_TBM), F, NA),
+    VI_NA_DA_TBN        = dplyr::if_else(!is.na(DA_TBN), F, NA),
+    VI_NA_DA_TCV        = dplyr::if_else(!is.na(DA_TCV), F, NA),
+    VI_NA_DA_TLM        = dplyr::if_else(!is.na(DA_TLM), F, NA),
+    VI_NA_DA_TCD        = dplyr::if_else(!is.na(DA_TCD), F, NA),
+    VI_NA_DA_EMIGRA     = dplyr::if_else(!is.na(DA_EMIGRA), F, NA),
+    VI_NA_DA_IMIGRA     = dplyr::if_else(!is.na(DA_IMIGRA), F, NA),
+    VI_NA_DA_HOMEM0A4   = dplyr::if_else(!is.na(DA_HOMEM0A4), F, NA),
+    VI_NA_DA_HOMEM5A9   = dplyr::if_else(!is.na(DA_HOMEM5A9), F, NA),
+    VI_NA_DA_HOMEM10A14 = dplyr::if_else(!is.na(DA_HOMEM10A14), F, NA),
+    VI_NA_DA_HOMEM15A19 = dplyr::if_else(!is.na(DA_HOMEM15A19), F, NA),
+    VI_NA_DA_HOMEM20A24 = dplyr::if_else(!is.na(DA_HOMEM20A24), F, NA),
+    VI_NA_DA_HOMEM25A29 = dplyr::if_else(!is.na(DA_HOMEM25A29), F, NA),
+    VI_NA_DA_HOMEM30A34 = dplyr::if_else(!is.na(DA_HOMEM30A34), F, NA),
+    VI_NA_DA_HOMEM35A39 = dplyr::if_else(!is.na(DA_HOMEM35A39), F, NA),
+    VI_NA_DA_HOMEM40A44 = dplyr::if_else(!is.na(DA_HOMEM40A44), F, NA),
+    VI_NA_DA_HOMEM45A49 = dplyr::if_else(!is.na(DA_HOMEM45A49), F, NA),
+    VI_NA_DA_HOMEM50A54 = dplyr::if_else(!is.na(DA_HOMEM50A54), F, NA),
+    VI_NA_DA_HOMEM55A59 = dplyr::if_else(!is.na(DA_HOMEM55A59), F, NA),
+    VI_NA_DA_HOMEM60A64 = dplyr::if_else(!is.na(DA_HOMEM60A64), F, NA),
+    VI_NA_DA_HOMEM65A69 = dplyr::if_else(!is.na(DA_HOMEM65A69), F, NA),
+    VI_NA_DA_HOMEM70A74 = dplyr::if_else(!is.na(DA_HOMEM70A74), F, NA),
+    VI_NA_DA_HOMEM75A79 = dplyr::if_else(!is.na(DA_HOMEM75A79), F, NA),
+    VI_NA_DA_HOMEM80    = dplyr::if_else(!is.na(DA_HOMEM80), F, NA),
+    VI_NA_DA_MULH0A4    = dplyr::if_else(!is.na(DA_MULH0A4), F, NA),
+    VI_NA_DA_MULH5A9    = dplyr::if_else(!is.na(DA_MULH5A9), F, NA),
+    VI_NA_DA_MULH10A14  = dplyr::if_else(!is.na(DA_MULH10A14), F, NA),
+    VI_NA_DA_MULH15A19  = dplyr::if_else(!is.na(DA_MULH15A19), F, NA),
+    VI_NA_DA_MULH20A24  = dplyr::if_else(!is.na(DA_MULH20A24), F, NA),
+    VI_NA_DA_MULH25A29  = dplyr::if_else(!is.na(DA_MULH25A29), F, NA),
+    VI_NA_DA_MULH30A34  = dplyr::if_else(!is.na(DA_MULH30A34), F, NA),
+    VI_NA_DA_MULH35A39  = dplyr::if_else(!is.na(DA_MULH35A39), F, NA),
+    VI_NA_DA_MULH40A44  = dplyr::if_else(!is.na(DA_MULH40A44), F, NA),
+    VI_NA_DA_MULH45A49  = dplyr::if_else(!is.na(DA_MULH45A49), F, NA),
+    VI_NA_DA_MULH50A54  = dplyr::if_else(!is.na(DA_MULH50A54), F, NA),
+    VI_NA_DA_MULH55A59  = dplyr::if_else(!is.na(DA_MULH55A59), F, NA),
+    VI_NA_DA_MULH60A64  = dplyr::if_else(!is.na(DA_MULH60A64), F, NA),
+    VI_NA_DA_MULH65A69  = dplyr::if_else(!is.na(DA_MULH65A69), F, NA),
+    VI_NA_DA_MULH70A74  = dplyr::if_else(!is.na(DA_MULH70A74), F, NA),
+    VI_NA_DA_MULH75A79  = dplyr::if_else(!is.na(DA_MULH75A79), F, NA),
+    VI_NA_DA_MULHER80   = dplyr::if_else(!is.na(DA_MULHER80), F, NA),
+    VI_NA_DA_HOMEMTOT   = dplyr::if_else(!is.na(DA_HOMEMTOT), F, NA),
+    VI_NA_DA_MULHERTOT  = dplyr::if_else(!is.na(DA_MULHERTOT), F, NA),
+    # Others
+    VI_DA_POPT       = dplyr::if_else(DA_POPT >= 0, F, T),
+    VI_DA_POPTA      = dplyr::if_else(DA_POPTA >= 0, F, T),
+    VI_DA_POPP0      = dplyr::if_else(DA_POPP0 >= 0, F, T),
+    VI_DA_POPP1A4    = dplyr::if_else(DA_POPP1A4 >= 0, F, T),
+    VI_DA_POPP4      = dplyr::if_else(DA_POPP4 >= 0, F, T),
+    VI_DA_POPP5      = dplyr::if_else(DA_POPP5 >= 0, F, T),
+    VI_DA_POPP4E5    = dplyr::if_else(DA_POPP4E5 >= 0, F, T),
+    VI_DA_POPP5A9    = dplyr::if_else(DA_POPP5A9 >= 0, F, T),
+    VI_DA_POPP6A14   = dplyr::if_else(DA_POPP6A14 >= 0, F, T),
+    VI_DA_POPP10A14  = dplyr::if_else(DA_POPP10A14 >= 0, F, T),
+    VI_DA_POPP15     = dplyr::if_else(DA_POPP15 >= 0, F, T),
+    VI_DA_POPP15A17  = dplyr::if_else(DA_POPP15A17 >= 0, F, T),
+    VI_DA_POPP15A19  = dplyr::if_else(DA_POPP15A19 >= 0, F, T),
+    VI_DA_POPP15M    = dplyr::if_else(DA_POPP15M >= 0, F, T),
+    VI_DA_POPP16A19  = dplyr::if_else(DA_POPP16A19 >= 0, F, T),
+    VI_DA_POPP16A64  = dplyr::if_else(DA_POPP16A64 >= 0, F, T),
+    VI_DA_POPP18M    = dplyr::if_else(DA_POPP18M >= 0, F, T),
+    VI_DA_POPP20A24  = dplyr::if_else(DA_POPP20A24 >= 0, F, T),
+    VI_DA_POPP25A29  = dplyr::if_else(DA_POPP25A29 >= 0, F, T),
+    VI_DA_POPP30A34  = dplyr::if_else(DA_POPP30A34 >= 0, F, T),
+    VI_DA_POPP35A39  = dplyr::if_else(DA_POPP35A39 >= 0, F, T),
+    VI_DA_POPP40A44  = dplyr::if_else(DA_POPP40A44 >= 0, F, T),
+    VI_DA_POPP45A49  = dplyr::if_else(DA_POPP45A49 >= 0, F, T),
+    VI_DA_POPP50A54  = dplyr::if_else(DA_POPP50A54 >= 0, F, T),
+    VI_DA_POPP55A59  = dplyr::if_else(DA_POPP55A59 >= 0, F, T),
+    VI_DA_POPP60A64  = dplyr::if_else(DA_POPP60A64 >= 0, F, T),
+    VI_DA_POPP65A69  = dplyr::if_else(DA_POPP65A69 >= 0, F, T),
+    VI_DA_POPP70A74  = dplyr::if_else(DA_POPP70A74 >= 0, F, T),
+    VI_DA_POPP75A79  = dplyr::if_else(DA_POPP75A79 >= 0, F, T),
+    VI_DA_POPP80M    = dplyr::if_else(DA_POPP80M >= 0, F, T),
+    VI_DA_DENSP      = dplyr::if_else(DA_DENSP >= 0, F, T),
+    VI_DA_PROPP4E5   = dplyr::if_else(dplyr::between(DA_PROPP4E5, 0, 100), F, T),
+    VI_DA_PROPP0A5   = dplyr::if_else(dplyr::between(DA_PROPP0A5, 0, 100), F, T),
+    VI_DA_PROPP6A17  = dplyr::if_else(dplyr::between(DA_PROPP6A17, 0, 100), F, T),
+    VI_DA_RDEPP      = dplyr::if_else(dplyr::between(DA_RDEPP, 0, 100), F, T),
+    VI_DA_PROPP15N   = dplyr::if_else(dplyr::between(DA_PROPP15N, 0, 100), F, T),
+    VI_DA_PROPP65M   = dplyr::if_else(dplyr::between(DA_PROPP65M, 0, 100), F, T),
+    VI_DA_INDENVE    = dplyr::if_else(dplyr::between(DA_INDENVE, 0, 100), F, T),
+    VI_DA_POPPURB    = dplyr::if_else(dplyr::between(DA_POPPURB, 0, 100), F, T),
+    VI_DA_TFT        = dplyr::if_else(DA_TFT >= 0, F, T),
+    VI_DA_TMI        = dplyr::if_else(dplyr::between(DA_TMI, 0, 1000), F, T),
+    VI_DA_ESPVIDA    = dplyr::if_else(DA_ESPVIDA >= 0, F, T),
+    VI_DA_TBM        = dplyr::if_else(dplyr::between(DA_TBM, 0, 1000), F, T),
+    VI_DA_TBN        = dplyr::if_else(dplyr::between(DA_TBN, 0, 1000), F, T),
+    VI_DA_TCV        = dplyr::if_else(DA_TCV >= 0, F, T),
+    VI_DA_TLM        = dplyr::if_else(dplyr::between(DA_TLM, 0, 1000), F, T),
+    VI_DA_TCD        = dplyr::if_else(DA_TCD >= 0, F, T),
+    VI_DA_EMIGRA     = dplyr::if_else(DA_EMIGRA >= 0, F, T),
+    VI_DA_IMIGRA     = dplyr::if_else(DA_IMIGRA >= 0, F, T),
+    VI_DA_HOMEM0A4   = dplyr::if_else(DA_HOMEM0A4 >= 0, F, T),
+    VI_DA_HOMEM5A9   = dplyr::if_else(DA_HOMEM5A9 >= 0, F, T),
+    VI_DA_HOMEM10A14 = dplyr::if_else(DA_HOMEM10A14 >= 0, F, T),
+    VI_DA_HOMEM15A19 = dplyr::if_else(DA_HOMEM15A19 >= 0, F, T),
+    VI_DA_HOMEM20A24 = dplyr::if_else(DA_HOMEM20A24 >= 0, F, T),
+    VI_DA_HOMEM25A29 = dplyr::if_else(DA_HOMEM25A29 >= 0, F, T),
+    VI_DA_HOMEM30A34 = dplyr::if_else(DA_HOMEM30A34 >= 0, F, T),
+    VI_DA_HOMEM35A39 = dplyr::if_else(DA_HOMEM35A39 >= 0, F, T),
+    VI_DA_HOMEM40A44 = dplyr::if_else(DA_HOMEM40A44 >= 0, F, T),
+    VI_DA_HOMEM45A49 = dplyr::if_else(DA_HOMEM45A49 >= 0, F, T),
+    VI_DA_HOMEM50A54 = dplyr::if_else(DA_HOMEM50A54 >= 0, F, T),
+    VI_DA_HOMEM55A59 = dplyr::if_else(DA_HOMEM55A59 >= 0, F, T),
+    VI_DA_HOMEM60A64 = dplyr::if_else(DA_HOMEM60A64 >= 0, F, T),
+    VI_DA_HOMEM65A69 = dplyr::if_else(DA_HOMEM65A69 >= 0, F, T),
+    VI_DA_HOMEM70A74 = dplyr::if_else(DA_HOMEM70A74 >= 0, F, T),
+    VI_DA_HOMEM75A79 = dplyr::if_else(DA_HOMEM75A79 >= 0, F, T),
+    VI_DA_HOMEM80    = dplyr::if_else(DA_HOMEM80 >= 0, F, T),
+    VI_DA_MULH0A4    = dplyr::if_else(DA_MULH0A4 >= 0, F, T),
+    VI_DA_MULH5A9    = dplyr::if_else(DA_MULH5A9 >= 0, F, T),
+    VI_DA_MULH10A14  = dplyr::if_else(DA_MULH10A14 >= 0, F, T),
+    VI_DA_MULH15A19  = dplyr::if_else(DA_MULH15A19 >= 0, F, T),
+    VI_DA_MULH20A24  = dplyr::if_else(DA_MULH20A24 >= 0, F, T),
+    VI_DA_MULH25A29  = dplyr::if_else(DA_MULH25A29 >= 0, F, T),
+    VI_DA_MULH30A34  = dplyr::if_else(DA_MULH30A34 >= 0, F, T),
+    VI_DA_MULH35A39  = dplyr::if_else(DA_MULH35A39 >= 0, F, T),
+    VI_DA_MULH40A44  = dplyr::if_else(DA_MULH40A44 >= 0, F, T),
+    VI_DA_MULH45A49  = dplyr::if_else(DA_MULH45A49 >= 0, F, T),
+    VI_DA_MULH50A54  = dplyr::if_else(DA_MULH50A54 >= 0, F, T),
+    VI_DA_MULH55A59  = dplyr::if_else(DA_MULH55A59 >= 0, F, T),
+    VI_DA_MULH60A64  = dplyr::if_else(DA_MULH60A64 >= 0, F, T),
+    VI_DA_MULH65A69  = dplyr::if_else(DA_MULH65A69 >= 0, F, T),
+    VI_DA_MULH70A74  = dplyr::if_else(DA_MULH70A74 >= 0, F, T),
+    VI_DA_MULH75A79  = dplyr::if_else(DA_MULH75A79 >= 0, F, T),
+    VI_DA_MULHER80   = dplyr::if_else(DA_MULHER80 >= 0, F, T),
+    VI_DA_HOMEMTOT   = dplyr::if_else(DA_HOMEMTOT >= 0, F, T),
+    VI_DA_MULHERTOT  = dplyr::if_else(DA_MULHERTOT >= 0, F, T)
   )
 ```
 
@@ -838,6 +935,7 @@ df_sumario <- df_sumario_valid_da |>
 ```{r table_valid_da_na_all}
 
 df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
@@ -864,7 +962,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-## Consistência
+<!-- ## Consistência -->
 
 ```{r data_rules_consist_da_all}
 
@@ -912,7 +1010,7 @@ df_sumario |>
 #   dplyr::ungroup()
 ```
 
-### Todos os indicadores
+<!-- ### Todos os indicadores -->
 
 ```{r table_consist_da_all}
 # 
@@ -931,7 +1029,14 @@ df_sumario |>
 ```{r rules_dist_da_popt}
 
 ## df com o resultado das aplicações das regras
+
 df_rules_dist_da_popt <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPT) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1000,6 +1105,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popta <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPTA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPTA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPTA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1068,6 +1179,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp0 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP0" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP0"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP0) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1136,6 +1253,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp1a4 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP1A4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP1A4"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP1A4) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1204,6 +1327,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp4 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP4"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP4) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1272,6 +1401,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp5 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1340,6 +1475,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp4e5 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP4E5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP4E5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP4E5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1408,6 +1549,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp5a9 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP5A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP5A9"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP5A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1476,6 +1623,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp6a14 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP6A14" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP6A14"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP6A14) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1544,6 +1697,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp10a14 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP10A14" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP10A14"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP10A14) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1612,6 +1771,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp15 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP15" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP15"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP15) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1680,6 +1845,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp15a17 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP15A17" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP15A17"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP15A17) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1748,6 +1919,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp15a19 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP15A19" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP15A19"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP15A19) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1816,6 +1993,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp15m <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP15M" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP15M"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP15M) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1884,6 +2067,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp16a19 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP16A19" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP16A19"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP16A19) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1952,6 +2141,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp16a64 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP16A64" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP16A64"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP16A64) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2020,6 +2215,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp18m <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP18M" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP18M"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP18M) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2088,6 +2289,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp20a24 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP20A24" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP20A24"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP20A24) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2156,6 +2363,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp25a29 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP25A29" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP25A29"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP25A29) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2224,6 +2437,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp30a34 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP30A34" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP30A34"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP30A34) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2292,6 +2511,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp35a39 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP35A39" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP35A39"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP35A39) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2326,7 +2551,7 @@ df_sumario <- df_sumario_dist_da |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T), 
+    Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
@@ -2360,6 +2585,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp40a44 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP40A44" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP40A44"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP40A44) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2428,6 +2659,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp45a49 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP45A49" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP45A49"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP45A49) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2496,6 +2733,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp50a54 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP50A54" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP50A54"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP50A54) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2564,6 +2807,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp55a59 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP55A59" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP55A59"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP55A59) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2632,6 +2881,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp60a64 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP60A64" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP60A64"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP60A64) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2700,6 +2955,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp65a69 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP65A69" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP65A69"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP65A69) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2768,6 +3029,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp70a74 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP70A74" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP70A74"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP70A74) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2836,6 +3103,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp75a79 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP75A79" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP75A79"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP75A79) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2904,6 +3177,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_popp80m <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPP80M" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPP80M"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPP80M) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -2972,6 +3251,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_densp <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_DENSP" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_DENSP"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_DENSP) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3040,6 +3325,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_propp4e5 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_PROPP4E5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_PROPP4E5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_PROPP4E5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3108,6 +3399,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_propp0a5 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_PROPP0A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_PROPP0A5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_PROPP0A5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3176,6 +3473,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_propp6a17 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_PROPP6A17" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_PROPP6A17"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_PROPP6A17) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3244,6 +3547,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_rdepp <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_RDEPP" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_RDEPP"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_RDEPP) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3312,6 +3621,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_propp15n <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_PROPP15N" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_PROPP15N"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_PROPP15N) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3380,6 +3695,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_propp65m <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_PROPP65M" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_PROPP65M"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_PROPP65M) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3448,6 +3769,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_indenve <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_INDENVE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_INDENVE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_INDENVE) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3516,6 +3843,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_poppurb <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_POPPURB" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPPURB"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPPURB) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3584,6 +3917,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tft <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TFT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TFT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TFT) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3652,6 +3991,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tmi <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TMI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TMI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TMI) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3720,6 +4065,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_espvida <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_ESPVIDA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_ESPVIDA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_ESPVIDA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3788,6 +4139,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tbm <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TBM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TBM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TBM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3856,6 +4213,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tbn <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TBN" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TBN"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TBN) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3924,6 +4287,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tcv <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TCV" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TCV"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TCV) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3992,6 +4361,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tlm <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TLM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TLM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TLM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4060,6 +4435,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_tcd <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_TCD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TCD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TCD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4128,6 +4509,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_emigra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_EMIGRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_EMIGRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_EMIGRA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4196,6 +4583,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_imigra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_IMIGRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_IMIGRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_IMIGRA) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4264,6 +4657,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem0a4 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM0A4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM0A4"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM0A4) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4332,6 +4731,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem5a9 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM5A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM5A9"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM5A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4400,6 +4805,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem10a14 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM10A14" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM10A14"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM10A14) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4468,6 +4879,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem15a19 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM15A19" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM15A19"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM15A19) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4536,6 +4953,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem20a24 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM20A24" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM20A24"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM20A24) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4604,6 +5027,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem25a29 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM25A29" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM25A29"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM25A29) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4672,6 +5101,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem30a34 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM30A34" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM30A34"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM30A34) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4740,6 +5175,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem35a39 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM35A39" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM35A39"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM35A39) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4808,6 +5249,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem40a44 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM40A44" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM40A44"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM40A44) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4876,6 +5323,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem45a49 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM45A49" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM45A49"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM45A49) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4944,6 +5397,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem50a54 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM50A54" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM50A54"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM50A54) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5012,6 +5471,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem55a59 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM55A59" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM55A59"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM55A59) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5080,6 +5545,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem60a64 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM60A64" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM60A64"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM60A64) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5148,6 +5619,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem65a69 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM65A69" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM65A69"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM65A69) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5216,6 +5693,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem70a74 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM70A74" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM70A74"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM70A74) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5284,6 +5767,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem75a79 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM75A79" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM75A79"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM75A79) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5352,6 +5841,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homem80 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEM80" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEM80"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEM80) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5420,6 +5915,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh0a4 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH0A4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH0A4"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH0A4) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5488,6 +5989,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh5a9 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH5A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH5A9"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH5A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5556,6 +6063,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh10a14 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH10A14" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH10A14"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH10A14) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5624,6 +6137,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh15a19 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH15A19" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH15A19"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH15A19) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5692,6 +6211,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh20a24 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH20A24" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH20A24"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH20A24) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5760,6 +6285,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh25a29 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH25A29" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH25A29"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH25A29) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5828,6 +6359,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh30a34 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH30A34" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH30A34"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH30A34) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5896,6 +6433,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh35a39 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH35A39" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH35A39"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH35A39) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -5964,6 +6507,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh40a44 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH40A44" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH40A44"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH40A44) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6032,6 +6581,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh45a49 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH45A49" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH45A49"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH45A49) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6100,6 +6655,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh50a54 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH50A54" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH50A54"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH50A54) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6168,6 +6729,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh55a59 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH55A59" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH55A59"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH55A59) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6236,6 +6803,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh60a64 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH60A64" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH60A64"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH60A64) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6304,6 +6877,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh65a69 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH65A69" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH65A69"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH65A69) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6372,6 +6951,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh70a74 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH70A74" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH70A74"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH70A74) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6440,6 +7025,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulh75a79 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULH75A79" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULH75A79"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULH75A79) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6508,6 +7099,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulher80 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULHER80" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULHER80"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULHER80) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6576,6 +7173,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_homemtot <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_HOMEMTOT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_HOMEMTOT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_HOMEMTOT) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -6644,6 +7247,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_da_mulhertot <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULHERTOT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULHERTOT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
   dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_MULHERTOT) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(

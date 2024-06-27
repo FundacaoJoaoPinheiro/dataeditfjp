@@ -1,0 +1,1080 @@
+---
+title: FJP Dados
+subtitle: Esporte e Laser
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+lang: pt
+date: today
+title-block-banner: "#FAAB36"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#FAAB36"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/el_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "el_relatorio.html"
+---
+
+```{r source_functions}
+
+# source(sistem.file("R", "aux_functions.R"), package = "criticaldatafjp")
+source(here::here("R", "aux_functions.R"))
+```
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+lockBinding("k", globalenv())
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
+
+# Regras de crítica
+
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
+
+A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
+
+**Classificação por finalidade**
+
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
+
+-   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+
+-   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+-   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
+
+-   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+-   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+-   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+-   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+-   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
+
+```{r get_cat}
+
+## Categorias variáveis dicotômicas
+cat_dic <- c(
+  "Sim",
+  "Não"
+)
+
+## Categorias encontradas na série histórica
+cat_orgesp <- c(
+  "Não possui estrutura",
+  "Órgão da administração indireta",
+  "Outros",
+  "Secretaria em conjunto com outras políticas setoriais",
+  "Secretaria exclusiva",
+  "Secretaria municipal exclusiva",
+  "Setor subordinado a outra secretaria",
+  "Setor subordinado diretamente  à chefia do Executivo"
+)
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8", # SP_PM1
+  `9`  = "Valor está dentro da faixa esperada (0 a 0,33)", # HS_POLITICA e HS_PLANOSAN
+  `10` = "Valor está dentro da faixa esperada (0 a 0,34)", # HS_CONSELHO
+  `11` = "Valor está dentro da faixa esperada (0 a 1)"     # HS_GESTAO
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_EL_EQUI",
+    "VI_EL_QUANT",
+    "VI_EL_PARTESP",
+    "VI_EL_PROGE",
+    "VI_EL_ESPESC",
+    "VI_EL_ILRHE",
+    "VI_EL_CONSESP",
+    "VI_EL_ORGESP",
+    "VI_EL_CONVESP"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_EL_EQUI"    ~ desc_regra_valid[2],
+      "VI_EL_QUANT"   ~ desc_regra_valid[1],
+      "VI_EL_PARTESP" ~ desc_regra_valid[2],
+      "VI_EL_PROGE"   ~ desc_regra_valid[1],
+      "VI_EL_ESPESC"  ~ desc_regra_valid[3],
+      "VI_EL_ILRHE"   ~ desc_regra_valid[3],
+      "VI_EL_CONSESP" ~ desc_regra_valid[2],
+      "VI_EL_ORGESP"  ~ desc_regra_valid[2],
+      "VI_EL_CONVESP" ~ desc_regra_valid[2]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# # Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+# desc_regra_consist <- c(
+#   `1` = "A soma da proporção anual é igual a 100%" # MA_FOCOS
+# )
+# 
+# # df com o nome da regra e a respectiva descrição
+# desc_regra_consist_var <- data.frame(
+#   Regra = c(
+#     "CF_MA_FOCOS_total_year"
+#   )
+# ) |> 
+#   dplyr::mutate(
+#     `Descrição` = dplyr::case_match(
+#       Regra,
+#       "CF_MA_FOCOS_total_year" ~ desc_regra_consist[1]
+#     )
+#   )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_EL_EQUI    = is.character(EL_EQUI),
+  TI_EL_QUANT   = is.numeric(EL_QUANT),
+  TI_EL_PARTESP = is.character(EL_PARTESP),
+  TI_EL_PROGE   = is.numeric(EL_PROGE),
+  TI_EL_ESPESC  = is.numeric(EL_ESPESC),
+  TI_EL_ILRHE   = is.numeric(EL_ILRHE),
+  TI_EL_CONSESP = is.character(EL_CONSESP),
+  TI_EL_ORGESP  = is.character(EL_ORGESP),
+  TI_EL_CONVESP = is.character(EL_CONVESP)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_el_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_el_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("EL_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_EL_EQUI    = dplyr::if_else(!is.na(EL_EQUI), F, NA),
+    VI_NA_EL_QUANT   = dplyr::if_else(!is.na(EL_QUANT), F, NA),
+    VI_NA_EL_PARTESP = dplyr::if_else(!is.na(EL_PARTESP), F, NA),
+    VI_NA_EL_PROGE   = dplyr::if_else(!is.na(EL_PROGE), F, NA),
+    VI_NA_EL_ESPESC  = dplyr::if_else(!is.na(EL_ESPESC), F, NA),
+    VI_NA_EL_ILRHE   = dplyr::if_else(!is.na(EL_ILRHE), F, NA),
+    VI_NA_EL_CONSESP = dplyr::if_else(!is.na(EL_CONSESP), F, NA),
+    VI_NA_EL_ORGESP  = dplyr::if_else(!is.na(EL_ORGESP), F, NA),
+    VI_NA_EL_CONVESP = dplyr::if_else(!is.na(EL_CONVESP), F, NA),
+    # Others
+    VI_EL_EQUI       = dplyr::if_else(EL_EQUI %in% cat_dic, F, T),
+    VI_EL_QUANT      = dplyr::if_else(EL_QUANT >= 0, F, T),
+    VI_EL_PARTESP    = dplyr::if_else(EL_PARTESP %in% cat_dic, F, T),
+    VI_EL_PROGE      = dplyr::if_else(EL_PROGE >= 0, F, T),
+    VI_EL_ESPESC     = dplyr::if_else(dplyr::between(EL_ESPESC, 0, 100), F, T),
+    VI_EL_ILRHE      = dplyr::if_else(dplyr::between(EL_ILRHE, 0, 100), F, T),
+    VI_EL_CONSESP    = dplyr::if_else(EL_CONSESP %in% cat_dic, F, T),
+    VI_EL_ORGESP     = dplyr::if_else(EL_ORGESP %in% cat_orgesp, F, T),
+    VI_EL_CONVESP    = dplyr::if_else(EL_CONVESP %in% cat_dic, F, T)
+  )
+```
+
+```{r data_wrangling_valid_el_all}
+
+## Transformação dos resultados
+df_sumario_valid_el <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_el |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_el_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_el_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+<!-- ## Consistência -->
+
+```{r data_rules_consist_el_all}
+
+# ## df com o resultado das aplicações das regras
+# df_rules_consist_el_all <- data |> 
+#   dplyr::select(
+#     Ano   = ANO, 
+#     ibge7 = IBGE7, 
+#     MA_FOCOS
+#   ) |> 
+#   dplyr::group_by(Ano) |> 
+#   dplyr::mutate(
+#     CF_MA_FOCOS_total_year = dplyr::if_else(
+#       dplyr::between(sum(MA_FOCOS, na.rm = T), 99, 101), F, T)
+#   )
+```
+
+```{r data_wrangling_consist_el_all}
+
+# ## Tranformação dos resultados
+# df_sumario_consist_el <- df_rules_consist_el_all |> 
+#   dplyr::select(!MA_FOCOS) |> 
+#   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+# 
+# ## df com um sumário dos resultados
+# df_sumario <- df_sumario_consist_el |> 
+#   dplyr::group_by(Ano, Regra) |> 
+#   dplyr::summarise(
+#     Total        = dplyr::n(),
+#     Validada     = sum(!resultado, na.rm = T),
+#     Suspeita     = sum(resultado, na.rm = T),
+#     Ausente      = sum(is.na(resultado)),
+#     `% Validada` = round(Validada / Total * 100, 2),
+#     `% Suspeita` = round(Suspeita / Total * 100, 2),
+#     `% Ausente`  = round(Ausente / Total * 100, 2)
+#   ) |> 
+#   dplyr::ungroup()
+```
+
+<!-- ### Todos os indicadores -->
+
+```{r table_consist_el_all}
+# #| column: screen-inset-right
+# 
+# df_sumario |> 
+#   dplyr::filter(Ano == max(Ano)) |>
+#   dplyr::mutate(Ano = as.character(Ano)) |>
+#   dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+#   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+#   kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### EL_QUANT
+
+```{r data_rules_dist_el_quant}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_el_quant <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EL_QUANT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_QUANT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_QUANT) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EL_QUANT_hampel_munic  = dplyr::if_else(!hampel_filter(EL_QUANT), F, T), # Longitudinal (município)
+    
+    DF_EL_QUANT_out_munic     = dplyr::if_else(!outlier_detection(EL_QUANT), F, T), # Longitudinal (município)
+    
+    DF_EL_QUANT_min_munic     = dplyr::if_else(EL_QUANT >= (min(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_EL_QUANT_max_munic     = dplyr::if_else(EL_QUANT <= (max(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_QUANT_min_k_munic   = dplyr::if_else(EL_QUANT >= (min(dplyr::lag(EL_QUANT), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_EL_QUANT_max_k_munic   = dplyr::if_else(EL_QUANT <= (k * max(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_QUANT_med_mov_munic = dplyr::if_else(EL_QUANT <= (k * zoo::rollmedian(EL_QUANT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EL_QUANT_dif_munic     = dplyr::if_else(!compare_first_dif(EL_QUANT), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_el_quant}
+
+## Transformação dos resultados
+df_sumario_dist_el <- df_rules_dist_el_quant |> 
+  dplyr::select(!EL_QUANT) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_el |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_el_quant}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_el_quant}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EL_PROGE
+
+```{r data_rules_dist_el_proge}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_el_proge <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EL_PROGE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_PROGE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_PROGE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EL_PROGE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_PROGE), F, T), # Longitudinal (município)
+    
+    DF_EL_PROGE_out_munic     = dplyr::if_else(!outlier_detection(EL_PROGE), F, T), # Longitudinal (município)
+    
+    DF_EL_PROGE_min_munic     = dplyr::if_else(EL_PROGE >= (min(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_EL_PROGE_max_munic     = dplyr::if_else(EL_PROGE <= (max(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_PROGE_min_k_munic   = dplyr::if_else(EL_PROGE >= (min(dplyr::lag(EL_PROGE), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_EL_PROGE_max_k_munic   = dplyr::if_else(EL_PROGE <= (k * max(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_PROGE_med_mov_munic = dplyr::if_else(EL_PROGE <= (k * zoo::rollmedian(EL_PROGE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EL_PROGE_dif_munic     = dplyr::if_else(!compare_first_dif(EL_PROGE), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_el_proge}
+
+## Transformação dos resultados
+df_sumario_dist_el <- df_rules_dist_el_proge |> 
+  dplyr::select(!EL_PROGE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_el |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_el_proge}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_el_proge}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EL_ESPESC
+
+```{r data_rules_dist_el_espesc}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_el_espesc <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EL_ESPESC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_ESPESC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_ESPESC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EL_ESPESC_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ESPESC), F, T), # Longitudinal (município)
+    
+    DF_EL_ESPESC_out_munic     = dplyr::if_else(!outlier_detection(EL_ESPESC), F, T), # Longitudinal (município)
+    
+    DF_EL_ESPESC_min_munic     = dplyr::if_else(EL_ESPESC >= (min(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_EL_ESPESC_max_munic     = dplyr::if_else(EL_ESPESC <= (max(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_ESPESC_min_k_munic   = dplyr::if_else(EL_ESPESC >= (min(dplyr::lag(EL_ESPESC), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_EL_ESPESC_max_k_munic   = dplyr::if_else(EL_ESPESC <= (k * max(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_ESPESC_med_mov_munic = dplyr::if_else(EL_ESPESC <= (k * zoo::rollmedian(EL_ESPESC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EL_ESPESC_dif_munic     = dplyr::if_else(!compare_first_dif(EL_ESPESC), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_el_espesc}
+
+## Transformação dos resultados
+df_sumario_dist_el <- df_rules_dist_el_espesc |> 
+  dplyr::select(!EL_ESPESC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_el |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_el_espesc}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_el_espesc}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### EL_ILRHE
+
+```{r data_rules_dist_el_ilrhe}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_el_ilrhe <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "EL_ILRHE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_ILRHE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_ILRHE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_EL_ILRHE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ILRHE), F, T), # Longitudinal (município)
+    
+    DF_EL_ILRHE_out_munic     = dplyr::if_else(!outlier_detection(EL_ILRHE), F, T), # Longitudinal (município)
+    
+    DF_EL_ILRHE_min_munic     = dplyr::if_else(EL_ILRHE >= (min(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_EL_ILRHE_max_munic     = dplyr::if_else(EL_ILRHE <= (max(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_ILRHE_min_k_munic   = dplyr::if_else(EL_ILRHE >= (min(dplyr::lag(EL_ILRHE), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_EL_ILRHE_max_k_munic   = dplyr::if_else(EL_ILRHE <= (k * max(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_EL_ILRHE_med_mov_munic = dplyr::if_else(EL_ILRHE <= (k * zoo::rollmedian(EL_ILRHE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_EL_ILRHE_dif_munic     = dplyr::if_else(!compare_first_dif(EL_ILRHE), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_el_ilrhe}
+
+## Transformação dos resultados
+df_sumario_dist_el <- df_rules_dist_el_ilrhe |> 
+  dplyr::select(!EL_ILRHE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_el |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_el_ilrhe}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_el_ilrhe}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(var), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(var))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+# Criar base com as observações que violaram uma ou mais regras de validade
+
+## Validade
+df_rules_valid_el_equi <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_EQUI")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_quant <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_QUANT")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_partesp <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_PARTESP")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_proge <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_PROGE")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_espesc <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_ESPESC")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_ilrhe <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_ILRHE")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_consesp <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_CONSESP")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_orgesp <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_ORGESP")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_valid_el_convesp <- df_rules_valid_el_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with("EL_CONVESP")
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_valid}
+
+## Lista com os dfs por indicador
+lista_df <- list(
+  "el_equi"    = df_rules_valid_el_equi,
+  "el_quant"   = df_rules_valid_el_quant,
+  "el_partesp" = df_rules_valid_el_partesp,
+  "el_proge"   = df_rules_valid_el_proge,
+  "el_espesc"  = df_rules_valid_el_espesc,
+  "el_ilrhe"   = df_rules_valid_el_ilrhe,
+  "el_consesp" = df_rules_valid_el_consesp,
+  "el_orgesp"  = df_rules_valid_el_orgesp,
+  "el_convesp" = df_rules_valid_el_convesp
+)
+
+## Add dados à pasta de trabalho
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_valid_")
+  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+}
+```
+
+```{r df_build_viol_consist}
+
+# # Criar base com as observações que violaram uma ou mais regras de consistência
+# 
+# ## Consistência
+# df_rules_consist_ma_focos <- df_rules_consist_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FOCOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_consist}
+
+# ## Lista com os dfs por indicador
+# lista_df <- list(
+#   "ma_focos" = df_rules_valid_ma_focos
+# )
+# 
+# ## Add dados à pasta de trabalho
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_consist_")
+#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
+#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+# }
+```
+
+```{r df_build_viol_dist}
+
+# Criar base com as observações que violaram uma ou mais regras de distribuição
+
+## Distribuição
+
+df_rules_dist_el_quant <- df_rules_dist_el_quant |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_el_proge <- df_rules_dist_el_proge |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_el_espesc <- df_rules_dist_el_espesc |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+
+df_rules_dist_el_ilrhe <- df_rules_dist_el_ilrhe |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")), 
+    names_to  = "regra", 
+    values_to = "obs_suspeita"
+  ) |> 
+  dplyr::filter(obs_suspeita) |> 
+  dplyr::rename_with(tolower) |> 
+  dplyr::arrange(ano, ibge7)
+```
+
+```{r df_export_viol_dist}
+
+lista_df <- list(
+  "el_quant"   = df_rules_dist_el_quant,
+  "el_proge"   = df_rules_dist_el_proge,
+  "el_espesc"  = df_rules_dist_el_espesc,
+  "el_ilrhe"   = df_rules_dist_el_ilrhe
+)
+
+for(i in names(lista_df)){
+  nome <- stringr::str_remove(i, "df_rules_dist_")
+  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+}
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_esportes_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+
+rm(list = ls())
+gc()
+```
