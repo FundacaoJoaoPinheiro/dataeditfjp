@@ -36,7 +36,7 @@ create_report <- function(){
 
   # Prompt para o usuário selecionar a base de dados
   path_data <- file.choose()
-  #path_data <- "C:/Users/edcam/Downloads/IMRS_BASE_MEIO-AMBIENTE_2000-2022.xlsx"
+
   # Obter o prefixo das variáveis (identificar a dimensão)
   prefix <- substr(rev(colnames(openxlsx::read.xlsx(path_data, rows = 1)))[1], 1, 2)
 

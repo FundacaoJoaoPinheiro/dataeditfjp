@@ -658,6 +658,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
+
 ## Distribuição
 
 ### MA_ICMSECOLOG
@@ -1542,7 +1543,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(var))
+  print(chart_boxplot(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -1556,7 +1557,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(var))
+  print(chart_histogram(variable = var, data = data))
   cat("\\pagebreak\n")
 }
 ```
@@ -1569,437 +1570,549 @@ pt <- openxlsx::createWorkbook()
 
 ```{r df_build_viol_valid}
 
+variables = c(
+"MA_ICMSECOLOG",
+"MA_CRH",
+"MA_CFEM",
+"MA_OGESTOR",
+"MA_FMMA",
+"MA_LEGISL",
+"MA_COMITE",
+"MA_FOCOS",
+"MA_CANA",
+"MA_FROTA",
+"MA_BOVINO",
+"MA_REFLO",
+"MA_FLONATIVA",
+"MA_INFRA",
+"MA_AGRO"
+  )
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_valid_ma_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
+
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_ma_icmsecolog <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_ICMSECOLOG")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_crh <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_CRH")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_cfem <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_CFEM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_ogestor <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_OGESTOR")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_fmma <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_FMMA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_legisl <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_LEGISL")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_comite <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_COMITE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_focos <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_FOCOS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_cana <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_CANA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_frota <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_FROTA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_bovino <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_BOVINO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_reflo <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_REFLO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_flonativa <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_FLONATIVA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_infra <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_INFRA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ma_agro <- df_rules_valid_ma_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("MA_AGRO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_valid_ma_icmsecolog <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_ICMSECOLOG")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_crh <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_CRH")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_cfem <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_CFEM")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_ogestor <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_OGESTOR")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_fmma <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_FMMA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_legisl <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_LEGISL")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_comite <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_COMITE")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_focos <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_FOCOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_cana <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_CANA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_frota <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_FROTA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_bovino <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_BOVINO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_reflo <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_REFLO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_flonativa <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_FLONATIVA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_infra <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_INFRA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_ma_agro <- df_rules_valid_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("MA_AGRO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_valid}
 
 ## Lista com os dfs por indicador
-lista_df <- list(
-  "ma_icmsecolog" = df_rules_valid_ma_icmsecolog,
-  "ma_crh"        = df_rules_valid_ma_crh,
-  "ma_cfem"       = df_rules_valid_ma_cfem,
-  "ma_ogestor"    = df_rules_valid_ma_ogestor,
-  "ma_fmma"       = df_rules_valid_ma_fmma,
-  "ma_legisl"     = df_rules_valid_ma_legisl,
-  "ma_comite"     = df_rules_valid_ma_comite,
-  "ma_focos"      = df_rules_valid_ma_focos,
-  "ma_cana"       = df_rules_valid_ma_cana,
-  "ma_frota"      = df_rules_valid_ma_frota,
-  "ma_bovino"     = df_rules_valid_ma_bovino,
-  "ma_reflo"      = df_rules_valid_ma_reflo,
-  "ma_flonativa"  = df_rules_valid_ma_flonativa,
-  "ma_infra"      = df_rules_valid_ma_infra,
-  "ma_agro"       = df_rules_valid_ma_agro
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_valid_")
-  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
-}
+# lista_df <- list(
+#   "ma_icmsecolog" = df_rules_valid_ma_icmsecolog,
+#   "ma_crh"        = df_rules_valid_ma_crh,
+#   "ma_cfem"       = df_rules_valid_ma_cfem,
+#   "ma_ogestor"    = df_rules_valid_ma_ogestor,
+#   "ma_fmma"       = df_rules_valid_ma_fmma,
+#   "ma_legisl"     = df_rules_valid_ma_legisl,
+#   "ma_comite"     = df_rules_valid_ma_comite,
+#   "ma_focos"      = df_rules_valid_ma_focos,
+#   "ma_cana"       = df_rules_valid_ma_cana,
+#   "ma_frota"      = df_rules_valid_ma_frota,
+#   "ma_bovino"     = df_rules_valid_ma_bovino,
+#   "ma_reflo"      = df_rules_valid_ma_reflo,
+#   "ma_flonativa"  = df_rules_valid_ma_flonativa,
+#   "ma_infra"      = df_rules_valid_ma_infra,
+#   "ma_agro"       = df_rules_valid_ma_agro
+# )
+# 
+# ## Add dados à pasta de trabalho
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_valid_")
+#   openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+#   openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+# }
 ```
 
 ```{r df_build_viol_consist}
 
-# Criar base com as observações que violaram uma ou mais regras de consistência
+variables = c("MA_FOCOS")
 
-## Consistência
-df_rules_consist_ma_focos <- df_rules_consist_ma_all |> 
+lis <- split(variables,f = variables)
+df_obs_consist <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_consist_ma_all |>
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::contains("_FOCOS")
-  ) |> 
+    dplyr::contains(i)
+  ) |>
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
     values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
   dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_consist, nrow)!=0
+
+if(index!=0){
+df_obs_consist <- df_obs_consist[index]
+for(i in names(df_obs_consist)){
+  openxlsx::addWorksheet(pt, paste0("consist - ", i))
+  openxlsx::writeData(pt, paste0("consist - ", i), df_obs_consist[[i]])
+}
+}
+
+
+# Criar base com as observações que violaram uma ou mais regras de consistência
+
+## Consistência
+# df_rules_consist_ma_focos <- df_rules_consist_ma_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FOCOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_consist}
 
 ## Lista com os dfs por indicador
-lista_df <- list(
-  "ma_focos" = df_rules_valid_ma_focos
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_consist_")
-  openxlsx::addWorksheet(pt, paste0("consist - ", nome))
-  openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
-}
+# lista_df <- list(
+#   "ma_focos" = df_rules_valid_ma_focos
+# )
+# 
+# ## Add dados à pasta de trabalho
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_consist_")
+#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
+#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+# }
 ```
 
 ```{r df_build_viol_dist}
+df_dist <- list(
+"MA_ICMSECOLOG" = df_rules_dist_ma_icmsecolog,
+"MA_CRH" = df_rules_dist_ma_crh,
+"MA_CFEM" = df_rules_dist_ma_cfem,
+"MA_FOCOS" = df_rules_dist_ma_focos,
+"MA_CANA" = df_rules_dist_ma_cana,
+"MA_FROTA" = df_rules_dist_ma_frota,
+"MA_BOVINO" = df_rules_dist_ma_bovino,
+"MA_REFLO" = df_rules_dist_ma_reflo,
+"MA_FLONATIVA" = df_rules_dist_ma_flonativa,
+"MA_INFRA" = df_rules_dist_ma_infra,
+"MA_AGRO" = df_rules_dist_ma_agro
+)
+
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
+  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+}
 
 # Criar base com as observações que violaram uma ou mais regras de distribuição
 
 ## Distribuição
-df_rules_dist_ma_icmsecolog <- df_rules_dist_ma_icmsecolog |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_dist_ma_icmsecolog <- df_rules_dist_ma_icmsecolog |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_crh <- df_rules_dist_ma_crh |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_cfem <- df_rules_dist_ma_cfem |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_focos <- df_rules_dist_ma_focos |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_cana <- df_rules_dist_ma_cana |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_frota <- df_rules_dist_ma_frota |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_bovino <- df_rules_dist_ma_bovino |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_flonativa <- df_rules_dist_ma_flonativa |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_infra <- df_rules_dist_ma_infra |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_ma_agro <- df_rules_dist_ma_agro |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_ma_crh <- df_rules_dist_ma_crh |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_cfem <- df_rules_dist_ma_cfem |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_focos <- df_rules_dist_ma_focos |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_cana <- df_rules_dist_ma_cana |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_frota <- df_rules_dist_ma_frota |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_bovino <- df_rules_dist_ma_bovino |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_flonativa <- df_rules_dist_ma_flonativa |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_infra <- df_rules_dist_ma_infra |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_ma_agro <- df_rules_dist_ma_agro |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_dist}
 
-lista_df <- list(
-  "ma_icmsecolog" = df_rules_dist_ma_icmsecolog,
-  "ma_crh"        = df_rules_dist_ma_crh,
-  "ma_cfem"       = df_rules_dist_ma_cfem,
-  "ma_focos"      = df_rules_dist_ma_focos,
-  "ma_cana"       = df_rules_dist_ma_cana,
-  "ma_frota"      = df_rules_dist_ma_frota,
-  "ma_bovino"     = df_rules_dist_ma_bovino,
-  "ma_reflo"      = df_rules_dist_ma_reflo,
-  "ma_flonativa"  = df_rules_dist_ma_flonativa,
-  "ma_infra"      = df_rules_dist_ma_infra,
-  "ma_agro"       = df_rules_dist_ma_agro
-)
-
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_dist_")
-  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
-  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
-}
+# lista_df <- list(
+#   "ma_icmsecolog" = df_rules_dist_ma_icmsecolog,
+#   "ma_crh"        = df_rules_dist_ma_crh,
+#   "ma_cfem"       = df_rules_dist_ma_cfem,
+#   "ma_focos"      = df_rules_dist_ma_focos,
+#   "ma_cana"       = df_rules_dist_ma_cana,
+#   "ma_frota"      = df_rules_dist_ma_frota,
+#   "ma_bovino"     = df_rules_dist_ma_bovino,
+#   "ma_reflo"      = df_rules_dist_ma_reflo,
+#   "ma_flonativa"  = df_rules_dist_ma_flonativa,
+#   "ma_infra"      = df_rules_dist_ma_infra,
+#   "ma_agro"       = df_rules_dist_ma_agro
+# )
+# 
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_dist_")
+#   openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+#   openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+# }
 ```
 
 ```{r excel_save_wb}
