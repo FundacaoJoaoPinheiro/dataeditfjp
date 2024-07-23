@@ -37,7 +37,6 @@ params:
 output-file: "as_relatorio.html"
 ---
 
-
 ```{r  setup, include=FALSE}
 
 table_descriptive <- function(variable, data){
@@ -70,7 +69,7 @@ table_quantile <- function(variable, data){
 
 chart_boxplot <- function(variable, data){
   result <- data  |>
-    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log(.data[[variable]] + 1), fill = ANO)) +
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(
@@ -258,8 +257,6 @@ compare_lag <- function(var){
 
 ```
 
-
-
 ```{r set_param_global}
 
 k1 <- 2 
@@ -389,7 +386,6 @@ cat_iproba <- c(1,2,3)
 cat_regulaprog <- c("Sim", "Não")
 
 ```
-
 
 ```{r map_valid_desc}
 
@@ -537,7 +533,6 @@ desc_regra_valid_var <- data.frame(
   )
 ```
 
-
 ```{r map_consist_desc}
 
 # Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
@@ -561,9 +556,6 @@ desc_regra_consist_var <- data.frame(
     )
   )
 ```
-
-
-
 
 ## Tipo
 
@@ -630,7 +622,6 @@ rules_type <- validate::validator(
 )
 ```
 
-
 ```{r confront_type}
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
@@ -644,7 +635,6 @@ validate::summary(check_type) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
-
 
 ## Validade
 
@@ -839,7 +829,6 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-
 ## Consistência
 
 ```{r data_rules_consist_as_all}
@@ -867,7 +856,7 @@ df_rules_consist_as_all <- data |>
   ) |> dplyr::select(Ano,ibge7, CF_AS_BPC_total_year, CF_AS_BPCP_total_year) |> dplyr::ungroup()
 ```
 
-```{r data_wrangling_consist_ma_all}
+```{r data_wrangling_consist_as_all}
 
 ## Tranformação dos resultados
 df_sumario_consist_as <- df_rules_consist_as_all |> 
@@ -1072,6 +1061,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### AS_IDCONSELHO
 
 ```{r rules_dist_as_idconselho}
@@ -1127,6 +1117,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### AS_IGDM
 
@@ -1184,6 +1175,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### AS_IGDSUASM
 
 ```{r rules_dist_as_igdsuasm}
@@ -1240,8 +1232,9 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_NCRAS
 
+
+### AS_NCRAS
 
 ```{r rules_dist_as_ncras}
 
@@ -1411,8 +1404,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHTOTALA
 
+### AS_RHTOTALA
 
 ```{r rules_dist_as_rhtotala}
 
@@ -1468,8 +1461,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHTOTALB
 
+### AS_RHTOTALB
 
 ```{r rules_dist_as_rhtotalb}
 
@@ -1528,7 +1521,6 @@ chart_vbar(df_sumario)
 
 ### AS_RHAS
 
-
 ```{r rules_dist_as_rhas}
 
 ## df com o resultado das aplicações das regras
@@ -1583,8 +1575,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHPSI
 
+### AS_RHPSI
 
 ```{r rules_dist_as_rhpsi}
 
@@ -1640,8 +1632,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHENME
 
+### AS_RHENME
 
 ```{r rules_dist_as_rhenme}
 
@@ -1697,8 +1689,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHCURSU
 
+### AS_RHCURSU
 
 ```{r rules_dist_as_rhcursu}
 
@@ -1745,7 +1737,6 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-
 ```{r chart_dist_as_rhcursu}
 #| column: screen-inset-right
 #| layout-ncol: 2
@@ -1755,7 +1746,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
- 
+
 ### AS_RHTOEST
 
 ```{r rules_dist_as_rhtoest}
@@ -1812,8 +1803,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHTOCEL
 
+### AS_RHTOCEL
 
 ```{r rules_dist_as_rhtocel}
 
@@ -1872,7 +1863,6 @@ chart_vbar(df_sumario)
 
 ### AS_BPCDEF
 
-
 ```{r rules_dist_as_bpcdef}
 
 ## df com o resultado das aplicações das regras
@@ -1927,8 +1917,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_BPCID
 
+### AS_BPCID
 
 ```{r rules_dist_as_bpcid}
 
@@ -1942,7 +1932,6 @@ df_rules_dist_as_bpcid <- data |>
     DF_as_bpcid_out_munic     = dplyr::if_else(!outlier_function(AS_BPCID), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_bpcid}
 
@@ -1966,7 +1955,6 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-
 ```{r table_dist_as_bpcid}
 #| column: screen-inset-right
 
@@ -1986,8 +1974,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_BPC
 
+### AS_BPC
 
 ```{r rules_dist_as_bpc}
 
@@ -2043,8 +2031,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHTPOASPH
 
+### AS_RHTPOASPH
 
 ```{r rules_dist_as_rhtpoasph}
 
@@ -2058,7 +2046,6 @@ df_rules_dist_as_rhtpoasph <- data |>
     DF_as_rhtpoasph_out_munic     = dplyr::if_else(!outlier_function(AS_RHTPOASPH), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_rhtpoasph}
 
@@ -2170,8 +2157,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPCADUNICO
 
+### AS_POPCADUNICO
 
 ```{r rules_dist_as_popcadunico}
 
@@ -2197,7 +2184,6 @@ df_rules_dist_as_popcadunico <- data |>
     DF_as_popcadunico_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPCADUNICO), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popcadunico}
 
@@ -2239,6 +2225,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 
 ### AS_COBBF
@@ -2311,7 +2298,6 @@ chart_vbar(df_sumario)
 
 ### AS_POPIDCADSPOP
 
-
 ```{r rules_dist_as_popidcadspop}
 
 ## df com o resultado das aplicações das regras
@@ -2378,8 +2364,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPRURALPOP
 
+### AS_POPRURALPOP
 
 ```{r rules_dist_as_popruralpop}
 
@@ -2447,8 +2433,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPPOBEXTRPOB
 
+### AS_POPPOBEXTRPOB
 
 ```{r rules_dist_as_poppobextrpob}
 
@@ -2519,7 +2505,6 @@ chart_vbar(df_sumario)
 
 ### AS_PCOBBFMEIOSAL
 
-
 ```{r rules_dist_as_pcobbfmeiosal}
 
 ## df com o resultado das aplicações das regras
@@ -2544,7 +2529,6 @@ df_rules_dist_as_pcobbfmeiosal <- data |>
     DF_as_pcobbfmeiosal_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PCOBBFMEIOSAL), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_pcobbfmeiosal}
 
@@ -2587,8 +2571,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPPOBEXTRCAD
 
+### AS_POPPOBEXTRCAD
 
 ```{r rules_dist_as_poppobextrcad}
 
@@ -2614,7 +2598,6 @@ df_rules_dist_as_poppobextrcad <- data |>
     DF_as_poppobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPPOBEXTRCAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_poppobextrcad}
 
@@ -2660,7 +2643,6 @@ chart_vbar(df_sumario)
 
 ### POPIDPOBEXTRCAD
 
-
 ```{r rules_dist_as_popidpobextrcad}
 
 ## df com o resultado das aplicações das regras
@@ -2685,7 +2667,6 @@ df_rules_dist_as_popidpobextrcad <- data |>
     DF_as_popidpobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDPOBEXTRCAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popidpobextrcad}
 
@@ -2731,7 +2712,6 @@ chart_vbar(df_sumario)
 
 ### AS_IDOSOPOBEXTRPOBCADS
 
-
 ```{r rules_dist_as_idosopobextrpobcads}
 
 ## df com o resultado das aplicações das regras
@@ -2756,7 +2736,6 @@ df_rules_dist_as_idosopobextrpobcads <- data |>
     DF_as_idosopobextrpobcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IDOSOPOBEXTRPOBCADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_idosopobextrpobcads}
 
@@ -2799,9 +2778,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### AS_DEFPOBEXTRCAD
-
 
 ```{r rules_dist_as_defpobextrcad}
 
@@ -2827,7 +2804,6 @@ df_rules_dist_as_defpobextrcad <- data |>
     DF_as_defpobextrcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_DEFPOBEXTRCAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_defpobextrcad}
 
@@ -2870,8 +2846,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_CRIANADOLEPOBEXTRPOP
 
+### AS_CRIANADOLEPOBEXTRPOP
 
 ```{r rules_dist_as_crianadolepobextrpop}
 
@@ -2897,7 +2873,6 @@ df_rules_dist_as_crianadolepobextrpop <- data |>
     DF_as_crianadolepobextrpop_dif_munic     = dplyr::if_else(!compare_first_dif(AS_CRIANADOLEPOBEXTRPOP), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_crianadolepobextrpop}
 
@@ -2940,8 +2915,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPIDPOBEXTRCADS
 
+### AS_POPIDPOBEXTRCADS
 
 ```{r rules_dist_as_popidpobextrcads}
 
@@ -2967,7 +2942,6 @@ df_rules_dist_as_popidpobextrcads <- data |>
     DF_as_popidpobextrcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDPOBEXTRCADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popidpobextrcads}
 
@@ -3012,7 +2986,6 @@ chart_vbar(df_sumario)
 
 ### AS_POPIDCADS
 
-
 ```{r rules_dist_as_popidcads}
 
 ## df com o resultado das aplicações das regras
@@ -3037,7 +3010,6 @@ df_rules_dist_as_popidcads <- data |>
     DF_as_popidcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPIDCADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popidcads}
 
@@ -3082,7 +3054,6 @@ chart_vbar(df_sumario)
 
 ### AS_EFINCOMPCAD
 
-
 ```{r rules_dist_as_efincompcad}
 
 ## df com o resultado das aplicações das regras
@@ -3107,7 +3078,6 @@ df_rules_dist_as_efincompcad <- data |>
     DF_as_efincompcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_EFINCOMPCAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_efincompcad}
 
@@ -3152,7 +3122,6 @@ chart_vbar(df_sumario)
 
 ### AS_PENLECAD
 
-
 ```{r rules_dist_as_penlecad}
 
 ## df com o resultado das aplicações das regras
@@ -3177,7 +3146,6 @@ df_rules_dist_as_penlecad <- data |>
     DF_as_penlecad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PENLECAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_penlecad}
 
@@ -3222,7 +3190,6 @@ chart_vbar(df_sumario)
 
 ### AS_POPINDIGENACADS
 
-
 ```{r rules_dist_as_popindigenacads}
 
 ## df com o resultado das aplicações das regras
@@ -3247,7 +3214,6 @@ df_rules_dist_as_popindigenacads <- data |>
     DF_as_popindigenacads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPINDIGENACADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popindigenacads}
 
@@ -3290,8 +3256,8 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPPRETAPARDACADS
 
+### AS_POPPRETAPARDACADS
 
 ```{r rules_dist_as_poppretapardacads}
 
@@ -3317,7 +3283,6 @@ df_rules_dist_as_poppretapardacads <- data |>
     DF_as_poppretapardacads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPPRETAPARDACADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_poppretapardacads}
 
@@ -3363,7 +3328,6 @@ chart_vbar(df_sumario)
 
 ### AS_PVULSANEACAD
 
-
 ```{r rules_dist_as_pvulsaneacad}
 
 ## df com o resultado das aplicações das regras
@@ -3388,7 +3352,6 @@ df_rules_dist_as_pvulsaneacad <- data |>
     DF_as_pvulsaneacad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_PVULSANEACAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_pvulsaneacad}
 
@@ -3433,7 +3396,6 @@ chart_vbar(df_sumario)
 
 ### AS_SANEACAD
 
-
 ```{r rules_dist_as_saneacad}
 
 ## df com o resultado das aplicações das regras
@@ -3458,7 +3420,6 @@ df_rules_dist_as_saneacad <- data |>
     DF_as_saneacad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_SANEACAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_saneacad}
 
@@ -3503,7 +3464,6 @@ chart_vbar(df_sumario)
 
 ### AS_POPRURALCADS
 
-
 ```{r rules_dist_as_popruralcads}
 
 ## df com o resultado das aplicações das regras
@@ -3528,7 +3488,6 @@ df_rules_dist_as_popruralcads <- data |>
     DF_as_popruralcads_dif_munic     = dplyr::if_else(!compare_first_dif(AS_POPRURALCADS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_popruralcads}
 
@@ -3573,7 +3532,6 @@ chart_vbar(df_sumario)
 
 ### AS_IGDMCONDE
 
-
 ```{r rules_dist_as_igdmconde}
 
 ## df com o resultado das aplicações das regras
@@ -3598,7 +3556,6 @@ df_rules_dist_as_igdmconde <- data |>
     DF_as_igdmconde_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCONDE), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_igdmconde}
 
@@ -3643,7 +3600,6 @@ chart_vbar(df_sumario)
 
 ### AS_IGDMCONDS
 
-
 ```{r rules_dist_as_igdmconds}
 
 ## df com o resultado das aplicações das regras
@@ -3668,7 +3624,6 @@ df_rules_dist_as_igdmconds <- data |>
     DF_as_igdmconds_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCONDS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_igdmconds}
 
@@ -3713,7 +3668,6 @@ chart_vbar(df_sumario)
 
 ### AS_IGDMATU
 
-
 ```{r rules_dist_as_igdmatu}
 
 ## df com o resultado das aplicações das regras
@@ -3738,7 +3692,6 @@ df_rules_dist_as_igdmatu <- data |>
     DF_as_igdmatu_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMATU), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_igdmatu}
 
@@ -3783,7 +3736,6 @@ chart_vbar(df_sumario)
 
 ### AS_IGDMCOBCAD
 
-
 ```{r rules_dist_as_igdmcobcad}
 
 ## df com o resultado das aplicações das regras
@@ -3808,7 +3760,6 @@ df_rules_dist_as_igdmcobcad <- data |>
     DF_as_igdmcobcad_dif_munic     = dplyr::if_else(!compare_first_dif(AS_IGDMCOBCAD), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_igdmcobcad}
 
@@ -3853,7 +3804,6 @@ chart_vbar(df_sumario)
 
 ### AS_BPCPID
 
-
 ```{r rules_dist_as_bpcpid}
 
 ## df com o resultado das aplicações das regras
@@ -3878,7 +3828,6 @@ df_rules_dist_as_bpcpid <- data |>
     DF_as_bpcpid_dif_munic     = dplyr::if_else(!compare_first_dif(AS_BPCPID), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_bpcpid}
 
@@ -3923,7 +3872,6 @@ chart_vbar(df_sumario)
 
 ### AS_BPCPDEF
 
-
 ```{r rules_dist_as_bpcpdef}
 
 ## df com o resultado das aplicações das regras
@@ -3948,7 +3896,6 @@ df_rules_dist_as_bpcpdef <- data |>
     DF_as_bpcpdef_dif_munic     = dplyr::if_else(!compare_first_dif(AS_BPCPDEF), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_bpcpdef}
 
@@ -3991,7 +3938,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### AS_RHASPS
 
 ```{r rules_dist_as_rhasps}
@@ -4018,7 +3964,6 @@ df_rules_dist_as_rhasps <- data |>
     DF_as_rhasps_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHASPS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_rhasps}
 
@@ -4061,7 +4006,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### AS_RHPSIPS
 
 ```{r rules_dist_as_rhpsips}
@@ -4088,7 +4032,6 @@ df_rules_dist_as_rhpsips <- data |>
     DF_as_rhpsips_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHPSIPS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_rhpsips}
 
@@ -4131,9 +4074,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### AS_RHVPOAAS
-
 
 ```{r rules_dist_as_rhvpoaas}
 
@@ -4159,7 +4100,6 @@ df_rules_dist_as_rhvpoaas <- data |>
     DF_as_rhvpoaas_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHVPOAAS), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_rhvpoaas}
 
@@ -4202,9 +4142,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### AS_RHVINEST
-
 
 ```{r rules_dist_as_rhvinest}
 
@@ -4230,7 +4168,6 @@ df_rules_dist_as_rhvinest <- data |>
     DF_as_rhvinest_dif_munic     = dplyr::if_else(!compare_first_dif(AS_RHVINEST), F, T) # Longitudinal (município)
   )
 ```
-
 
 ```{r data_wrangling_dist_as_rhvinest}
 
@@ -4305,7 +4242,6 @@ As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, 
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
 
-
 ## Tabelas
 
 ```{r show_desc_table, results='asis'}
@@ -4347,7 +4283,6 @@ for(var in var_numeric){
 }
 ```
 
-
 ```{r show_hist_chart, results='asis'}
 #| out-width: 100%
 #| fig-format: svg
@@ -4362,242 +4297,332 @@ for(var in var_numeric){
 }
 ```
 
-
-```{r excel_create_wb, eval=FALSE}
+```{r excel_create_wb}
 
 ## Criar pasta de trabalho
 pt <- openxlsx::createWorkbook()
 ```
 
-```{r df_build_viol_valid, eval=FALSE}
+```{r df_build_viol_valid}
+
+variables = c(
+     "AS_INDCRAS",
+     "AS_IDCRASME",      
+     "AS_IDCREASNOR",   
+     "AS_IDCONSELHO",   
+     "AS_IGDM",
+     "AS_IGDSUASM",   
+     "AS_NCRAS",
+     "AS_NCREAS",    
+     "AS_FCADMEIOSAL",  
+     "AS_RHTOTALA", 
+     "AS_RHTOTALB",  
+     "AS_RHAS",  
+     "AS_RHPSI",       
+     "AS_RHENME",        
+     "AS_RHCURSU",        
+     "AS_RHTOEST",       
+     "AS_RHTOCEL",       
+     "AS_BPCDEF",  
+     "AS_BPCID",   
+     "AS_BPC",  
+     "AS_RHTPOASPH",
+     "AS_BPCIDPOPI",    
+     "AS_POPCADUNICO",     
+     "AS_COBBF",  
+     "AS_POPIDCADSPOP",       
+     "AS_POPRURALPOP", 
+     "AS_POPPOBEXTRPOB",      
+     "AS_PCOBBFMEIOSAL",    
+     "AS_POPPOBEXTRCAD",     
+     "AS_POPIDPOBEXTRCAD",     
+     "AS_IDOSOPOBEXTRPOBCADS",
+     "AS_DEFPOBEXTRCAD",
+     "AS_CRIANADOLEPOBEXTRPOP", 
+     "AS_POPIDPOBEXTRCADS",
+     "AS_POPIDCADS",
+     "AS_EFINCOMPCAD",    
+     "AS_PENLECAD",  
+     "AS_POPINDIGENACADS",     
+     "AS_POPPRETAPARDACADS", 
+     "AS_PVULSANEACAD",
+     "AS_SANEACAD",   
+     "AS_POPRURALCADS",     
+     "AS_IGDMCONDE",   
+     "AS_IGDMCONDS",     
+     "AS_IGDMATU",      
+     "AS_IGDMCOBCAD",        
+     "AS_BPCPID",       
+     "AS_BPCPDEF",        
+     "AS_RHASPS",       
+     "AS_RHPSIPS",           
+     "AS_RHVPOAAS",      
+     "AS_RHVINEST",
+     "AS_ORGGESTOR",      
+     "AS_PFMPMUAS",   
+     "AS_IPROBA",      
+     "AS_PSENOR",         
+     "AS_ORGCADU",          
+     "AS_REGULAPROG")
+
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|> 
+sapply(function(i){
+lis[[i]] <- df_rules_valid_as_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
+
+
+
 
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_as_indcras <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_INDCRAS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_crh <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_IDCRASME")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_idcreasnor <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_IDCREASNOR")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_ogestor <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_IDCONSELHO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_fmma <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_IGDM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_legisl <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_IGDSUASM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_comite <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_COMITE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_idconselho <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_FOCOS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_cana <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_CANA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_frota <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_FROTA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_bovino <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_BOVINO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_reflo <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_REFLO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_flonativa <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_FLONATIVA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_infra <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_INFRA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_as_agro <- df_rules_valid_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_AGRO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_valid_as_indcras <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_INDCRAS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_crh <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_IDCRASME")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_idcreasnor <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_IDCREASNOR")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_ogestor <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_IDCONSELHO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_fmma <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_IGDM")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_legisl <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_IGDSUASM")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_comite <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_COMITE")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_idconselho <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FOCOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_cana <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_CANA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_frota <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FROTA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_bovino <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_BOVINO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_reflo <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_REFLO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_flonativa <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FLONATIVA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_infra <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_INFRA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_as_agro <- df_rules_valid_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_AGRO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_valid, eval=FALSE}
@@ -4629,156 +4654,265 @@ for(i in names(lista_df)){
 }
 ```
 
-```{r df_build_viol_consist, eval=FALSE}
+```{r df_build_viol_consist}
+variables = c(
+    "AS_BPC",
+    "AS_BPCP")
+
+lis <- split(variables,f = variables)
+df_obs_consist <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_consist_as_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::contains(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_consist, nrow)!=0
+
+if(sum(index)!=0){df_obs_consist <- df_obs_consist[index]}
+
+for(i in names(df_obs_consist)){
+  openxlsx::addWorksheet(pt, paste0("consist - ", i))
+  openxlsx::writeData(pt, paste0("consist - ", i), df_obs_consist[[i]])
+}
+
 
 # Criar base com as observações que violaram uma ou mais regras de consistência
 
 ## Consistência
-df_rules_consist_as_idconselho <- df_rules_consist_as_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::contains("_FOCOS")
-  ) |> 
+# df_rules_consist_as_idconselho <- df_rules_consist_as_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::contains("_FOCOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# ```
+# 
+# ```{r df_export_viol_consist, eval=FALSE}
+# 
+# ## Lista com os dfs por indicador
+# lista_df <- list(
+#   "as_idconselho" = df_rules_consist_as_idconselho
+# )
+# 
+# ## Add dados à pasta de trabalho
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_consist_")
+#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
+#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+# }
+```
+
+```{r df_build_viol_dist}
+
+
+df_dist <- list(
+  "AS_INDCRAS"              = df_rules_dist_as_indcras,
+  "AS_IDCRASME"             = df_rules_dist_as_idcrasme,
+  "AS_IDCREASNOR"           = df_rules_dist_as_idcreasnor,
+  "AS_IDCONSELHO"           = df_rules_dist_as_idconselho,
+  "AS_IGDM"                 = df_rules_dist_as_igdm,
+  "AS_IGDSUASM"             = df_rules_dist_as_igdsuasm,
+  "AS_NCRAS"                = df_rules_dist_as_ncras,
+  "AS_NCREAS"               = df_rules_dist_as_ncreas,
+  "AS_FCADMEIOSAL"          = df_rules_dist_as_fcadmeiosal,
+  "AS_RHTOTALA"             = df_rules_dist_as_rhtotala,
+  "AS_RHTOTALB"             = df_rules_dist_as_rhtotalb,
+  "AS_RHAS"                 = df_rules_dist_as_rhas,
+  "AS_RHPSI"                = df_rules_dist_as_rhpsi,
+  "AS_RHENME"               = df_rules_dist_as_rhenme,
+  "AS_RHCURSU"              = df_rules_dist_as_rhenme,
+  "AS_RHTOEST"              = df_rules_dist_as_rhtoest,
+  "AS_RHTOCEL"              = df_rules_dist_as_rhtocel,
+  "AS_BPCDEF"               = df_rules_dist_as_bpcdef,
+  "AS_BPCID"                = df_rules_dist_as_bpcid,
+  "AS_BPC"                  = df_rules_dist_as_bpc,
+  "AS_RHTPOASPH"            = df_rules_dist_as_rhtpoasph,
+  "AS_BPCIDPOPI"            = df_rules_dist_as_bpcidpopi,
+  "AS_POPCADUNICO"          = df_rules_dist_as_popcadunico,
+  "AS_COBBF"                = df_rules_dist_as_cobbf,
+  "AS_POPIDCADSPOP"         = df_rules_dist_as_popidcadspop,
+  "AS_POPRURALPOP"          = df_rules_dist_as_popruralpop,
+  "AS_POPPOBEXTRPOB"        = df_rules_dist_as_poppobextrpob,
+  "AS_PCOBBFMEIOSAL"        = df_rules_dist_as_pcobbfmeiosal,
+  "AS_POPPOBEXTRCAD"        = df_rules_dist_as_poppobextrcad,
+  "AS_POPIDPOBEXTRCAD"      = df_rules_dist_as_popidpobextrcad,
+  "AS_IDOSOPOBEXTRPOBCADS"  = df_rules_dist_as_idosopobextrpobcads,
+  "AS_DEFPOBEXTRCAD"        = df_rules_dist_as_defpobextrcad,
+  "AS_CRIANADOLEPOBEXTRPOP" = df_rules_dist_as_crianadolepobextrpop,
+  "AS_POPIDPOBEXTRCADS"     = df_rules_dist_as_popidpobextrcads,
+  "AS_POPIDCADS"            = df_rules_dist_as_popidcads,
+  "AS_EFINCOMPCAD"          = df_rules_dist_as_efincompcad,
+  "AS_PENLECAD"             = df_rules_dist_as_penlecad,
+  "AS_POPINDIGENACADS"      = df_rules_dist_as_popindigenacads,
+  "AS_POPPRETAPARDACADS"    = df_rules_dist_as_poppretapardacads,
+  "AS_PVULSANEACAD"         = df_rules_dist_as_pvulsaneacad,
+  "AS_SANEACAD"             = df_rules_dist_as_saneacad,
+  "AS_POPRURALCADS"         = df_rules_dist_as_popruralcads,
+  "AS_IGDMCONDE"            = df_rules_dist_as_igdmconde,
+  "AS_IGDMCONDS"            = df_rules_dist_as_igdmconds,
+  "AS_IGDMATU"              = df_rules_dist_as_igdmatu,
+  "AS_IGDMCOBCAD"           = df_rules_dist_as_igdmcobcad,
+  "AS_BPCPID"               = df_rules_dist_as_bpcpid,
+  "AS_BPCPDEF"              = df_rules_dist_as_bpcpdef,
+  "AS_RHASPS"               = df_rules_dist_as_rhasps,
+  "AS_RHPSIPS"              = df_rules_dist_as_rhpsips,
+  "AS_RHVPOAAS"             = df_rules_dist_as_rhvpoaas,
+  "AS_RHVINEST"             = df_rules_dist_as_rhvinest )
+
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-    names_to  = "regra", 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")),
+    names_to  = "regra",
     values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
   dplyr::arrange(ano, ibge7)
-```
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
 
-```{r df_export_viol_consist, eval=FALSE}
 
-## Lista com os dfs por indicador
-lista_df <- list(
-  "as_idconselho" = df_rules_consist_as_idconselho
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_consist_")
-  openxlsx::addWorksheet(pt, paste0("consist - ", nome))
-  openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("dist - ", i))
+  openxlsx::writeData(pt, paste0("dist - ", i), df_obs_dist[[i]])
 }
-```
 
-```{r df_build_viol_dist, eval=FALSE}
 
 # Criar base com as observações que violaram uma ou mais regras de distribuição
 
 ## Distribuição
-df_rules_dist_as_indcras <- df_rules_dist_as_indcras |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_crh <- df_rules_dist_as_crh |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_idcreasnor <- df_rules_dist_as_idcreasnor |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_idconselho <- df_rules_dist_as_idconselho |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_cana <- df_rules_dist_as_cana |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_frota <- df_rules_dist_as_frota |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_bovino <- df_rules_dist_as_bovino |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_reflo <- df_rules_dist_as_reflo |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_flonativa <- df_rules_dist_as_flonativa |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_infra <- df_rules_dist_as_infra |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_as_agro <- df_rules_dist_as_agro |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_dist_as_indcras <- df_rules_dist_as_indcras |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_crh <- df_rules_dist_as_crh |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_idcreasnor <- df_rules_dist_as_idcreasnor |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_idconselho <- df_rules_dist_as_idconselho |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_cana <- df_rules_dist_as_cana |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_frota <- df_rules_dist_as_frota |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_bovino <- df_rules_dist_as_bovino |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_reflo <- df_rules_dist_as_reflo |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_flonativa <- df_rules_dist_as_flonativa |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_infra <- df_rules_dist_as_infra |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_as_agro <- df_rules_dist_as_agro |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("AS_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_dist, eval=FALSE}
@@ -4804,7 +4938,7 @@ for(i in names(lista_df)){
 }
 ```
 
-```{r excel_save_wb, eval=FALSE}
+```{r excel_save_wb}
 
 openxlsx::saveWorkbook(pt, "fjpdados_assistenciasocial_violacoes.xlsx", overwrite = T)
 ```

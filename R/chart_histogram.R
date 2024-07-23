@@ -8,9 +8,10 @@
 
 chart_histogram <- function(variable, data){
   result <- data |>
+    dplyr::mutate(ANO = as.numeric(ANO)) |>
     ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
     ggplot2::geom_histogram() +
-    ggplot2::scale_fill_viridis_c(option = "G", direction = -1) + # G: mako
+    ggplot2::scale_fill_viridis_c(option = "mako", direction = -1) + # G: mako
     ggplot2::labs(
       y = paste0("Escala logarítmica de ", variable)
     ) +

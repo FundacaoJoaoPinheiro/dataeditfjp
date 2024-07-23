@@ -1,16 +1,15 @@
 #' @title create descriptive table
-#' @describeIn
-#' destination description
+#' @description
+#' A short description...
 #'
 #' @param variable
-#' @param df Dataset
+#' @param data Dataset
 #' @return A dataframe with de summary statistics
 #' @export
 
-
 table_descriptive <- function(variable, data){
-  res <- data %>%
-    dplyr::group_by(ANO) %>%
+  res <- data |>
+    dplyr::group_by(ANO) |>
     dplyr::summarise(
       N = dplyr::n(),
       `Mínimo`=dplyr::na_if(min(.data[[variable]], na.rm = TRUE), Inf),

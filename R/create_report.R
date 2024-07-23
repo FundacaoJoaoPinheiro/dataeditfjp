@@ -7,30 +7,21 @@
 #' @return Report
 #' @export
 
-## To-do: criar uma função para mover o relátorio "relatorio.html" do diretório
-## \inst\qmd para a raíz do projeto, dado que quarto::quarto_render() não oferece
-## esta opção
 create_report <- function(){
 
-  # path_list <- c(
-  #   "MA" = here::here("inst", "qmd", "ma_report.qmd"),
-  #   "EE" = here::here("inst", "qmd", "ee_report.qmd"),
-  #   "EA" = here::here("inst", "qmd", "ea_report.qmd")
-  # )
-
   path_list <- c(
-    "MA" = system.file("qmd", "ma_report.qmd", package = "criticaldatafjp"),
-    "AS" = system.file("qmd", "as_report.qmd", package = "criticaldatafjp"),
-    "EA" = system.file("qmd", "ea_report.qmd", package = "criticaldatafjp"),
-    "SE" = system.file("qmd", "se_report.qmd", package = "criticaldatafjp"),
-    "HS" = system.file("qmd", "hs_report.qmd", package = "criticaldatafjp"),
-    "SP" = system.file("qmd", "sp_report.qmd", package = "criticaldatafjp"),
-    "DA" = system.file("qmd", "da_report.qmd", package = "criticaldatafjp"),
-    "EO" = system.file("qmd", "eo_report.qmd", package = "criticaldatafjp"),
-    "GP" = system.file("qmd", "gp_report.qmd", package = "criticaldatafjp"),
-    "CA" = system.file("qmd", "ca_report.qmd", package = "criticaldatafjp"),
-    "EL" = system.file("qmd", "el_report.qmd", package = "criticaldatafjp"),
-    "FS" = system.file("qmd", "fs_report.qmd", package = "criticaldatafjp")
+    "MA" = system.file("qmd", "ma_report.qmd", package = "dataeditfjp"),
+    "AS" = system.file("qmd", "as_report.qmd", package = "dataeditfjp"),
+    "EA" = system.file("qmd", "ea_report.qmd", package = "dataeditfjp"),
+    "SE" = system.file("qmd", "se_report.qmd", package = "dataeditfjp"),
+    "HS" = system.file("qmd", "hs_report.qmd", package = "dataeditfjp"),
+    "SP" = system.file("qmd", "sp_report.qmd", package = "dataeditfjp"),
+    "DA" = system.file("qmd", "da_report.qmd", package = "dataeditfjp"),
+    "EO" = system.file("qmd", "eo_report.qmd", package = "dataeditfjp"),
+    "GP" = system.file("qmd", "gp_report.qmd", package = "dataeditfjp"),
+    "CA" = system.file("qmd", "ca_report.qmd", package = "dataeditfjp"),
+    "EL" = system.file("qmd", "el_report.qmd", package = "dataeditfjp"),
+    "FS" = system.file("qmd", "fs_report.qmd", package = "dataeditfjp")
   )
 
 
