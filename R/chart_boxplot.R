@@ -1,17 +1,17 @@
-#' Title
+#' @title create a boxplot
+#'
+#' @description
+#' A short description...
 #'
 #' @param variabe
 #' @param data
 #'
-#' @return
+#' @return result
 #' @export
 
 chart_boxplot <- function(variable, data){
-  result <- data  %>%
-    dplyr::mutate(
-      ANO = as.character(ANO)
-    )  %>%
-    ggplot2::ggplot(ggplot2::aes(x = ANO, y = log({{variable}} + 1), fill = ANO)) +
+  result <- data  |>
+    ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
     ggplot2::labs(

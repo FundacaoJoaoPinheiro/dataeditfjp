@@ -4,10 +4,7 @@
 \alias{compare_lag}
 \title{Compare values}
 \usage{
-compare_lag(variable)
-}
-\arguments{
-\item{variable}{}
+compare_lag(var)
 }
 \value{
 Vector with TRUE or FALSE

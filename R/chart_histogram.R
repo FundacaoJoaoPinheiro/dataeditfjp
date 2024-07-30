@@ -1,4 +1,7 @@
-#' Title
+#' @title create histograms
+#'
+#' @description
+#' A short description...
 #'
 #' @param variable
 #' @param data

@@ -2,13 +2,13 @@
 % Please edit documentation in R/compare_first_dif.R
 \name{compare_first_dif}
 \alias{compare_first_dif}
-\title{Title}
+\title{Compare the first diference}
 \usage{
 compare_first_dif(var)
 }
-\arguments{
-\item{var}{}
+\value{
+check
 }
 \description{
-Title
+A short description...
 }

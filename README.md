@@ -14,8 +14,8 @@ You can install the development version of dataeditfjp from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("fjpmg/dataeditfjp")
+# install.packages("remotes")
+remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp")
 ```
 
 ## Example

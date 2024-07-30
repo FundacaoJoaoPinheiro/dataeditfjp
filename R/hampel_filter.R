@@ -3,8 +3,9 @@
 #' A short description...
 #'
 #' @param variable
-#'
-#' @return resul
+#' @importFrom stats mad
+#' @import stats
+#' @return result
 #' @export
 hampel_filter <- function(variable){
   limite_inf = stats::median(variable, na.rm = T) - 3 * stats::mad(variable, constant = 1, na.rm = T)

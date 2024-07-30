@@ -1,14 +1,45 @@
 ---
-title: "Report"
+title: FJP Dados
+subtitle: Meio Ambiente
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
 author: 
-  name: "Coordenação de Indicadores Sociais (CIS)"
-  url: https://imrs.fjp.mg.gov.br/
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
 output: html_document
+lang: pt
 date: "`r Sys.Date()`"
+title-block-banner: "#68bb59"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#68bb59"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/ma_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+
 params:
   data: file.xlsx
-  metadata: metafile.xlsx
+output-file: "ma_relatorio.html"
 ---
+
+
 
 ```{r setup, include=FALSE}
 #library(openxlsx)

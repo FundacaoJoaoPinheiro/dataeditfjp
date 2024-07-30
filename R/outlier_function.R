@@ -11,9 +11,9 @@
 #' @export
 
 outlier_function <- function(variable, a=-4,b=3){
-  q1 <- quantile(variable, probs = 0.25, na.rm = T, names = F)
-  q3 <- quantile(variable, probs = 0.75, na.rm = T, names = F)
-  iqr <- IQR(variable, na.rm = T)
+  q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)
+  q3 <- stats::quantile(variable, probs = 0.75, na.rm = T, names = F)
+  iqr <- stats::IQR(variable, na.rm = T)
   mc <- robustbase::mc(variable, na.rm = T)
   inf <- q1 - 1.5*exp(a*mc)*iqr
   sup <- q3 + 1.5*exp(b*mc)*iqr

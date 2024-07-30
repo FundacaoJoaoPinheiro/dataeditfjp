@@ -18,5 +18,7 @@ get_files <- function(output_path){
 
   file.copy(output_xlsx,output_path)
   file.copy(output_html,output_path)
+  if(file.exists(output_xlsx)){file.remove(output_xlsx)}
+  if(file.exists(output_html)){file.remove(output_html)}
 
 }

@@ -2,13 +2,16 @@
 % Please edit documentation in R/chart_boxplot.R
 \name{chart_boxplot}
 \alias{chart_boxplot}
-\title{Title}
+\title{create a boxplot}
 \usage{
 chart_boxplot(variable, data)
 }
 \arguments{
 \item{data}{}
 }
+\value{
+result
+}
 \description{
-Title
+A short description...
 }

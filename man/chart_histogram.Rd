@@ -2,7 +2,7 @@
 % Please edit documentation in R/chart_histogram.R
 \name{chart_histogram}
 \alias{chart_histogram}
-\title{Title}
+\title{create histograms}
 \usage{
 chart_histogram(variable, data)
 }
@@ -10,5 +10,5 @@ chart_histogram(variable, data)
 \item{data}{}
 }
 \description{
-Title
+A short description...
 }

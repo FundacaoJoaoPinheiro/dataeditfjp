@@ -9,6 +9,9 @@ table_quantile(variable, data)
 \arguments{
 \item{data}{}
 }
+\value{
+result
+}
 \description{
 A short description...
 }
