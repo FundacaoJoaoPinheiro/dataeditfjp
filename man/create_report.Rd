@@ -4,7 +4,7 @@
 \alias{create_report}
 \title{Create Report}
 \usage{
-create_report()
+create_report(output_path = getwd())
 }
 \arguments{
 \item{path_data}{Path to dataset}

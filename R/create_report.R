@@ -7,7 +7,7 @@
 #' @return Report
 #' @export
 
-create_report <- function(){
+create_report <- function(output_path = getwd()){
 
   path_list <- c(
     "MA" = system.file("qmd", "ma_report.qmd", package = "dataeditfjp"),
@@ -31,13 +31,13 @@ create_report <- function(){
   # Obter o prefixo das variáveis (identificar a dimensão)
   prefix <- substr(rev(colnames(openxlsx::read.xlsx(path_data, rows = 1)))[1], 1, 2)
 
-  return(
-    quarto::quarto_render(
-      input          = path_list[prefix],
-      output_format  = "html",
-      quiet          = F,
-      execute_params = list(data = path_data),
-      #cache          = T
-    )
+  quarto::quarto_render(
+    input          = path_list[prefix],
+    output_format  = "html",
+    quiet          = F,
+    execute_params = list(data = path_data)
+    #cache          = T
   )
+
+  return(get_files(output_path = output_path) )
 }
