@@ -768,7 +768,6 @@ df_rules_valid_as_all <- data |>
     VI_NA_AS_RHPSIPS              = dplyr::if_else(!is.na(AS_RHPSIPS), F, T),
     VI_NA_AS_RHVPOAAS             = dplyr::if_else(!is.na(AS_RHVPOAAS), F, T),
     VI_NA_AS_RHVINEST             = dplyr::if_else(!is.na(AS_RHVINEST), F, T),
-    
     VI_NA_AS_ORGGESTOR            = dplyr::if_else(!is.na(AS_ORGGESTOR), F, T),
     VI_NA_AS_PFMPMUAS             = dplyr::if_else(!is.na(AS_PFMPMUAS), F, T),
     VI_NA_AS_IPROBA               = dplyr::if_else(!is.na(AS_IPROBA), F, T), 
@@ -856,7 +855,7 @@ df_sumario <- df_sumario_valid_as |>
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
+    Ausente      = sum(resultado),
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
