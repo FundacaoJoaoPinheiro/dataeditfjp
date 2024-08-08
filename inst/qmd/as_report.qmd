@@ -387,6 +387,73 @@ cat_regulaprog <- c("Sim", "Não")
 
 ```
 
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição
+# no ano inicial de análise devido a fatores como mudança de metodologia
+ano_base_alter <- c(
+  "AS_INDCRAS"               = 2012,
+  "AS_IDCRASME"              = 2012,
+   "AS_IDCREASNOR"           = 2014,   
+   "AS_IDCONSELHO"           = 2014, 
+   "AS_IGDM"                 = 2014,    
+   "AS_IGDSUASM"             = 2012,     
+   "AS_NCRAS"                = 2012,        
+   "AS_NCREAS"               = 2012,          
+   "AS_FCADMEIOSAL"          = 2012,    
+   "AS_RHTOTALA"             = 2012,     
+   "AS_RHTOTALB"             = 2012,      
+   "AS_RHAS"                 = 2012,        
+   "AS_RHPSI"                = 2012,      
+   "AS_RHENME"               = 2012,     
+   "AS_RHCURSU"              = 2012,    #APARTIR DAQUI    
+   "AS_RHTOEST"              = 2012,    
+   "AS_RHTOCEL"              = 2012,    
+   "AS_BPCDEF"               = 2012,     
+   "AS_BPCID"                = 2012,     
+   "AS_BPC"                  = 2012,          
+   "AS_RHTPOASPH"            = 2012,     
+   "AS_BPCIDPOPI"            = 2012,        
+   "AS_POPCADUNICO"          = 2012,     
+   "AS_COBBF"                = 2012,              
+   "AS_POPIDCADSPOP"         = 2012,      
+   "AS_POPRURALPOP"          = 2012,         
+   "AS_POPPOBEXTRPOB"        = 2012,  
+   "AS_PCOBBFMEIOSAL"        = 2012,      
+   "AS_POPPOBEXTRCAD"        = 2012,      
+   "AS_POPIDPOBEXTRCAD"      = 2012,      
+   "AS_IDOSOPOBEXTRPOBCADS"  = 2012,  
+   "AS_DEFPOBEXTRCAD"        = 2012,        
+   "AS_CRIANADOLEPOBEXTRPOP" = 2012, 
+   "AS_POPIDPOBEXTRCADS"     = 2012,     
+   "AS_POPIDCADS"            = 2012,        
+   "AS_EFINCOMPCAD"          = 2012,         
+   "AS_PENLECAD"             = 2012,          
+   "AS_POPINDIGENACADS"      = 2012,      
+   "AS_POPPRETAPARDACADS"    = 2012,    
+   "AS_PVULSANEACAD"         = 2012,      
+   "AS_SANEACAD"             = 2012,           
+   "AS_POPRURALCADS"         = 2012,        
+   "AS_IGDMCONDE"            = 2012,       
+   "AS_IGDMCONDS"            = 2012,       
+   "AS_IGDMATU"              = 2012,        
+   "AS_IGDMCOBCAD"           = 2012,        
+   "AS_BPCPID"               = 2012,          
+   "AS_BPCPDEF"              = 2012,      
+   "AS_RHASPS"               = 2012,       
+   "AS_RHPSIPS"              = 2012,        
+   "AS_RHVPOAAS"             = 2012,           
+   "AS_RHVINEST"             = 2012   
+)
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+```
+
+
 ```{r map_valid_desc}
 
 # Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
@@ -899,6 +966,12 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_indcras <- data |> 
+    dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_INDCRAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_INDCRAS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_INDCRAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -955,6 +1028,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_idcrasme <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IDCRASME" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IDCRASME"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IDCRASME) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1011,6 +1090,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_idcreasnor <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IDCREASNOR" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IDCREASNOR"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IDCREASNOR) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1068,6 +1153,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_idconselho <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IDCONSELHO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IDCONSELHO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IDCONSELHO) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1125,6 +1216,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdm <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1182,6 +1279,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdsuasm <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDSUASM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDSUASM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDSUASM) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -1240,6 +1343,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_ncras <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_NCRAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_NCRAS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_NCRAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
