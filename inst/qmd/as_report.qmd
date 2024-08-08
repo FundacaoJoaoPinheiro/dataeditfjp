@@ -448,9 +448,9 @@ ano_base_alter <- c(
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
-ano_base_alter <- c(
-  "NA" = NA_integer_
-)
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
 ```
 
 
