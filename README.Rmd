@@ -22,7 +22,7 @@ The goal of dataeditfjp is to ...
 
 ## Installation
 
-You can install the development version of dataeditfjp from [GitHub](https://github.com/) with:
+You can install the development version of **dataeditfjp** from [GitHub](https://github.com/) with:
 
 ```{r eval=FALSE}
 # install.packages("remotes")

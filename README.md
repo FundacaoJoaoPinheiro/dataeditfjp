@@ -10,7 +10,7 @@ The goal of dataeditfjp is to …
 
 ## Installation
 
-You can install the development version of dataeditfjp from
+You can install the development version of **dataeditfjp** from
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -20,7 +20,7 @@ remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp@development")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to use:
 
 ``` r
 ## basic example code
