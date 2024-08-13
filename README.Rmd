@@ -26,12 +26,12 @@ You can install the development version of dataeditfjp from [GitHub](https://git
 
 ```{r eval=FALSE}
 # install.packages("remotes")
-remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp")
+remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp@development")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to use:
 
 ```{r example, eval=FALSE}
 ## basic example code
