@@ -3261,6 +3261,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_popidcads <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_POPIDCADS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_POPIDCADS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPIDCADS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3330,6 +3336,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_efincompcad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_EFINCOMPCAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_EFINCOMPCAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_EFINCOMPCAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3399,6 +3411,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_penlecad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_PENLECAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_PENLECAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_PENLECAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3468,6 +3486,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_popindigenacads <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_POPINDIGENACADS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_POPINDIGENACADS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPINDIGENACADS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3538,6 +3562,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_poppretapardacads <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_POPPRETAPARDACADS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_POPPRETAPARDACADS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPPRETAPARDACADS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3608,6 +3638,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_pvulsaneacad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_PVULSANEACAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_PVULSANEACAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_PVULSANEACAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3677,6 +3713,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_saneacad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_SANEACAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_SANEACAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_SANEACAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3746,6 +3788,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_popruralcads <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_POPRURALCADS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_POPRURALCADS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_POPRURALCADS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3815,6 +3863,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdmconde <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDMCONDE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDMCONDE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCONDE) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3884,6 +3938,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdmconds <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDMCONDS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDMCONDS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCONDS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -3953,6 +4013,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdmatu <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDMATU" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDMATU"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMATU) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4022,6 +4088,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdmcobcad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_IGDMCOBCAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDMCOBCAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_IGDMCOBCAD) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4091,6 +4163,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_bpcpid <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_BPCPID" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_BPCPID"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCPID) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4160,6 +4238,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_bpcpdef <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_BPCPDEF" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_BPCPDEF"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_BPCPDEF) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4229,6 +4313,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_rhasps <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_RHASPS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_RHASPS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHASPS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4298,6 +4388,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_rhpsips <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_RHPSIPS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_RHPSIPS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHPSIPS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4367,6 +4463,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_rhvpoaas <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_RHVPOAAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_RHVPOAAS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHVPOAAS) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4436,6 +4538,12 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_rhvinest <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "AS_RHVINEST" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_RHVINEST"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
   dplyr::select(Ano = ANO, ibge7 = IBGE7, AS_RHVINEST) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
@@ -4497,6 +4605,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 
 
