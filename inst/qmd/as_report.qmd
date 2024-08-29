@@ -1470,7 +1470,7 @@ chart_vbar(df_sumario)
 df_rules_dist_as_fcadmeiosal <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "AS_FCADMEDIOSAL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_FCADMEIOSAL"],
+      "AS_FCADMEIOSAL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_FCADMEIOSAL"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
