@@ -3484,7 +3484,7 @@ variables <- c(
 lis <- split(variables,f = variables)
 df_obs_valid <- names(lis)|> 
 sapply(function(i){
-lis[[i]] <- df_rules_valid_as_all |> 
+lis[[i]] <- df_rules_valid_sp_all |> 
   dplyr::select(
     Ano,
     ibge7,
