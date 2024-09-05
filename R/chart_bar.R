@@ -6,8 +6,7 @@
 #' @param n
 #'
 #' @return
-#' @export
-#'
+
 
 chart_bar <- function(ano, n){
   result <- data.frame(ano, n) |>

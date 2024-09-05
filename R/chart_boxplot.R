@@ -7,7 +7,6 @@
 #' @param data
 #'
 #' @return result
-#' @export
 
 chart_boxplot <- function(variable, data){
   result <- data  |>

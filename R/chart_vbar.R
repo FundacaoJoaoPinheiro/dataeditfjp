@@ -3,7 +3,6 @@
 #' @param df
 #'
 #' @return
-#' @export
 
 chart_vbar <- function(df){
   result <-

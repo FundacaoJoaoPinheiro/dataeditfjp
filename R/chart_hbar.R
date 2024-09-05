@@ -4,7 +4,6 @@
 #' @param n
 #'
 #' @return
-#' @export
 
 chart_hbar <- function(ano, n){
   result <-

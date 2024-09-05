@@ -7,7 +7,6 @@
 #' @param data
 #'
 #' @return
-#' @export
 
 chart_histogram <- function(variable, data){
   result <- data |>

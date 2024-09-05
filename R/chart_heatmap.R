@@ -5,8 +5,6 @@
 #' @param df
 #'
 #' @return
-#' @export
-
 
 chart_heatmap <- function(df){
   result <-
