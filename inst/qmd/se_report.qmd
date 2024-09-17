@@ -39,8 +39,12 @@ output-file: "se_relatorio.html"
 
 ```{r  setup, include=FALSE}
 
-table_descriptive <- function(variable, data){
+table_descriptive <- function(variable, data, ano_base_alter){
   res <- data |>
+    dplyr::filter( 
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::group_by(ANO) |>
     dplyr::summarise(
       N = dplyr::n(),
@@ -56,6 +60,7 @@ table_descriptive <- function(variable, data){
 
     return(res)
 }
+
 
 table_quantile <- function(variable, data){
   result <- data  |>

@@ -4,10 +4,12 @@
 \alias{table_descriptive}
 \title{create descriptive table}
 \usage{
-table_descriptive(variable, data)
+table_descriptive(variable, data, ano_base_alter)
 }
 \arguments{
 \item{data}{Dataset}
+
+\item{ano_base_alter}{start year}
 }
 \value{
 A dataframe with de summary statistics

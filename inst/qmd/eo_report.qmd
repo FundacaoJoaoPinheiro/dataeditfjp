@@ -67,8 +67,12 @@ table_quantile <- function(variable, data){
   return(result)
 }
 
-chart_boxplot <- function(variable, data){
-  result <- data  |>
+chart_boxplot <- function(variable, data, ano_base_alter){
+  result <- data  |> 
+    dplyr::filter( 
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     ggplot2::ggplot(ggplot2::aes(x = as.character(ANO), y = log(.data[[variable]] + 1), fill = as.character(ANO))) +
     ggplot2::geom_boxplot() +
     ggplot2::scale_fill_viridis_d(option = "G", direction = -1) + # G: mako
@@ -84,6 +88,7 @@ chart_boxplot <- function(variable, data){
 
   return(result)
 }
+
 
 
 chart_histogram <- function(variable, data){
@@ -14509,7 +14514,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(variable = var, data = data))
+  print(chart_boxplot(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```

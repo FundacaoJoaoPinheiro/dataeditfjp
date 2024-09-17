@@ -4,11 +4,15 @@
 #'
 #' @param variable
 #' @param data Dataset
+#' @param ano_base_alter start year
 #' @return A dataframe with de summary statistics
-#' @export
 
-table_descriptive <- function(variable, data){
+table_descriptive <- function(variable, data, ano_base_alter){
   res <- data |>
+    dplyr::filter(
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::group_by(ANO) |>
     dplyr::summarise(
       N = dplyr::n(),
