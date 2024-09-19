@@ -94,10 +94,12 @@ chart_boxplot <- function(variable, data, ano_base_alter){
   return(result)
 }
 
-
-
-chart_histogram <- function(variable, data){
+chart_histogram <- function(variable, data, ano_base_alter){
   result <- data |>
+    dplyr::filter( 
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::mutate(ANO = as.numeric(ANO)) |>
     ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
     ggplot2::geom_histogram() +
@@ -1567,7 +1569,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data))
+  print(chart_histogram(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```

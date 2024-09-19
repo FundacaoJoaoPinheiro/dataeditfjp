@@ -6,7 +6,6 @@
 #' @param variable
 #'
 #' @return Data frame containing the difference
-#' @export
 
 difpercentual <- function(df, variable){
   df %>%

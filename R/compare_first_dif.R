@@ -6,7 +6,6 @@
 #' @importFrom dplyr lag
 #' @import dplyr
 #' @return check
-#' @export
 
 compare_first_dif <- function(var){
   dif <- abs(round(c(NA_real_, diff(var)), 2))

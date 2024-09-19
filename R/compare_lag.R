@@ -6,7 +6,6 @@
 #' @importFrom dplyr lag
 #' @import dplyr
 #' @return Vector with TRUE or FALSE
-#' @export
 
 compare_lag <- function(var){
   return(var >= dplyr::lag(var, n = 1))
