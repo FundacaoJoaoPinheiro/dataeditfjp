@@ -372,8 +372,8 @@ ano_base_alter <- c(
   "EO_ESCOLAEFAF"      = 2007,
   "EO_ESCOLAEFCO"      = 2007,
   "EO_ESCOLAME"        = 2007,
-  "EO_IDEBFU1a5"       = 2005,
-  "EO_IDEBFU6a9"       = 2005,
+  "EO_IDEBFU1A5"       = 2005,
+  "EO_IDEBFU6A9"       = 2005,
   "EO_IQEP11"          = 2003,
   "EO_IQEM4"           = 2003,
   "EO_IQEM8"           = 2003,
@@ -393,18 +393,18 @@ ano_base_alter <- c(
   "EO_TAXALIQ7"        = 2007,
   "EO_TAXALIQ15"       = 2007,
   "EO_DISTEM"          = 2013, 
-  "EO_TXAPROV1a5"      = 2005,
-  "EO_TXAPROV1a9"      = 2013,
-  "EO_TXAPROV6a9"      = 2005,
-  "EO_TXAPROV10a12"    = 2013,
-  "EO_TXREP1a9"        = 2013,
-  "EO_TXREP1a5"        = 2013,
-  "EO_TXREP10a12"      = 2013,
-  "EO_TXREP6a9"        = 2013,
-  "EO_TXABA1a9"        = 2013,
-  "EO_TXABA1a5"        = 2013,
-  "EO_TXABA6a9"        = 2013,
-  "EO_TXABA10a12"      = 2013,
+  "EO_TXAPROV1A5"      = 2005,
+  "EO_TXAPROV1A9"      = 2013,
+  "EO_TXAPROV6A9"      = 2005,
+  "EO_TXAPROV10A12"    = 2013,
+  "EO_TXREP1A9"        = 2013,
+  "EO_TXREP1A5"        = 2013,
+  "EO_TXREP10A12"      = 2013,
+  "EO_TXREP6A9"        = 2013,
+  "EO_TXABA1A9"        = 2013,
+  "EO_TXABA1A5"        = 2013,
+  "EO_TXABA6A9"        = 2013,
+  "EO_TXABA10A12"      = 2013,
   "EO_DISTEF"          = 2013,
   "EO_DISTEFAI"        = 2013,
   "EO_DISTEFAF"        = 2013,
@@ -510,8 +510,8 @@ desc_regra_valid_var <- data.frame(
     "VI_EO_ESCOLAEFAF",
     "VI_EO_ESCOLAEFCO",
     "VI_EO_ESCOLAME",
-    "VI_EO_IDEBFU1a5",
-    "VI_EO_IDEBFU6a9",
+    "VI_EO_IDEBFU1A5",
+    "VI_EO_IDEBFU6A9",
     "VI_EO_IQEP11",
     "VI_EO_IQEM4",
     "VI_EO_IQEM8",
@@ -543,18 +543,18 @@ desc_regra_valid_var <- data.frame(
     "VI_EO_TAXA15",
     "VI_EO_TAXALIQ15",
     "VI_EO_DISTEM",
-    "VI_EO_TXAPROV1a5",
-    "VI_EO_TXAPROV1a9",
-    "VI_EO_TXAPROV6a9",
-    "VI_EO_TXAPROV10a12",
-    "VI_EO_TXREP1a9",
-    "VI_EO_TXREP1a5",
-    "VI_EO_TXREP10a12",
-    "VI_EO_TXREP6a9",
-    "VI_EO_TXABA1a9",
-    "VI_EO_TXABA1a5",
-    "VI_EO_TXABA6a9",
-    "VI_EO_TXABA10a12",
+    "VI_EO_TXAPROV1A5",
+    "VI_EO_TXAPROV1A9",
+    "VI_EO_TXAPROV6A9",
+    "VI_EO_TXAPROV10A12",
+    "VI_EO_TXREP1A9",
+    "VI_EO_TXREP1A5",
+    "VI_EO_TXREP10A12",
+    "VI_EO_TXREP6A9",
+    "VI_EO_TXABA1A9",
+    "VI_EO_TXABA1A5",
+    "VI_EO_TXABA6A9",
+    "VI_EO_TXABA10A12",
     "VI_EO_DISTEF",
     "VI_EO_DISTEFAI",
     "VI_EO_DISTEFAF",
@@ -653,8 +653,8 @@ desc_regra_valid_var <- data.frame(
       "VI_EO_ESCOLAEFAF"      ~ desc_regra_valid[1],
       "VI_EO_ESCOLAEFCO"      ~ desc_regra_valid[1],
       "VI_EO_ESCOLAME"        ~ desc_regra_valid[1],
-      "VI_EO_IDEBFU1a5"       ~ desc_regra_valid[4],
-      "VI_EO_IDEBFU6a9"       ~ desc_regra_valid[4],
+      "VI_EO_IDEBFU1A5"       ~ desc_regra_valid[4],
+      "VI_EO_IDEBFU6A9"       ~ desc_regra_valid[4],
       "VI_EO_IQEP11"          ~ desc_regra_valid[3],
       "VI_EO_IQEM4"           ~ desc_regra_valid[3],
       "VI_EO_IQEM8"           ~ desc_regra_valid[3],
@@ -686,18 +686,18 @@ desc_regra_valid_var <- data.frame(
       "VI_EO_TAXA15"          ~ desc_regra_valid[5],
       "VI_EO_TAXALIQ15"       ~ desc_regra_valid[5],
       "VI_EO_DISTEM"          ~ desc_regra_valid[5],
-      "VI_EO_TXAPROV1a5"      ~ desc_regra_valid[5],
-      "VI_EO_TXAPROV1a9"      ~ desc_regra_valid[5],
-      "VI_EO_TXAPROV6a9"      ~ desc_regra_valid[5],
-      "VI_EO_TXAPROV10a12"    ~ desc_regra_valid[5],
-      "VI_EO_TXREP1a9"        ~ desc_regra_valid[5],
-      "VI_EO_TXREP1a5"        ~ desc_regra_valid[5],
-      "VI_EO_TXREP10a12"      ~ desc_regra_valid[5],
-      "VI_EO_TXREP6a9"        ~ desc_regra_valid[5],
-      "VI_EO_TXABA1a9"        ~ desc_regra_valid[5],
-      "VI_EO_TXABA1a5"        ~ desc_regra_valid[5],
-      "VI_EO_TXABA6a9"        ~ desc_regra_valid[5],
-      "VI_EO_TXABA10a12"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV1A5"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV1A9"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV6A9"      ~ desc_regra_valid[5],
+      "VI_EO_TXAPROV10A12"    ~ desc_regra_valid[5],
+      "VI_EO_TXREP1A9"        ~ desc_regra_valid[5],
+      "VI_EO_TXREP1A5"        ~ desc_regra_valid[5],
+      "VI_EO_TXREP10A12"      ~ desc_regra_valid[5],
+      "VI_EO_TXREP6A9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA1A9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA1A5"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA6A9"        ~ desc_regra_valid[5],
+      "VI_EO_TXABA10A12"      ~ desc_regra_valid[5],
       "VI_EO_DISTEF"          ~ desc_regra_valid[5],
       "VI_EO_DISTEFAI"        ~ desc_regra_valid[5],
       "VI_EO_DISTEFAF"        ~ desc_regra_valid[5],
@@ -823,8 +823,8 @@ rules_type <- validate::validator(
   TI_EO_ESCOLAEFAF      = is.numeric(EO_ESCOLAEFAF),
   TI_EO_ESCOLAEFCO      = is.numeric(EO_ESCOLAEFCO),
   TI_EO_ESCOLAME        = is.numeric(EO_ESCOLAME),
-  TI_EO_IDEBFU1a5       = is.numeric(EO_IDEBFU1a5),
-  TI_EO_IDEBFU6a9       = is.numeric(EO_IDEBFU6a9),
+  TI_EO_IDEBFU1A5       = is.numeric(EO_IDEBFU1A5),
+  TI_EO_IDEBFU6A9       = is.numeric(EO_IDEBFU6A9),
   TI_EO_IQEP11          = is.numeric(EO_IQEP11),
   TI_EO_IQEM4           = is.numeric(EO_IQEM4),
   TI_EO_IQEM8           = is.numeric(EO_IQEM8),
@@ -856,18 +856,18 @@ rules_type <- validate::validator(
   TI_EO_TAXA15          = is.numeric(EO_TAXA15),
   TI_EO_TAXALIQ15       = is.numeric(EO_TAXALIQ15),
   TI_EO_DISTEM          = is.numeric(EO_DISTEM), 
-  TI_EO_TXAPROV1a5      = is.numeric(EO_TXAPROV1a5),
-  TI_EO_TXAPROV1a9      = is.numeric(EO_TXAPROV1a9),
-  TI_EO_TXAPROV6a9      = is.numeric(EO_TXAPROV6a9),
-  TI_EO_TXAPROV10a12    = is.numeric(EO_TXAPROV10a12),
-  TI_EO_TXREP1a9        = is.numeric(EO_TXREP1a9),
-  TI_EO_TXREP1a5        = is.numeric(EO_TXREP1a5),
-  TI_EO_TXREP10a12      = is.numeric(EO_TXREP10a12),
-  TI_EO_TXREP6a9        = is.numeric(EO_TXREP6a9),
-  TI_EO_TXABA1a9        = is.numeric(EO_TXABA1a9),
-  TI_EO_TXABA1a5        = is.numeric(EO_TXABA1a5),
-  TI_EO_TXABA6a9        = is.numeric(EO_TXABA6a9),
-  TI_EO_TXABA10a12      = is.numeric(EO_TXABA10a12),
+  TI_EO_TXAPROV1A5      = is.numeric(EO_TXAPROV1A5),
+  TI_EO_TXAPROV1A9      = is.numeric(EO_TXAPROV1A9),
+  TI_EO_TXAPROV6A9      = is.numeric(EO_TXAPROV6A9),
+  TI_EO_TXAPROV10A12    = is.numeric(EO_TXAPROV10A12),
+  TI_EO_TXREP1A9        = is.numeric(EO_TXREP1A9),
+  TI_EO_TXREP1A5        = is.numeric(EO_TXREP1A5),
+  TI_EO_TXREP10A12      = is.numeric(EO_TXREP10A12),
+  TI_EO_TXREP6A9        = is.numeric(EO_TXREP6A9),
+  TI_EO_TXABA1A9        = is.numeric(EO_TXABA1A9),
+  TI_EO_TXABA1A5        = is.numeric(EO_TXABA1A5),
+  TI_EO_TXABA6A9        = is.numeric(EO_TXABA6A9),
+  TI_EO_TXABA10A12      = is.numeric(EO_TXABA10A12),
   TI_EO_DISTEF          = is.numeric(EO_DISTEF),
   TI_EO_DISTEFAI        = is.numeric(EO_DISTEFAI),
   TI_EO_DISTEFAF        = is.numeric(EO_DISTEFAF),
@@ -987,8 +987,8 @@ df_rules_valid_eo_all <- data |>
     VI_NA_EO_ALUNOSM8        = dplyr::if_else(!is.na(EO_ALUNOSM8), F, NA),
     VI_NA_EO_ALUNOSM11       = dplyr::if_else(!is.na(EO_ALUNOSM11), F, NA),
     VI_NA_EO_ESCOLAME        = dplyr::if_else(!is.na(EO_ESCOLAME), F, NA),
-    VI_NA_EO_IDEBFU1a5       = dplyr::if_else(!is.na(EO_IDEBFU1a5), F, NA),
-    VI_NA_EO_IDEBFU6a9       = dplyr::if_else(!is.na(EO_IDEBFU6a9), F, NA),
+    VI_NA_EO_IDEBFU1A5       = dplyr::if_else(!is.na(EO_IDEBFU1A5), F, NA),
+    VI_NA_EO_IDEBFU6A9       = dplyr::if_else(!is.na(EO_IDEBFU6A9), F, NA),
     VI_NA_EO_IQEP11          = dplyr::if_else(!is.na(EO_IQEP11), F, NA),
     VI_NA_EO_IQEM4           = dplyr::if_else(!is.na(EO_IQEM4), F, NA),
     VI_NA_EO_IQEM8           = dplyr::if_else(!is.na(EO_IQEM8), F, NA),
@@ -1020,18 +1020,18 @@ df_rules_valid_eo_all <- data |>
     VI_NA_EO_TAXA15          = dplyr::if_else(!is.na(EO_TAXA15), F, NA),
     VI_NA_EO_TAXALIQ15       = dplyr::if_else(!is.na(EO_TAXALIQ15), F, NA),
     VI_NA_EO_DISTEM          = dplyr::if_else(!is.na(EO_DISTEM), F, NA), 
-    VI_NA_EO_TXAPROV1a5      = dplyr::if_else(!is.na(EO_TXAPROV1a5), F, NA),
-    VI_NA_EO_TXAPROV1a9      = dplyr::if_else(!is.na(EO_TXAPROV1a9), F, NA),
-    VI_NA_EO_TXAPROV6a9      = dplyr::if_else(!is.na(EO_TXAPROV6a9), F, NA),
-    VI_NA_EO_TXAPROV10a12    = dplyr::if_else(!is.na(EO_TXAPROV10a12), F, NA),
-    VI_NA_EO_TXREP1a9        = dplyr::if_else(!is.na(EO_TXREP1a9), F, NA),
-    VI_NA_EO_TXREP1a5        = dplyr::if_else(!is.na(EO_TXREP1a5), F, NA),
-    VI_NA_EO_TXREP10a12      = dplyr::if_else(!is.na(EO_TXREP10a12), F, NA),
-    VI_NA_EO_TXREP6a9        = dplyr::if_else(!is.na(EO_TXREP6a9), F, NA),
-    VI_NA_EO_TXABA1a9        = dplyr::if_else(!is.na(EO_TXABA1a9), F, NA),
-    VI_NA_EO_TXABA1a5        = dplyr::if_else(!is.na(EO_TXABA1a5), F, NA),
-    VI_NA_EO_TXABA6a9        = dplyr::if_else(!is.na(EO_TXABA6a9), F, NA),
-    VI_NA_EO_TXABA10a12      = dplyr::if_else(!is.na(EO_TXABA10a12), F, NA),
+    VI_NA_EO_TXAPROV1A5      = dplyr::if_else(!is.na(EO_TXAPROV1A5), F, NA),
+    VI_NA_EO_TXAPROV1A9      = dplyr::if_else(!is.na(EO_TXAPROV1A9), F, NA),
+    VI_NA_EO_TXAPROV6A9      = dplyr::if_else(!is.na(EO_TXAPROV6A9), F, NA),
+    VI_NA_EO_TXAPROV10A12    = dplyr::if_else(!is.na(EO_TXAPROV10A12), F, NA),
+    VI_NA_EO_TXREP1A9        = dplyr::if_else(!is.na(EO_TXREP1A9), F, NA),
+    VI_NA_EO_TXREP1A5        = dplyr::if_else(!is.na(EO_TXREP1A5), F, NA),
+    VI_NA_EO_TXREP10A12      = dplyr::if_else(!is.na(EO_TXREP10A12), F, NA),
+    VI_NA_EO_TXREP6A9        = dplyr::if_else(!is.na(EO_TXREP6A9), F, NA),
+    VI_NA_EO_TXABA1A9        = dplyr::if_else(!is.na(EO_TXABA1A9), F, NA),
+    VI_NA_EO_TXABA1A5        = dplyr::if_else(!is.na(EO_TXABA1A5), F, NA),
+    VI_NA_EO_TXABA6A9        = dplyr::if_else(!is.na(EO_TXABA6A9), F, NA),
+    VI_NA_EO_TXABA10A12      = dplyr::if_else(!is.na(EO_TXABA10A12), F, NA),
     VI_NA_EO_DISTEF          = dplyr::if_else(!is.na(EO_DISTEF), F, NA),
     VI_NA_EO_DISTEFAI        = dplyr::if_else(!is.na(EO_DISTEFAI), F, NA),
     VI_NA_EO_DISTEFAF        = dplyr::if_else(!is.na(EO_DISTEFAF), F, NA),
@@ -1128,8 +1128,8 @@ df_rules_valid_eo_all <- data |>
     VI_EO_ESCOLAEFAF    = dplyr::if_else(EO_ESCOLAEFAF  >= 0, F, T),
     VI_EO_ESCOLAEFCO    = dplyr::if_else(EO_ESCOLAEFCO  >= 0, F, T),
     VI_EO_ESCOLAME      = dplyr::if_else(EO_ESCOLAME>= 0, F, T),
-    VI_EO_IDEBFU1a5     = dplyr::if_else(dplyr::between(EO_IDEBFU1a5, 0, 10), F, T),
-    VI_EO_IDEBFU6a9     = dplyr::if_else(dplyr::between(EO_IDEBFU6a9, 0, 10), F, T),
+    VI_EO_IDEBFU1A5     = dplyr::if_else(dplyr::between(EO_IDEBFU1A5, 0, 10), F, T),
+    VI_EO_IDEBFU6A9     = dplyr::if_else(dplyr::between(EO_IDEBFU6A9, 0, 10), F, T),
     VI_EO_IQEP11        = dplyr::if_else(dplyr::between(EO_IQEP11, 0, 1), F, T),
     VI_EO_IQEM4         = dplyr::if_else(dplyr::between(EO_IQEM4, 0, 1), F, T),
     VI_EO_IQEM8         = dplyr::if_else(dplyr::between(EO_IQEM8, 0, 1), F, T),
@@ -1161,18 +1161,18 @@ df_rules_valid_eo_all <- data |>
     VI_EO_TAXA15        = dplyr::if_else(dplyr::between(EO_TAXA15, 0, 100), F, T),
     VI_EO_TAXALIQ15     = dplyr::if_else(dplyr::between(EO_TAXALIQ15, 0, 100), F, T),
     VI_EO_DISTEM        = dplyr::if_else(dplyr::between(EO_DISTEM, 0, 100), F, T), 
-    VI_EO_TXAPROV1a5    = dplyr::if_else(dplyr::between(EO_TXAPROV1a5, 0, 100), F, T),
-    VI_EO_TXAPROV1a9    = dplyr::if_else(dplyr::between(EO_TXAPROV1a9, 0, 100), F, T),
-    VI_EO_TXAPROV6a9    = dplyr::if_else(dplyr::between(EO_TXAPROV6a9, 0, 100), F, T),
-    VI_EO_TXAPROV10a12  = dplyr::if_else(dplyr::between(EO_TXAPROV10a12, 0, 100), F, T),
-    VI_EO_TXREP1a9      = dplyr::if_else(dplyr::between(EO_TXREP1a9, 0, 100), F, T),
-    VI_EO_TXREP1a5      = dplyr::if_else(dplyr::between(EO_TXREP1a5, 0, 100), F, T),
-    VI_EO_TXREP10a12    = dplyr::if_else(dplyr::between(EO_TXREP10a12, 0, 100), F, T),
-    VI_EO_TXREP6a9      = dplyr::if_else(dplyr::between(EO_TXREP6a9, 0, 100), F, T),
-    VI_EO_TXABA1a9      = dplyr::if_else(dplyr::between(EO_TXABA1a9, 0, 100), F, T),
-    VI_EO_TXABA1a5      = dplyr::if_else(dplyr::between(EO_TXABA1a5, 0, 100), F, T),
-    VI_EO_TXABA6a9      = dplyr::if_else(dplyr::between(EO_TXABA6a9, 0, 100), F, T),
-    VI_EO_TXABA10a12    = dplyr::if_else(dplyr::between(EO_TXABA10a12, 0, 100), F, T),
+    VI_EO_TXAPROV1A5    = dplyr::if_else(dplyr::between(EO_TXAPROV1A5, 0, 100), F, T),
+    VI_EO_TXAPROV1A9    = dplyr::if_else(dplyr::between(EO_TXAPROV1A9, 0, 100), F, T),
+    VI_EO_TXAPROV6A9    = dplyr::if_else(dplyr::between(EO_TXAPROV6A9, 0, 100), F, T),
+    VI_EO_TXAPROV10A12  = dplyr::if_else(dplyr::between(EO_TXAPROV10A12, 0, 100), F, T),
+    VI_EO_TXREP1A9      = dplyr::if_else(dplyr::between(EO_TXREP1A9, 0, 100), F, T),
+    VI_EO_TXREP1A5      = dplyr::if_else(dplyr::between(EO_TXREP1A5, 0, 100), F, T),
+    VI_EO_TXREP10A12    = dplyr::if_else(dplyr::between(EO_TXREP10A12, 0, 100), F, T),
+    VI_EO_TXREP6A9      = dplyr::if_else(dplyr::between(EO_TXREP6A9, 0, 100), F, T),
+    VI_EO_TXABA1A9      = dplyr::if_else(dplyr::between(EO_TXABA1A9, 0, 100), F, T),
+    VI_EO_TXABA1A5      = dplyr::if_else(dplyr::between(EO_TXABA1A5, 0, 100), F, T),
+    VI_EO_TXABA6A9      = dplyr::if_else(dplyr::between(EO_TXABA6A9, 0, 100), F, T),
+    VI_EO_TXABA10A12    = dplyr::if_else(dplyr::between(EO_TXABA10A12, 0, 100), F, T),
     VI_EO_DISTEF        = dplyr::if_else(dplyr::between(EO_DISTEF, 0, 100), F, T),
     VI_EO_DISTEFAI      = dplyr::if_else(dplyr::between(EO_DISTEFAI, 0, 100), F, T),
     VI_EO_DISTEFAF      = dplyr::if_else(dplyr::between(EO_DISTEFAF, 0, 100), F, T),
@@ -1966,44 +1966,44 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EO_IDEBFU1a5
+### EO_IDEBFU1A5
 
 ```{r rules_dist_eo_idebfu1a5}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IDEBFU1a5 <- data |>
+df_rules_dist_EO_IDEBFU1A5 <- data |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_IDEBFU1a5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU1a5"],
+      "EO_IDEBFU1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU1A5"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU1a5) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU1A5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_IDEBFU1a5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU1a5), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU1A5), F, T), # Longitudinal (município)
     
-    DF_EO_IDEBFU1a5_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU1a5), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU1A5), F, T), # Longitudinal (município)
     
-    DF_EO_IDEBFU1a5_min_munic     = dplyr::if_else(EO_IDEBFU1a5 >= (min(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_min_munic     = dplyr::if_else(EO_IDEBFU1A5 >= (min(dplyr::lag(EO_IDEBFU1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU1a5_max_munic     = dplyr::if_else(EO_IDEBFU1a5 <= (max(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_max_munic     = dplyr::if_else(EO_IDEBFU1A5 <= (max(dplyr::lag(EO_IDEBFU1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU1a5_min_k_munic   = dplyr::if_else(EO_IDEBFU1a5 >= (min(dplyr::lag(EO_IDEBFU1a5), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_min_k_munic   = dplyr::if_else(EO_IDEBFU1A5 >= (min(dplyr::lag(EO_IDEBFU1A5), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU1a5_max_k_munic   = dplyr::if_else(EO_IDEBFU1a5 <= (k * max(dplyr::lag(EO_IDEBFU1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_max_k_munic   = dplyr::if_else(EO_IDEBFU1A5 <= (k * max(dplyr::lag(EO_IDEBFU1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU1a5_med_mov_munic = dplyr::if_else(EO_IDEBFU1a5 <= (k * zoo::rollmedian(EO_IDEBFU1a5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU1A5_med_mov_munic = dplyr::if_else(EO_IDEBFU1A5 <= (k * zoo::rollmedian(EO_IDEBFU1A5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU1a5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU1a5), F, T) # Longitudinal (município)
+    DF_EO_IDEBFU1A5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU1A5), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_eo_idebfu1a5}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_IDEBFU1a5 |> 
-  dplyr::select(!EO_IDEBFU1a5) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_IDEBFU1A5 |> 
+  dplyr::select(!EO_IDEBFU1A5) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -2040,46 +2040,46 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EO_IDEBFU6a9
+### EO_IDEBFU6A9
 
 ```{r rules_dist_eo_idebfu6a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IDEBFU6a9 <- data |> 
+df_rules_dist_EO_IDEBFU6A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_IDEBFU6a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU6a9"],
+      "EO_IDEBFU6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU6A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU6a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_IDEBFU6A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_IDEBFU6a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_IDEBFU6A9), F, T), # Longitudinal (município)
     
-    DF_EO_IDEBFU6a9_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_out_munic     = dplyr::if_else(!outlier_function(EO_IDEBFU6A9), F, T), # Longitudinal (município)
     
-     DF_EO_IDEBFU6a9_min_munic    = dplyr::if_else(EO_IDEBFU6a9 >= (min(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+     DF_EO_IDEBFU6A9_min_munic    = dplyr::if_else(EO_IDEBFU6A9 >= (min(dplyr::lag(EO_IDEBFU6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_max_munic     = dplyr::if_else(EO_IDEBFU6a9 <= (max(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_max_munic     = dplyr::if_else(EO_IDEBFU6A9 <= (max(dplyr::lag(EO_IDEBFU6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_min_k_munic   = dplyr::if_else(EO_IDEBFU6a9 >= (min(dplyr::lag(EO_IDEBFU6a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_min_k_munic   = dplyr::if_else(EO_IDEBFU6A9 >= (min(dplyr::lag(EO_IDEBFU6A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_max_k_munic   = dplyr::if_else(EO_IDEBFU6a9 <= (k * max(dplyr::lag(EO_IDEBFU6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_max_k_munic   = dplyr::if_else(EO_IDEBFU6A9 <= (k * max(dplyr::lag(EO_IDEBFU6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_med_mov_munic = dplyr::if_else(EO_IDEBFU6a9 <= (k * zoo::rollmedian(EO_IDEBFU6a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_med_mov_munic = dplyr::if_else(EO_IDEBFU6A9 <= (k * zoo::rollmedian(EO_IDEBFU6A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU6a9), F, T), # Longitudinal (município)
+    DF_EO_IDEBFU6A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_IDEBFU6A9), F, T), # Longitudinal (município)
 
-    DF_EO_IDEBFU6a9_estoque_munic = dplyr::if_else(EO_IDEBFU6a9 >= dplyr::lag(EO_IDEBFU6a9), F, T) # Longitudinal (município)
+    DF_EO_IDEBFU6A9_estoque_munic = dplyr::if_else(EO_IDEBFU6A9 >= dplyr::lag(EO_IDEBFU6A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_eo_idebfu6a9}
 
 ## Tranformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_IDEBFU6a9 |> 
-  dplyr::select(!EO_IDEBFU6a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_IDEBFU6A9 |> 
+  dplyr::select(!EO_IDEBFU6A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -3826,43 +3826,43 @@ chart_vbar(df_sumario)
 
 
 
-### EO_TXAPROV1a9
+### EO_TXAPROV1A9
 
 ```{r rules_dist_EO_TXAPROV1a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXAPROV1a9 <- data |> 
+df_rules_dist_EO_TXAPROV1A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXAPROV1a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1a9"],
+      "EO_TXAPROV1A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV1a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV1A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXAPROV1a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV1a9), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV1a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV1a9), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV1a9_min_munic     = dplyr::if_else(EO_TXAPROV1a9 >= (min(dplyr::lag(EO_TXAPROV1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_min_munic     = dplyr::if_else(EO_TXAPROV1A9 >= (min(dplyr::lag(EO_TXAPROV1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a9_max_munic     = dplyr::if_else(EO_TXAPROV1a9 <= (max(dplyr::lag(EO_TXAPROV1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_max_munic     = dplyr::if_else(EO_TXAPROV1A9 <= (max(dplyr::lag(EO_TXAPROV1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a9_min_k_munic   = dplyr::if_else(EO_TXAPROV1a9 >= (min(dplyr::lag(EO_TXAPROV1a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_min_k_munic   = dplyr::if_else(EO_TXAPROV1A9 >= (min(dplyr::lag(EO_TXAPROV1A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a9_max_k_munic   = dplyr::if_else(EO_TXAPROV1a9 <= (k * max(dplyr::lag(EO_TXAPROV1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_max_k_munic   = dplyr::if_else(EO_TXAPROV1A9 <= (k * max(dplyr::lag(EO_TXAPROV1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a9_med_mov_munic = dplyr::if_else(EO_TXAPROV1a9 <= (k * zoo::rollmedian(EO_TXAPROV1a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A9_med_mov_munic = dplyr::if_else(EO_TXAPROV1A9 <= (k * zoo::rollmedian(EO_TXAPROV1A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV1a9), F, T) # Longitudinal (município)
+    DF_EO_TXAPROV1A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV1A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXAPROV1a9}
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV1a9 |> 
-  dplyr::select(!EO_TXAPROV1a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV1A9 |> 
+  dplyr::select(!EO_TXAPROV1A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -3902,43 +3902,43 @@ chart_vbar(df_sumario)
 
 
 
-### EO_TXAPROV1a5
+### EO_TXAPROV1A5
 
 ```{r rules_dist_EO_TXAPROV1a5}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXAPROV1a5 <- data |> 
+df_rules_dist_EO_TXAPROV1A5 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXAPROV1a5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1a5"],
+      "EO_TXAPROV1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1A5"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV1a5) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV1A5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXAPROV1a5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV1a5), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV1a5_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV1a5), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV1a5_min_munic     = dplyr::if_else(EO_TXAPROV1a5 >= (min(dplyr::lag(EO_TXAPROV1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_min_munic     = dplyr::if_else(EO_TXAPROV1A5 >= (min(dplyr::lag(EO_TXAPROV1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a5_max_munic     = dplyr::if_else(EO_TXAPROV1a5 <= (max(dplyr::lag(EO_TXAPROV1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_max_munic     = dplyr::if_else(EO_TXAPROV1A5 <= (max(dplyr::lag(EO_TXAPROV1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a5_min_k_munic   = dplyr::if_else(EO_TXAPROV1a5 >= (min(dplyr::lag(EO_TXAPROV1a5), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_min_k_munic   = dplyr::if_else(EO_TXAPROV1A5 >= (min(dplyr::lag(EO_TXAPROV1A5), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a5_max_k_munic   = dplyr::if_else(EO_TXAPROV1a5 <= (k * max(dplyr::lag(EO_TXAPROV1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_max_k_munic   = dplyr::if_else(EO_TXAPROV1A5 <= (k * max(dplyr::lag(EO_TXAPROV1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a5_med_mov_munic = dplyr::if_else(EO_TXAPROV1a5 <= (k * zoo::rollmedian(EO_TXAPROV1a5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV1A5_med_mov_munic = dplyr::if_else(EO_TXAPROV1A5 <= (k * zoo::rollmedian(EO_TXAPROV1A5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV1a5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV1a5), F, T) # Longitudinal (município)
+    DF_EO_TXAPROV1A5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV1A5), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXAPROV1a5}
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV1a5 |> 
-  dplyr::select(!EO_TXAPROV1a5) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV1A5 |> 
+  dplyr::select(!EO_TXAPROV1A5) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -3977,44 +3977,44 @@ chart_vbar(df_sumario)
 
 
 
-### EO_TXAPROV6a9
+### EO_TXAPROV6A9
 
 ```{r rules_dist_EO_TXAPROV6a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXAPROV6a9 <- data |> 
+df_rules_dist_EO_TXAPROV6A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXAPROV6a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV6a9"],
+      "EO_TXAPROV6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV6A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV6a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV6A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXAPROV6a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV6a9), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV6a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV6a9), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV6a9_min_munic     = dplyr::if_else(EO_TXAPROV6a9 >= (min(dplyr::lag(EO_TXAPROV6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_min_munic     = dplyr::if_else(EO_TXAPROV6A9 >= (min(dplyr::lag(EO_TXAPROV6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV6a9_max_munic     = dplyr::if_else(EO_TXAPROV6a9 <= (max(dplyr::lag(EO_TXAPROV6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_max_munic     = dplyr::if_else(EO_TXAPROV6A9 <= (max(dplyr::lag(EO_TXAPROV6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV6a9_min_k_munic   = dplyr::if_else(EO_TXAPROV6a9 >= (min(dplyr::lag(EO_TXAPROV6a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_min_k_munic   = dplyr::if_else(EO_TXAPROV6A9 >= (min(dplyr::lag(EO_TXAPROV6A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV6a9_max_k_munic   = dplyr::if_else(EO_TXAPROV6a9 <= (k * max(dplyr::lag(EO_TXAPROV6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_max_k_munic   = dplyr::if_else(EO_TXAPROV6A9 <= (k * max(dplyr::lag(EO_TXAPROV6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV6a9_med_mov_munic = dplyr::if_else(EO_TXAPROV6a9 <= (k * zoo::rollmedian(EO_TXAPROV6a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV6A9_med_mov_munic = dplyr::if_else(EO_TXAPROV6A9 <= (k * zoo::rollmedian(EO_TXAPROV6A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV6a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV6a9), F, T) # Longitudinal (município)
+    DF_EO_TXAPROV6A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV6A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXAPROV6a9}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV6a9 |> 
-  dplyr::select(!EO_TXAPROV6a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV6A9 |> 
+  dplyr::select(!EO_TXAPROV6A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4052,43 +4052,43 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXAPROV10a12
+### EO_TXAPROV10A12
 
 ```{r rules_dist_EO_TXAPROV10a12}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXAPROV10a12 <- data |> 
+df_rules_dist_EO_TXAPROV10A12 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXAPROV10a12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV10a12"],
+      "EO_TXAPROV10A12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV10A12"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV10a12) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXAPROV10A12) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXAPROV10a12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV10a12), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXAPROV10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV10a12_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV10a12), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_out_munic     = dplyr::if_else(!outlier_function(EO_TXAPROV10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXAPROV10a12_min_munic     = dplyr::if_else(EO_TXAPROV10a12 >= (min(dplyr::lag(EO_TXAPROV10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_min_munic     = dplyr::if_else(EO_TXAPROV10A12 >= (min(dplyr::lag(EO_TXAPROV10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV10a12_max_munic     = dplyr::if_else(EO_TXAPROV10a12 <= (max(dplyr::lag(EO_TXAPROV10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_max_munic     = dplyr::if_else(EO_TXAPROV10A12 <= (max(dplyr::lag(EO_TXAPROV10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV10a12_min_k_munic   = dplyr::if_else(EO_TXAPROV10a12 >= (min(dplyr::lag(EO_TXAPROV10a12), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_min_k_munic   = dplyr::if_else(EO_TXAPROV10A12 >= (min(dplyr::lag(EO_TXAPROV10A12), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV10a12_max_k_munic   = dplyr::if_else(EO_TXAPROV10a12 <= (k * max(dplyr::lag(EO_TXAPROV10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_max_k_munic   = dplyr::if_else(EO_TXAPROV10A12 <= (k * max(dplyr::lag(EO_TXAPROV10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV10a12_med_mov_munic = dplyr::if_else(EO_TXAPROV10a12 <= (k * zoo::rollmedian(EO_TXAPROV10a12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXAPROV10A12_med_mov_munic = dplyr::if_else(EO_TXAPROV10A12 <= (k * zoo::rollmedian(EO_TXAPROV10A12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXAPROV10a12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV10a12), F, T) # Longitudinal (município)
+    DF_EO_TXAPROV10A12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXAPROV10A12), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXAPROV10a12}
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV10a12 |> 
-  dplyr::select(!EO_TXAPROV10a12) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXAPROV10A12 |> 
+  dplyr::select(!EO_TXAPROV10A12) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4126,44 +4126,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXREP1a9
+### EO_TXREP1A9
 
 ```{r rules_dist_EO_TXREP1a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXREP1a9 <- data |> 
+df_rules_dist_EO_TXREP1A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXREP1a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP1a9"],
+      "EO_TXREP1A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP1A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP1a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP1A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXREP1a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP1a9), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP1a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP1a9), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP1a9_min_munic     = dplyr::if_else(EO_TXREP1a9 >= (min(dplyr::lag(EO_TXREP1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_min_munic     = dplyr::if_else(EO_TXREP1A9 >= (min(dplyr::lag(EO_TXREP1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a9_max_munic     = dplyr::if_else(EO_TXREP1a9 <= (max(dplyr::lag(EO_TXREP1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_max_munic     = dplyr::if_else(EO_TXREP1A9 <= (max(dplyr::lag(EO_TXREP1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a9_min_k_munic   = dplyr::if_else(EO_TXREP1a9 >= (min(dplyr::lag(EO_TXREP1a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_min_k_munic   = dplyr::if_else(EO_TXREP1A9 >= (min(dplyr::lag(EO_TXREP1A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a9_max_k_munic   = dplyr::if_else(EO_TXREP1a9 <= (k * max(dplyr::lag(EO_TXREP1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_max_k_munic   = dplyr::if_else(EO_TXREP1A9 <= (k * max(dplyr::lag(EO_TXREP1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a9_med_mov_munic = dplyr::if_else(EO_TXREP1a9 <= (k * zoo::rollmedian(EO_TXREP1a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A9_med_mov_munic = dplyr::if_else(EO_TXREP1A9 <= (k * zoo::rollmedian(EO_TXREP1A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP1a9), F, T) # Longitudinal (município)
+    DF_EO_TXREP1A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP1A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXREP1a9}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXREP1a9 |> 
-  dplyr::select(!EO_TXREP1a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXREP1A9 |> 
+  dplyr::select(!EO_TXREP1A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4201,44 +4201,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXREP1a5
+### EO_TXREP1A5
 
 ```{r rules_dist_EO_TXREP1a5}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXREP1a5 <- data |> 
+df_rules_dist_EO_TXREP1A5 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXREP1a5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP1a5"],
+      "EO_TXREP1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP1A5"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP1a5) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP1A5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXREP1a5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP1a5), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP1a5_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP1a5), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP1a5_min_munic     = dplyr::if_else(EO_TXREP1a5 >= (min(dplyr::lag(EO_TXREP1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_min_munic     = dplyr::if_else(EO_TXREP1A5 >= (min(dplyr::lag(EO_TXREP1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a5_max_munic     = dplyr::if_else(EO_TXREP1a5 <= (max(dplyr::lag(EO_TXREP1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_max_munic     = dplyr::if_else(EO_TXREP1A5 <= (max(dplyr::lag(EO_TXREP1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a5_min_k_munic   = dplyr::if_else(EO_TXREP1a5 >= (min(dplyr::lag(EO_TXREP1a5), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_min_k_munic   = dplyr::if_else(EO_TXREP1A5 >= (min(dplyr::lag(EO_TXREP1A5), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a5_max_k_munic   = dplyr::if_else(EO_TXREP1a5 <= (k * max(dplyr::lag(EO_TXREP1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_max_k_munic   = dplyr::if_else(EO_TXREP1A5 <= (k * max(dplyr::lag(EO_TXREP1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a5_med_mov_munic = dplyr::if_else(EO_TXREP1a5 <= (k * zoo::rollmedian(EO_TXREP1a5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXREP1A5_med_mov_munic = dplyr::if_else(EO_TXREP1A5 <= (k * zoo::rollmedian(EO_TXREP1A5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP1a5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP1a5), F, T) # Longitudinal (município)
+    DF_EO_TXREP1A5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP1A5), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXREP1a5}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXREP1a5 |> 
-  dplyr::select(!EO_TXREP1a5) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXREP1A5 |> 
+  dplyr::select(!EO_TXREP1A5) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4276,44 +4276,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXREP10a12
+### EO_TXREP10A12
 
 ```{r rules_dist_EO_TXREP10a12}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXREP10a12 <- data |> 
+df_rules_dist_EO_TXREP10A12 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXREP10a12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP10a12"],
+      "EO_TXREP10A12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP10A12"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP10a12) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP10A12) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXREP10a12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP10a12), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP10a12_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP10a12), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP10a12_min_munic     = dplyr::if_else(EO_TXREP10a12 >= (min(dplyr::lag(EO_TXREP10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_min_munic     = dplyr::if_else(EO_TXREP10A12 >= (min(dplyr::lag(EO_TXREP10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP10a12_max_munic     = dplyr::if_else(EO_TXREP10a12 <= (max(dplyr::lag(EO_TXREP10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_max_munic     = dplyr::if_else(EO_TXREP10A12 <= (max(dplyr::lag(EO_TXREP10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP10a12_min_k_munic   = dplyr::if_else(EO_TXREP10a12 >= (min(dplyr::lag(EO_TXREP10a12), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_min_k_munic   = dplyr::if_else(EO_TXREP10A12 >= (min(dplyr::lag(EO_TXREP10A12), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP10a12_max_k_munic   = dplyr::if_else(EO_TXREP10a12 <= (k * max(dplyr::lag(EO_TXREP10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_max_k_munic   = dplyr::if_else(EO_TXREP10A12 <= (k * max(dplyr::lag(EO_TXREP10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP10a12_med_mov_munic = dplyr::if_else(EO_TXREP10a12 <= (k * zoo::rollmedian(EO_TXREP10a12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXREP10A12_med_mov_munic = dplyr::if_else(EO_TXREP10A12 <= (k * zoo::rollmedian(EO_TXREP10A12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP10a12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP10a12), F, T) # Longitudinal (município)
+    DF_EO_TXREP10A12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP10A12), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXREP10a12}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXREP10a12 |> 
-  dplyr::select(!EO_TXREP10a12) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXREP10A12 |> 
+  dplyr::select(!EO_TXREP10A12) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4351,44 +4351,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXREP6a9
+### EO_TXREP6A9
 
 ```{r rules_dist_EO_TXREP6a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXREP6a9 <- data |> 
+df_rules_dist_EO_TXREP6A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXREP6a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP6a9"],
+      "EO_TXREP6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXREP6A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP6a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXREP6A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXREP6a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP6a9), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXREP6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP6a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP6a9), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXREP6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXREP6a9_min_munic     = dplyr::if_else(EO_TXREP6a9 >= (min(dplyr::lag(EO_TXREP6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_min_munic     = dplyr::if_else(EO_TXREP6A9 >= (min(dplyr::lag(EO_TXREP6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP6a9_max_munic     = dplyr::if_else(EO_TXREP6a9 <= (max(dplyr::lag(EO_TXREP6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_max_munic     = dplyr::if_else(EO_TXREP6A9 <= (max(dplyr::lag(EO_TXREP6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP6a9_min_k_munic   = dplyr::if_else(EO_TXREP6a9 >= (min(dplyr::lag(EO_TXREP6a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_min_k_munic   = dplyr::if_else(EO_TXREP6A9 >= (min(dplyr::lag(EO_TXREP6A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP6a9_max_k_munic   = dplyr::if_else(EO_TXREP6a9 <= (k * max(dplyr::lag(EO_TXREP6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_max_k_munic   = dplyr::if_else(EO_TXREP6A9 <= (k * max(dplyr::lag(EO_TXREP6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP6a9_med_mov_munic = dplyr::if_else(EO_TXREP6a9 <= (k * zoo::rollmedian(EO_TXREP6a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXREP6A9_med_mov_munic = dplyr::if_else(EO_TXREP6A9 <= (k * zoo::rollmedian(EO_TXREP6A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXREP6a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP6a9), F, T) # Longitudinal (município)
+    DF_EO_TXREP6A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXREP6A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXREP6a9}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXREP6a9 |> 
-  dplyr::select(!EO_TXREP6a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXREP6A9 |> 
+  dplyr::select(!EO_TXREP6A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4426,44 +4426,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXABA1a9
+### EO_TXABA1A9
 
 ```{r rules_dist_EO_TXABA1a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXABA1a9 <- data |> 
+df_rules_dist_EO_TXABA1A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXABA1a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA1a9"],
+      "EO_TXABA1A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA1A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA1a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA1A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXABA1a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA1a9), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA1a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA1a9), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA1A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA1a9_min_munic     = dplyr::if_else(EO_TXABA1a9 >= (min(dplyr::lag(EO_TXABA1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_min_munic     = dplyr::if_else(EO_TXABA1A9 >= (min(dplyr::lag(EO_TXABA1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a9_max_munic     = dplyr::if_else(EO_TXABA1a9 <= (max(dplyr::lag(EO_TXABA1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_max_munic     = dplyr::if_else(EO_TXABA1A9 <= (max(dplyr::lag(EO_TXABA1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a9_min_k_munic   = dplyr::if_else(EO_TXABA1a9 >= (min(dplyr::lag(EO_TXABA1a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_min_k_munic   = dplyr::if_else(EO_TXABA1A9 >= (min(dplyr::lag(EO_TXABA1A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a9_max_k_munic   = dplyr::if_else(EO_TXABA1a9 <= (k * max(dplyr::lag(EO_TXABA1a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_max_k_munic   = dplyr::if_else(EO_TXABA1A9 <= (k * max(dplyr::lag(EO_TXABA1A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a9_med_mov_munic = dplyr::if_else(EO_TXABA1a9 <= (k * zoo::rollmedian(EO_TXABA1a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A9_med_mov_munic = dplyr::if_else(EO_TXABA1A9 <= (k * zoo::rollmedian(EO_TXABA1A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA1a9), F, T) # Longitudinal (município)
+    DF_EO_TXABA1A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA1A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXABA1a9}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXABA1a9 |> 
-  dplyr::select(!EO_TXABA1a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXABA1A9 |> 
+  dplyr::select(!EO_TXABA1A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4501,44 +4501,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXABA1a5
+### EO_TXABA1A5
 
 ```{r rules_dist_EO_TXABA1a5}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXABA1a5 <- data |> 
+df_rules_dist_EO_TXABA1A5 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXABA1a5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA1a5"],
+      "EO_TXABA1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA1A5"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA1a5) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA1A5) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXABA1a5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA1a5), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA1a5_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA1a5), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA1A5), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA1a5_min_munic     = dplyr::if_else(EO_TXABA1a5 >= (min(dplyr::lag(EO_TXABA1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_min_munic     = dplyr::if_else(EO_TXABA1A5 >= (min(dplyr::lag(EO_TXABA1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a5_max_munic     = dplyr::if_else(EO_TXABA1a5 <= (max(dplyr::lag(EO_TXABA1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_max_munic     = dplyr::if_else(EO_TXABA1A5 <= (max(dplyr::lag(EO_TXABA1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a5_min_k_munic   = dplyr::if_else(EO_TXABA1a5 >= (min(dplyr::lag(EO_TXABA1a5), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_min_k_munic   = dplyr::if_else(EO_TXABA1A5 >= (min(dplyr::lag(EO_TXABA1A5), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a5_max_k_munic   = dplyr::if_else(EO_TXABA1a5 <= (k * max(dplyr::lag(EO_TXABA1a5), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_max_k_munic   = dplyr::if_else(EO_TXABA1A5 <= (k * max(dplyr::lag(EO_TXABA1A5), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a5_med_mov_munic = dplyr::if_else(EO_TXABA1a5 <= (k * zoo::rollmedian(EO_TXABA1a5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXABA1A5_med_mov_munic = dplyr::if_else(EO_TXABA1A5 <= (k * zoo::rollmedian(EO_TXABA1A5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA1a5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA1a5), F, T) # Longitudinal (município)
+    DF_EO_TXABA1A5_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA1A5), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXABA1a5}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXABA1a5 |> 
-  dplyr::select(!EO_TXABA1a5) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXABA1A5 |> 
+  dplyr::select(!EO_TXABA1A5) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4576,44 +4576,44 @@ chart_vbar(df_sumario)
 ```
 
 
-### EO_TXABA6a9
+### EO_TXABA6A9
 
 ```{r rules_dist_EO_TXABA6a9}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXABA6a9 <- data |> 
+df_rules_dist_EO_TXABA6A9 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXABA6a9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA6a9"],
+      "EO_TXABA6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA6A9"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA6a9) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA6A9) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXABA6a9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA6a9), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA6a9_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA6a9), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA6A9), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA6a9_min_munic     = dplyr::if_else(EO_TXABA6a9 >= (min(dplyr::lag(EO_TXABA6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_min_munic     = dplyr::if_else(EO_TXABA6A9 >= (min(dplyr::lag(EO_TXABA6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA6a9_max_munic     = dplyr::if_else(EO_TXABA6a9 <= (max(dplyr::lag(EO_TXABA6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_max_munic     = dplyr::if_else(EO_TXABA6A9 <= (max(dplyr::lag(EO_TXABA6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA6a9_min_k_munic   = dplyr::if_else(EO_TXABA6a9 >= (min(dplyr::lag(EO_TXABA6a9), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_min_k_munic   = dplyr::if_else(EO_TXABA6A9 >= (min(dplyr::lag(EO_TXABA6A9), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA6a9_max_k_munic   = dplyr::if_else(EO_TXABA6a9 <= (k * max(dplyr::lag(EO_TXABA6a9), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_max_k_munic   = dplyr::if_else(EO_TXABA6A9 <= (k * max(dplyr::lag(EO_TXABA6A9), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA6a9_med_mov_munic = dplyr::if_else(EO_TXABA6a9 <= (k * zoo::rollmedian(EO_TXABA6a9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXABA6A9_med_mov_munic = dplyr::if_else(EO_TXABA6A9 <= (k * zoo::rollmedian(EO_TXABA6A9, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA6a9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA6a9), F, T) # Longitudinal (município)
+    DF_EO_TXABA6A9_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA6A9), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXABA6a9}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXABA6a9 |> 
-  dplyr::select(!EO_TXABA6a9) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXABA6A9 |> 
+  dplyr::select(!EO_TXABA6A9) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -4650,44 +4650,44 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EO_TXABA10a12
+### EO_TXABA10A12
 
 ```{r rules_dist_EO_TXABA10a12}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_TXABA10a12 <- data |> 
+df_rules_dist_EO_TXABA10A12 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EO_TXABA10a12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA10a12"],
+      "EO_TXABA10A12" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXABA10A12"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |>
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA10a12) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EO_TXABA10A12) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_EO_TXABA10a12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA10a12), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_hampel_munic  = dplyr::if_else(!hampel_filter(EO_TXABA10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA10a12_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA10a12), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_out_munic     = dplyr::if_else(!outlier_function(EO_TXABA10A12), F, T), # Longitudinal (município)
     
-    DF_EO_TXABA10a12_min_munic     = dplyr::if_else(EO_TXABA10a12 >= (min(dplyr::lag(EO_TXABA10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_min_munic     = dplyr::if_else(EO_TXABA10A12 >= (min(dplyr::lag(EO_TXABA10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA10a12_max_munic     = dplyr::if_else(EO_TXABA10a12 <= (max(dplyr::lag(EO_TXABA10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_max_munic     = dplyr::if_else(EO_TXABA10A12 <= (max(dplyr::lag(EO_TXABA10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA10a12_min_k_munic   = dplyr::if_else(EO_TXABA10a12 >= (min(dplyr::lag(EO_TXABA10a12), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_min_k_munic   = dplyr::if_else(EO_TXABA10A12 >= (min(dplyr::lag(EO_TXABA10A12), na.rm = T) / k), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA10a12_max_k_munic   = dplyr::if_else(EO_TXABA10a12 <= (k * max(dplyr::lag(EO_TXABA10a12), na.rm = T)), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_max_k_munic   = dplyr::if_else(EO_TXABA10A12 <= (k * max(dplyr::lag(EO_TXABA10A12), na.rm = T)), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA10a12_med_mov_munic = dplyr::if_else(EO_TXABA10a12 <= (k * zoo::rollmedian(EO_TXABA10a12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_EO_TXABA10A12_med_mov_munic = dplyr::if_else(EO_TXABA10A12 <= (k * zoo::rollmedian(EO_TXABA10A12, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
 
-    DF_EO_TXABA10a12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA10a12), F, T) # Longitudinal (município)
+    DF_EO_TXABA10A12_dif_munic     = dplyr::if_else(!compare_first_dif(EO_TXABA10A12), F, T) # Longitudinal (município)
   )
 ```
 
 ```{r data_wrangling_dist_EO_TXABA10a12}
 
 ## Transformação dos resultados
-df_sumario_dist_eo <- df_rules_dist_EO_TXABA10a12 |> 
-  dplyr::select(!EO_TXABA10a12) |> 
+df_sumario_dist_eo <- df_rules_dist_EO_TXABA10A12 |> 
+  dplyr::select(!EO_TXABA10A12) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -14669,8 +14669,8 @@ pt <- openxlsx::createWorkbook()
     "EO_ESCOLAEFAF",
     "EO_ESCOLAEFCO",
     "EO_ESCOLAME",
-    "EO_IDEBFU1a5",
-    "EO_IDEBFU6a9",
+    "EO_IDEBFU1A5",
+    "EO_IDEBFU6A9",
     "EO_IQEP11",
     "EO_IQEM4",
     "EO_IQEM8",
@@ -14702,18 +14702,18 @@ pt <- openxlsx::createWorkbook()
     "EO_TAXA15",
     "EO_TAXALIQ15",
     "EO_DISTEM",
-    "EO_TXAPROV1a5",
-    "EO_TXAPROV1a9",
-    "EO_TXAPROV6a9",
-    "EO_TXAPROV10a12",
-    "EO_TXREP1a9",
-    "EO_TXREP1a5",
-    "EO_TXREP10a12",
-    "EO_TXREP6a9",
-    "EO_TXABA1a9",
-    "EO_TXABA1a5",
-    "EO_TXABA6a9",
-    "EO_TXABA10a12",
+    "EO_TXAPROV1A5",
+    "EO_TXAPROV1A9",
+    "EO_TXAPROV6A9",
+    "EO_TXAPROV10A12",
+    "EO_TXREP1A9",
+    "EO_TXREP1A5",
+    "EO_TXREP10A12",
+    "EO_TXREP6A9",
+    "EO_TXABA1A9",
+    "EO_TXABA1A5",
+    "EO_TXABA6A9",
+    "EO_TXABA10A12",
     "EO_DISTEF",
     "EO_DISTEFAI",
     "EO_DISTEFAF",
@@ -15118,8 +15118,8 @@ for(i in names(df_obs_valid)){
     "EO_ESCOLAEFAF" = df_rules_dist_EO_ESCOLAEFAF ,
     "EO_ESCOLAEFCO" = df_rules_dist_EO_ESCOLAEFCO ,
     "EO_ESCOLAME" = df_rules_dist_EO_ESCOLAME ,
-    "EO_IDEBFU1a5" = df_rules_dist_EO_IDEBFU1a5 ,
-    "EO_IDEBFU6a9" = df_rules_dist_EO_IDEBFU6a9 ,
+    "EO_IDEBFU1A5" = df_rules_dist_EO_IDEBFU1A5 ,
+    "EO_IDEBFU6A9" = df_rules_dist_EO_IDEBFU6A9 ,
     "EO_IQEP11" = df_rules_dist_EO_IQEP11 ,
     "EO_IQEM4" = df_rules_dist_EO_IQEM4 ,
     "EO_IQEM8" = df_rules_dist_EO_IQEM8 ,
@@ -15151,18 +15151,18 @@ for(i in names(df_obs_valid)){
     "EO_TAXA15" = df_rules_dist_EO_TAXA15 ,
     "EO_TAXALIQ15" = df_rules_dist_EO_TAXALIQ15 ,
     "EO_DISTEM" = df_rules_dist_EO_DISTEM ,
-    "EO_TXAPROV1a5" = df_rules_dist_EO_TXAPROV1a5 ,
-    "EO_TXAPROV1a9" = df_rules_dist_EO_TXAPROV1a9 ,
-    "EO_TXAPROV6a9" = df_rules_dist_EO_TXAPROV6a9 ,
-    "EO_TXAPROV10a12" = df_rules_dist_EO_TXAPROV10a12 ,
-    "EO_TXREP1a9" = df_rules_dist_EO_TXREP1a9 ,
-    "EO_TXREP1a5" = df_rules_dist_EO_TXREP1a5 ,
-    "EO_TXREP10a12" = df_rules_dist_EO_TXREP10a12 ,
-    "EO_TXREP6a9" = df_rules_dist_EO_TXREP6a9 ,
-    "EO_TXABA1a9" = df_rules_dist_EO_TXABA1a9 ,
-    "EO_TXABA1a5" = df_rules_dist_EO_TXABA1a5 ,
-    "EO_TXABA6a9" = df_rules_dist_EO_TXABA6a9 ,
-    "EO_TXABA10a12" = df_rules_dist_EO_TXABA10a12 ,
+    "EO_TXAPROV1A5" = df_rules_dist_EO_TXAPROV1A5 ,
+    "EO_TXAPROV1A9" = df_rules_dist_EO_TXAPROV1A9 ,
+    "EO_TXAPROV6A9" = df_rules_dist_EO_TXAPROV6A9 ,
+    "EO_TXAPROV10A12" = df_rules_dist_EO_TXAPROV10A12 ,
+    "EO_TXREP1A9" = df_rules_dist_EO_TXREP1A9 ,
+    "EO_TXREP1A5" = df_rules_dist_EO_TXREP1A5 ,
+    "EO_TXREP10A12" = df_rules_dist_EO_TXREP10A12 ,
+    "EO_TXREP6A9" = df_rules_dist_EO_TXREP6A9 ,
+    "EO_TXABA1A9" = df_rules_dist_EO_TXABA1A9 ,
+    "EO_TXABA1A5" = df_rules_dist_EO_TXABA1A5 ,
+    "EO_TXABA6A9" = df_rules_dist_EO_TXABA6A9 ,
+    "EO_TXABA10A12" = df_rules_dist_EO_TXABA10A12 ,
     "EO_DISTEF" = df_rules_dist_EO_DISTEF ,
     "EO_DISTEFAI" = df_rules_dist_EO_DISTEFAI ,
     "EO_DISTEFAF" = df_rules_dist_EO_DISTEFAF ,
