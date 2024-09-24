@@ -39,8 +39,12 @@ output-file: "eo_relatorio.html"
 
 ```{r  setup, include=FALSE}
 
-table_descriptive <- function(variable, data){
+table_descriptive <- function(variable, data, ano_base_alter){
   res <- data |>
+    dplyr::filter( 
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::group_by(ANO) |>
     dplyr::summarise(
       N = dplyr::n(),
@@ -89,10 +93,12 @@ chart_boxplot <- function(variable, data, ano_base_alter){
   return(result)
 }
 
-
-
-chart_histogram <- function(variable, data){
+chart_histogram <- function(variable, data, ano_base_alter){
   result <- data |>
+    dplyr::filter( 
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::mutate(ANO = as.numeric(ANO)) |>
     ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
     ggplot2::geom_histogram() +
@@ -356,15 +362,128 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
 # no ano inicial de análise devido a fatores como mudança de metodologia
-# ano_base_alter <- c(
-#   "EO_ALUNOSP8" = 2010
-# )
+
+ano_base_alter <- c(
+  "EO_ALUNOSP8"        = 2003,
+  "EO_ALUNOSM8"        = 2003,
+  "EO_ALUNOSP11"       = 2003,
+  "EO_ESCOLAEFAI"      = 2007,
+  "EO_ESCOLAEFAF"      = 2007,
+  "EO_ESCOLAEFCO"      = 2007,
+  "EO_ESCOLAME"        = 2007,
+  "EO_IDEBFU1a5"       = 2005,
+  "EO_IDEBFU6a9"       = 2005,
+  "EO_IQEP11"          = 2003,
+  "EO_IQEM4"           = 2003,
+  "EO_IQEM8"           = 2003,
+  "EO_IQEM11"          = 2003,
+  "EO_IQEP4"           = 2003,
+  "EO_IQEP8"           = 2003,
+  "EO_IQE4"            = 2003,
+  "EO_IQE8"            = 2003,
+  "EO_IQE11"           = 2003,
+  "EO_IQE"             = 2003,
+  "EO_EJAFU15"         = 2007,
+  "EO_EJAME18"         = 2007,
+  "EO_TAXA0A3"         = 2010,
+  "EO_TAXA4A5"         = 2007,
+  "EO_TAXA15A17"       = 2010,
+  "EO_TXATBASICA"      = 2013,
+  "EO_TAXALIQ7"        = 2007,
+  "EO_TAXALIQ15"       = 2007,
+  "EO_DISTEM"          = 2013, 
+  "EO_TXAPROV1a5"      = 2005,
+  "EO_TXAPROV1a9"      = 2013,
+  "EO_TXAPROV6a9"      = 2005,
+  "EO_TXAPROV10a12"    = 2013,
+  "EO_TXREP1a9"        = 2013,
+  "EO_TXREP1a5"        = 2013,
+  "EO_TXREP10a12"      = 2013,
+  "EO_TXREP6a9"        = 2013,
+  "EO_TXABA1a9"        = 2013,
+  "EO_TXABA1a5"        = 2013,
+  "EO_TXABA6a9"        = 2013,
+  "EO_TXABA10a12"      = 2013,
+  "EO_DISTEF"          = 2013,
+  "EO_DISTEFAI"        = 2013,
+  "EO_DISTEFAF"        = 2013,
+  "EO_PCAPM8"          = 2003,
+  "EO_PCAPM11"         = 2003,
+  "EO_PCAPP8"          = 2003,
+  "EO_PCAPP11"         = 2003,
+  "EO_PALUNOSM11"      = 2003,
+  "EO_DOCSUPEI"        = 2013,
+  "EO_DOCSUPEF"        = 2013,
+  "EO_DOCSUPEFAF"      = 2013,
+  "EO_DOCSUPEFAI"      = 2013,
+  "EO_DOCSUPEM"        = 2013,
+  "EO_ADEDG1EI"        = 2013,
+  "EO_ADEDG2EI"        = 2013,
+  "EO_ADEDG3EI"        = 2013,
+  "EO_ADEDG4EI"        = 2013,
+  "EO_ADEDG5EI"        = 2013,
+  "EO_ADEDG1EF"        = 2013,
+  "EO_ADEDG2EF"        = 2013,
+  "EO_ADEDG3EF"        = 2013,
+  "EO_ADEDG4EF"        = 2013,
+  "EO_ADEDG5EF"        = 2013,
+  "EO_ADEDG1EFAI"      = 2013,
+  "EO_ADEDG2EFAI"      = 2013,
+  "EO_ADEDG3EFAI"      = 2013,
+  "EO_ADEDG4EFAI"      = 2013,
+  "EO_ADEDG5EFAI"      = 2013,
+  "EO_ADEDG1EFAF"      = 2013,
+  "EO_ADEDG2EFAF"      = 2013,
+  "EO_ADEDG3EFAF"      = 2013,
+  "EO_ADEDG4EFAF"      = 2013,
+  "EO_ADEDG5EFAF"      = 2013,
+  "EO_ADEDG1EM"        = 2013,
+  "EO_ADEDG2EM"        = 2013,
+  "EO_ADEDG3EM"        = 2013,
+  "EO_ADEDG4EM"        = 2013,
+  "EO_ADEDG5EM"        = 2013,
+  "EO_ADEDG1EJAF"      = 2013,
+  "EO_ADEDG2EJAF"      = 2013,
+  "EO_ADEDG3EJAF"      = 2013,
+  "EO_ADEDG4EJAF"      = 2013,
+  "EO_ADEDG5EFAF"      = 2013,
+  "EO_ADEDG1EJAM"      = 2013,
+  "EO_ADEDG2EJAM"      = 2013,
+  "EO_ADEDG3EJAM"      = 2013,
+  "EO_ADEDG4EJAM"      = 2013,
+  "EO_ADEDG5EJAM"      = 2013,
+  "EO_MATFEI"          = 2013,
+  "EO_MATEEI"          = 2013,
+  "EO_MATMEI"          = 2013,
+  "EO_MATPEI"          = 2013,
+  "EO_MATFEF"          = 2013,
+  "EO_MATEEF"          = 2013,
+  "EO_MATMEF"          = 2013,
+  "EO_MATPEF"          = 2013,
+  "EO_MATFEFAI"        = 2013,
+  "EO_MATEEFAI"        = 2013,
+  "EO_MATMEFAI"        = 2013,
+  "EO_MATPEFAI"        = 2013,
+  "EO_MATFEFAF"        = 2013,
+  "EO_MATEEFAF"        = 2013,
+  "EO_MATMEFAF"        = 2013,
+  "EO_MATPEFAF"        = 2013,
+  "EO_MATFEM"          = 2013,
+  "EO_MATEEM"          = 2013,
+  "EO_MATMEM"          = 2013,
+  "EO_MATPEM"          = 2013,
+  "EO_MATTICR"         = 2015,
+  "EO_MATTIPE"         = 2015,
+  "EO_MATTIEFAI"       = 2015,
+  "EO_MATTIEFAF"       = 2015,
+  "EO_MATTIEM"         = 2015
+)
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
-ano_base_alter <- c(
-  "NA" = NA_integer_
-)
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
 ```
 
 
@@ -14489,7 +14608,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(variable = var, data = data), 
+    table_descriptive(variable = var, data = data, ano_base_alter), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -14528,7 +14647,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data))
+  print(chart_histogram(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
