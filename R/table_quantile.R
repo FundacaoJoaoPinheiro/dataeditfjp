@@ -6,7 +6,6 @@
 #' @param data
 #'
 #' @return result
-#' @export
 
 table_quantile <- function(variable, data){
   result <- data  |>

@@ -2,9 +2,6 @@
 
 export("%>%")
 export(create_report)
-export(hampel_filter)
-export(outlier_function)
-export(table_quantile)
 import(dplyr)
 import(robustbase)
 import(stats)

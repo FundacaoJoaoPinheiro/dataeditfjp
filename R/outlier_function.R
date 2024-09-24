@@ -8,7 +8,6 @@
 #' @importFrom robustbase mc
 #' @import robustbase
 #' @return Vector with TRUE or FALSE
-#' @export
 
 outlier_function <- function(variable, a=-4,b=3){
   q1 <- stats::quantile(variable, probs = 0.25, na.rm = T, names = F)

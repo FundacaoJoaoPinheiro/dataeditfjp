@@ -366,6 +366,7 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 ano_base_alter <- c(
   "EO_ALUNOSP8"        = 2003,
   "EO_ALUNOSM8"        = 2003,
+  "EO_ALUNOSM11"       = 2003,
   "EO_ALUNOSP11"       = 2003,
   "EO_ESCOLAEFAI"      = 2007,
   "EO_ESCOLAEFAF"      = 2007,
