@@ -670,7 +670,6 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-
 ## Distribuição
 
 ### MA_ICMSECOLOG

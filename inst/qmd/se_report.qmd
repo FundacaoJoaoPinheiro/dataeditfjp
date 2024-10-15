@@ -276,12 +276,6 @@ k <- 1.5
 
 ## "Truque" para setar "k" como uma constante
 lockBinding("k", globalenv())
-
-## Parâmetros para os gráficos do validate::
-# chart_title <- "Sumário da validação por regra estabelecida"
-# chart_label <- c("Suspeita", "Validada", "Ausente", "Total")
-# chart_palette <- c("#ff985a", "#9fc0de", "#cccccc")
-# chart_xlab <- ""
 ```
 
 ```{r import_data}
@@ -365,15 +359,18 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
 # no ano inicial de análise devido a fatores como mudança de metodologia
-# ano_base_alter <- c(
-#   "MA_ICMSECOLOG" = 2010
-# )
+ano_base_alter <- c(
+  "SE_PENTA"         = 2010,
+  "SE_TXMODCNT30A69" = 2014,
+  "SE_ICSABMS"       = 2014,
+  "SE_MEDICOS"       = 2008
+)
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
-ano_base_alter <- c(
-  "NA" = NA_integer_
-)
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
 ```
 
 ```{r get_cat}
@@ -572,7 +569,7 @@ rules_type <- validate::validator(
   TI_SE_PARTODESLOCMIC    = is.numeric(SE_PARTODESLOCMIC),
   TI_SE_PENTA             = is.numeric(SE_PENTA),
   TI_SE_TXMODCNT30A69     = is.numeric(SE_TXMODCNT30A69),
-  TI_SE_ICSABMS          = is.numeric(SE_ICSABMS),
+  TI_SE_ICSABMS           = is.numeric(SE_ICSABMS),
   TI_SE_MEDICOS           = is.numeric(SE_MEDICOS)
 )
 ```
@@ -690,7 +687,7 @@ df_sumario_valid_se <- df_rules_valid_se_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with("VI_")
+    dplyr::starts_with(c("VI_", "VF_"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
@@ -3697,630 +3694,697 @@ pt <- openxlsx::createWorkbook()
 
 ```{r df_build_viol_valid}
 
+variables = c(
+"SE_TXBRUTAMORT",
+"SE_TXBRUTAMORTPAD",
+"SE_TXMOISQCOR45A59",
+"SE_TXMOAVC45A59",
+"SE_TXMOATRA15A29",
+"SE_TXMOHOMI",
+"SE_TXMOHOMI15A29",
+"SE_TXMOCANCOLUT",
+"SE_TXMOCANMA",
+"SE_TXMOCANPUL",
+"SE_OBITO60",
+"SE_NASCBAIXOPESO",
+"SE_OBINFSIFILS",
+"SE_OBTETANONEO",
+"SE_OBRAIVA",
+"SE_INTERDVHID",
+"SE_INTERDRSAI",
+"SE_COBPSF",
+"SE_NASC7CONSUL",
+"SE_TETRA",
+"SE_POLIO",
+"SE_TRIPLICE",
+"SE_FAMARELA",
+"SE_OBMALDEF",
+"SE_OBITSEMASSIS",
+"SE_INTERDCV40",
+"SE_INTERDIAB",
+"SE_INTERSAP",
+"SE_INTERSAP1A5",
+"SE_INTERSAP60",
+"SE_FRATFEMUR60",
+"SE_CANCPROST",
+"SE_INTMEDCOMPLDESMIC",
+"SE_PARTODESLOCMIC",
+"SE_PENTA",
+"SE_TXMODCNT30A69",
+"SE_ICSABMS",
+"SE_MEDICOS"
+  )
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_valid_se_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_se_txbrutamort <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXBRUTAMORT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txbrutamortpad <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXBRUTAMORTPAD")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmoisqcor45a59 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOISQCOR45A59")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmoavc45a59 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOAVC45A59")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmoatra15a29 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOATRA15A29")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmohomi <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOHOMI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmohomi15a29 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOHOMI15A29")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmocancolut <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOCANCOLUT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmocanma <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOCANMA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmocanpul <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMOCANPUL")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obito60 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBITO60")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_nascbaixopeso <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_NASCBAIXOPESO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obinfsifils <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBINFSIFILS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obtetanoneo <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBTETANONEO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obraiva <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBRAIVA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_interdvhid <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERDVHID")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_interdrsai <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERDRSAI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_cobpsf <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_COBPSF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_nasc7consul <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_NASC7CONSUL")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_tetra <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TETRA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_polio <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_POLIO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_triplice <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TRIPLICE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_famarela <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_FAMARELA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obmaldef <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBMALDEF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_obitsemassis <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_OBITSEMASSIS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_interdcv40 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERDCV40")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_interdiab <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERDIAB")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_intersap <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERSAP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_intersap1a5 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERSAP1A5")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_intersap60 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTERSAP60")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_fratfemur60 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_FRATFEMUR60")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_cancprost <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_CANCPROST")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_intmedcompldesmic <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_INTMEDCOMPLDESMIC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_partodeslocmic <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_PARTODESLOCMIC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_penta <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_PENTA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_txmodcnt30a69 <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_TXMODCNT30A69")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_icsabms <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_ICSABMS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_se_medicos <- df_rules_valid_se_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("SE_MEDICOS")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_valid_se_txbrutamort <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXBRUTAMORT")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txbrutamortpad <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXBRUTAMORTPAD")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmoisqcor45a59 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOISQCOR45A59")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmoavc45a59 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOAVC45A59")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmoatra15a29 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOATRA15A29")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmohomi <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOHOMI")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmohomi15a29 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOHOMI15A29")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmocancolut <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOCANCOLUT")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmocanma <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOCANMA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmocanpul <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMOCANPUL")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obito60 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBITO60")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_nascbaixopeso <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_NASCBAIXOPESO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obinfsifils <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBINFSIFILS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obtetanoneo <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBTETANONEO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obraiva <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBRAIVA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_interdvhid <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERDVHID")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_interdrsai <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERDRSAI")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_cobpsf <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_COBPSF")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_nasc7consul <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_NASC7CONSUL")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_tetra <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TETRA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_polio <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_POLIO")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_triplice <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TRIPLICE")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_famarela <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_FAMARELA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obmaldef <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBMALDEF")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_obitsemassis <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_OBITSEMASSIS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_interdcv40 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERDCV40")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_interdiab <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERDIAB")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_intersap <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERSAP")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_intersap1a5 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERSAP1A5")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_intersap60 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTERSAP60")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_fratfemur60 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_FRATFEMUR60")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_cancprost <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_CANCPROST")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_intmedcompldesmic <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_INTMEDCOMPLDESMIC")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_partodeslocmic <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_PARTODESLOCMIC")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_penta <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_PENTA")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_txmodcnt30a69 <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_TXMODCNT30A69")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_icsabms <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_ICSABMS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_se_medicos <- df_rules_valid_se_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("SE_MEDICOS")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_valid}
 
 ## Lista com os dfs por indicador
-lista_df <- list(
-  "se_txbrutamort"       = df_rules_valid_se_txbrutamort,
-  "se_txbrutamortpad"    = df_rules_valid_se_txbrutamortpad,
-  "se_txmoisqcor45a59"   = df_rules_valid_se_txmoisqcor45a59,
-  "se_txmoavc45a59"      = df_rules_valid_se_txmoavc45a59,
-  "se_txmoatra15a29"     = df_rules_valid_se_txmoatra15a29,
-  "se_txmohomi"          = df_rules_valid_se_txmohomi,
-  "se_txmohomi15a29"     = df_rules_valid_se_txmohomi15a29,
-  "se_txmocancolut"      = df_rules_valid_se_txmocancolut,
-  "se_txmocanma"         = df_rules_valid_se_txmocanma,
-  "se_txmocanpul"        = df_rules_valid_se_txmocanpul,
-  "se_obito60"           = df_rules_valid_se_obito60,
-  "se_nascbaixopeso"     = df_rules_valid_se_nascbaixopeso,
-  "se_obinfsifils"       = df_rules_valid_se_obinfsifils,
-  "se_obtetanoneo"       = df_rules_valid_se_obtetanoneo,
-  "se_obraiva"           = df_rules_valid_se_obraiva,
-  "se_interdvhid"        = df_rules_valid_se_interdvhid,
-  "se_interdrsai"        = df_rules_valid_se_interdrsai,
-  "se_cobpsf"            = df_rules_valid_se_cobpsf,
-  "se_nasc7consul"       = df_rules_valid_se_nasc7consul,
-  "se_tetra"             = df_rules_valid_se_tetra,
-  "se_polio"             = df_rules_valid_se_polio,
-  "se_triplice"          = df_rules_valid_se_triplice,
-  "se_famarela"          = df_rules_valid_se_famarela,
-  "se_obmaldef"          = df_rules_valid_se_obmaldef,
-  "se_obitsemassis"      = df_rules_valid_se_obitsemassis,
-  "se_interdcv40"        = df_rules_valid_se_interdcv40,
-  "se_interdiab"         = df_rules_valid_se_interdiab,
-  "se_intersap"          = df_rules_valid_se_intersap,
-  "se_intersap1a5"       = df_rules_valid_se_intersap1a5,
-  "se_intersap60"        = df_rules_valid_se_intersap60,
-  "se_fratfemur60"       = df_rules_valid_se_fratfemur60,
-  "se_cancprost"         = df_rules_valid_se_cancprost,
-  "se_intmedcompldesmic" = df_rules_valid_se_intmedcompldesmic,
-  "se_partodeslocmic"    = df_rules_valid_se_partodeslocmic,
-  "se_penta"             = df_rules_valid_se_penta,
-  "se_txmodcnt30a69"     = df_rules_valid_se_txmodcnt30a69,
-  "se_icsabms"          = df_rules_valid_se_icsabms,
-  "se_medicos"           = df_rules_valid_se_medicos
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_valid_")
-  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
-}
+# lista_df <- list(
+#   "se_txbrutamort"       = df_rules_valid_se_txbrutamort,
+#   "se_txbrutamortpad"    = df_rules_valid_se_txbrutamortpad,
+#   "se_txmoisqcor45a59"   = df_rules_valid_se_txmoisqcor45a59,
+#   "se_txmoavc45a59"      = df_rules_valid_se_txmoavc45a59,
+#   "se_txmoatra15a29"     = df_rules_valid_se_txmoatra15a29,
+#   "se_txmohomi"          = df_rules_valid_se_txmohomi,
+#   "se_txmohomi15a29"     = df_rules_valid_se_txmohomi15a29,
+#   "se_txmocancolut"      = df_rules_valid_se_txmocancolut,
+#   "se_txmocanma"         = df_rules_valid_se_txmocanma,
+#   "se_txmocanpul"        = df_rules_valid_se_txmocanpul,
+#   "se_obito60"           = df_rules_valid_se_obito60,
+#   "se_nascbaixopeso"     = df_rules_valid_se_nascbaixopeso,
+#   "se_obinfsifils"       = df_rules_valid_se_obinfsifils,
+#   "se_obtetanoneo"       = df_rules_valid_se_obtetanoneo,
+#   "se_obraiva"           = df_rules_valid_se_obraiva,
+#   "se_interdvhid"        = df_rules_valid_se_interdvhid,
+#   "se_interdrsai"        = df_rules_valid_se_interdrsai,
+#   "se_cobpsf"            = df_rules_valid_se_cobpsf,
+#   "se_nasc7consul"       = df_rules_valid_se_nasc7consul,
+#   "se_tetra"             = df_rules_valid_se_tetra,
+#   "se_polio"             = df_rules_valid_se_polio,
+#   "se_triplice"          = df_rules_valid_se_triplice,
+#   "se_famarela"          = df_rules_valid_se_famarela,
+#   "se_obmaldef"          = df_rules_valid_se_obmaldef,
+#   "se_obitsemassis"      = df_rules_valid_se_obitsemassis,
+#   "se_interdcv40"        = df_rules_valid_se_interdcv40,
+#   "se_interdiab"         = df_rules_valid_se_interdiab,
+#   "se_intersap"          = df_rules_valid_se_intersap,
+#   "se_intersap1a5"       = df_rules_valid_se_intersap1a5,
+#   "se_intersap60"        = df_rules_valid_se_intersap60,
+#   "se_fratfemur60"       = df_rules_valid_se_fratfemur60,
+#   "se_cancprost"         = df_rules_valid_se_cancprost,
+#   "se_intmedcompldesmic" = df_rules_valid_se_intmedcompldesmic,
+#   "se_partodeslocmic"    = df_rules_valid_se_partodeslocmic,
+#   "se_penta"             = df_rules_valid_se_penta,
+#   "se_txmodcnt30a69"     = df_rules_valid_se_txmodcnt30a69,
+#   "se_icsabms"          = df_rules_valid_se_icsabms,
+#   "se_medicos"           = df_rules_valid_se_medicos
+# )
+# 
+# ## Add dados à pasta de trabalho
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_valid_")
+#   openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+#   openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+# }
 ```
 
 ```{r df_build_viol_consist}
@@ -4361,438 +4425,499 @@ for(i in names(lista_df)){
 
 ```{r df_build_viol_dist}
 
+df_dist <- list(
+"SE_TXBRUTAMORT" = df_rules_dist_se_txbrutamort,
+"SE_TXBRUTAMORTPAD" = df_rules_dist_se_txbrutamortpad,
+"SE_TXMOISQCOR45A59" = df_rules_dist_se_txmoisqcor45a59,
+"SE_TXMOAVC45A59" = df_rules_dist_se_txmoavc45a59,
+"SE_TXMOATRA15A29" = df_rules_dist_se_txmoatra15a29,
+"SE_TXMOHOMI" = df_rules_dist_se_txmohomi,
+"SE_TXMOHOMI15A29" = df_rules_dist_se_txmohomi15a29,
+"SE_TXMOCANCOLUT" = df_rules_dist_se_txmocancolut,
+"SE_TXMOCANMA" = df_rules_dist_se_txmocanma,
+"SE_TXMOCANPUL" = df_rules_dist_se_txmocanpul,
+"SE_OBITO60" = df_rules_dist_se_obito60,
+"SE_NASCBAIXOPESO" = df_rules_dist_se_nascbaixopeso,
+"SE_OBINFSIFILS" = df_rules_dist_se_obinfsifils,
+"SE_OBTETANONEO" = df_rules_dist_se_obtetanoneo,
+"SE_OBRAIVA" = df_rules_dist_se_obraiva,
+"SE_INTERDVHID" = df_rules_dist_se_interdvhid,
+"SE_INTERDRSAI" = df_rules_dist_se_interdrsai,
+"SE_COBPSF" = df_rules_dist_se_cobpsf,
+"SE_NASC7CONSUL" = df_rules_dist_se_nasc7consul,
+"SE_TETRA" = df_rules_dist_se_tetra,
+"SE_POLIO" = df_rules_dist_se_polio,
+"SE_TRIPLICE" = df_rules_dist_se_triplice,
+"SE_FAMARELA" = df_rules_dist_se_famarela,
+"SE_OBMALDEF" = df_rules_dist_se_obmaldef,
+"SE_OBITSEMASSIS" = df_rules_dist_se_obitsemassis,
+"SE_INTERDCV40" = df_rules_dist_se_interdcv40,
+"SE_INTERDIAB" = df_rules_dist_se_interdiab,
+"SE_INTERSAP" = df_rules_dist_se_intersap,
+"SE_INTERSAP1A5" = df_rules_dist_se_intersap1a5,
+"SE_INTERSAP60" = df_rules_dist_se_intersap60,
+"SE_FRATFEMUR60" = df_rules_dist_se_fratfemur60,
+"SE_CANCPROST" = df_rules_dist_se_cancprost,
+"SE_INTMEDCOMPLDESMIC" = df_rules_dist_se_intmedcompldesmic,
+"SE_PARTODESLOCMIC" = df_rules_dist_se_partodeslocmic,
+"SE_PENTA" = df_rules_dist_se_penta,
+"SE_TXMODCNT30A69" = df_rules_dist_se_txmodcnt30a69,
+"SE_ICSABMS" = df_rules_dist_se_icsabms,
+"SE_MEDICOS" = df_rules_dist_se_medicos
+)
+
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
+  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+}
+
 # Criar base com as observações que violaram uma ou mais regras de distribuição
 
 ## Distribuição
-df_rules_dist_se_txbrutamort <- df_rules_dist_se_txbrutamort |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txbrutamortpad <- df_rules_dist_se_txbrutamortpad |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmoisqcor45a59 <- df_rules_dist_se_txmoisqcor45a59 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmoavc45a59 <- df_rules_dist_se_txmoavc45a59 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmoatra15a29 <- df_rules_dist_se_txmoatra15a29 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmohomi <- df_rules_dist_se_txmohomi |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmohomi15a29 <- df_rules_dist_se_txmohomi15a29 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmocancolut <- df_rules_dist_se_txmocancolut |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmocanma <- df_rules_dist_se_txmocanma |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmocanpul <- df_rules_dist_se_txmocanpul |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obito60 <- df_rules_dist_se_obito60 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_nascbaixopeso <- df_rules_dist_se_nascbaixopeso |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obinfsifils <- df_rules_dist_se_obinfsifils |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obtetanoneo <- df_rules_dist_se_obtetanoneo |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obraiva <- df_rules_dist_se_obraiva |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_interdvhid <- df_rules_dist_se_interdvhid |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_interdrsai <- df_rules_dist_se_interdrsai |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_cobpsf <- df_rules_dist_se_cobpsf |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_nasc7consul <- df_rules_dist_se_nasc7consul |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_tetra <- df_rules_dist_se_tetra |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_polio <- df_rules_dist_se_polio |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_triplice <- df_rules_dist_se_triplice |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_famarela <- df_rules_dist_se_famarela |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obmaldef <- df_rules_dist_se_obmaldef |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_obitsemassis <- df_rules_dist_se_obitsemassis |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_interdcv40 <- df_rules_dist_se_interdcv40 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_interdiab <- df_rules_dist_se_interdiab |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_intersap <- df_rules_dist_se_intersap |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_intersap1a5 <- df_rules_dist_se_intersap1a5 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_intersap60 <- df_rules_dist_se_intersap60 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_fratfemur60 <- df_rules_dist_se_fratfemur60 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_cancprost <- df_rules_dist_se_cancprost |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_intmedcompldesmic <- df_rules_dist_se_intmedcompldesmic |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_partodeslocmic <- df_rules_dist_se_partodeslocmic |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_penta <- df_rules_dist_se_penta |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_txmodcnt30a69 <- df_rules_dist_se_txmodcnt30a69 |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_icsabms <- df_rules_dist_se_icsabms |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_se_medicos <- df_rules_dist_se_medicos |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+# df_rules_dist_se_txbrutamort <- df_rules_dist_se_txbrutamort |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txbrutamortpad <- df_rules_dist_se_txbrutamortpad |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmoisqcor45a59 <- df_rules_dist_se_txmoisqcor45a59 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmoavc45a59 <- df_rules_dist_se_txmoavc45a59 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmoatra15a29 <- df_rules_dist_se_txmoatra15a29 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmohomi <- df_rules_dist_se_txmohomi |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmohomi15a29 <- df_rules_dist_se_txmohomi15a29 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmocancolut <- df_rules_dist_se_txmocancolut |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmocanma <- df_rules_dist_se_txmocanma |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmocanpul <- df_rules_dist_se_txmocanpul |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obito60 <- df_rules_dist_se_obito60 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_nascbaixopeso <- df_rules_dist_se_nascbaixopeso |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obinfsifils <- df_rules_dist_se_obinfsifils |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obtetanoneo <- df_rules_dist_se_obtetanoneo |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obraiva <- df_rules_dist_se_obraiva |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_interdvhid <- df_rules_dist_se_interdvhid |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_interdrsai <- df_rules_dist_se_interdrsai |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_cobpsf <- df_rules_dist_se_cobpsf |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_nasc7consul <- df_rules_dist_se_nasc7consul |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_tetra <- df_rules_dist_se_tetra |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_polio <- df_rules_dist_se_polio |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_triplice <- df_rules_dist_se_triplice |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_famarela <- df_rules_dist_se_famarela |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obmaldef <- df_rules_dist_se_obmaldef |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_obitsemassis <- df_rules_dist_se_obitsemassis |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_interdcv40 <- df_rules_dist_se_interdcv40 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_interdiab <- df_rules_dist_se_interdiab |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_intersap <- df_rules_dist_se_intersap |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_intersap1a5 <- df_rules_dist_se_intersap1a5 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_intersap60 <- df_rules_dist_se_intersap60 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_fratfemur60 <- df_rules_dist_se_fratfemur60 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_cancprost <- df_rules_dist_se_cancprost |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_intmedcompldesmic <- df_rules_dist_se_intmedcompldesmic |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_partodeslocmic <- df_rules_dist_se_partodeslocmic |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_penta <- df_rules_dist_se_penta |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_txmodcnt30a69 <- df_rules_dist_se_txmodcnt30a69 |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_icsabms <- df_rules_dist_se_icsabms |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_dist_se_medicos <- df_rules_dist_se_medicos |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
 ```
 
 ```{r df_export_viol_dist}
 
-lista_df <- list(
-  "se_txbrutamort"       = df_rules_dist_se_txbrutamort,
-  "se_txbrutamortpad"    = df_rules_dist_se_txbrutamortpad,
-  "se_txmoisqcor45a59"   = df_rules_dist_se_txmoisqcor45a59,
-  "se_txmoavc45a59"      = df_rules_dist_se_txmoavc45a59,
-  "se_txmoatra15a29"     = df_rules_dist_se_txmoatra15a29,
-  "se_txmohomi"          = df_rules_dist_se_txmohomi,
-  "se_txmohomi15a29"     = df_rules_dist_se_txmohomi15a29,
-  "se_txmocancolut"      = df_rules_dist_se_txmocancolut,
-  "se_txmocanma"         = df_rules_dist_se_txmocanma,
-  "se_txmocanpul"        = df_rules_dist_se_txmocanpul,
-  "se_obito60"           = df_rules_dist_se_obito60,
-  "se_nascbaixopeso"     = df_rules_dist_se_nascbaixopeso,
-  "se_obinfsifils"       = df_rules_dist_se_obinfsifils,
-  "se_obtetanoneo"       = df_rules_dist_se_obtetanoneo,
-  "se_obraiva"           = df_rules_dist_se_obraiva,
-  "se_interdvhid"        = df_rules_dist_se_interdvhid,
-  "se_interdrsai"        = df_rules_dist_se_interdrsai,
-  "se_cobpsf"            = df_rules_dist_se_cobpsf,
-  "se_nasc7consul"       = df_rules_dist_se_nasc7consul,
-  "se_tetra"             = df_rules_dist_se_tetra,
-  "se_polio"             = df_rules_dist_se_polio,
-  "se_triplice"          = df_rules_dist_se_triplice,
-  "se_famarela"          = df_rules_dist_se_famarela,
-  "se_obmaldef"          = df_rules_dist_se_obmaldef,
-  "se_obitsemassis"      = df_rules_dist_se_obitsemassis,
-  "se_interdcv40"        = df_rules_dist_se_interdcv40,
-  "se_interdiab"         = df_rules_dist_se_interdiab,
-  "se_intersap"          = df_rules_dist_se_intersap,
-  "se_intersap1a5"       = df_rules_dist_se_intersap1a5,
-  "se_intersap60"        = df_rules_dist_se_intersap60,
-  "se_fratfemur60"       = df_rules_dist_se_fratfemur60,
-  "se_cancprost"         = df_rules_dist_se_cancprost,
-  "se_intmedcompldesmic" = df_rules_dist_se_intmedcompldesmic,
-  "se_partodeslocmic"    = df_rules_dist_se_partodeslocmic,
-  "se_penta"             = df_rules_dist_se_penta,
-  "se_txmodcnt30a69"     = df_rules_dist_se_txmodcnt30a69,
-  "se_icsabms"          = df_rules_dist_se_icsabms,
-  "se_medicos"           = df_rules_dist_se_medicos
-)
-
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_dist_")
-  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
-  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
-}
+# lista_df <- list(
+#   "se_txbrutamort"       = df_rules_dist_se_txbrutamort,
+#   "se_txbrutamortpad"    = df_rules_dist_se_txbrutamortpad,
+#   "se_txmoisqcor45a59"   = df_rules_dist_se_txmoisqcor45a59,
+#   "se_txmoavc45a59"      = df_rules_dist_se_txmoavc45a59,
+#   "se_txmoatra15a29"     = df_rules_dist_se_txmoatra15a29,
+#   "se_txmohomi"          = df_rules_dist_se_txmohomi,
+#   "se_txmohomi15a29"     = df_rules_dist_se_txmohomi15a29,
+#   "se_txmocancolut"      = df_rules_dist_se_txmocancolut,
+#   "se_txmocanma"         = df_rules_dist_se_txmocanma,
+#   "se_txmocanpul"        = df_rules_dist_se_txmocanpul,
+#   "se_obito60"           = df_rules_dist_se_obito60,
+#   "se_nascbaixopeso"     = df_rules_dist_se_nascbaixopeso,
+#   "se_obinfsifils"       = df_rules_dist_se_obinfsifils,
+#   "se_obtetanoneo"       = df_rules_dist_se_obtetanoneo,
+#   "se_obraiva"           = df_rules_dist_se_obraiva,
+#   "se_interdvhid"        = df_rules_dist_se_interdvhid,
+#   "se_interdrsai"        = df_rules_dist_se_interdrsai,
+#   "se_cobpsf"            = df_rules_dist_se_cobpsf,
+#   "se_nasc7consul"       = df_rules_dist_se_nasc7consul,
+#   "se_tetra"             = df_rules_dist_se_tetra,
+#   "se_polio"             = df_rules_dist_se_polio,
+#   "se_triplice"          = df_rules_dist_se_triplice,
+#   "se_famarela"          = df_rules_dist_se_famarela,
+#   "se_obmaldef"          = df_rules_dist_se_obmaldef,
+#   "se_obitsemassis"      = df_rules_dist_se_obitsemassis,
+#   "se_interdcv40"        = df_rules_dist_se_interdcv40,
+#   "se_interdiab"         = df_rules_dist_se_interdiab,
+#   "se_intersap"          = df_rules_dist_se_intersap,
+#   "se_intersap1a5"       = df_rules_dist_se_intersap1a5,
+#   "se_intersap60"        = df_rules_dist_se_intersap60,
+#   "se_fratfemur60"       = df_rules_dist_se_fratfemur60,
+#   "se_cancprost"         = df_rules_dist_se_cancprost,
+#   "se_intmedcompldesmic" = df_rules_dist_se_intmedcompldesmic,
+#   "se_partodeslocmic"    = df_rules_dist_se_partodeslocmic,
+#   "se_penta"             = df_rules_dist_se_penta,
+#   "se_txmodcnt30a69"     = df_rules_dist_se_txmodcnt30a69,
+#   "se_icsabms"          = df_rules_dist_se_icsabms,
+#   "se_medicos"           = df_rules_dist_se_medicos
+# )
+# 
+# for(i in names(lista_df)){
+#   nome <- stringr::str_remove(i, "df_rules_dist_")
+#   openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
+#   openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+# }
 ```
 
 ```{r excel_save_wb}
