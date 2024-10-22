@@ -5,11 +5,16 @@
 #'
 #' @param variable
 #' @param data
+#' @param ano_base_alter year start data
 #'
 #' @return
 
-chart_histogram <- function(variable, data){
+chart_histogram <- function(variable, data, ano_base_alter){
   result <- data |>
+    dplyr::filter(
+      dplyr::case_when(
+        variable %in% names(ano_base_alter) ~ ANO >= ano_base_alter[variable],
+        TRUE ~ ANO >= min(ANO, na.rm = T)) ) |>
     dplyr::mutate(ANO = as.numeric(ANO)) |>
     ggplot2::ggplot(ggplot2::aes(x = log(.data[[variable]] + 1), fill = ANO)) +
     ggplot2::geom_histogram() +

@@ -4,10 +4,10 @@
 \alias{chart_histogram}
 \title{create histograms}
 \usage{
-chart_histogram(variable, data)
+chart_histogram(variable, data, ano_base_alter)
 }
 \arguments{
-\item{data}{}
+\item{ano_base_alter}{year start data}
 }
 \description{
 A short description...

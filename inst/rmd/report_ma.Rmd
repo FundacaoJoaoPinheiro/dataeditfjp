@@ -11,7 +11,9 @@ author:
     state: Minas Gerais
     postal-code: 31.275-150
     url: https://fjp.mg.gov.br/
-output: html_document
+output: 
+  html_document: 
+    toc: true
 lang: pt
 date: "`r Sys.Date()`"
 title-block-banner: "#68bb59"
@@ -33,658 +35,1459 @@ execute:
   warning: false
   error: false
   message: false
-
 params:
   data: file.xlsx
-output-file: "ma_relatorio.html"
+output-file: "relatorio_ma.html"
 ---
 
-
-
 ```{r setup, include=FALSE}
-#library(openxlsx)
-#library(validate)
-options(dplyr.summarise.inform = FALSE)
-knitr::opts_chunk$set(echo = TRUE)
-#Read dataset
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+#lockBinding("k", globalenv())
+```
+
+```{r import_data}
+
 data <- openxlsx::read.xlsx(params$data)
-#Read dataset documentation
-metadata <- openxlsx::read.xlsx(params$metadata)
-data <- data %>%  
-  dplyr::select(-c("CHAVE", "IBGE6"))
-
-
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-
-```{r include=FALSE}
-#take all variables
-colunm_meta <- metadata %>% 
-  dplyr::filter(`DIMENSÃO` != "atlas") %>% 
-  dplyr::pull(SIGLA)
-
-#take all categorical variables
-categorical_variable <- metadata %>% 
-  dplyr::filter(`DIMENSÃO` != "atlas" & UNIDADE == "Sim/Não") %>% 
-  dplyr::pull(SIGLA)
-
-text_variable <- metadata %>% 
-  dplyr::filter(`DIMENSÃO` != "atlas" & is.na(UNIDADE)) %>%   
-  dplyr::pull(SIGLA)
-
-#quantitative variable
-
-numeric_variable <- colunm_meta[!(colunm_meta %in% c(categorical_variable,text_variable)) ] 
-
-```
-
-```{r include=FALSE}
 data$ANO <- as.character(data$ANO)
-data$IBGE7 <- as.character(data$IBGE7)
-yearbase <- max(data$ANO, na.rm = TRUE)
-yearstart <- min(data$ANO, na.rm = TRUE)
-n_city <- 853
-n_years <- length(unique(data$ANO))
-name_dimension <- tail(metadata$DIMENSÃO,1)
 ```
 
-# IMRS - Dimensão `r tools::toTitleCase(name_dimension)`
+```{r get_var_numeric}
 
-1.  A base de dados do IMRS da dimensão `r tools::toTitleCase(name_dimension)` `r if(nrow(data) == n_city * n_years) {" possui"} else {" não possui"}` o total esperado de observações. Vale ressaltar que a base de `r yearbase` deve possuir `r n_city*n_years` observações.
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
 
-2.  A base de dados da dimensão `r tools::toTitleCase(name_dimension)` possui `r length(colunm_meta)` variáveis excluindo CHAVE, IBGE6, IBGE7 e ANO.
+```{r get_var_character}
 
-3.  Destas `r length(colunm_meta)` variáveis, `r length(numeric_variable)` são numéricas, `r length(text_variable)` `r if(length(text_variable) > 1) {" textuais"} else {" textual"}` e `r length(categorical_variable)` `r if(length(categorical_variable) > 1) {" booleanas"} else {" booleana"}`.
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
 
+# Introdução
 
-# Descriptive Analysis
-```{r echo=FALSE, warning=FALSE}
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
 
-statistics <- data %>% 
-  dplyr::select(c(IBGE7,ANO,all_of(numeric_variable))) %>% 
-  tidyr::pivot_longer(!c(IBGE7,ANO), names_to = "variable", values_to = "value") %>%
-  dplyr::group_by(ANO, variable) %>%
-  dplyr::summarise(n_obs = dplyr::n(),
-                   minimo = min(value),
-                   media = mean(value, na.rm = TRUE),
-                   maximo = max(value),
-                   n_zero = sum(value == 0, na.rm = TRUE),
-                   ausentes = sum(is.na(value), na.rm = TRUE),
-                   coef_var = (sd(value, na.rm = TRUE)/mean(value, na.rm = TRUE) )*100) %>% 
-  dplyr::ungroup() 
+# Regras de crítica
 
-statistics_aux <- data %>% 
-  dplyr::select(c(IBGE7,ANO,all_of(numeric_variable))) %>% 
-  tidyr::pivot_longer(!c(IBGE7,ANO), names_to = "variable", values_to = "value") %>%
-  dplyr::group_by(ANO, variable) %>%
-  dplyr::summarise(q1 = quantile(value, probs = 0.25, na.rm = TRUE),
-                   mediana = median(value, na.rm = TRUE),
-                   q3 = quantile(value, probs = 0.75, na.rm = TRUE),
-                   desvio_padrao = sd(value, na.rm = TRUE) ) %>% 
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
+
+A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
+
+**Classificação por finalidade**
+
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
+
+-   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+
+-   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+-   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
+
+-   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+-   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+-   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+-   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+-   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+ano_base_alter <- c(
+  "MA_ICMSECOLOG" = 2010
+)
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
+```
+
+```{r get_cat}
+
+## Categorias variáveis dicotômicas
+cat_dic <- c(
+  "Sim",
+  "Não"
+)
+
+## Categorias encontradas na série histórica
+cat_ogestor <- c(
+  "Departamento, assessoria, setor ou órgão similar",
+  "Não possui estrutura",
+  "Não possui estrutura para a área",
+  "Órgão da administração indireta",
+  "Secretaria em conjunto com outra política",
+  "Secretaria em conjunto com outras políticas setoriais",
+  "Secretaria exclusiva",
+  "Secretaria municipal em conjunto com outras políticas",
+  "Secretaria municipal em conjunto com outros temas",
+  "Secretaria municipal exclusiva",
+  "Setor subordinado a outra secretaria",
+  "Setor subordinado diretamente à chefia do executivo"
+)
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_MA_ICMSECOLOG",
+    "VI_MA_CRH",
+    "VI_MA_CFEM",
+    "VI_MA_OGESTOR",
+    "VI_MA_FMMA",
+    "VI_MA_LEGISL",
+    "VI_MA_COMITE",
+    "VI_MA_FOCOS",
+    "VI_MA_CANA",
+    "VI_MA_FROTA",
+    "VI_MA_BOVINO",
+    "VI_MA_REFLO",
+    "VI_MA_FLONATIVA",
+    "VI_MA_INFRA",
+    "VI_MA_AGRO"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_MA_ICMSECOLOG" ~ desc_regra_valid[1],
+      "VI_MA_CRH"        ~ desc_regra_valid[1],
+      "VI_MA_CFEM"       ~ desc_regra_valid[1],
+      "VI_MA_OGESTOR"    ~ desc_regra_valid[2],
+      "VI_MA_FMMA"       ~ desc_regra_valid[2],
+      "VI_MA_LEGISL"     ~ desc_regra_valid[2],
+      "VI_MA_COMITE"     ~ desc_regra_valid[2],
+      "VI_MA_FOCOS"      ~ desc_regra_valid[3],
+      "VI_MA_CANA"       ~ desc_regra_valid[3],
+      "VI_MA_FROTA"      ~ desc_regra_valid[1],
+      "VI_MA_BOVINO"     ~ desc_regra_valid[1],
+      "VI_MA_REFLO"      ~ desc_regra_valid[3],
+      "VI_MA_FLONATIVA"  ~ desc_regra_valid[3],
+      "VI_MA_INFRA"      ~ desc_regra_valid[3],
+      "VI_MA_AGRO"       ~ desc_regra_valid[3]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+desc_regra_consist <- c(
+  `1` = "A soma da proporção anual é igual a 100%" # MA_FOCOS
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CF_MA_FOCOS_total_year"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CF_MA_FOCOS_total_year" ~ desc_regra_consist[1]
+    )
+  )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_MA_ICMSECOLOG = is.numeric(MA_ICMSECOLOG),
+  TI_MA_CRH        = is.numeric(MA_CRH),
+  TI_MA_CFEM       = is.numeric(MA_CFEM),
+  TI_MA_OGESTOR    = is.character(MA_OGESTOR),
+  TI_MA_FMMA       = is.character(MA_FMMA),
+  TI_MA_LEGISL     = is.character(MA_LEGISL),
+  TI_MA_COMITE     = is.character(MA_COMITE),
+  TI_MA_FOCOS      = is.numeric(MA_FOCOS),
+  TI_MA_CANA       = is.numeric(MA_CANA),
+  TI_MA_FROTA      = is.numeric(MA_FROTA),
+  TI_MA_BOVINO     = is.numeric(MA_BOVINO),
+  TI_MA_REFLO      = is.numeric(MA_REFLO),
+  TI_MA_FLONATIVA  = is.numeric(MA_FLONATIVA),
+  TI_MA_INFRA      = is.numeric(MA_INFRA),
+  TI_MA_AGRO       = is.numeric(MA_AGRO)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_ma_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_ma_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("MA_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_MA_ICMSECOLOG = dplyr::if_else(!is.na(MA_ICMSECOLOG), F, NA),
+    VI_NA_MA_CRH        = dplyr::if_else(!is.na(MA_CRH), F, NA),
+    VI_NA_MA_CFEM       = dplyr::if_else(!is.na(MA_CFEM), F, NA),
+    VI_NA_MA_FOCOS      = dplyr::if_else(!is.na(MA_FOCOS), F, NA),
+    VI_NA_MA_CANA       = dplyr::if_else(!is.na(MA_CANA), F, NA),
+    VI_NA_MA_FROTA      = dplyr::if_else(!is.na(MA_FROTA), F, NA),
+    VI_NA_MA_BOVINO     = dplyr::if_else(!is.na(MA_BOVINO), F, NA),
+    VI_NA_MA_REFLO      = dplyr::if_else(!is.na(MA_REFLO), F, NA),
+    VI_NA_MA_FLONATIVA  = dplyr::if_else(!is.na(MA_FLONATIVA), F, NA),
+    VI_NA_MA_INFRA      = dplyr::if_else(!is.na(MA_INFRA), F, NA),
+    VI_NA_MA_AGRO       = dplyr::if_else(!is.na(MA_AGRO), F, NA),
+    # Others
+    VI_MA_ICMSECOLOG    = dplyr::if_else(MA_ICMSECOLOG >= 0, F, T),
+    VI_MA_CRH           = dplyr::if_else(MA_CRH >= 0, F, T),
+    VI_MA_CFEM          = dplyr::if_else(MA_CFEM >= 0, F, T),
+    VI_MA_OGESTOR       = dplyr::if_else(MA_OGESTOR %in% cat_ogestor, F, T),
+    VI_MA_FMMA          = dplyr::if_else(MA_FMMA %in% cat_dic, F, T),
+    VI_MA_LEGISL        = dplyr::if_else(MA_LEGISL %in% cat_dic, F, T),
+    VI_MA_COMITE        = dplyr::if_else(MA_COMITE %in% cat_dic, F, T),
+    VI_MA_FOCOS         = dplyr::if_else(dplyr::between(MA_FOCOS, 0, 100), F, T),
+    VI_MA_CANA          = dplyr::if_else(dplyr::between(MA_CANA, 0, 100), F, T),
+    VI_MA_FROTA         = dplyr::if_else(MA_FROTA >= 0, F, T),
+    VI_MA_BOVINO        = dplyr::if_else(MA_BOVINO >= 0, F, T),
+    VI_MA_REFLO         = dplyr::if_else(dplyr::between(MA_REFLO, 0, 100), F, T),
+    VI_MA_FLONATIVA     = dplyr::if_else(dplyr::between(MA_FLONATIVA, 0, 100), F, T),
+    VI_MA_INFRA         = dplyr::if_else(dplyr::between(MA_INFRA, 0, 100), F, T),
+    VI_MA_AGRO          = dplyr::if_else(dplyr::between(MA_AGRO, 0, 100), F, T)
+  )
+```
+
+```{r data_wrangling_valid_ma_all}
+
+## Transformação dos resultados
+df_sumario_valid_ma <- df_rules_valid_ma_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
   dplyr::ungroup()
+```
 
-res <- split(statistics, f = statistics$variable)
-res_aux <- split(statistics_aux, f = statistics_aux$variable)
-# dd <- data %>% 
-#   dplyr::group_by(ANO) %>% 
-#   dplyr::summarise(dplyr::across(numeric_variable,
-#                    list(n_obs = ~dplyr::n(), minimo = ~min(.,na.rm = TRUE), media =  ~mean(., na.rm = TRUE), maximo = ~max(.,na.rm = TRUE) ) ) ) %>% 
-#   dplyr::ungroup()
+### Todos os indicadores - Valores ausentes
 
-names(res) %>% 
-  sapply(function(i){
-    pander::pandoc.header(i, level = 2)
-    print(metadata$DENOMINAÇÃO[which(metadata$SIGLA == i)])
-    pander::pandoc.table(res[[i]], decimal.mark = ",", big.mark = ".", round = 2)
-    cat("\\pagebreak\n")
-    pander::pandoc.header(i, level = 2)
-    pander::pandoc.table(res_aux[[i]], decimal.mark = ",", big.mark = ".", round = 2)
-    cat("\\pagebreak\n")
+```{r table_valid_ma_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_ma_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Consistência
+
+```{r data_rules_consist_ma_all}
+
+## df com o resultado das aplicações das regras
+df_rules_consist_ma_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    MA_FOCOS
+  ) |> 
+  dplyr::group_by(Ano) |> 
+  dplyr::mutate(
+    CF_MA_FOCOS_total_year = dplyr::if_else(
+      dplyr::between(sum(MA_FOCOS, na.rm = T), 99, 101), F, T)
+  )
+```
+
+```{r data_wrangling_consist_ma_all}
+
+## Tranformação dos resultados
+df_sumario_consist_ma <- df_rules_consist_ma_all |> 
+  dplyr::select(!MA_FOCOS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_consist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores
+
+```{r table_consist_ma_all}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### MA_ICMSECOLOG
+
+```{r data_rules_dist_ma_icmsecolog}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_icmsecolog <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_ICMSECOLOG" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_ICMSECOLOG"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_ICMSECOLOG) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_ICMSECOLOG_hampel_munic  = dplyr::if_else(!hampel_filter(MA_ICMSECOLOG), F, T), # Longitudinal (município)
     
-  })
-
-# names(res_aux) %>% 
-#   sapply(function(i){
-#     pander::pandoc.header(i, level = 2)
-#     print(metadata$DENOMINAÇÃO[which(metadata$SIGLA == i)])
-#     pander::pandoc.table(res_aux[[i]], decimal.mark = ",", big.mark = ".", round = 2)
-#   })
-
-
+    DF_MA_ICMSECOLOG_out_munic     = dplyr::if_else(!outlier_function(MA_ICMSECOLOG), F, T), # Longitudinal (município)
+    
+    DF_MA_ICMSECOLOG_min_munic     = dplyr::if_else(MA_ICMSECOLOG >= (min(dplyr::lag(MA_ICMSECOLOG), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_MA_ICMSECOLOG_max_munic     = dplyr::if_else(MA_ICMSECOLOG <= (max(dplyr::lag(MA_ICMSECOLOG), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_ICMSECOLOG_min_k_munic   = dplyr::if_else(MA_ICMSECOLOG >= (min(dplyr::lag(MA_ICMSECOLOG), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_MA_ICMSECOLOG_max_k_munic   = dplyr::if_else(MA_ICMSECOLOG <= (k * max(dplyr::lag(MA_ICMSECOLOG), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_ICMSECOLOG_med_mov_munic = dplyr::if_else(MA_ICMSECOLOG <= (k * zoo::rollmedian(MA_ICMSECOLOG, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_ICMSECOLOG_dif_munic     = dplyr::if_else(!compare_first_dif(MA_ICMSECOLOG), F, T) # Longitudinal (município)
+)
 ```
 
-# Charts
+```{r data_wrangling_dist_ma_icmsecolog}
 
-```{r echo=FALSE, include=FALSE, warning=FALSE}
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_icmsecolog |> 
+  dplyr::select(!MA_ICMSECOLOG) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
-list_data <- data %>% 
-  dplyr::select(c(IBGE7,ANO,all_of(numeric_variable))) %>% 
-  tidyr::pivot_longer(!c(IBGE7,ANO), names_to = "variable", values_to = "value") 
-
-list_data <- split(list_data, f = list_data$variable)
-
-graphic <- names(list_data) %>% 
-  sapply(function(i){
-    graf <- list_data[[i]] %>% 
-      ggplot2::ggplot( ) +
-      ggplot2::geom_boxplot(mapping=ggplot2::aes(x = ANO, y = value)) +
-      ggplot2::ylab(i)
-    return(graf)
-  },simplify = F,USE.NAMES = T)
-
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
 ```
 
-```{r echo=FALSE, warning=FALSE}
-# names(graphic) %>% 
-#   sapply(function(i){
-#     return(show(graphic[[i]]))
-#   },simplify = F, USE.NAMES = TRUE)
+```{r table_dist_ma_icmsecolog}
+#| column: screen-inset-right
 
-lapply(seq(1,length(graphic)),
-       function(i){
-         return(show(graphic[[i]]))
-       })
-
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
 ```
 
+```{r chart_dist_ma_icmsecolog}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
 
-```{r echo=FALSE, warning=FALSE}
-# Definir funções ---------------------------------------------------------
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
 
-## https://blogs.sas.com/content/iml/2021/06/01/hampel-filter-robust-outliers.html
+### MA_CRH
 
-# A fórmula abaixo eh a mesma utilizada em dataMaid::identifyOutliers().
-# Q1 - 1,5 * exp(a * MC) * IQR; Q3 + 1,5 * exp(b * MC) * IQR
-# source("../../R/total_sum.R")
-# source("../../R/hampel_filter.R")
-# source("../../R/outlier_function.R")
-# source("../../R/compare_lag.R")
-# source("../../R/difpercentual.R")
-# Definir regras ----------------------------------------------------------
+```{r rules_dist_ma_crh}
 
-## Regras para tema meio ambiente
-  org_gestor <- c("Departamento, assessoria, setor ou órgão similar",
-                  "Secretaria municipal em conjunto com outros temas",    
-                  "Não possui estrutura para a área",   
-                  "Secretaria municipal exclusiva",                    
-                   "Setor subordinado a outra secretaria",                 
-                  "Secretaria em conjunto com outra política",            
-                   "Não possui estrutura",            
-                   "Setor subordinado diretamente à chefia do executivo",  
-                   "Secretaria exclusiva",                                
-                   "Órgão da administração indireta",  
-                   "Secretaria municipal em conjunto com outras políticas",
-                   "Setor subordinado diretamente à chefia do Executivo",
-                   "Secretaria em conjunto com outras políticas setoriais")
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_crh <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CRH" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CRH"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CRH) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_CRH_hampel_munic  = dplyr::if_else(!hampel_filter(MA_CRH), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_out_munic     = dplyr::if_else(!outlier_function(MA_CRH), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_min_munic     = dplyr::if_else(MA_CRH >= (min(dplyr::lag(MA_CRH), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_max_munic     = dplyr::if_else(MA_CRH <= (max(dplyr::lag(MA_CRH), na.rm = T)), F, T), # Longitudinal (município)
   
-  typerules <-  validate::validator(
-    TI_M_AGRO = is.numeric(M_AGRO),
-    TI_M_BOVINO = is.numeric(M_BOVINO),
-    TI_M_CANA = is.numeric(M_CANA),
-    TI_M_CFEM = is.numeric(M_CFEM),
-    TI_M_COMITE = is.character(M_COMITE),
-    TI_M_CRH = is.numeric(M_CRH),
-    TI_VI_M_FLONATIVA = is.numeric(M_FLONATIVA),
-    TI_M_FMMA = is.character(M_FMMA),
-    TI_M_FOCOS = is.numeric(M_FOCOS),
-    TI_M_FROTA = is.numeric(M_FROTA),
-    TI_M_ICMSECOLOG = is.numeric(M_ICMSECOLOG),
-    TI_M_INFRA = is.numeric(M_INFRA),
-    TI_M_LEGISL = is.character(M_LEGISL),
-    TI_M_OGESTOR = is.character(M_OGESTOR),
-    TI_M_REFLO = is.numeric(M_REFLO)
+    DF_MA_CRH_min_k_munic   = dplyr::if_else(MA_CRH >= (min(dplyr::lag(MA_CRH), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_max_k_munic   = dplyr::if_else(MA_CRH <= (k * max(dplyr::lag(MA_CRH), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_med_mov_munic = dplyr::if_else(MA_CRH <= (k * zoo::rollmedian(MA_CRH, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_CRH_dif_munic     = dplyr::if_else(!compare_first_dif(MA_CRH), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_ma_crh}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_crh |> 
+  dplyr::select(!MA_CRH) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_crh}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_crh}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_CFEM
+
+```{r rules_dist_ma_cfem}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_cfem <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CFEM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CFEM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CFEM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_CFEM_hampel_munic  = dplyr::if_else(!hampel_filter(MA_CFEM), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_out_munic     = dplyr::if_else(!outlier_function(MA_CFEM), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_min_munic     = dplyr::if_else(MA_CFEM >= (min(dplyr::lag(MA_CFEM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_max_munic     = dplyr::if_else(MA_CFEM <= (max(dplyr::lag(MA_CFEM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_min_k_munic   = dplyr::if_else(MA_CFEM >= (min(dplyr::lag(MA_CFEM), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_max_k_munic   = dplyr::if_else(MA_CFEM <= (k * max(dplyr::lag(MA_CFEM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_med_mov_munic = dplyr::if_else(MA_CFEM <= (k * zoo::rollmedian(MA_CFEM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_CFEM_dif_munic     = dplyr::if_else(!compare_first_dif(MA_CFEM), F, T) # Longitudinal (município)
   )
-  
-  ## Acrescentar as demais variaveis numericas
-  validaterules_na <- validate::validator(
-    VI_M_AGRO = !is.na(M_AGRO),
-    VI_M_BOVINO = !is.na(M_BOVINO),
-    VI_M_CANA = !is.na(M_CANA),
-    VI_M_CFEM = !is.na(M_CFEM),
-    VI_M_COMITE = !is.na(M_COMITE),
-    VI_M_CRH = !is.na(M_CRH),
-    VI_M_FLONATIVA = !is.na(M_FLONATIVA),
-    VI_M_FOCOS = !is.na(M_FOCOS),
-    VI_M_INFRA = !is.na(M_INFRA),
-    VI_M_REFLO = !is.na(M_REFLO),
-    VI_M_FROTA = !is.na(M_FROTA),
-    VI_M_ICMSECOLOG = !is.na(M_ICMSECOLOG)
+```
+
+```{r data_wrangling_dist_ma_cfem}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_cfem |> 
+  dplyr::select(!MA_CFEM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_cfem}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_cfem}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_FOCOS
+
+```{r rules_dist_ma_focos}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_focos <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FOCOS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FOCOS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FOCOS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_FOCOS_hampel_munic  = dplyr::if_else(!hampel_filter(MA_FOCOS), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_out_munic     = dplyr::if_else(!outlier_function(MA_FOCOS), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_min_munic     = dplyr::if_else(MA_FOCOS >= (min(dplyr::lag(MA_FOCOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_max_munic     = dplyr::if_else(MA_FOCOS <= (max(dplyr::lag(MA_FOCOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_min_k_munic   = dplyr::if_else(MA_FOCOS >= (min(dplyr::lag(MA_FOCOS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_max_k_munic   = dplyr::if_else(MA_FOCOS <= (k * max(dplyr::lag(MA_FOCOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_med_mov_munic = dplyr::if_else(MA_FOCOS <= (k * zoo::rollmedian(MA_FOCOS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_FOCOS_dif_munic     = dplyr::if_else(!compare_first_dif(MA_FOCOS), F, T) # Longitudinal (município)
   )
-  
-  validaterules <-  validate::validator(
-    VI_M_AGRO = validate::in_range(M_AGRO, min = 0, max = 100),
-    VI_M_BOVINO = M_BOVINO >= 0,
-    VI_M_CANA = validate::in_range(M_CANA, min = 0, max = 100),
-    VI_M_CFEM = M_CFEM >=0,
-    VI_M_COMITE = M_COMITE %in% c("Sim", "Não"),
-    VI_M_CRH = M_CRH >= 0,
-    VI_M_M_FLONATIVA = validate::in_range(M_FLONATIVA, min = 0, max = 100),
-    VI_M_FMMA = M_FMMA %in% c("Sim", "Não"),
-    VI_M_FOCOS = validate::in_range(M_FOCOS, min = 0, max = 100),
-    VI_M_FROTA = M_FROTA >= 0,
-    VI_M_ICMSECOLOG = M_ICMSECOLOG >= 0,
-    VI_M_INFRA = validate::in_range(M_INFRA, min = 0, max = 100),
-    VI_M_LEGISL = M_LEGISL %in% c("Sim", "Não"),
-    VI_M_OGESTOR = M_OGESTOR %in% org_gestor,
-    VI_M_REFLO = validate::in_range(M_REFLO, min = 0, max = 100)
+```
+
+```{r data_wrangling_dist_ma_focos}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_focos |> 
+  dplyr::select(!MA_FOCOS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_focos}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_focos}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_CANA
+
+```{r rules_dist_ma_cana}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_cana <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_CANA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_CANA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_CANA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_CANA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_CANA), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_out_munic     = dplyr::if_else(!outlier_function(MA_CANA), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_min_munic     = dplyr::if_else(MA_CANA >= (min(dplyr::lag(MA_CANA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_max_munic     = dplyr::if_else(MA_CANA <= (max(dplyr::lag(MA_CANA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_min_k_munic   = dplyr::if_else(MA_CANA >= (min(dplyr::lag(MA_CANA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_max_k_munic   = dplyr::if_else(MA_CANA <= (k * max(dplyr::lag(MA_CANA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_med_mov_munic = dplyr::if_else(MA_CANA <= (k * zoo::rollmedian(MA_CANA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_CANA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_CANA), F, T) # Longitudinal (município)
   )
-  
-  ## Consistencia
-  consistencyrules <- validate::validator(
-    CF_M_FOCOS = (validate::do_by(M_FOCOS, by = ANO, fun = total_sum) == TRUE),
-    CF_M_FOCOS_range = validate::in_range(M_FOCOS, min = 0, max = 100)
+```
+
+```{r data_wrangling_dist_ma_cana}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_cana |> 
+  dplyr::select(!MA_CANA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_cana}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_cana}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_FROTA
+
+```{r rules_dist_ma_frota}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_frota <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FROTA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FROTA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FROTA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_FROTA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_FROTA), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_out_munic     = dplyr::if_else(!outlier_function(MA_FROTA), F, T), # Longitudinal (município)
+    
+     DF_MA_FROTA_min_munic    = dplyr::if_else(MA_FROTA >= (min(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_max_munic     = dplyr::if_else(MA_FROTA <= (max(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_min_k_munic   = dplyr::if_else(MA_FROTA >= (min(dplyr::lag(MA_FROTA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_max_k_munic   = dplyr::if_else(MA_FROTA <= (k * max(dplyr::lag(MA_FROTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_med_mov_munic = dplyr::if_else(MA_FROTA <= (k * zoo::rollmedian(MA_FROTA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_FROTA), F, T), # Longitudinal (município)
+    
+    DF_MA_FROTA_estoque_munic = dplyr::if_else(MA_FROTA >= dplyr::lag(MA_FROTA), F, T) # Longitudinal (município)
   )
-  
-  
-k1 <- 2 #razao
-k2 <- 0.05 #proporcao
-### Regra de Distribuicao
+```
 
-##### PROPORCAO
-distributionrules_magro <- validate::validator(
-  DF_M_AGRO_out_year = validate::do_by(M_AGRO, by = ANO, fun = hampel_filter) == FALSE, # Compara por ano
-  DF_M_AGRO_out_city = validate::do_by(M_AGRO, by = IBGE7, fun = hampel_filter) == FALSE, # Compara por cidade
-  DF_M_AGRO_out_datamaid_year = validate::do_by(M_AGRO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_AGRO_out_datamaid_city = validate::do_by(M_AGRO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_AGRO_min_year = M_AGRO  >= k2*validate::do_by(M_AGRO, by = ANO, fun = min, na.rm = T),
-  DF_M_AGRO_min_city = M_AGRO  >= k2*validate::do_by(M_AGRO, by = IBGE7, fun = min, na.rm = T),
-  DF_M_AGRO_max_year = M_AGRO  <= k2*validate::do_by(M_AGRO, by = ANO, fun = max, na.rm = T),
-  DF_M_AGRO_max_city = M_AGRO  <= k2*validate::do_by(M_AGRO, by = IBGE7, fun = max, na.rm = T),
-  DF_M_AGRO_median_mov_sup = M_AGRO <= k2 + validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"),
-  DF_M_AGRO_median_mov_inf = M_AGRO >= k2 - validate::do_by(M_AGRO, by = IBGE7, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
+```{r data_wrangling_dist_ma_frota}
 
-##### RAZAO
-distributionrules_mbovino <- validate::validator(
-  DF_M_BOVINO_out_year = validate::do_by(M_BOVINO, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_BOVINO_out_city = validate::do_by(M_BOVINO, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_BOVINO_out_datamaid_year = validate::do_by(M_BOVINO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_BOVINO_out_datamaid_city = validate::do_by(M_BOVINO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_BOVINO_min_year = M_BOVINO >= k1*validate::do_by(M_BOVINO, by = ANO, fun = fun_min, na.rm = T),
-  DF_M_BOVINO_min_city = M_BOVINO >= k1*validate::do_by(M_BOVINO, by = IBGE7, fun = fun_min, na.rm = T),
-  DF_M_BOVINO_max_year = M_BOVINO <= k1*validate::do_by(M_BOVINO, by = ANO, fun = max, na.rm = T),
-  DF_M_BOVINO_max_city = M_BOVINO <= k1*validate::do_by(M_BOVINO, by = IBGE7, fun = max, na.rm = T),
-  DF_M_BOVINO_median_mov_sup = M_BOVINO <= k1+validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"),
-  DF_M_BOVINO_median_mov_inf = M_BOVINO >= k1-validate::do_by(M_BOVINO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")
+## Tranformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_frota |> 
+  dplyr::select(!MA_FROTA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_frota}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_frota}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_BOVINO
+
+```{r rules_dist_ma_bovino}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_bovino <- data |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_BOVINO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_BOVINO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_BOVINO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_BOVINO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_BOVINO), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_out_munic     = dplyr::if_else(!outlier_function(MA_BOVINO), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_min_munic     = dplyr::if_else(MA_BOVINO >= (min(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_max_munic     = dplyr::if_else(MA_BOVINO <= (max(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_min_k_munic   = dplyr::if_else(MA_BOVINO >= (min(dplyr::lag(MA_BOVINO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_max_k_munic   = dplyr::if_else(MA_BOVINO <= (k * max(dplyr::lag(MA_BOVINO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_med_mov_munic = dplyr::if_else(MA_BOVINO <= (k * zoo::rollmedian(MA_BOVINO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_BOVINO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_BOVINO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_bovino}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_bovino |> 
+  dplyr::select(!MA_BOVINO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_bovino}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_bovino}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_REFLO
+
+```{r rules_dist_ma_reflo}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_reflo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_REFLO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_REFLO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_REFLO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_REFLO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_REFLO), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_out_munic     = dplyr::if_else(!outlier_function(MA_REFLO), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_min_munic     = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_max_munic     = dplyr::if_else(MA_REFLO <= (max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_min_k_munic   = dplyr::if_else(MA_REFLO >= (min(dplyr::lag(MA_REFLO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_max_k_munic   = dplyr::if_else(MA_REFLO <= (k * max(dplyr::lag(MA_REFLO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_med_mov_munic = dplyr::if_else(MA_REFLO <= (k * zoo::rollmedian(MA_REFLO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_REFLO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_REFLO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_reflo}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_reflo |> 
+  dplyr::select(!MA_REFLO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_reflo}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_reflo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_FLONATIVA
+
+```{r rules_dist_ma_flonativa}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_flonativa <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_FLONATIVA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_FLONATIVA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_FLONATIVA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_FLONATIVA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_FLONATIVA), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_out_munic     = dplyr::if_else(!outlier_function(MA_FLONATIVA), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_min_munic     = dplyr::if_else(MA_FLONATIVA >= (min(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_max_munic     = dplyr::if_else(MA_FLONATIVA <= (max(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_min_k_munic   = dplyr::if_else(MA_FLONATIVA >= (min(dplyr::lag(MA_FLONATIVA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_max_k_munic   = dplyr::if_else(MA_FLONATIVA <= (k * max(dplyr::lag(MA_FLONATIVA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_med_mov_munic = dplyr::if_else(MA_FLONATIVA <= (k * zoo::rollmedian(MA_FLONATIVA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_FLONATIVA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_FLONATIVA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_flonativa}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_flonativa |> 
+  dplyr::select(!MA_FLONATIVA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_flonativa}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_flonativa}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_INFRA
+
+```{r rules_dist_ma_infra}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_infra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_INFRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_INFRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_INFRA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_INFRA_hampel_munic  = dplyr::if_else(!hampel_filter(MA_INFRA), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_out_munic     = dplyr::if_else(!outlier_function(MA_INFRA), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_min_munic     = dplyr::if_else(MA_INFRA >= (min(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_max_munic     = dplyr::if_else(MA_INFRA <= (max(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_min_k_munic   = dplyr::if_else(MA_INFRA >= (min(dplyr::lag(MA_INFRA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_max_k_munic   = dplyr::if_else(MA_INFRA <= (k * max(dplyr::lag(MA_INFRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_med_mov_munic = dplyr::if_else(MA_INFRA <= (k * zoo::rollmedian(MA_INFRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_INFRA_dif_munic     = dplyr::if_else(!compare_first_dif(MA_INFRA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_infra}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_infra |> 
+  dplyr::select(!MA_INFRA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_infra}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_infra}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### MA_AGRO
+
+```{r rules_dist_ma_agro}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_ma_agro <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "MA_AGRO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["MA_AGRO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, MA_AGRO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_MA_AGRO_hampel_munic  = dplyr::if_else(!hampel_filter(MA_AGRO), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_out_munic     = dplyr::if_else(!outlier_function(MA_AGRO), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_min_munic     = dplyr::if_else(MA_AGRO >= (min(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_max_munic     = dplyr::if_else(MA_AGRO <= (max(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_min_k_munic   = dplyr::if_else(MA_AGRO >= (min(dplyr::lag(MA_AGRO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_max_k_munic   = dplyr::if_else(MA_AGRO <= (k * max(dplyr::lag(MA_AGRO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_med_mov_munic = dplyr::if_else(MA_AGRO <= (k * zoo::rollmedian(MA_AGRO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_MA_AGRO_dif_munic     = dplyr::if_else(!compare_first_dif(MA_AGRO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_ma_agro}
+
+## Transformação dos resultados
+df_sumario_dist_ma <- df_rules_dist_ma_agro |> 
+  dplyr::select(!MA_AGRO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_ma |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_ma_agro}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_ma_agro}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data, ano_base_alter), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(variable = var, data = data, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+variables = c(
+"MA_ICMSECOLOG",
+"MA_CRH",
+"MA_CFEM",
+"MA_OGESTOR",
+"MA_FMMA",
+"MA_LEGISL",
+"MA_COMITE",
+"MA_FOCOS",
+"MA_CANA",
+"MA_FROTA",
+"MA_BOVINO",
+"MA_REFLO",
+"MA_FLONATIVA",
+"MA_INFRA",
+"MA_AGRO"
+  )
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_valid_ma_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
+
+```
+
+```{r df_build_viol_consist}
+
+variables = c("MA_FOCOS")
+
+lis <- split(variables,f = variables)
+df_obs_consist <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_consist_ma_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::contains(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_consist, nrow)!=0
+
+if(index!=0){
+df_obs_consist <- df_obs_consist[index]
+for(i in names(df_obs_consist)){
+  openxlsx::addWorksheet(pt, paste0("consist - ", i))
+  openxlsx::writeData(pt, paste0("consist - ", i), df_obs_consist[[i]])
+}
+}
+
+```
+
+
+```{r df_build_viol_dist}
+df_dist <- list(
+"MA_ICMSECOLOG" = df_rules_dist_ma_icmsecolog,
+"MA_CRH" = df_rules_dist_ma_crh,
+"MA_CFEM" = df_rules_dist_ma_cfem,
+"MA_FOCOS" = df_rules_dist_ma_focos,
+"MA_CANA" = df_rules_dist_ma_cana,
+"MA_FROTA" = df_rules_dist_ma_frota,
+"MA_BOVINO" = df_rules_dist_ma_bovino,
+"MA_REFLO" = df_rules_dist_ma_reflo,
+"MA_FLONATIVA" = df_rules_dist_ma_flonativa,
+"MA_INFRA" = df_rules_dist_ma_infra,
+"MA_AGRO" = df_rules_dist_ma_agro
 )
 
-##### PROPORCAO
-distributionrules_mcana <- validate::validator(
-  DF_M_CANA_out_year = validate::do_by(M_CANA, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_CANA_out_city = validate::do_by(M_CANA, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_CANA_out_datamaid_year = validate::do_by(M_CANA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_CANA_out_datamaid_city = validate::do_by(M_CANA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_CANA_min_year = M_CANA >= (k2*validate::do_by(M_CANA, by = ANO, fun = fun_min, na.rm = T)),
-  DF_M_CANA_min_city = M_CANA >= (k2*validate::do_by(M_CANA, by = IBGE7, fun = fun_min, na.rm = T)),
-  DF_M_CANA_max_year = M_CANA <= (k2*validate::do_by(M_CANA, by = ANO, fun = max, na.rm = T)),
-  DF_M_CANA_max_city = M_CANA <= (k2*validate::do_by(M_CANA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_CANA_median_mov_sup = M_CANA <= (k2+validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_CANA_median_mov_inf = M_CANA >= (k2-validate::do_by(M_CANA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
-##### TOTAL
-distributionrules_mcfem <- validate::validator(
-  DF_M_CFEM_out_year = validate::do_by(M_CFEM, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_CFEM_out_city = validate::do_by(M_CFEM, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_CFEM_out_datamaid_year = validate::do_by(M_CFEM, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_CFEM_out_datamaid_city = validate::do_by(M_CFEM, by = IBGE7, fun = outlier_function) == FALSE #, # Compara por cidade
-)
-##### TOTAL
-distributionrules_mcrh <- validate::validator(
-  DF_M_CRH_out_year = validate::do_by(M_CRH, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_CRH_out_city = validate::do_by(M_CRH, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_CRH_out_datamaid_year = validate::do_by(M_CRH, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_CRH_out_datamaid_city = validate::do_by(M_CRH, by = IBGE7, fun = outlier_function) == FALSE #, # Compara por cidade
-)
-
-##### PROPORCAO
-distributionrules_mflonativa <- validate::validator(
-  DF_M_FLONATIVA_out_year = validate::do_by(M_FLONATIVA, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_FLONATIVA_out_city = validate::do_by(M_FLONATIVA, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_FLONATIVA_out_datamaid_year = validate::do_by(M_FLONATIVA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_FLONATIVA_out_datamaid_city = validate::do_by(M_FLONATIVA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_FLONATIVA_min_year = M_FLONATIVA >= (k2*validate::do_by(M_FLONATIVA, by = ANO, fun = fun_min, na.rm = T)),
-  DF_M_FLONATIVA_min_city = M_FLONATIVA >= (k2*validate::do_by(M_FLONATIVA, by = IBGE7, fun = fun_min, na.rm = T)),
-  DF_M_FLONATIVA_max_year = M_FLONATIVA <= (k2*validate::do_by(M_FLONATIVA, by = ANO, fun = max, na.rm = T)),
-  DF_M_FLONATIVA_max_city = M_FLONATIVA <= (k2*validate::do_by(M_FLONATIVA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FLONATIVA_median_mov_sup = M_FLONATIVA <= (k2 +validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_FLONATIVA_median_mov_inf = M_FLONATIVA >= (k2-validate::do_by(M_FLONATIVA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
-
-##### PROPORCAO
-distributionrules_mfocos <- validate::validator(
-  DF_M_FOCOS_out_year = validate::do_by(M_FOCOS, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_FOCOS_out_city = validate::do_by(M_FOCOS, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_FOCOS_out_datamaid_year = validate::do_by(M_FOCOS, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_FOCOS_out_datamaid_city = validate::do_by(M_FOCOS, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_FOCOS_min_year = M_FOCOS >= (k2*validate::do_by(M_FOCOS, by = ANO, fun = fun_min, na.rm = T)),
-  DF_M_FOCOS_min_city = M_FOCOS >= (k2*validate::do_by(M_FOCOS, by = IBGE7, fun = fun_min, na.rm = T)),
-  DF_M_FOCOS_max_year = M_FOCOS <= (k2*validate::do_by(M_FOCOS, by = ANO, fun = max, na.rm = T)),
-  DF_M_FOCOS_max_city = M_FOCOS <= (k2*validate::do_by(M_FOCOS, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FOCOS_median_mov_sup = M_FOCOS <= (k2+validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_FOCOS_median_mov_inf = M_FOCOS >= (k2-validate::do_by(M_FOCOS, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
-
-##### RAZAO
-distributionrules_mfrota <- validate::validator(
-  DF_M_FROTA_out_year = validate::do_by(M_FROTA, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_FROTA_out_city = validate::do_by(M_FROTA, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_FROTA_out_datamaid_year = validate::do_by(M_FROTA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_FROTA_out_datamaid_city = validate::do_by(M_FROTA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_FROTA_min_year = M_FROTA >= (k1*validate::do_by(M_FROTA, by = ANO, fun = fun_min, na.rm = T)),
-  DF_M_FROTA_min_city = M_FROTA >= (k1*validate::do_by(M_FROTA, by = IBGE7, fun = fun_min, na.rm = T)),
-  DF_M_FROTA_max_year = M_FROTA <= (k1*validate::do_by(M_FROTA, by = ANO, fun = max, na.rm = T)),
-  DF_M_FROTA_max_city = M_FROTA <= (k1*validate::do_by(M_FROTA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_FROTA_median_mov_sup = M_FROTA <= (k1+validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_FROTA_median_mov_inf = M_FROTA >= (k1-validate::do_by(M_FROTA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
 
 
-distibution_mfrota_compare <- validate::validator(
-  DF_M_FROTA_compare = validate::do_by(M_FROTA, by = IBGE7, fun = compare_lag)==TRUE
-)
-
-##### TOTAL
-distributionrules_micmsecolog <- validate::validator(
-  DF_M_ICMSECOLOG_out_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_ICMSECOLOG_out_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_ICMSECOLOG_out_datamaid_year = validate::do_by(M_ICMSECOLOG, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_ICMSECOLOG_out_datamaid_city = validate::do_by(M_ICMSECOLOG, by = IBGE7, fun = outlier_function) == FALSE#, # Compara por cidade
-)
-
-##### PROPORCAO
-distributionrules_minfra <- validate::validator(
-  DF_M_INFRA_out_year = validate::do_by(M_INFRA, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_INFRA_out_city = validate::do_by(M_INFRA, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_INFRA_out_datamaid_year = validate::do_by(M_INFRA, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_INFRA_out_datamaid_city = validate::do_by(M_INFRA, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_INFRA_min_year = M_INFRA >= (k2*validate::do_by(M_INFRA, by = ANO, fun = fun_min, na.rm = T)),
-  DF_M_INFRA_min_city = M_INFRA >= (k2*validate::do_by(M_INFRA, by = IBGE7, fun = fun_min, na.rm = T)),
-  DF_M_INFRA_max_year = M_INFRA <= (k2*validate::do_by(M_INFRA, by = ANO, fun = max, na.rm = T)),
-  DF_M_INFRA_max_city = M_INFRA <= (k2*validate::do_by(M_INFRA, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_INFRA_median_mov_sup = M_INFRA <= (k2+validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_INFRA_median_mov_inf = M_INFRA >= (k2-validate::do_by(M_INFRA, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
-
-##### PROPORCAO
-distributionrules_mreflo <- validate::validator(
-  DF_M_REFLO_out_year = validate::do_by(M_REFLO, by = ANO, fun = hampel_filter) == FALSE,
-  DF_M_REFLO_out_city = validate::do_by(M_REFLO, by = IBGE7, fun = hampel_filter) == FALSE,
-  DF_M_REFLO_out_datamaid_year = validate::do_by(M_REFLO, by = ANO, fun = outlier_function) == FALSE,  # Compara por ano
-  DF_M_REFLO_out_datamaid_city = validate::do_by(M_REFLO, by = IBGE7, fun = outlier_function) == FALSE, # Compara por cidade
-  DF_M_REFLO_min_year = M_REFLO >= (k2*validate::do_by(M_REFLO, by = ANO, fun = min, na.rm = T)),
-  DF_M_REFLO_min_city = M_REFLO >= (k2*validate::do_by(M_REFLO, by = IBGE7, fun = min, na.rm = T)),
-  DF_M_REFLO_max_year = M_REFLO <= (k2*validate::do_by(M_REFLO, by = ANO, fun = max, na.rm = T)),
-  DF_M_REFLO_max_city = M_REFLO <= (k2*validate::do_by(M_REFLO, by = IBGE7, fun = max, na.rm = T)),
-  DF_M_REFLO_median_mov_sup = M_REFLO <= (k2+validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right")),
-  DF_M_REFLO_median_mov_inf = M_REFLO >= (k2-validate::do_by(M_REFLO, by = ANO, fun = zoo::rollmedian, k = 3, fill = NA, align = "right"))
-)
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
+  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+}
 
 ```
 
 
-## Checando as regras de tipo
 
-```{r warning=FALSE, message=FALSE}
+```{r excel_save_wb}
 
-check_type <- validate::confront(data, typerules)
-
-validate::summary(check_type)
+openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T)
 ```
 
-```{r warning=FALSE, message=FALSE}
+```{r clean_env, results='hide'}
 
-check_type_na <- validate::confront(data, validaterules_na)
-
-validate::summary(check_type_na)
+rm(list = ls())
+gc()
 ```
-
-## Checando as regras de validade
-```{r warning=FALSE, message=FALSE}
-org_gestor
-check_validate <- validate::confront(data, validaterules)
-validate::summary(check_validate)
-```
-
-## Checando as regras de consistência
-```{r warning=FALSE, message=FALSE}
-check_consistency <- validate::confront(data, consistencyrules)
-validate::summary(check_consistency)
-
-```
-
-
-## Variáveis monetárias e regras de consistência
-
-### M_ICMSECOLOG
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-### variaveis de total: M_ICMSECOLOG, M_CRH, M_CFEM
-
-dd <- data %>% 
-  difpercentual(M_ICMSECOLOG) 
-
-data_aux <- data %>%
-  dplyr::left_join(dd %>% 
-                     dplyr::select(IBGE7,ANO,dif_prop),
-                   by = c("IBGE7", "ANO") ) %>% 
-  dplyr::select(IBGE7,ANO,M_ICMSECOLOG,dif_prop)
-
-consistency_icms <- validate::validator(
-  CF_M_ICMSECOLOG = in_range(dif_prop, min = -0.05, max = 0.05)
-)
-```
-
-
-```{r warning=FALSE, message=FALSE}
-check_consistency_icms <- validate::confront(data_aux, consistency_icms)
-validate::summary(check_consistency_icms)
-validate::plot(check_consistency_icms)
-```
-
-### M_CRH
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-dd <- data %>% 
-  difpercentual(M_CRH) 
-
-data_aux <- data %>%
-  dplyr::left_join(dd %>% 
-                     dplyr::select(IBGE7,ANO,dif_prop),
-                   by = c("IBGE7", "ANO") ) %>% 
-  dplyr::select(IBGE7,ANO,M_CRH,dif_prop)
-
-consistency_crh <- validate::validator(
-  CF_M_ICMSECOLOG = in_range(dif_prop, min = -0.05, max = 0.05)
-)
-```
-
-
-```{r warning=FALSE, message=FALSE}
-check_consistency_crh <- validate::confront(data_aux, consistency_crh)
-validate::summary(check_consistency_crh)
-validate::plot(check_consistency_crh)
-```
-
-### M_CFEM
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-dd <- data %>% 
-  difpercentual(M_CFEM) 
-
-data_aux <- data %>%
-  dplyr::left_join(dd %>% 
-                     dplyr::select(IBGE7,ANO,dif_prop),
-                   by = c("IBGE7", "ANO") ) %>% 
-  dplyr::select(IBGE7,ANO,M_CFEM,dif_prop)
-
-consistency_cfem <- validate::validator(
-  CF_M_M_CFEM = in_range(dif_prop, min = -0.05, max = 0.05)
-)
-```
-
-
-```{r warning=FALSE, message=FALSE}
-check_consistency_cfem <- validate::confront(data_aux, consistency_cfem)
-validate::summary(check_consistency_cfem)
-validate::plot(check_consistency_cfem)
-```
-
-
-## Checando as regras de distribuição
-### M_AGRO
-```{r warning=FALSE, message=FALSE}
-check_distibution_magro <- validate::confront(data, distributionrules_magro)
-validate::summary(check_distibution_magro)
-```
-
-### M_BOVINO
-```{r warning=FALSE, message=FALSE}
-check_distibution_mbovino <- validate::confront(data, distributionrules_mbovino)
-validate::summary(check_distibution_mbovino)
-```
-
-### M_CANA
-```{r warning=FALSE, message=FALSE}
-check_distibution_mcana <- validate::confront(data, distributionrules_mcana)
-validate::summary(check_distibution_mcana)
-```
-
-### M_CFEM
-```{r warning=FALSE, message=FALSE}
-check_distibution_mcfem <- validate::confront(data, distributionrules_mcfem)
-validate::summary(check_distibution_mcfem)
-```
-
-### M_CRH
-```{r warning=FALSE, message=FALSE}
-check_distibution_mcrh <- validate::confront(data, distributionrules_mcrh)
-validate::summary(check_distibution_mcrh)
-```
-
-### M_FLONATIVA
-```{r warning=FALSE, message=FALSE}
-check_distibution_mflonativa <- validate::confront(data, distributionrules_mflonativa)
-validate::summary(check_distibution_mflonativa)
-```
-
-### M_FOCOS
-```{r warning=FALSE, message=FALSE}
-check_distibution_mfocos <- validate::confront(data, distributionrules_mfocos)
-validate::summary(check_distibution_mfocos)
-```
-
-### M_FROTA
-```{r warning=FALSE, message=FALSE}
-check_distibution_mfrota <- validate::confront(data, distributionrules_mfrota)
-validate::summary(check_distibution_mfrota)
-
-```
-
-
-```{r warning=FALSE, message=FALSE}
-
-check_distibution_mfrota_compare <- validate::confront(data, distibution_mfrota_compare)
-validate::summary(check_distibution_mfrota_compare)
-
-```
-
-### M_ICMSECOLOG
-```{r warning=FALSE, message=FALSE}
-check_distibution_micmsecolog <- validate::confront(data, distributionrules_micmsecolog)
-validate::summary(check_distibution_micmsecolog)
-```
-
-### M_INFRA
-```{r warning=FALSE, message=FALSE}
-check_distibution_minfra <- validate::confront(data, distributionrules_minfra)
-validate::summary(check_distibution_minfra)
-```
-
-### M_REFLO
-```{r warning=FALSE, message=FALSE}
-check_distibution_mreflo <- validate::confront(data, distributionrules_mreflo)
-validate::summary(check_distibution_mreflo)
-```
-
-
-## Gráfico para regra de tipo 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_type)
-```
-
-
-## Gráfico para regra de validade
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_validate)
-#validate::violating(data, check_consistency)
-```
-
-## Gráfico para regra de consistencia
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_consistency)
-
-```
-
-
-## Gráficos para regra de distribuicao
-
-### M_AGRO
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_magro)
-```
-
-### M_BOVINO
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mbovino)
-```
-
-### M_CANA
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mcana)
-```
-
-### M_CFEM
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mcfem)
-```
-
-### M_CRH
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mcrh)
-```
-
-### M_FLONATIVA
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mflonativa)
-```
-
-### M_FOCOS
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mfocos)
-```
-
-### M_FROTA
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mfrota)
-
-validate::plot(check_distibution_mfrota_compare)
-```
-
-### M_ICMSECOLOG
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_micmsecolog)
-```
-
-### M_INFRA
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_minfra)
-```
-
-### M_REFLO
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-validate::plot(check_distibution_mreflo)
-```
-
-
 

@@ -308,7 +308,6 @@ var_char <- data |>
 
 A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
 
-
 # Regras de crítica
 
 As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
@@ -486,7 +485,6 @@ ano_base_alter <- c(
 #   "NA" = NA_integer_
 # )
 ```
-
 
 ```{r map_valid_desc}
 
@@ -1594,7 +1592,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_ALUNOSP11
 
 ```{r rules_dist_eo_alunosp11}
@@ -1668,7 +1665,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_ESCOLAEFAI
 
@@ -2412,7 +2408,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_IQEP4
 
 ```{r rules_dist_eo_iqep4}
@@ -2468,7 +2463,6 @@ df_sumario <- df_sumario_dist_eo |>
   dplyr::ungroup()
 ```
 
-
 ```{r table_dist_eo_iqep4}
 #| column: screen-inset-right
 
@@ -2487,7 +2481,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_IQEP8
 
@@ -2543,7 +2536,6 @@ df_sumario <- df_sumario_dist_eo |>
   dplyr::ungroup()
 ```
 
-
 ```{r table_dist_eo_iqep8}
 #| column: screen-inset-right
 
@@ -2562,7 +2554,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_IQE4
 
@@ -2636,7 +2627,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_IQE8
 
@@ -2784,7 +2774,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_IQE
 
 ```{r rules_dist_EO_IQE}
@@ -2857,7 +2846,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_PC15
 
@@ -2932,7 +2920,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_PC18
 
 ```{r rules_dist_EO_PC18}
@@ -3005,7 +2992,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_EJAFU15
 
@@ -3080,7 +3066,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_EJAME18
 
 ```{r rules_dist_EO_EJAME18}
@@ -3153,7 +3138,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TAXA0A3
 
@@ -3228,7 +3212,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TAXA4A5
 
 ```{r rules_dist_EO_TAXA4A5}
@@ -3301,7 +3284,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TAXA15A17
 
@@ -3376,7 +3358,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TXATBASICA
 
 ```{r rules_dist_EO_TXATBASICA}
@@ -3449,7 +3430,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TAXA6A14
 
@@ -3597,8 +3577,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
 ### EO_TAXALIQ7
 
 ```{r rules_dist_EO_TAXALIQ7}
@@ -3672,8 +3650,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
 
 ### EO_TAXALIQ15
 
@@ -3749,7 +3725,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_DISTEM
 
 ```{r rules_dist_eo_distem}
@@ -3824,8 +3799,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
 ### EO_TXAPROV1A9
 
 ```{r rules_dist_EO_TXAPROV1a9}
@@ -3899,9 +3872,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
 ### EO_TXAPROV1A5
 
 ```{r rules_dist_EO_TXAPROV1a5}
@@ -3974,8 +3944,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
 
 ### EO_TXAPROV6A9
 
@@ -4051,7 +4019,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TXAPROV10A12
 
 ```{r rules_dist_EO_TXAPROV10a12}
@@ -4124,7 +4091,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TXREP1A9
 
@@ -4200,7 +4166,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TXREP1A5
 
 ```{r rules_dist_EO_TXREP1a5}
@@ -4274,7 +4239,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TXREP10A12
 
@@ -4350,7 +4314,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TXREP6A9
 
 ```{r rules_dist_EO_TXREP6a9}
@@ -4424,7 +4387,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TXABA1A9
 
@@ -4500,7 +4462,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_TXABA1A5
 
 ```{r rules_dist_EO_TXABA1a5}
@@ -4574,7 +4535,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_TXABA6A9
 
@@ -4724,7 +4684,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_DISTEF
 
 ```{r rules_dist_EO_DISTEF}
@@ -4798,7 +4757,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### EO_DISTEFAI
 
@@ -4874,7 +4832,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### EO_DISTEFAF
 
 ```{r rules_dist_EO_DISTEFAF}
@@ -4948,39 +4905,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PCINF
 
@@ -5056,38 +4980,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_PCITF
 
 ```{r rules_dist_EO_PCITF}
@@ -5161,37 +5053,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PCINFM
 
@@ -5267,37 +5128,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_PCITM
 
 ```{r rules_dist_EO_PCITM}
@@ -5371,37 +5201,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PCAPM8
 
@@ -5477,39 +5276,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_PCAPM11
 
 ```{r rules_dist_EO_PCAPM11}
@@ -5583,40 +5349,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PCAPP8
 
@@ -5692,39 +5424,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_PCAPP11
 
 ```{r rules_dist_EO_PCAPP11}
@@ -5798,40 +5497,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PALUNOSM8
 
@@ -5907,39 +5572,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_PALUNOSP8
 
 ```{r rules_dist_EO_PALUNOSP8}
@@ -6013,41 +5645,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_PALUNOSM11
 
@@ -6123,41 +5720,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ANALF25_B
 
 ```{r rules_dist_EO_ANALF25_B}
@@ -6231,46 +5793,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ANALF25_PP
 
@@ -6346,44 +5868,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_FUND25_B
 
 ```{r rules_dist_EO_FUND25_B}
@@ -6457,45 +5941,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_FUND25_PP
 
@@ -6571,47 +6016,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MED25M_B
 
 ```{r rules_dist_EO_MED25M_B}
@@ -6685,44 +6089,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MED25M_PP
 
@@ -6798,47 +6164,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_DOCSUPEI
 
 ```{r rules_dist_EO_DOCSUPEI}
@@ -6912,47 +6237,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_DOCSUPEF
 
@@ -7028,46 +6312,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_DOCSUPEFAF
 
 ```{r rules_dist_EO_DOCSUPEFAF}
@@ -7141,44 +6385,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_DOCSUPEFAI
 
@@ -7254,45 +6460,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_DOCSUPEM
 
 ```{r rules_dist_EO_DOCSUPEM}
@@ -7366,46 +6533,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG1EI
 
@@ -7481,46 +6608,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG2EI
 
 ```{r rules_dist_EO_ADEDG2EI}
@@ -7594,45 +6681,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG3EI
 
@@ -7708,45 +6756,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG4EI
 
 ```{r rules_dist_EO_ADEDG4EI}
@@ -7820,44 +6829,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG5EI
 
@@ -7933,44 +6904,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG1EF
 
 ```{r rules_dist_EO_ADEDG1EF}
@@ -8044,46 +6977,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG2EF
 
@@ -8159,47 +7052,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG3EF
 
 ```{r rules_dist_EO_ADEDG3EF}
@@ -8273,47 +7125,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG4EF
 
@@ -8389,47 +7200,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG5EF
 
 ```{r rules_dist_EO_ADEDG5EF}
@@ -8503,47 +7273,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG1EFAI
 
@@ -8619,48 +7348,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG2EFAI
 
 ```{r rules_dist_EO_ADEDG2EFAI}
@@ -8734,48 +7421,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG3EFAI
 
@@ -8851,47 +7496,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG4EFAI
 
 ```{r rules_dist_EO_ADEDG4EFAI}
@@ -8965,47 +7569,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG5EFAI
 
@@ -9081,47 +7644,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG1EFAF
 
 ```{r rules_dist_EO_ADEDG1EFAF}
@@ -9195,48 +7717,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG2EFAF
 
@@ -9312,47 +7792,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG3EFAF
 
 ```{r rules_dist_EO_ADEDG3EFAF}
@@ -9426,51 +7865,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG4EFAF
 
@@ -9546,52 +7940,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG5EFAF
 
 ```{r rules_dist_EO_ADEDG5EFAF}
@@ -9665,54 +8013,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG1EM
 
@@ -9788,53 +8088,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG2EM
 
 ```{r rules_dist_EO_ADEDG2EM}
@@ -9908,54 +8161,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG3EM
 
@@ -10031,53 +8236,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG4EM
 
 ```{r rules_dist_EO_ADEDG4EM}
@@ -10151,53 +8309,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG5EM
 
@@ -10273,52 +8384,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG1EJAF
 
 ```{r rules_dist_EO_ADEDG1EJAF}
@@ -10392,53 +8457,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG2EJAF
 
@@ -10514,53 +8532,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG3EJAF
 
 ```{r rules_dist_EO_ADEDG3EJAF}
@@ -10634,53 +8605,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG4EJAF
 
@@ -10756,52 +8680,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG5EJAF
 
 ```{r rules_dist_EO_ADEDG5EJAF}
@@ -10875,54 +8753,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG1EJAM
 
@@ -10998,53 +8828,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG2EJAM
 
 ```{r rules_dist_EO_ADEDG2EJAM}
@@ -11118,54 +8901,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG3EJAM
 
@@ -11241,53 +8976,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_ADEDG4EJAM
 
 ```{r rules_dist_EO_ADEDG4EJAM}
@@ -11361,53 +9049,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_ADEDG5EJAM
 
@@ -11483,53 +9124,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATFEI
 
 ```{r rules_dist_EO_MATFEI}
@@ -11603,55 +9197,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATEEI
 
@@ -11727,57 +9272,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATMEI
 
 ```{r rules_dist_EO_MATMEI}
@@ -11851,55 +9345,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATPEI
 
@@ -11975,55 +9420,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATFEF
 
 ```{r rules_dist_EO_MATFEF}
@@ -12097,55 +9493,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATEEF
 
@@ -12221,56 +9568,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATMEF
 
 ```{r rules_dist_EO_MATMEF}
@@ -12344,55 +9641,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATPEF
 
@@ -12468,55 +9716,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATFEFAI
 
 ```{r rules_dist_EO_MATFEFAI}
@@ -12590,55 +9789,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATEEFAI
 
@@ -12714,55 +9864,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATMEFAI
 
 ```{r rules_dist_EO_MATMEFAI}
@@ -12836,55 +9937,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATPEFAI
 
@@ -12960,55 +10012,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATFEFAF
 
 ```{r rules_dist_EO_MATFEFAF}
@@ -13082,56 +10085,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATEEFAF
 
@@ -13207,57 +10160,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATMEFAF
 
 ```{r rules_dist_EO_MATMEFAF}
@@ -13331,56 +10233,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATPEFAF
 
@@ -13456,55 +10308,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATFEM
 
 ```{r rules_dist_EO_MATFEM}
@@ -13578,56 +10381,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATEEM
 
@@ -13703,56 +10456,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATMEM
 
 ```{r rules_dist_EO_MATMEM}
@@ -13826,56 +10529,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATPEM
 
@@ -13951,55 +10604,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATTICR
 
 ```{r rules_dist_EO_MATTICR}
@@ -14073,55 +10677,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATTIPE
 
@@ -14197,56 +10752,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATTIEFAI
 
 ```{r rules_dist_EO_MATTIEFAI}
@@ -14321,55 +10826,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### EO_MATTIEFAF
 
 ```{r rules_dist_EO_MATTIEFAF}
@@ -14443,56 +10899,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### EO_MATTIEM
 
@@ -15419,5 +11825,3 @@ openxlsx::saveWorkbook(pt, "fjpdados_educacao_violacoes.xlsx", overwrite = T)
 rm(list = ls())
 gc()
 ```
-
-
