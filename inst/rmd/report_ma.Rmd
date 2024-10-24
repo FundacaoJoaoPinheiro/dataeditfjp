@@ -42,6 +42,7 @@ output-file: "relatorio_ma.html"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
 ```
 
 
