@@ -1,4 +1,4 @@
-#' @title Compare the first diference
+#' @title Compare the first difference
 #' @description
 #' A short description...
 #'

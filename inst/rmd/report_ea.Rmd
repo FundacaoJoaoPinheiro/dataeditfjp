@@ -1,6 +1,6 @@
 ---
 title: FJP Dados
-subtitle: Meio Ambiente
+subtitle: Economia
 description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
 author: 
   name: Coordenação de Indicadores Sociais (CIS)

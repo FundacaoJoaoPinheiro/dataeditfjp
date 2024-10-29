@@ -1,0 +1,3619 @@
+---
+title: FJP Dados
+subtitle: Saúde
+description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
+author: 
+  name: Coordenação de Indicadores Sociais (CIS)
+  affiliation: 
+    name: Diretoria de Estatística e Informações (Direi)
+    address: Alameda das Acácias, 70 - São Luiz 
+    city: Belo Horizonte
+    state: Minas Gerais
+    postal-code: 31.275-150
+    url: https://fjp.mg.gov.br/
+output: 
+  html_document: 
+    toc: true
+lang: pt
+date: "`r Sys.Date()`"
+title-block-banner: "#68bb59"
+title-block-banner-color: "#ffffff"
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    toc: true
+    toc-location: left
+    toc-title: MENU
+    linkcolor: "#68bb59"
+    css: css/all_custom.css
+    theme:
+      light: [flatly, css/ma_custom.scss]
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "relatorio_ma.html"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+```
+
+```{r set_param_global}
+
+k <- 1.5 
+
+## "Truque" para setar "k" como uma constante
+#lockBinding("k", globalenv())
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
+```
+
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
+
+# Regras de crítica
+
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados. A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
+
+**Classificação por finalidade**
+
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
+
+-   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes;
+
+-   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
+
+-   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
+
+-   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
+
+-   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica; - **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+-   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+-   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+-   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+-   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+ano_base_alter <- c(
+  "SE_PENTA"         = 2010,
+  "SE_TXMODCNT30A69" = 2014,
+  "SE_ICSABMS"       = 2014,
+  "SE_MEDICOS"       = 2008
+)
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
+```
+
+```{r get_cat}
+
+## Categorias varíaveis dicotômicas
+# cat_dic <- c(
+#   "Sim",
+#   "Não"
+# )
+
+## Categorias encontradas na série histórica
+# cat_ogestor <- c(
+#   "Departamento, assessoria, setor ou órgão similar",
+#   "Não possui estrutura",
+#   "Não possui estrutura para a área",
+#   "Órgão da administração indireta",
+#   "Secretaria em conjunto com outra política",
+#   "Secretaria em conjunto com outras políticas setoriais",
+#   "Secretaria exclusiva",
+#   "Secretaria municipal em conjunto com outras políticas",
+#   "Secretaria municipal em conjunto com outros temas",
+#   "Secretaria municipal exclusiva",
+#   "Setor subordinado a outra secretaria",
+#   "Setor subordinado diretamente à chefia do executivo"
+# )
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1`  = "Valor é ≥ 0",
+  `2`  = "Valor está dentro da categoria esperada",
+  `3`  = "Valor está dentro da faixa esperada (0 a 100)",
+  `4`  = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5`  = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6`  = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7`  = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8`  = "Valor é ≥ 8", # SP_PM1
+  `9`  = "Valor está dentro da faixa esperada (0 a 0,33)", # HS_POLITICA e HS_PLANOSAN
+  `10` = "Valor está dentro da faixa esperada (0 a 0,34)", # HS_CONSELHO
+  `11` = "Valor está dentro da faixa esperada (0 a 1)"     # HS_GESTAO
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_SE_TXBRUTAMORT",
+    "VI_SE_TXBRUTAMORTPAD",
+    "VI_SE_TXMOISQCOR45A59",
+    "VI_SE_TXMOAVC45A59",
+    "VI_SE_TXMOATRA15A29",
+    "VI_SE_TXMOHOMI",
+    "VI_SE_TXMOHOMI15A29",
+    "VI_SE_TXMOCANCOLUT",
+    "VI_SE_TXMOCANMA",
+    "VI_SE_TXMOCANPUL",
+    "VI_SE_OBITO60",
+    "VI_SE_NASCBAIXOPESO",
+    "VI_SE_OBINFSIFILS",
+    "VI_SE_OBTETANONEO",
+    "VI_SE_OBRAIVA",
+    "VI_SE_INTERDVHID",
+    "VI_SE_INTERDRSAI",
+    "VI_SE_COBPSF",
+    "VI_SE_NASC7CONSUL",
+    "VI_SE_TETRA",
+    "VI_SE_POLIO",
+    "VI_SE_TRIPLICE",
+    "VI_SE_FAMARELA",
+    "VI_SE_OBMALDEF",
+    "VI_SE_OBITSEMASSIS",
+    "VI_SE_INTERDCV40",
+    "VI_SE_INTERDIAB",
+    "VI_SE_INTERSAP",
+    "VI_SE_INTERSAP1A5",
+    "VI_SE_INTERSAP60",
+    "VI_SE_FRATFEMUR60",
+    "VI_SE_CANCPROST",
+    "VI_SE_INTMEDCOMPLDESMIC",
+    "VI_SE_PARTODESLOCMIC",
+    "VI_SE_PENTA",
+    "VI_SE_TXMODCNT30A69",
+    "VI_SE_ICSABMS",
+    "VI_SE_MEDICOS"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+    "VI_SE_TXBRUTAMORT"       ~ desc_regra_valid[4],
+    "VI_SE_TXBRUTAMORTPAD"    ~ desc_regra_valid[4],
+    "VI_SE_TXMOISQCOR45A59"   ~ desc_regra_valid[6],
+    "VI_SE_TXMOAVC45A59"      ~ desc_regra_valid[6],
+    "VI_SE_TXMOATRA15A29"     ~ desc_regra_valid[6],
+    "VI_SE_TXMOHOMI"          ~ desc_regra_valid[6],
+    "VI_SE_TXMOHOMI15A29"     ~ desc_regra_valid[6],
+    "VI_SE_TXMOCANCOLUT"      ~ desc_regra_valid[6],
+    "VI_SE_TXMOCANMA"         ~ desc_regra_valid[6],
+    "VI_SE_TXMOCANPUL"        ~ desc_regra_valid[6],
+    "VI_SE_OBITO60"           ~ desc_regra_valid[3],
+    "VI_SE_NASCBAIXOPESO"     ~ desc_regra_valid[3],
+    "VI_SE_OBINFSIFILS"       ~ desc_regra_valid[1],
+    "VI_SE_OBTETANONEO"       ~ desc_regra_valid[1],
+    "VI_SE_OBRAIVA"           ~ desc_regra_valid[1],
+    "VI_SE_INTERDVHID"        ~ desc_regra_valid[3],
+    "VI_SE_INTERDRSAI"        ~ desc_regra_valid[3],
+    "VI_SE_COBPSF"            ~ desc_regra_valid[3],
+    "VI_SE_NASC7CONSUL"       ~ desc_regra_valid[3],
+    "VI_SE_TETRA"             ~ desc_regra_valid[3],
+    "VI_SE_POLIO"             ~ desc_regra_valid[3],
+    "VI_SE_TRIPLICE"          ~ desc_regra_valid[3],
+    "VI_SE_FAMARELA"          ~ desc_regra_valid[3],
+    "VI_SE_OBMALDEF"          ~ desc_regra_valid[3],
+    "VI_SE_OBITSEMASSIS"      ~ desc_regra_valid[3],
+    "VI_SE_INTERDCV40"        ~ desc_regra_valid[3],
+    "VI_SE_INTERDIAB"         ~ desc_regra_valid[3],
+    "VI_SE_INTERSAP"          ~ desc_regra_valid[3],
+    "VI_SE_INTERSAP1A5"       ~ desc_regra_valid[3],
+    "VI_SE_INTERSAP60"        ~ desc_regra_valid[3],
+    "VI_SE_FRATFEMUR60"       ~ desc_regra_valid[3],
+    "VI_SE_CANCPROST"         ~ desc_regra_valid[6],
+    "VI_SE_INTMEDCOMPLDESMIC" ~ desc_regra_valid[3],
+    "VI_SE_PARTODESLOCMIC"    ~ desc_regra_valid[3],
+    "VI_SE_PENTA"             ~ desc_regra_valid[3],
+    "VI_SE_TXMODCNT30A69"     ~ desc_regra_valid[6],
+    "VI_SE_ICSABMS"          ~ desc_regra_valid[3],
+    "VI_SE_MEDICOS"           ~ desc_regra_valid[4]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+# desc_regra_consist <- c(
+#   `1` = "A soma da proporção anual é igual a 100%" # MA_FOCOS
+# )
+
+# df com o nome da regra e a respectiva descrição
+# desc_regra_consist_var <- data.frame(
+#   Regra = c(
+#     "CF_MA_FOCOS_total_year"
+#   )
+# ) |> 
+#   dplyr::mutate(
+#     `Descrição` = dplyr::case_match(
+#       Regra,
+#       "CF_MA_FOCOS_total_year" ~ desc_regra_consist[1]
+#     )
+#   )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_SE_TXBRUTAMORT       = is.numeric(SE_TXBRUTAMORT),
+  TI_SE_TXBRUTAMORTPAD    = is.numeric(SE_TXBRUTAMORTPAD),
+  TI_SE_TXMOISQCOR45A59   = is.numeric(SE_TXMOISQCOR45A59),
+  TI_SE_TXMOAVC45A59      = is.numeric(SE_TXMOAVC45A59),
+  TI_SE_TXMOATRA15A29     = is.numeric(SE_TXMOATRA15A29),
+  TI_SE_TXMOHOMI          = is.numeric(SE_TXMOHOMI),
+  TI_SE_TXMOHOMI15A29     = is.numeric(SE_TXMOHOMI15A29),
+  TI_SE_TXMOCANCOLUT      = is.numeric(SE_TXMOCANCOLUT),
+  TI_SE_TXMOCANMA         = is.numeric(SE_TXMOCANMA),
+  TI_SE_TXMOCANPUL        = is.numeric(SE_TXMOCANPUL),
+  TI_SE_OBITO60           = is.numeric(SE_OBITO60),
+  TI_SE_NASCBAIXOPESO     = is.numeric(SE_NASCBAIXOPESO),
+  TI_SE_OBINFSIFILS       = is.numeric(SE_OBINFSIFILS),
+  TI_SE_OBTETANONEO       = is.numeric(SE_OBTETANONEO),
+  TI_SE_OBRAIVA           = is.numeric(SE_OBRAIVA),
+  TI_SE_INTERDVHID        = is.numeric(SE_INTERDVHID),
+  TI_SE_INTERDRSAI        = is.numeric(SE_INTERDRSAI),
+  TI_SE_COBPSF            = is.numeric(SE_COBPSF),
+  TI_SE_NASC7CONSUL       = is.numeric(SE_NASC7CONSUL),
+  TI_SE_TETRA             = is.numeric(SE_TETRA),
+  TI_SE_POLIO             = is.numeric(SE_POLIO),
+  TI_SE_TRIPLICE          = is.numeric(SE_TRIPLICE),
+  TI_SE_FAMARELA          = is.numeric(SE_FAMARELA),
+  TI_SE_OBMALDEF          = is.numeric(SE_OBMALDEF),
+  TI_SE_OBITSEMASSIS      = is.numeric(SE_OBITSEMASSIS),
+  TI_SE_INTERDCV40        = is.numeric(SE_INTERDCV40),
+  TI_SE_INTERDIAB         = is.numeric(SE_INTERDIAB),
+  TI_SE_INTERSAP          = is.numeric(SE_INTERSAP),
+  TI_SE_INTERSAP1A5       = is.numeric(SE_INTERSAP1A5),
+  TI_SE_INTERSAP60        = is.numeric(SE_INTERSAP60),
+  TI_SE_FRATFEMUR60       = is.numeric(SE_FRATFEMUR60),
+  TI_SE_CANCPROST         = is.numeric(SE_CANCPROST),
+  TI_SE_INTMEDCOMPLDESMIC = is.numeric(SE_INTMEDCOMPLDESMIC),
+  TI_SE_PARTODESLOCMIC    = is.numeric(SE_PARTODESLOCMIC),
+  TI_SE_PENTA             = is.numeric(SE_PENTA),
+  TI_SE_TXMODCNT30A69     = is.numeric(SE_TXMODCNT30A69),
+  TI_SE_ICSABMS           = is.numeric(SE_ICSABMS),
+  TI_SE_MEDICOS           = is.numeric(SE_MEDICOS)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Validade
+
+```{r data_rules_valid_se_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_se_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("SE_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_SE_TXBRUTAMORT       = dplyr::if_else(!is.na(SE_TXBRUTAMORT), F, NA),
+    VI_NA_SE_TXBRUTAMORTPAD    = dplyr::if_else(!is.na(SE_TXBRUTAMORTPAD), F, NA),
+    VI_NA_SE_TXMOISQCOR45A59   = dplyr::if_else(!is.na(SE_TXMOISQCOR45A59), F, NA),
+    VI_NA_SE_TXMOAVC45A59      = dplyr::if_else(!is.na(SE_TXMOAVC45A59), F, NA),
+    VI_NA_SE_TXMOATRA15A29     = dplyr::if_else(!is.na(SE_TXMOATRA15A29), F, NA),
+    VI_NA_SE_TXMOHOMI          = dplyr::if_else(!is.na(SE_TXMOHOMI), F, NA),
+    VI_NA_SE_TXMOHOMI15A29     = dplyr::if_else(!is.na(SE_TXMOHOMI15A29), F, NA),
+    VI_NA_SE_TXMOCANCOLUT      = dplyr::if_else(!is.na(SE_TXMOCANCOLUT), F, NA),
+    VI_NA_SE_TXMOCANMA         = dplyr::if_else(!is.na(SE_TXMOCANMA), F, NA),
+    VI_NA_SE_TXMOCANPUL        = dplyr::if_else(!is.na(SE_TXMOCANPUL), F, NA),
+    VI_NA_SE_OBITO60           = dplyr::if_else(!is.na(SE_OBITO60), F, NA),
+    VI_NA_SE_NASCBAIXOPESO     = dplyr::if_else(!is.na(SE_NASCBAIXOPESO), F, NA),
+    VI_NA_SE_OBINFSIFILS       = dplyr::if_else(!is.na(SE_OBINFSIFILS), F, NA),
+    VI_NA_SE_OBTETANONEO       = dplyr::if_else(!is.na(SE_OBTETANONEO), F, NA),
+    VI_NA_SE_OBRAIVA           = dplyr::if_else(!is.na(SE_OBRAIVA), F, NA),
+    VI_NA_SE_INTERDVHID        = dplyr::if_else(!is.na(SE_INTERDVHID), F, NA),
+    VI_NA_SE_INTERDRSAI        = dplyr::if_else(!is.na(SE_INTERDRSAI), F, NA),
+    VI_NA_SE_COBPSF            = dplyr::if_else(!is.na(SE_COBPSF), F, NA),
+    VI_NA_SE_NASC7CONSUL       = dplyr::if_else(!is.na(SE_NASC7CONSUL), F, NA),
+    VI_NA_SE_TETRA             = dplyr::if_else(!is.na(SE_TETRA), F, NA),
+    VI_NA_SE_POLIO             = dplyr::if_else(!is.na(SE_POLIO), F, NA),
+    VI_NA_SE_TRIPLICE          = dplyr::if_else(!is.na(SE_TRIPLICE), F, NA),
+    VI_NA_SE_FAMARELA          = dplyr::if_else(!is.na(SE_FAMARELA), F, NA),
+    VI_NA_SE_OBMALDEF          = dplyr::if_else(!is.na(SE_OBMALDEF), F, NA),
+    VI_NA_SE_OBITSEMASSIS      = dplyr::if_else(!is.na(SE_OBITSEMASSIS), F, NA),
+    VI_NA_SE_INTERDCV40        = dplyr::if_else(!is.na(SE_INTERDCV40), F, NA),
+    VI_NA_SE_INTERDIAB         = dplyr::if_else(!is.na(SE_INTERDIAB), F, NA),
+    VI_NA_SE_INTERSAP          = dplyr::if_else(!is.na(SE_INTERSAP), F, NA),
+    VI_NA_SE_INTERSAP1A5       = dplyr::if_else(!is.na(SE_INTERSAP1A5), F, NA),
+    VI_NA_SE_INTERSAP60        = dplyr::if_else(!is.na(SE_INTERSAP60), F, NA),
+    VI_NA_SE_FRATFEMUR60       = dplyr::if_else(!is.na(SE_FRATFEMUR60), F, NA),
+    VI_NA_SE_CANCPROST         = dplyr::if_else(!is.na(SE_CANCPROST), F, NA),
+    VI_NA_SE_INTMEDCOMPLDESMIC = dplyr::if_else(!is.na(SE_INTMEDCOMPLDESMIC), F, NA),
+    VI_NA_SE_PARTODESLOCMIC    = dplyr::if_else(!is.na(SE_PARTODESLOCMIC), F, NA),
+    VI_NA_SE_PENTA             = dplyr::if_else(!is.na(SE_PENTA), F, NA),
+    VI_NA_SE_TXMODCNT30A69     = dplyr::if_else(!is.na(SE_TXMODCNT30A69), F, NA),
+    VI_NA_SE_ICSABMS          = dplyr::if_else(!is.na(SE_ICSABMS), F, NA),
+    VI_NA_SE_MEDICOS           = dplyr::if_else(!is.na(SE_MEDICOS), F, NA),
+    # Others
+    VI_SE_OBINFSIFILS       = dplyr::if_else(SE_OBINFSIFILS >= 0, F, T),
+    VI_SE_OBTETANONEO       = dplyr::if_else(SE_OBTETANONEO >= 0, F, T),
+    VI_SE_OBRAIVA           = dplyr::if_else(SE_OBRAIVA >= 0, F, T),
+    VI_SE_OBITO60           = dplyr::if_else(dplyr::between(SE_OBITO60, 0, 100), F, T),
+    VI_SE_NASCBAIXOPESO     = dplyr::if_else(dplyr::between(SE_NASCBAIXOPESO, 0, 100), F, T),
+    VI_SE_INTERDVHID        = dplyr::if_else(dplyr::between(SE_INTERDVHID, 0, 100), F, T),
+    VI_SE_INTERDRSAI        = dplyr::if_else(dplyr::between(SE_INTERDRSAI, 0, 100), F, T),
+    VI_SE_COBPSF            = dplyr::if_else(dplyr::between(SE_COBPSF, 0, 100), F, T),
+    VI_SE_NASC7CONSUL       = dplyr::if_else(dplyr::between(SE_NASC7CONSUL, 0, 100), F, T),
+    VI_SE_TETRA             = dplyr::if_else(dplyr::between(SE_TETRA, 0, 100), F, T),
+    VI_SE_POLIO             = dplyr::if_else(dplyr::between(SE_POLIO, 0, 100), F, T),
+    VI_SE_TRIPLICE          = dplyr::if_else(dplyr::between(SE_TRIPLICE, 0, 100), F, T),
+    VI_SE_FAMARELA          = dplyr::if_else(dplyr::between(SE_FAMARELA, 0, 100), F, T),
+    VI_SE_OBMALDEF          = dplyr::if_else(dplyr::between(SE_OBMALDEF, 0, 100), F, T),
+    VI_SE_OBITSEMASSIS      = dplyr::if_else(dplyr::between(SE_OBITSEMASSIS, 0, 100), F, T),
+    VI_SE_INTERDCV40        = dplyr::if_else(dplyr::between(SE_INTERDCV40, 0, 100), F, T),
+    VI_SE_INTERDIAB         = dplyr::if_else(dplyr::between(SE_INTERDIAB, 0, 100), F, T),
+    VI_SE_INTERSAP          = dplyr::if_else(dplyr::between(SE_INTERSAP, 0, 100), F, T),
+    VI_SE_INTERSAP1A5       = dplyr::if_else(dplyr::between(SE_INTERSAP1A5, 0, 100), F, T),
+    VI_SE_INTERSAP60        = dplyr::if_else(dplyr::between(SE_INTERSAP60, 0, 100), F, T),
+    VI_SE_FRATFEMUR60       = dplyr::if_else(dplyr::between(SE_FRATFEMUR60, 0, 100), F, T),
+    VI_SE_INTMEDCOMPLDESMIC = dplyr::if_else(dplyr::between(SE_INTMEDCOMPLDESMIC, 0, 100), F, T),
+    VI_SE_PARTODESLOCMIC  = dplyr::if_else(dplyr::between(SE_PARTODESLOCMIC, 0, 100), F, T),
+    VI_SE_PENTA           = dplyr::if_else(dplyr::between(SE_PENTA, 0, 100), F, T),
+    VI_SE_ICSABMS        = dplyr::if_else(dplyr::between(SE_ICSABMS, 0, 100), F, T),
+    VI_SE_TXBRUTAMORT     = dplyr::if_else(dplyr::between(SE_TXBRUTAMORT, 0, 1000), F, T),
+    VI_SE_TXBRUTAMORTPAD  = dplyr::if_else(dplyr::between(SE_TXBRUTAMORTPAD, 0, 1000), F, T),
+    VI_SE_TXMOISQCOR45A59 = dplyr::if_else(dplyr::between(SE_TXMOISQCOR45A59, 0, 1000), F, T),
+    VI_SE_MEDICOS       = dplyr::if_else(dplyr::between(SE_MEDICOS, 0, 1000), F, T),
+    VI_SE_TXMOAVC45A59  = dplyr::if_else(dplyr::between(SE_TXMOAVC45A59, 0, 100000), F, T),
+    VI_SE_TXMOATRA15A29 = dplyr::if_else(dplyr::between(SE_TXMOATRA15A29, 0, 100000), F, T),
+    VI_SE_TXMOHOMI      = dplyr::if_else(dplyr::between(SE_TXMOHOMI, 0, 100000), F, T),
+    VI_SE_TXMOHOMI15A29 = dplyr::if_else(dplyr::between(SE_TXMOHOMI15A29, 0, 100000), F, T),
+    VI_SE_TXMOCANCOLUT  = dplyr::if_else(dplyr::between(SE_TXMOCANCOLUT, 0, 100000), F, T),
+    VI_SE_TXMOCANMA     = dplyr::if_else(dplyr::between(SE_TXMOCANMA, 0, 100000), F, T),
+    VI_SE_TXMOCANPUL    = dplyr::if_else(dplyr::between(SE_TXMOCANPUL, 0, 100000), F, T),
+    VI_SE_CANCPROST     = dplyr::if_else(dplyr::between(SE_CANCPROST, 0, 100000), F, T)
+  )
+```
+
+```{r data_wrangling_valid_se_all}
+
+## Transformação dos resultados
+df_sumario_valid_se <- df_rules_valid_se_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_se_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_se_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+<!-- ## Consistência -->
+
+```{r data_rules_consist_se_all}
+
+## df com o resultado das aplicações das regras
+# df_rules_consist_se_all <- data |> 
+#   dplyr::select(
+#     Ano   = ANO, 
+#     ibge7 = IBGE7, 
+#     MA_FOCOS
+#   ) |> 
+#   dplyr::group_by(Ano) |> 
+#   dplyr::mutate(
+#     CF_MA_FOCOS_total_year = dplyr::if_else(
+#       dplyr::between(sum(MA_FOCOS, na.rm = T), 99, 101), F, T)
+#   )
+```
+
+```{r data_wrangling_consist_se_all}
+
+## Tranformação dos resultados
+# df_sumario_consist_ma <- df_rules_consist_ma_all |> 
+#   dplyr::select(!MA_FOCOS) |> 
+#   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+# df_sumario <- df_sumario_consist_ma |> 
+#   dplyr::group_by(Ano, Regra) |> 
+#   dplyr::summarise(
+#     Total        = dplyr::n(),
+#     Validada     = sum(!resultado, na.rm = T),
+#     Suspeita     = sum(resultado, na.rm = T),
+#     Ausente      = sum(is.na(resultado)),
+#     `% Validada` = round(Validada / Total * 100, 2),
+#     `% Suspeita` = round(Suspeita / Total * 100, 2),
+#     `% Ausente`  = round(Ausente / Total * 100, 2)
+#   ) |> 
+#   dplyr::ungroup()
+```
+
+<!-- ### Todos os indicadores -->
+
+```{r table_consist_se_all}
+
+# df_sumario |> 
+#   dplyr::filter(Ano == max(Ano)) |>
+#   dplyr::mutate(Ano = as.character(Ano)) |>
+#   dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+#   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+#   kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Distribuição
+
+### SE_TXBRUTAMORT
+
+```{r rules_dist_se_txbrutamort}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txbrutamort <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXBRUTAMORT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXBRUTAMORT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXBRUTAMORT) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXBRUTAMORT_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXBRUTAMORT), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_out_munic     = dplyr::if_else(!outlier_function(SE_TXBRUTAMORT), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_min_munic     = dplyr::if_else(SE_TXBRUTAMORT >= (min(dplyr::lag(SE_TXBRUTAMORT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_max_munic     = dplyr::if_else(SE_TXBRUTAMORT <= (max(dplyr::lag(SE_TXBRUTAMORT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_min_k_munic   = dplyr::if_else(SE_TXBRUTAMORT >= (min(dplyr::lag(SE_TXBRUTAMORT), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_max_k_munic   = dplyr::if_else(SE_TXBRUTAMORT <= (k * max(dplyr::lag(SE_TXBRUTAMORT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_med_mov_munic = dplyr::if_else(SE_TXBRUTAMORT <= (k * zoo::rollmedian(SE_TXBRUTAMORT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORT_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXBRUTAMORT), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txbrutamort}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txbrutamort |> 
+  dplyr::select(!SE_TXBRUTAMORT) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txbrutamort}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txbrutamort}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXBRUTAMORTPAD
+
+```{r rules_dist_se_txbrutamortpad}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txbrutamortpad <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXBRUTAMORTPAD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXBRUTAMORTPAD"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXBRUTAMORTPAD) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXBRUTAMORTPAD_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXBRUTAMORTPAD), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_out_munic     = dplyr::if_else(!outlier_function(SE_TXBRUTAMORTPAD), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_min_munic     = dplyr::if_else(SE_TXBRUTAMORTPAD >= (min(dplyr::lag(SE_TXBRUTAMORTPAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_max_munic     = dplyr::if_else(SE_TXBRUTAMORTPAD <= (max(dplyr::lag(SE_TXBRUTAMORTPAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_min_k_munic   = dplyr::if_else(SE_TXBRUTAMORTPAD >= (min(dplyr::lag(SE_TXBRUTAMORTPAD), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_max_k_munic   = dplyr::if_else(SE_TXBRUTAMORTPAD <= (k * max(dplyr::lag(SE_TXBRUTAMORTPAD), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_med_mov_munic = dplyr::if_else(SE_TXBRUTAMORTPAD <= (k * zoo::rollmedian(SE_TXBRUTAMORTPAD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXBRUTAMORTPAD_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXBRUTAMORTPAD), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txbrutamortpad}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txbrutamortpad |> 
+  dplyr::select(!SE_TXBRUTAMORTPAD) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txbrutamortpad}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txbrutamortpad}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOISQCOR45A59
+
+```{r rules_dist_se_txmoisqcor45a59}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmoisqcor45a59 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOISQCOR45A59" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOISQCOR45A59"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOISQCOR45A59) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOISQCOR45A59_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOISQCOR45A59), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOISQCOR45A59), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_min_munic     = dplyr::if_else(SE_TXMOISQCOR45A59 >= (min(dplyr::lag(SE_TXMOISQCOR45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_max_munic     = dplyr::if_else(SE_TXMOISQCOR45A59 <= (max(dplyr::lag(SE_TXMOISQCOR45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_min_k_munic   = dplyr::if_else(SE_TXMOISQCOR45A59 >= (min(dplyr::lag(SE_TXMOISQCOR45A59), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_max_k_munic   = dplyr::if_else(SE_TXMOISQCOR45A59 <= (k * max(dplyr::lag(SE_TXMOISQCOR45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_med_mov_munic = dplyr::if_else(SE_TXMOISQCOR45A59 <= (k * zoo::rollmedian(SE_TXMOISQCOR45A59, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOISQCOR45A59_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOISQCOR45A59), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmoisqcor45a59}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmoisqcor45a59 |> 
+  dplyr::select(!SE_TXMOISQCOR45A59) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmoisqcor45a59}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmoisqcor45a59}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOAVC45A59
+
+```{r rules_dist_se_txmoavc45a59}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmoavc45a59 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOAVC45A59" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOAVC45A59"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOAVC45A59) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOAVC45A59_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOAVC45A59), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOAVC45A59), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_min_munic     = dplyr::if_else(SE_TXMOAVC45A59 >= (min(dplyr::lag(SE_TXMOAVC45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_max_munic     = dplyr::if_else(SE_TXMOAVC45A59 <= (max(dplyr::lag(SE_TXMOAVC45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_min_k_munic   = dplyr::if_else(SE_TXMOAVC45A59 >= (min(dplyr::lag(SE_TXMOAVC45A59), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_max_k_munic   = dplyr::if_else(SE_TXMOAVC45A59 <= (k * max(dplyr::lag(SE_TXMOAVC45A59), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_med_mov_munic = dplyr::if_else(SE_TXMOAVC45A59 <= (k * zoo::rollmedian(SE_TXMOAVC45A59, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOAVC45A59_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOAVC45A59), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmoavc45a59}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmoavc45a59 |> 
+  dplyr::select(!SE_TXMOAVC45A59) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmoavc45a59}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmoavc45a59}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOATRA15A29
+
+```{r rules_dist_se_txmoatra15a29}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmoatra15a29 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOATRA15A29" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOATRA15A29"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOATRA15A29) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOATRA15A29_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOATRA15A29), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOATRA15A29), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_min_munic     = dplyr::if_else(SE_TXMOATRA15A29 >= (min(dplyr::lag(SE_TXMOATRA15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_max_munic     = dplyr::if_else(SE_TXMOATRA15A29 <= (max(dplyr::lag(SE_TXMOATRA15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_min_k_munic   = dplyr::if_else(SE_TXMOATRA15A29 >= (min(dplyr::lag(SE_TXMOATRA15A29), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_max_k_munic   = dplyr::if_else(SE_TXMOATRA15A29 <= (k * max(dplyr::lag(SE_TXMOATRA15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_med_mov_munic = dplyr::if_else(SE_TXMOATRA15A29 <= (k * zoo::rollmedian(SE_TXMOATRA15A29, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOATRA15A29_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOATRA15A29), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmoatra15a29}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmoatra15a29 |> 
+  dplyr::select(!SE_TXMOATRA15A29) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmoatra15a29}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmoatra15a29}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOHOMI
+
+```{r rules_dist_se_txmohomi}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmohomi <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOHOMI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOHOMI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOHOMI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOHOMI_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOHOMI), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOHOMI), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_min_munic     = dplyr::if_else(SE_TXMOHOMI >= (min(dplyr::lag(SE_TXMOHOMI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_max_munic     = dplyr::if_else(SE_TXMOHOMI <= (max(dplyr::lag(SE_TXMOHOMI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_min_k_munic   = dplyr::if_else(SE_TXMOHOMI >= (min(dplyr::lag(SE_TXMOHOMI), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_max_k_munic   = dplyr::if_else(SE_TXMOHOMI <= (k * max(dplyr::lag(SE_TXMOHOMI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_med_mov_munic = dplyr::if_else(SE_TXMOHOMI <= (k * zoo::rollmedian(SE_TXMOHOMI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOHOMI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmohomi}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmohomi |> 
+  dplyr::select(!SE_TXMOHOMI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmohomi}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmohomi}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOHOMI15A29
+
+```{r rules_dist_se_txmohomi15a29}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmohomi15a29 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOHOMI15A29" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOHOMI15A29"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOHOMI15A29) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOHOMI15A29_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOHOMI15A29), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOHOMI15A29), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_min_munic     = dplyr::if_else(SE_TXMOHOMI15A29 >= (min(dplyr::lag(SE_TXMOHOMI15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_max_munic     = dplyr::if_else(SE_TXMOHOMI15A29 <= (max(dplyr::lag(SE_TXMOHOMI15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_min_k_munic   = dplyr::if_else(SE_TXMOHOMI15A29 >= (min(dplyr::lag(SE_TXMOHOMI15A29), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_max_k_munic   = dplyr::if_else(SE_TXMOHOMI15A29 <= (k * max(dplyr::lag(SE_TXMOHOMI15A29), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_med_mov_munic = dplyr::if_else(SE_TXMOHOMI15A29 <= (k * zoo::rollmedian(SE_TXMOHOMI15A29, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOHOMI15A29_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOHOMI15A29), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmohomi15a29}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmohomi15a29 |> 
+  dplyr::select(!SE_TXMOHOMI15A29) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmohomi15a29}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmohomi15a29}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOCANCOLUT
+
+```{r rules_dist_se_txmocancolut}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmocancolut <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOCANCOLUT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOCANCOLUT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOCANCOLUT) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOCANCOLUT_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOCANCOLUT), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOCANCOLUT), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_min_munic     = dplyr::if_else(SE_TXMOCANCOLUT >= (min(dplyr::lag(SE_TXMOCANCOLUT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_max_munic     = dplyr::if_else(SE_TXMOCANCOLUT <= (max(dplyr::lag(SE_TXMOCANCOLUT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_min_k_munic   = dplyr::if_else(SE_TXMOCANCOLUT >= (min(dplyr::lag(SE_TXMOCANCOLUT), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_max_k_munic   = dplyr::if_else(SE_TXMOCANCOLUT <= (k * max(dplyr::lag(SE_TXMOCANCOLUT), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_med_mov_munic = dplyr::if_else(SE_TXMOCANCOLUT <= (k * zoo::rollmedian(SE_TXMOCANCOLUT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANCOLUT_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOCANCOLUT), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmocancolut}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmocancolut |> 
+  dplyr::select(!SE_TXMOCANCOLUT) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmocancolut}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmocancolut}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOCANMA
+
+```{r rules_dist_se_txmocanma}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmocanma <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOCANMA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOCANMA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOCANMA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOCANMA_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOCANMA), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOCANMA), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_min_munic     = dplyr::if_else(SE_TXMOCANMA >= (min(dplyr::lag(SE_TXMOCANMA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_max_munic     = dplyr::if_else(SE_TXMOCANMA <= (max(dplyr::lag(SE_TXMOCANMA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_min_k_munic   = dplyr::if_else(SE_TXMOCANMA >= (min(dplyr::lag(SE_TXMOCANMA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_max_k_munic   = dplyr::if_else(SE_TXMOCANMA <= (k * max(dplyr::lag(SE_TXMOCANMA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_med_mov_munic = dplyr::if_else(SE_TXMOCANMA <= (k * zoo::rollmedian(SE_TXMOCANMA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANMA_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOCANMA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmocanma}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmocanma |> 
+  dplyr::select(!SE_TXMOCANMA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmocanma}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmocanma}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMOCANPUL
+
+```{r rules_dist_se_txmocanpul}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmocanpul <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMOCANPUL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMOCANPUL"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMOCANPUL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMOCANPUL_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMOCANPUL), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_out_munic     = dplyr::if_else(!outlier_function(SE_TXMOCANPUL), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_min_munic     = dplyr::if_else(SE_TXMOCANPUL >= (min(dplyr::lag(SE_TXMOCANPUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_max_munic     = dplyr::if_else(SE_TXMOCANPUL <= (max(dplyr::lag(SE_TXMOCANPUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_min_k_munic   = dplyr::if_else(SE_TXMOCANPUL >= (min(dplyr::lag(SE_TXMOCANPUL), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_max_k_munic   = dplyr::if_else(SE_TXMOCANPUL <= (k * max(dplyr::lag(SE_TXMOCANPUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_med_mov_munic = dplyr::if_else(SE_TXMOCANPUL <= (k * zoo::rollmedian(SE_TXMOCANPUL, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMOCANPUL_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMOCANPUL), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmocanpul}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmocanpul |> 
+  dplyr::select(!SE_TXMOCANPUL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmocanpul}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmocanpul}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBITO60
+
+```{r rules_dist_se_obito60}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_obito60 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_OBITO60" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_OBITO60"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBITO60) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBITO60_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBITO60), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_out_munic     = dplyr::if_else(!outlier_function(SE_OBITO60), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_min_munic     = dplyr::if_else(SE_OBITO60 >= (min(dplyr::lag(SE_OBITO60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_max_munic     = dplyr::if_else(SE_OBITO60 <= (max(dplyr::lag(SE_OBITO60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_min_k_munic   = dplyr::if_else(SE_OBITO60 >= (min(dplyr::lag(SE_OBITO60), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_max_k_munic   = dplyr::if_else(SE_OBITO60 <= (k * max(dplyr::lag(SE_OBITO60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_med_mov_munic = dplyr::if_else(SE_OBITO60 <= (k * zoo::rollmedian(SE_OBITO60, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITO60_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBITO60), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_obito60}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obito60 |> 
+  dplyr::select(!SE_OBITO60) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_obito60}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obito60}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_NASCBAIXOPESO
+
+```{r rules_dist_se_nascbaixopeso}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_nascbaixopeso <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_NASCBAIXOPESO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_NASCBAIXOPESO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_NASCBAIXOPESO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_NASCBAIXOPESO_hampel_munic  = dplyr::if_else(!hampel_filter(SE_NASCBAIXOPESO), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_out_munic     = dplyr::if_else(!outlier_function(SE_NASCBAIXOPESO), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_min_munic     = dplyr::if_else(SE_NASCBAIXOPESO >= (min(dplyr::lag(SE_NASCBAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_max_munic     = dplyr::if_else(SE_NASCBAIXOPESO <= (max(dplyr::lag(SE_NASCBAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_min_k_munic   = dplyr::if_else(SE_NASCBAIXOPESO >= (min(dplyr::lag(SE_NASCBAIXOPESO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_max_k_munic   = dplyr::if_else(SE_NASCBAIXOPESO <= (k * max(dplyr::lag(SE_NASCBAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_med_mov_munic = dplyr::if_else(SE_NASCBAIXOPESO <= (k * zoo::rollmedian(SE_NASCBAIXOPESO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_NASCBAIXOPESO_dif_munic     = dplyr::if_else(!compare_first_dif(SE_NASCBAIXOPESO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_nascbaixopeso}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_nascbaixopeso |> 
+  dplyr::select(!SE_NASCBAIXOPESO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_nascbaixopeso}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_nascbaixopeso}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBINFSIFILS
+
+```{r rules_dist_se_obinfsifils}
+
+df_rules_dist_se_obinfsifils <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULHERTOT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULHERTOT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBINFSIFILS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBINFSIFILS_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBINFSIFILS), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_out_munic     = dplyr::if_else(!outlier_function(SE_OBINFSIFILS), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_min_munic     = dplyr::if_else(SE_OBINFSIFILS >= (min(dplyr::lag(SE_OBINFSIFILS), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SE_OBINFSIFILS_max_munic     = dplyr::if_else(SE_OBINFSIFILS <= (max(dplyr::lag(SE_OBINFSIFILS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_min_k_munic   = dplyr::if_else(SE_OBINFSIFILS >= (min(dplyr::lag(SE_OBINFSIFILS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_max_k_munic   = dplyr::if_else(SE_OBINFSIFILS <= (k * max(dplyr::lag(SE_OBINFSIFILS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_med_mov_munic = dplyr::if_else(SE_OBINFSIFILS <= (k * zoo::rollmedian(SE_OBINFSIFILS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBINFSIFILS_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBINFSIFILS), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_se_obinfsifils}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obinfsifils |> 
+  dplyr::select(!SE_OBINFSIFILS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_se_obinfsifils}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obinfsifils}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBTETANONEO
+
+```{r rules_dist_se_obtetanoneo}
+
+df_rules_dist_se_obtetanoneo <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULHERTOT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULHERTOT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBTETANONEO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBTETANONEO_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBTETANONEO), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_out_munic     = dplyr::if_else(!outlier_function(SE_OBTETANONEO), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_min_munic     = dplyr::if_else(SE_OBTETANONEO >= (min(dplyr::lag(SE_OBTETANONEO), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SE_OBTETANONEO_max_munic     = dplyr::if_else(SE_OBTETANONEO <= (max(dplyr::lag(SE_OBTETANONEO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_min_k_munic   = dplyr::if_else(SE_OBTETANONEO >= (min(dplyr::lag(SE_OBTETANONEO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_max_k_munic   = dplyr::if_else(SE_OBTETANONEO <= (k * max(dplyr::lag(SE_OBTETANONEO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_med_mov_munic = dplyr::if_else(SE_OBTETANONEO <= (k * zoo::rollmedian(SE_OBTETANONEO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBTETANONEO_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBTETANONEO), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_se_obtetanoneo}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obtetanoneo |> 
+  dplyr::select(!SE_OBTETANONEO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_se_obtetanoneo}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obtetanoneo}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBRAIVA
+
+```{r rules_dist_se_obraiva}
+
+df_rules_dist_se_obraiva <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "DA_MULHERTOT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_MULHERTOT"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBRAIVA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBRAIVA_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBRAIVA), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_out_munic     = dplyr::if_else(!outlier_function(SE_OBRAIVA), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_min_munic     = dplyr::if_else(SE_OBRAIVA >= (min(dplyr::lag(SE_OBRAIVA), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SE_OBRAIVA_max_munic     = dplyr::if_else(SE_OBRAIVA <= (max(dplyr::lag(SE_OBRAIVA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_min_k_munic   = dplyr::if_else(SE_OBRAIVA >= (min(dplyr::lag(SE_OBRAIVA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_max_k_munic   = dplyr::if_else(SE_OBRAIVA <= (k * max(dplyr::lag(SE_OBRAIVA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_med_mov_munic = dplyr::if_else(SE_OBRAIVA <= (k * zoo::rollmedian(SE_OBRAIVA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBRAIVA_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBRAIVA), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_se_obraiva}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obraiva |> 
+  dplyr::select(!SE_OBRAIVA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_se_obraiva}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obraiva}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERDVHID
+
+```{r rules_dist_se_interdvhid}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_interdvhid <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERDVHID" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERDVHID"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERDVHID) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERDVHID_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERDVHID), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_out_munic     = dplyr::if_else(!outlier_function(SE_INTERDVHID), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_min_munic     = dplyr::if_else(SE_INTERDVHID >= (min(dplyr::lag(SE_INTERDVHID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_max_munic     = dplyr::if_else(SE_INTERDVHID <= (max(dplyr::lag(SE_INTERDVHID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_min_k_munic   = dplyr::if_else(SE_INTERDVHID >= (min(dplyr::lag(SE_INTERDVHID), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_max_k_munic   = dplyr::if_else(SE_INTERDVHID <= (k * max(dplyr::lag(SE_INTERDVHID), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_med_mov_munic = dplyr::if_else(SE_INTERDVHID <= (k * zoo::rollmedian(SE_INTERDVHID, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDVHID_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERDVHID), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_interdvhid}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_interdvhid |> 
+  dplyr::select(!SE_INTERDVHID) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_interdvhid}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_interdvhid}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERDRSAI
+
+```{r rules_dist_se_interdrsai}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_interdrsai <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERDRSAI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERDRSAI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERDRSAI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERDRSAI_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERDRSAI), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_out_munic     = dplyr::if_else(!outlier_function(SE_INTERDRSAI), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_min_munic     = dplyr::if_else(SE_INTERDRSAI >= (min(dplyr::lag(SE_INTERDRSAI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_max_munic     = dplyr::if_else(SE_INTERDRSAI <= (max(dplyr::lag(SE_INTERDRSAI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_min_k_munic   = dplyr::if_else(SE_INTERDRSAI >= (min(dplyr::lag(SE_INTERDRSAI), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_max_k_munic   = dplyr::if_else(SE_INTERDRSAI <= (k * max(dplyr::lag(SE_INTERDRSAI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_med_mov_munic = dplyr::if_else(SE_INTERDRSAI <= (k * zoo::rollmedian(SE_INTERDRSAI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDRSAI_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERDRSAI), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_interdrsai}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_interdrsai |> 
+  dplyr::select(!SE_INTERDRSAI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_interdrsai}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_interdrsai}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_COBPSF
+
+```{r rules_dist_se_cobpsf}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_cobpsf <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_COBPSF" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_COBPSF"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_COBPSF) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_COBPSF_hampel_munic  = dplyr::if_else(!hampel_filter(SE_COBPSF), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_out_munic     = dplyr::if_else(!outlier_function(SE_COBPSF), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_min_munic     = dplyr::if_else(SE_COBPSF >= (min(dplyr::lag(SE_COBPSF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_max_munic     = dplyr::if_else(SE_COBPSF <= (max(dplyr::lag(SE_COBPSF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_min_k_munic   = dplyr::if_else(SE_COBPSF >= (min(dplyr::lag(SE_COBPSF), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_max_k_munic   = dplyr::if_else(SE_COBPSF <= (k * max(dplyr::lag(SE_COBPSF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_med_mov_munic = dplyr::if_else(SE_COBPSF <= (k * zoo::rollmedian(SE_COBPSF, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_COBPSF_dif_munic     = dplyr::if_else(!compare_first_dif(SE_COBPSF), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_cobpsf}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_cobpsf |> 
+  dplyr::select(!SE_COBPSF) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_cobpsf}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_cobpsf}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_NASC7CONSUL
+
+```{r rules_dist_se_nasc7consul}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_nasc7consul <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_NASC7CONSUL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_NASC7CONSUL"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_NASC7CONSUL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_NASC7CONSUL_hampel_munic  = dplyr::if_else(!hampel_filter(SE_NASC7CONSUL), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_out_munic     = dplyr::if_else(!outlier_function(SE_NASC7CONSUL), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_min_munic     = dplyr::if_else(SE_NASC7CONSUL >= (min(dplyr::lag(SE_NASC7CONSUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_max_munic     = dplyr::if_else(SE_NASC7CONSUL <= (max(dplyr::lag(SE_NASC7CONSUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_min_k_munic   = dplyr::if_else(SE_NASC7CONSUL >= (min(dplyr::lag(SE_NASC7CONSUL), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_max_k_munic   = dplyr::if_else(SE_NASC7CONSUL <= (k * max(dplyr::lag(SE_NASC7CONSUL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_med_mov_munic = dplyr::if_else(SE_NASC7CONSUL <= (k * zoo::rollmedian(SE_NASC7CONSUL, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_NASC7CONSUL_dif_munic     = dplyr::if_else(!compare_first_dif(SE_NASC7CONSUL), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_nasc7consul}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_nasc7consul |> 
+  dplyr::select(!SE_NASC7CONSUL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_nasc7consul}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_nasc7consul}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TETRA
+
+```{r rules_dist_se_tetra}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_tetra <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TETRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TETRA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TETRA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TETRA_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TETRA), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_out_munic     = dplyr::if_else(!outlier_function(SE_TETRA), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_min_munic     = dplyr::if_else(SE_TETRA >= (min(dplyr::lag(SE_TETRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_max_munic     = dplyr::if_else(SE_TETRA <= (max(dplyr::lag(SE_TETRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_min_k_munic   = dplyr::if_else(SE_TETRA >= (min(dplyr::lag(SE_TETRA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_max_k_munic   = dplyr::if_else(SE_TETRA <= (k * max(dplyr::lag(SE_TETRA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_med_mov_munic = dplyr::if_else(SE_TETRA <= (k * zoo::rollmedian(SE_TETRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TETRA_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TETRA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_tetra}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_tetra |> 
+  dplyr::select(!SE_TETRA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_tetra}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_tetra}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_POLIO
+
+```{r rules_dist_se_polio}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_polio <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_POLIO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_POLIO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_POLIO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_POLIO_hampel_munic  = dplyr::if_else(!hampel_filter(SE_POLIO), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_out_munic     = dplyr::if_else(!outlier_function(SE_POLIO), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_min_munic     = dplyr::if_else(SE_POLIO >= (min(dplyr::lag(SE_POLIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_max_munic     = dplyr::if_else(SE_POLIO <= (max(dplyr::lag(SE_POLIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_min_k_munic   = dplyr::if_else(SE_POLIO >= (min(dplyr::lag(SE_POLIO), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_max_k_munic   = dplyr::if_else(SE_POLIO <= (k * max(dplyr::lag(SE_POLIO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_med_mov_munic = dplyr::if_else(SE_POLIO <= (k * zoo::rollmedian(SE_POLIO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_POLIO_dif_munic     = dplyr::if_else(!compare_first_dif(SE_POLIO), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_polio}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_polio |> 
+  dplyr::select(!SE_POLIO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_polio}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_polio}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TRIPLICE
+
+```{r rules_dist_se_triplice}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_triplice <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TRIPLICE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TRIPLICE"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TRIPLICE) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TRIPLICE_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TRIPLICE), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_out_munic     = dplyr::if_else(!outlier_function(SE_TRIPLICE), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_min_munic     = dplyr::if_else(SE_TRIPLICE >= (min(dplyr::lag(SE_TRIPLICE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_max_munic     = dplyr::if_else(SE_TRIPLICE <= (max(dplyr::lag(SE_TRIPLICE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_min_k_munic   = dplyr::if_else(SE_TRIPLICE >= (min(dplyr::lag(SE_TRIPLICE), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_max_k_munic   = dplyr::if_else(SE_TRIPLICE <= (k * max(dplyr::lag(SE_TRIPLICE), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_med_mov_munic = dplyr::if_else(SE_TRIPLICE <= (k * zoo::rollmedian(SE_TRIPLICE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TRIPLICE_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TRIPLICE), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_triplice}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_triplice |> 
+  dplyr::select(!SE_TRIPLICE) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_triplice}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_triplice}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_FAMARELA
+
+```{r rules_dist_se_famarela}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_famarela <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_FAMARELA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_FAMARELA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_FAMARELA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_FAMARELA_hampel_munic  = dplyr::if_else(!hampel_filter(SE_FAMARELA), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_out_munic     = dplyr::if_else(!outlier_function(SE_FAMARELA), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_min_munic     = dplyr::if_else(SE_FAMARELA >= (min(dplyr::lag(SE_FAMARELA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_max_munic     = dplyr::if_else(SE_FAMARELA <= (max(dplyr::lag(SE_FAMARELA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_min_k_munic   = dplyr::if_else(SE_FAMARELA >= (min(dplyr::lag(SE_FAMARELA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_max_k_munic   = dplyr::if_else(SE_FAMARELA <= (k * max(dplyr::lag(SE_FAMARELA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_med_mov_munic = dplyr::if_else(SE_FAMARELA <= (k * zoo::rollmedian(SE_FAMARELA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_FAMARELA_dif_munic     = dplyr::if_else(!compare_first_dif(SE_FAMARELA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_famarela}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_famarela |> 
+  dplyr::select(!SE_FAMARELA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_famarela}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_famarela}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBMALDEF
+
+```{r rules_dist_se_obmaldef}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_obmaldef <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_OBMALDEF" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_OBMALDEF"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBMALDEF) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBMALDEF_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBMALDEF), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_out_munic     = dplyr::if_else(!outlier_function(SE_OBMALDEF), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_min_munic     = dplyr::if_else(SE_OBMALDEF >= (min(dplyr::lag(SE_OBMALDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_max_munic     = dplyr::if_else(SE_OBMALDEF <= (max(dplyr::lag(SE_OBMALDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_min_k_munic   = dplyr::if_else(SE_OBMALDEF >= (min(dplyr::lag(SE_OBMALDEF), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_max_k_munic   = dplyr::if_else(SE_OBMALDEF <= (k * max(dplyr::lag(SE_OBMALDEF), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_med_mov_munic = dplyr::if_else(SE_OBMALDEF <= (k * zoo::rollmedian(SE_OBMALDEF, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBMALDEF_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBMALDEF), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_obmaldef}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obmaldef |> 
+  dplyr::select(!SE_OBMALDEF) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_obmaldef}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obmaldef}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_OBITSEMASSIS
+
+```{r rules_dist_se_obitsemassis}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_obitsemassis <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_OBITSEMASSIS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_OBITSEMASSIS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_OBITSEMASSIS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_OBITSEMASSIS_hampel_munic  = dplyr::if_else(!hampel_filter(SE_OBITSEMASSIS), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_out_munic     = dplyr::if_else(!outlier_function(SE_OBITSEMASSIS), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_min_munic     = dplyr::if_else(SE_OBITSEMASSIS >= (min(dplyr::lag(SE_OBITSEMASSIS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_max_munic     = dplyr::if_else(SE_OBITSEMASSIS <= (max(dplyr::lag(SE_OBITSEMASSIS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_min_k_munic   = dplyr::if_else(SE_OBITSEMASSIS >= (min(dplyr::lag(SE_OBITSEMASSIS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_max_k_munic   = dplyr::if_else(SE_OBITSEMASSIS <= (k * max(dplyr::lag(SE_OBITSEMASSIS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_med_mov_munic = dplyr::if_else(SE_OBITSEMASSIS <= (k * zoo::rollmedian(SE_OBITSEMASSIS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_OBITSEMASSIS_dif_munic     = dplyr::if_else(!compare_first_dif(SE_OBITSEMASSIS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_obitsemassis}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_obitsemassis |> 
+  dplyr::select(!SE_OBITSEMASSIS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_obitsemassis}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_obitsemassis}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERDCV40
+
+```{r rules_dist_se_interdcv40}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_interdcv40 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERDCV40" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERDCV40"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERDCV40) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERDCV40_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERDCV40), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_out_munic     = dplyr::if_else(!outlier_function(SE_INTERDCV40), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_min_munic     = dplyr::if_else(SE_INTERDCV40 >= (min(dplyr::lag(SE_INTERDCV40), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_max_munic     = dplyr::if_else(SE_INTERDCV40 <= (max(dplyr::lag(SE_INTERDCV40), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_min_k_munic   = dplyr::if_else(SE_INTERDCV40 >= (min(dplyr::lag(SE_INTERDCV40), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_max_k_munic   = dplyr::if_else(SE_INTERDCV40 <= (k * max(dplyr::lag(SE_INTERDCV40), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_med_mov_munic = dplyr::if_else(SE_INTERDCV40 <= (k * zoo::rollmedian(SE_INTERDCV40, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDCV40_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERDCV40), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_interdcv40}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_interdcv40 |> 
+  dplyr::select(!SE_INTERDCV40) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_interdcv40}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_interdcv40}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERDIAB
+
+```{r rules_dist_se_interdiab}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_interdiab <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERDIAB" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERDIAB"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERDIAB) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERDIAB_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERDIAB), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_out_munic     = dplyr::if_else(!outlier_function(SE_INTERDIAB), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_min_munic     = dplyr::if_else(SE_INTERDIAB >= (min(dplyr::lag(SE_INTERDIAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_max_munic     = dplyr::if_else(SE_INTERDIAB <= (max(dplyr::lag(SE_INTERDIAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_min_k_munic   = dplyr::if_else(SE_INTERDIAB >= (min(dplyr::lag(SE_INTERDIAB), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_max_k_munic   = dplyr::if_else(SE_INTERDIAB <= (k * max(dplyr::lag(SE_INTERDIAB), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_med_mov_munic = dplyr::if_else(SE_INTERDIAB <= (k * zoo::rollmedian(SE_INTERDIAB, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERDIAB_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERDIAB), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_interdiab}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_interdiab |> 
+  dplyr::select(!SE_INTERDIAB) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_interdiab}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_interdiab}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERSAP
+
+```{r rules_dist_se_intersap}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_intersap <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERSAP" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERSAP"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERSAP) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERSAP_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERSAP), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_out_munic     = dplyr::if_else(!outlier_function(SE_INTERSAP), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_min_munic     = dplyr::if_else(SE_INTERSAP >= (min(dplyr::lag(SE_INTERSAP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_max_munic     = dplyr::if_else(SE_INTERSAP <= (max(dplyr::lag(SE_INTERSAP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_min_k_munic   = dplyr::if_else(SE_INTERSAP >= (min(dplyr::lag(SE_INTERSAP), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_max_k_munic   = dplyr::if_else(SE_INTERSAP <= (k * max(dplyr::lag(SE_INTERSAP), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_med_mov_munic = dplyr::if_else(SE_INTERSAP <= (k * zoo::rollmedian(SE_INTERSAP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERSAP), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_intersap}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_intersap |> 
+  dplyr::select(!SE_INTERSAP) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_intersap}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_intersap}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERSAP1A5
+
+```{r rules_dist_se_intersap1a5}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_intersap1a5 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERSAP1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERSAP1A5"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERSAP1A5) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERSAP1A5_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERSAP1A5), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_out_munic     = dplyr::if_else(!outlier_function(SE_INTERSAP1A5), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_min_munic     = dplyr::if_else(SE_INTERSAP1A5 >= (min(dplyr::lag(SE_INTERSAP1A5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_max_munic     = dplyr::if_else(SE_INTERSAP1A5 <= (max(dplyr::lag(SE_INTERSAP1A5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_min_k_munic   = dplyr::if_else(SE_INTERSAP1A5 >= (min(dplyr::lag(SE_INTERSAP1A5), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_max_k_munic   = dplyr::if_else(SE_INTERSAP1A5 <= (k * max(dplyr::lag(SE_INTERSAP1A5), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_med_mov_munic = dplyr::if_else(SE_INTERSAP1A5 <= (k * zoo::rollmedian(SE_INTERSAP1A5, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP1A5_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERSAP1A5), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_intersap1a5}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_intersap1a5 |> 
+  dplyr::select(!SE_INTERSAP1A5) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_intersap1a5}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_intersap1a5}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTERSAP60
+
+```{r rules_dist_se_intersap60}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_intersap60 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTERSAP60" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTERSAP60"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTERSAP60) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTERSAP60_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTERSAP60), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_out_munic     = dplyr::if_else(!outlier_function(SE_INTERSAP60), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_min_munic     = dplyr::if_else(SE_INTERSAP60 >= (min(dplyr::lag(SE_INTERSAP60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_max_munic     = dplyr::if_else(SE_INTERSAP60 <= (max(dplyr::lag(SE_INTERSAP60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_min_k_munic   = dplyr::if_else(SE_INTERSAP60 >= (min(dplyr::lag(SE_INTERSAP60), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_max_k_munic   = dplyr::if_else(SE_INTERSAP60 <= (k * max(dplyr::lag(SE_INTERSAP60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_med_mov_munic = dplyr::if_else(SE_INTERSAP60 <= (k * zoo::rollmedian(SE_INTERSAP60, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTERSAP60_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTERSAP60), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_intersap60}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_intersap60 |> 
+  dplyr::select(!SE_INTERSAP60) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_intersap60}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_intersap60}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_FRATFEMUR60
+
+```{r rules_dist_se_fratfemur60}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_fratfemur60 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_FRATFEMUR60" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_FRATFEMUR60"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_FRATFEMUR60) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_FRATFEMUR60_hampel_munic  = dplyr::if_else(!hampel_filter(SE_FRATFEMUR60), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_out_munic     = dplyr::if_else(!outlier_function(SE_FRATFEMUR60), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_min_munic     = dplyr::if_else(SE_FRATFEMUR60 >= (min(dplyr::lag(SE_FRATFEMUR60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_max_munic     = dplyr::if_else(SE_FRATFEMUR60 <= (max(dplyr::lag(SE_FRATFEMUR60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_min_k_munic   = dplyr::if_else(SE_FRATFEMUR60 >= (min(dplyr::lag(SE_FRATFEMUR60), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_max_k_munic   = dplyr::if_else(SE_FRATFEMUR60 <= (k * max(dplyr::lag(SE_FRATFEMUR60), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_med_mov_munic = dplyr::if_else(SE_FRATFEMUR60 <= (k * zoo::rollmedian(SE_FRATFEMUR60, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_FRATFEMUR60_dif_munic     = dplyr::if_else(!compare_first_dif(SE_FRATFEMUR60), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_fratfemur60}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_fratfemur60 |> 
+  dplyr::select(!SE_FRATFEMUR60) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_fratfemur60}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_fratfemur60}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_CANCPROST
+
+```{r rules_dist_se_cancprost}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_cancprost <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_CANCPROST" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_CANCPROST"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_CANCPROST) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_CANCPROST_hampel_munic  = dplyr::if_else(!hampel_filter(SE_CANCPROST), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_out_munic     = dplyr::if_else(!outlier_function(SE_CANCPROST), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_min_munic     = dplyr::if_else(SE_CANCPROST >= (min(dplyr::lag(SE_CANCPROST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_max_munic     = dplyr::if_else(SE_CANCPROST <= (max(dplyr::lag(SE_CANCPROST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_min_k_munic   = dplyr::if_else(SE_CANCPROST >= (min(dplyr::lag(SE_CANCPROST), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_max_k_munic   = dplyr::if_else(SE_CANCPROST <= (k * max(dplyr::lag(SE_CANCPROST), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_med_mov_munic = dplyr::if_else(SE_CANCPROST <= (k * zoo::rollmedian(SE_CANCPROST, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_CANCPROST_dif_munic     = dplyr::if_else(!compare_first_dif(SE_CANCPROST), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_cancprost}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_cancprost |> 
+  dplyr::select(!SE_CANCPROST) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_cancprost}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_cancprost}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_INTMEDCOMPLDESMIC
+
+```{r rules_dist_se_intmedcompldesmic}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_intmedcompldesmic <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_INTMEDCOMPLDESMIC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_INTMEDCOMPLDESMIC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_INTMEDCOMPLDESMIC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_INTMEDCOMPLDESMIC_hampel_munic  = dplyr::if_else(!hampel_filter(SE_INTMEDCOMPLDESMIC), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_out_munic     = dplyr::if_else(!outlier_function(SE_INTMEDCOMPLDESMIC), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_min_munic     = dplyr::if_else(SE_INTMEDCOMPLDESMIC >= (min(dplyr::lag(SE_INTMEDCOMPLDESMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_max_munic     = dplyr::if_else(SE_INTMEDCOMPLDESMIC <= (max(dplyr::lag(SE_INTMEDCOMPLDESMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_min_k_munic   = dplyr::if_else(SE_INTMEDCOMPLDESMIC >= (min(dplyr::lag(SE_INTMEDCOMPLDESMIC), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_max_k_munic   = dplyr::if_else(SE_INTMEDCOMPLDESMIC <= (k * max(dplyr::lag(SE_INTMEDCOMPLDESMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_med_mov_munic = dplyr::if_else(SE_INTMEDCOMPLDESMIC <= (k * zoo::rollmedian(SE_INTMEDCOMPLDESMIC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_INTMEDCOMPLDESMIC_dif_munic     = dplyr::if_else(!compare_first_dif(SE_INTMEDCOMPLDESMIC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_intmedcompldesmic}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_intmedcompldesmic |> 
+  dplyr::select(!SE_INTMEDCOMPLDESMIC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_intmedcompldesmic}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_intmedcompldesmic}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_PARTODESLOCMIC
+
+```{r rules_dist_se_partodeslocmic}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_partodeslocmic <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_PARTODESLOCMIC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_PARTODESLOCMIC"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_PARTODESLOCMIC) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_PARTODESLOCMIC_hampel_munic  = dplyr::if_else(!hampel_filter(SE_PARTODESLOCMIC), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_out_munic     = dplyr::if_else(!outlier_function(SE_PARTODESLOCMIC), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_min_munic     = dplyr::if_else(SE_PARTODESLOCMIC >= (min(dplyr::lag(SE_PARTODESLOCMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_max_munic     = dplyr::if_else(SE_PARTODESLOCMIC <= (max(dplyr::lag(SE_PARTODESLOCMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_min_k_munic   = dplyr::if_else(SE_PARTODESLOCMIC >= (min(dplyr::lag(SE_PARTODESLOCMIC), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_max_k_munic   = dplyr::if_else(SE_PARTODESLOCMIC <= (k * max(dplyr::lag(SE_PARTODESLOCMIC), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_med_mov_munic = dplyr::if_else(SE_PARTODESLOCMIC <= (k * zoo::rollmedian(SE_PARTODESLOCMIC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_PARTODESLOCMIC_dif_munic     = dplyr::if_else(!compare_first_dif(SE_PARTODESLOCMIC), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_partodeslocmic}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_partodeslocmic |> 
+  dplyr::select(!SE_PARTODESLOCMIC) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_partodeslocmic}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_partodeslocmic}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_PENTA
+
+```{r rules_dist_se_penta}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_penta <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_PENTA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_PENTA"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_PENTA) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_PENTA_hampel_munic  = dplyr::if_else(!hampel_filter(SE_PENTA), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_out_munic     = dplyr::if_else(!outlier_function(SE_PENTA), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_min_munic     = dplyr::if_else(SE_PENTA >= (min(dplyr::lag(SE_PENTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_max_munic     = dplyr::if_else(SE_PENTA <= (max(dplyr::lag(SE_PENTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_min_k_munic   = dplyr::if_else(SE_PENTA >= (min(dplyr::lag(SE_PENTA), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_max_k_munic   = dplyr::if_else(SE_PENTA <= (k * max(dplyr::lag(SE_PENTA), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_med_mov_munic = dplyr::if_else(SE_PENTA <= (k * zoo::rollmedian(SE_PENTA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_PENTA_dif_munic     = dplyr::if_else(!compare_first_dif(SE_PENTA), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_penta}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_penta |> 
+  dplyr::select(!SE_PENTA) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_penta}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_penta}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_TXMODCNT30A69
+
+```{r rules_dist_se_txmodcnt30a69}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_txmodcnt30a69 <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_TXMODCNT30A69" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_TXMODCNT30A69"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_TXMODCNT30A69) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_TXMODCNT30A69_hampel_munic  = dplyr::if_else(!hampel_filter(SE_TXMODCNT30A69), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_out_munic     = dplyr::if_else(!outlier_function(SE_TXMODCNT30A69), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_min_munic     = dplyr::if_else(SE_TXMODCNT30A69 >= (min(dplyr::lag(SE_TXMODCNT30A69), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_max_munic     = dplyr::if_else(SE_TXMODCNT30A69 <= (max(dplyr::lag(SE_TXMODCNT30A69), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_min_k_munic   = dplyr::if_else(SE_TXMODCNT30A69 >= (min(dplyr::lag(SE_TXMODCNT30A69), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_max_k_munic   = dplyr::if_else(SE_TXMODCNT30A69 <= (k * max(dplyr::lag(SE_TXMODCNT30A69), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_med_mov_munic = dplyr::if_else(SE_TXMODCNT30A69 <= (k * zoo::rollmedian(SE_TXMODCNT30A69, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_TXMODCNT30A69_dif_munic     = dplyr::if_else(!compare_first_dif(SE_TXMODCNT30A69), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_txmodcnt30a69}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_txmodcnt30a69 |> 
+  dplyr::select(!SE_TXMODCNT30A69) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_txmodcnt30a69}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_txmodcnt30a69}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_ICSABMS
+
+```{r rules_dist_se_icsabms}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_icsabms <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_ICSABMS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_ICSABMS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_ICSABMS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_ICSABMS_hampel_munic  = dplyr::if_else(!hampel_filter(SE_ICSABMS), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_out_munic     = dplyr::if_else(!outlier_function(SE_ICSABMS), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_min_munic     = dplyr::if_else(SE_ICSABMS >= (min(dplyr::lag(SE_ICSABMS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_max_munic     = dplyr::if_else(SE_ICSABMS <= (max(dplyr::lag(SE_ICSABMS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_min_k_munic   = dplyr::if_else(SE_ICSABMS >= (min(dplyr::lag(SE_ICSABMS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_max_k_munic   = dplyr::if_else(SE_ICSABMS <= (k * max(dplyr::lag(SE_ICSABMS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_med_mov_munic = dplyr::if_else(SE_ICSABMS <= (k * zoo::rollmedian(SE_ICSABMS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_ICSABMS_dif_munic     = dplyr::if_else(!compare_first_dif(SE_ICSABMS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_icsabms}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_icsabms |> 
+  dplyr::select(!SE_ICSABMS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_icsabms}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_icsabms}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### SE_MEDICOS
+
+```{r rules_dist_se_medicos}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_se_medicos <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SE_MEDICOS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SE_MEDICOS"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SE_MEDICOS) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SE_MEDICOS_hampel_munic  = dplyr::if_else(!hampel_filter(SE_MEDICOS), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_out_munic     = dplyr::if_else(!outlier_function(SE_MEDICOS), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_min_munic     = dplyr::if_else(SE_MEDICOS >= (min(dplyr::lag(SE_MEDICOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_max_munic     = dplyr::if_else(SE_MEDICOS <= (max(dplyr::lag(SE_MEDICOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_min_k_munic   = dplyr::if_else(SE_MEDICOS >= (min(dplyr::lag(SE_MEDICOS), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_max_k_munic   = dplyr::if_else(SE_MEDICOS <= (k * max(dplyr::lag(SE_MEDICOS), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_med_mov_munic = dplyr::if_else(SE_MEDICOS <= (k * zoo::rollmedian(SE_MEDICOS, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SE_MEDICOS_dif_munic     = dplyr::if_else(!compare_first_dif(SE_MEDICOS), F, T) # Longitudinal (município)
+  )
+```
+
+```{r data_wrangling_dist_se_medicos}
+
+## Transformação dos resultados
+df_sumario_dist_se <- df_rules_dist_se_medicos |> 
+  dplyr::select(!SE_MEDICOS) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_se |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_se_medicos}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_se_medicos}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data, ano_base_alter), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_boxplot(variable = var, data = data, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+```
+
+```{r df_build_viol_valid}
+
+variables = c(
+"SE_TXBRUTAMORT",
+"SE_TXBRUTAMORTPAD",
+"SE_TXMOISQCOR45A59",
+"SE_TXMOAVC45A59",
+"SE_TXMOATRA15A29",
+"SE_TXMOHOMI",
+"SE_TXMOHOMI15A29",
+"SE_TXMOCANCOLUT",
+"SE_TXMOCANMA",
+"SE_TXMOCANPUL",
+"SE_OBITO60",
+"SE_NASCBAIXOPESO",
+"SE_OBINFSIFILS",
+"SE_OBTETANONEO",
+"SE_OBRAIVA",
+"SE_INTERDVHID",
+"SE_INTERDRSAI",
+"SE_COBPSF",
+"SE_NASC7CONSUL",
+"SE_TETRA",
+"SE_POLIO",
+"SE_TRIPLICE",
+"SE_FAMARELA",
+"SE_OBMALDEF",
+"SE_OBITSEMASSIS",
+"SE_INTERDCV40",
+"SE_INTERDIAB",
+"SE_INTERSAP",
+"SE_INTERSAP1A5",
+"SE_INTERSAP60",
+"SE_FRATFEMUR60",
+"SE_CANCPROST",
+"SE_INTMEDCOMPLDESMIC",
+"SE_PARTODESLOCMIC",
+"SE_PENTA",
+"SE_TXMODCNT30A69",
+"SE_ICSABMS",
+"SE_MEDICOS"
+  )
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_valid_se_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
+
+```
+
+
+```{r df_build_viol_dist}
+
+df_dist <- list(
+"SE_TXBRUTAMORT" = df_rules_dist_se_txbrutamort,
+"SE_TXBRUTAMORTPAD" = df_rules_dist_se_txbrutamortpad,
+"SE_TXMOISQCOR45A59" = df_rules_dist_se_txmoisqcor45a59,
+"SE_TXMOAVC45A59" = df_rules_dist_se_txmoavc45a59,
+"SE_TXMOATRA15A29" = df_rules_dist_se_txmoatra15a29,
+"SE_TXMOHOMI" = df_rules_dist_se_txmohomi,
+"SE_TXMOHOMI15A29" = df_rules_dist_se_txmohomi15a29,
+"SE_TXMOCANCOLUT" = df_rules_dist_se_txmocancolut,
+"SE_TXMOCANMA" = df_rules_dist_se_txmocanma,
+"SE_TXMOCANPUL" = df_rules_dist_se_txmocanpul,
+"SE_OBITO60" = df_rules_dist_se_obito60,
+"SE_NASCBAIXOPESO" = df_rules_dist_se_nascbaixopeso,
+"SE_OBINFSIFILS" = df_rules_dist_se_obinfsifils,
+"SE_OBTETANONEO" = df_rules_dist_se_obtetanoneo,
+"SE_OBRAIVA" = df_rules_dist_se_obraiva,
+"SE_INTERDVHID" = df_rules_dist_se_interdvhid,
+"SE_INTERDRSAI" = df_rules_dist_se_interdrsai,
+"SE_COBPSF" = df_rules_dist_se_cobpsf,
+"SE_NASC7CONSUL" = df_rules_dist_se_nasc7consul,
+"SE_TETRA" = df_rules_dist_se_tetra,
+"SE_POLIO" = df_rules_dist_se_polio,
+"SE_TRIPLICE" = df_rules_dist_se_triplice,
+"SE_FAMARELA" = df_rules_dist_se_famarela,
+"SE_OBMALDEF" = df_rules_dist_se_obmaldef,
+"SE_OBITSEMASSIS" = df_rules_dist_se_obitsemassis,
+"SE_INTERDCV40" = df_rules_dist_se_interdcv40,
+"SE_INTERDIAB" = df_rules_dist_se_interdiab,
+"SE_INTERSAP" = df_rules_dist_se_intersap,
+"SE_INTERSAP1A5" = df_rules_dist_se_intersap1a5,
+"SE_INTERSAP60" = df_rules_dist_se_intersap60,
+"SE_FRATFEMUR60" = df_rules_dist_se_fratfemur60,
+"SE_CANCPROST" = df_rules_dist_se_cancprost,
+"SE_INTMEDCOMPLDESMIC" = df_rules_dist_se_intmedcompldesmic,
+"SE_PARTODESLOCMIC" = df_rules_dist_se_partodeslocmic,
+"SE_PENTA" = df_rules_dist_se_penta,
+"SE_TXMODCNT30A69" = df_rules_dist_se_txmodcnt30a69,
+"SE_ICSABMS" = df_rules_dist_se_icsabms,
+"SE_MEDICOS" = df_rules_dist_se_medicos
+)
+
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SE_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::arrange(ano, ibge7)
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
+  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+}
+
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_saude_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+
+rm(list = ls())
+gc()
+```

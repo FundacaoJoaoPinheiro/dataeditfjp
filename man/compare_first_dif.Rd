@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_first_dif.R
 \name{compare_first_dif}
 \alias{compare_first_dif}
-\title{Compare the first diference}
+\title{Compare the first difference}
 \usage{
 compare_first_dif(var)
 }
