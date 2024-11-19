@@ -1,34 +1,30 @@
 ---
-title: FJP Dados
-subtitle: Educação
-description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
-author: 
-  name: Coordenação de Indicadores Sociais (CIS)
-  affiliation: 
-    name: Diretoria de Estatística e Informações (Direi)
-    address: Alameda das Acácias, 70 - São Luiz 
-    city: Belo Horizonte
-    state: Minas Gerais
-    postal-code: 31.275-150
-    url: https://fjp.mg.gov.br/
-output: 
-  html_document: 
-    toc: true
+title: "FJP Dados"
+subtitle: "Educação"
+author:
+  - name: "Coordenação de Indicadores Sociais (CIS)"
+    affiliation: "Diretoria de Estatística e Informações (Direi)"
+    address: "Alameda das Acácias, 70 - São Luiz"
+    city: "Belo Horizonte"
+    state: "Minas Gerais"
+    postal_code: "31.275-150"
+    url: "https://fjp.mg.gov.br/"
 lang: pt
-date: "`r Sys.Date()`"
-title-block-banner: "#68bb59"
-title-block-banner-color: "#ffffff"
-format: 
-  html:
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+description: "Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão."
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+    table_caption: true
     embed-resources: true
     smooth-scroll: true
-    toc: true
     toc-location: left
     toc-title: MENU
-    linkcolor: "#68bb59"
-    css: css/all_custom.css
-    theme:
-      light: [flatly, css/ma_custom.scss]
+    theme: journal
 editor: visual
 execute:
   echo: false
@@ -37,12 +33,13 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_eo.html"
+output-file: "relatorio_se.html"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
@@ -1041,7 +1038,7 @@ df_sumario_valid_eo <- df_rules_valid_eo_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with(c("VI_", "VF_"))
+    dplyr::starts_with(c("VI_", "VI_NA"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 

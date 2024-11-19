@@ -271,7 +271,6 @@ lockBinding("k", globalenv())
 # chart_xlab <- ""
 ```
 
-
 ```{r import_data}
 
 data <- openxlsx::read.xlsx(params$data)
