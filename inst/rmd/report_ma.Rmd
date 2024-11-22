@@ -1,34 +1,30 @@
 ---
-title: FJP Dados
-subtitle: Meio Ambiente
-description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
-author: 
-  name: Coordenação de Indicadores Sociais (CIS)
-  affiliation: 
-    name: Diretoria de Estatística e Informações (Direi)
-    address: Alameda das Acácias, 70 - São Luiz 
-    city: Belo Horizonte
-    state: Minas Gerais
-    postal-code: 31.275-150
-    url: https://fjp.mg.gov.br/
-output: 
-  html_document: 
-    toc: true
+title: "FJP Dados"
+subtitle: "Meio Ambiente"
+author:
+  - name: "Coordenação de Indicadores Sociais (CIS)"
+    affiliation: "Diretoria de Estatística e Informações (Direi)"
+    address: "Alameda das Acácias, 70 - São Luiz"
+    city: "Belo Horizonte"
+    state: "Minas Gerais"
+    postal_code: "31.275-150"
+    url: "https://fjp.mg.gov.br/"
 lang: pt
-date: "`r Sys.Date()`"
-title-block-banner: "#68bb59"
-title-block-banner-color: "#ffffff"
-format: 
-  html:
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+description: "Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão."
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+    table_caption: true
     embed-resources: true
     smooth-scroll: true
-    toc: true
     toc-location: left
     toc-title: MENU
-    linkcolor: "#68bb59"
-    css: css/all_custom.css
-    theme:
-      light: [flatly, css/ma_custom.scss]
+    theme: journal
 editor: visual
 execute:
   echo: false
@@ -43,8 +39,8 @@ output-file: "relatorio_ma.html"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
 ```
-
 
 ```{r set_param_global}
 
@@ -98,36 +94,36 @@ A padronização dos nomes permite que seja possível a identificação da class
 
 Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
 
--   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+-   **TI\_**$$...$$: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
 
 Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
 
--   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
--   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+-   **VI_NA\_**$$...$$: dado não tem valor ausente/*missing*;
+-   **VI\_**$$...$$: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
--   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+-   **CF\_**$$...$$\_total_year: a soma da proporção anual é igual a $\approx$ 100%.
 
 Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
 
--   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_**$$...$$\_hampel_munic: método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_**$$...$$\_out_munic: segundo método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   **DF\_**$$...$$\_min_munic: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
--   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **DF\_**$$...$$\_max_munic: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
--   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   **DF\_**$$...$$\_min_k_munic: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
 
--   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   **DF\_**$$...$$\_max_k_munic: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   **DF\_**$$...$$\_med_mov_munic: o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
 
--   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   **DF\_**$$...$$\_dif_munic: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
--   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+-   **DF\_**$$...$$\_estoque_munic: valor atual é maior ou igual ao valor imediatamente anterior.
 
 **Classificação por flexibilidade (F ou I)**
 
@@ -148,6 +144,10 @@ ano_base_alter <- c(
 # ano_base_alter <- c(
 #   "NA" = NA_integer_
 # )
+
+exclusions_years = list(
+  "NA" = NA_integer_
+)
 ```
 
 ```{r get_cat}
@@ -1441,7 +1441,6 @@ for(i in names(df_obs_consist)){
 
 ```
 
-
 ```{r df_build_viol_dist}
 df_dist <- list(
 "MA_ICMSECOLOG" = df_rules_dist_ma_icmsecolog,
@@ -1479,8 +1478,6 @@ for(i in names(df_obs_dist)){
 
 ```
 
-
-
 ```{r excel_save_wb}
 
 openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T)
@@ -1491,4 +1488,3 @@ openxlsx::saveWorkbook(pt, "fjpdados_meioambiente_violacoes.xlsx", overwrite = T
 rm(list = ls())
 gc()
 ```
-
