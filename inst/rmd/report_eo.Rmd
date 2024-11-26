@@ -1921,7 +1921,7 @@ chart_vbar(df_sumario)
 ```{r rules_dist_eo_iqem4}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IQEM4 <- data |> remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years)
+df_rules_dist_EO_IQEM4 <- data |> remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM4"],
