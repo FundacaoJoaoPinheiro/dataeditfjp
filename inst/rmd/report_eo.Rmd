@@ -258,6 +258,14 @@ ano_base_alter <- c(
 # ano_base_alter <- c(
 #   "NA" = NA_integer_
 # )
+
+exclusions_years <- c(
+  "EO_IQEP11"          = 2020,
+  "EO_IQEM4"           = 2020,
+  "EO_IQEM8"           = 2020,
+  "EO_IQEM11"           = 2020
+  )
+
 ```
 
 ```{r map_valid_desc}
@@ -1089,58 +1097,6 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-<!-- ## Consistência -->
-
-```{r data_rules_consist_eo_all, eval=FALSE}
-
-## df com o resultado das aplicações das regras
-df_rules_consist_eo_all <- data |> 
-  dplyr::select(
-    Ano   = ANO, 
-    ibge7 = IBGE7, 
-    EO_ESCOLAME
-  ) |> 
-  dplyr::group_by(Ano) |> 
-  dplyr::mutate(
-    CF_EO_ESCOLAME_total_year = dplyr::if_else(
-      dplyr::between(sum(EO_ESCOLAME, na.rm = T), 99, 101), F, T)
-  )
-```
-
-```{r data_wrangling_consist_eo_all, eval=FALSE}
-
-## Tranformação dos resultados
-df_sumario_consist_eo <- df_rules_consist_eo_all |> 
-  dplyr::select(!EO_ESCOLAME) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_consist_ma |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-<!-- ### Todos os indicadores -->
-
-```{r table_consist_eo_all, eval=FALSE}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
 
 ## Distribuição
 
@@ -1965,7 +1921,7 @@ chart_vbar(df_sumario)
 ```{r rules_dist_eo_iqem4}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IQEM4 <- data |> 
+df_rules_dist_EO_IQEM4 <- data |> remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years)
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM4"],
