@@ -28,5 +28,6 @@ chart_boxplot <- function(variable, data, ano_base_alter){
       axis.text.x     = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)
     )
 
+
   return(result)
 }

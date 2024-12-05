@@ -94,36 +94,35 @@ A padronização dos nomes permite que seja possível a identificação da class
 
 Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
 
--   **TI\_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+-   **TI_[...]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
 
 Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
 
--   **VI_NA\_\[...\]**: dado não tem valor ausente/*missing*;
--   **VI\_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+-   **VI_NA_[...]**: dado não tem valor ausente/*missing*;
+-   **VI_[...]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
--   **CF\_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+-   **CF_[...]_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
 
 Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
 
--   **DF\_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+-   **DF_[...]_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **DF_[...]_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   **DF_[...]_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
--   **DF\_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **DF_[...]_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
--   **DF\_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   **DF_[...]_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
 
--   **DF\_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   **DF_[...]_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   **DF\_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   **DF_[...]_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
 
--   **DF\_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   **DF_[...]_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
--   **DF\_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
 
 **Classificação por flexibilidade (F ou I)**
 
@@ -186,6 +185,9 @@ ano_base_alter <- c(
   "EO_PCAPP8"          = 2003,
   "EO_PCAPP11"         = 2003,
   "EO_PALUNOSM11"      = 2003,
+  "EO_PALUNOSM8"       = 2003,
+  "EO_PALUNOSP8"       = 2003,
+  "EO_PALUNOSP11"      = 2003,
   "EO_DOCSUPEI"        = 2013,
   "EO_DOCSUPEF"        = 2013,
   "EO_DOCSUPEFAF"      = 2013,
@@ -220,7 +222,7 @@ ano_base_alter <- c(
   "EO_ADEDG2EJAF"      = 2013,
   "EO_ADEDG3EJAF"      = 2013,
   "EO_ADEDG4EJAF"      = 2013,
-  "EO_ADEDG5EFAF"      = 2013,
+  "EO_ADEDG5EJAF"      = 2013,
   "EO_ADEDG1EJAM"      = 2013,
   "EO_ADEDG2EJAM"      = 2013,
   "EO_ADEDG3EJAM"      = 2013,
@@ -260,10 +262,32 @@ ano_base_alter <- c(
 # )
 
 exclusions_years <- c(
-  "EO_IQEP11"          = 2020,
-  "EO_IQEM4"           = 2020,
-  "EO_IQEM8"           = 2020,
-  "EO_IQEM11"           = 2020
+  "EO_IDEBFU6A9"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
+  "EO_IDEBFU1A5"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
+  "EO_IQEP11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEM4"           = c(2004,2005,2015,2017,2020),
+  "EO_IQEM8"           = c(2004,2005,2015,2017,2020),
+  "EO_IQEM11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEP4"           = c(2004,2005,2015,2017,2020),
+  "EO_IQEP8"           = c(2004,2005,2015,2017,2020),
+  "EO_IQE4"            = c(2004,2005,2015,2017,2020),
+  "EO_IQE8"            = c(2004,2005,2015,2017,2020),
+  "EO_IQE11"           = c(2004,2005,2015,2017,2020),
+  "EO_IQE"             = c(2004,2005,2015,2017,2020),
+  "EO_PCAPM8"          = c(2004,2005,2010,2015,2017,2020),
+  "EO_PCAPP8"          = c(2004,2005,2010,2015,2017,2020),
+  "EO_PCAPM11"         = c(2004,2005,2010,2015,2017,2020),
+  "EO_PCAPP11"         = c(2004,2005,2010,2015,2017,2020),
+  "EO_ALUNOSM8"        = c(2004,2005,2015,2017,2020),
+  "EO_ALUNOSP8"        = c(2004,2005,2015,2017,2020),
+  "EO_ALUNOSM11"       = c(2004,2005,2020),
+  "EO_ALUNOSP11"       = c(2004,2005,2020),
+  "EO_PALUNOSM8"       = c(2004,2005,2015,2017,2020),
+  "EO_PALUNOSP8"       = c(2004,2005,2015,2017,2020),
+  "EO_PALUNOSM11"      = c(2004,2005,2010,2020),
+  "EO_PALUNOSP11"      = c(2004,2005,2010,2020),
+  "EO_TXAPROV1A5"      = c(2006,2008,2020),
+  "EO_TXAPROV6A9"      = c(2006,2008)
   )
 
 ```
@@ -863,11 +887,11 @@ df_rules_valid_eo_all <- data |>
     VI_NA_EO_ADEDG3EM        = dplyr::if_else(!is.na(EO_ADEDG3EM), F, NA),
     VI_NA_EO_ADEDG4EM        = dplyr::if_else(!is.na(EO_ADEDG4EM), F, NA),
     VI_NA_EO_ADEDG5EM        = dplyr::if_else(!is.na(EO_ADEDG5EM), F, NA),
-    VI_NA_EO_ADEDG1EJAF      = dplyr::if_else(!is.na(EO_ADEDG1EFAF), F, NA),
-    VI_NA_EO_ADEDG2EJAF      = dplyr::if_else(!is.na(EO_ADEDG2EFAF), F, NA),
-    VI_NA_EO_ADEDG3EJAF      = dplyr::if_else(!is.na(EO_ADEDG3EFAF), F, NA),
-    VI_NA_EO_ADEDG4EJAF      = dplyr::if_else(!is.na(EO_ADEDG4EFAF), F, NA),
-    VI_NA_EO_ADEDG5EFAF      = dplyr::if_else(!is.na(EO_ADEDG5EFAF), F, NA),
+    VI_NA_EO_ADEDG1EJAF      = dplyr::if_else(!is.na(EO_ADEDG1EJAF), F, NA),
+    VI_NA_EO_ADEDG2EJAF      = dplyr::if_else(!is.na(EO_ADEDG2EJAF), F, NA),
+    VI_NA_EO_ADEDG3EJAF      = dplyr::if_else(!is.na(EO_ADEDG3EJAF), F, NA),
+    VI_NA_EO_ADEDG4EJAF      = dplyr::if_else(!is.na(EO_ADEDG4EJAF), F, NA),
+    VI_NA_EO_ADEDG5EJAF      = dplyr::if_else(!is.na(EO_ADEDG5EJAF), F, NA),
     VI_NA_EO_ADEDG1EJAM      = dplyr::if_else(!is.na(EO_ADEDG1EJAM), F, NA),
     VI_NA_EO_ADEDG2EJAM      = dplyr::if_else(!is.na(EO_ADEDG2EJAM), F, NA),
     VI_NA_EO_ADEDG3EJAM      = dplyr::if_else(!is.na(EO_ADEDG3EJAM), F, NA),
@@ -1772,6 +1796,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IDEBFU6A9 <- data |> 
+  remove_year_variable(variable = "EO_IDEBFU6A9", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IDEBFU6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU6A9"],
@@ -1848,6 +1873,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEP11 <- data |>
+  remove_year_variable(variable = "EO_IQEP11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEP11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP11"],
@@ -1996,6 +2022,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEM8 <- data |> 
+  remove_year_variable(variable = "EO_IQEM8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM8"],
@@ -10770,7 +10797,8 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(variable = var, data = data, ano_base_alter))
+    data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
+  print(chart_boxplot(variable = var, data = data_aux, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -10783,8 +10811,9 @@ pander::pandoc.header("Histograma", level = 3)
 
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
+  data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data, ano_base_alter))
+  print(chart_histogram(variable = var, data = data_aux, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -10864,6 +10893,7 @@ pt <- openxlsx::createWorkbook()
     "EO_PALUNOSM8",
     "EO_PALUNOSP8",
     "EO_PALUNOSM11",
+    "EO_PALUNOSP11",
     "EO_ANALF25_PP",
     "EO_ANALF25_PP",
     "EO_FUND25_B",
@@ -10904,7 +10934,7 @@ pt <- openxlsx::createWorkbook()
     "EO_ADEDG2EJAF",
     "EO_ADEDG3EJAF",
     "EO_ADEDG4EJAF",
-    "EO_ADEDG5EFAF",
+    "EO_ADEDG5EJAF",
     "EO_ADEDG1EJAM",
     "EO_ADEDG2EJAM",
     "EO_ADEDG3EJAM",
@@ -10965,284 +10995,9 @@ for(i in names(df_obs_valid)){
 }
 
 
-# Criar base com as observações que violaram uma ou mais regras de validade
 
-## Validade
-# df_rules_valid_EO_ALUNOSP8 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ALUNOSP8")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ALUNOSM8 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ALUNOSM8")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ALUNOSM11 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ALUNOSM11")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ALUNOSP11 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ALUNOSP11")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ESCOLAEFAI <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ESCOLAEFAI")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ESCOLAEFAF <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ESCOLAEFAF")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ESCOLAEFCO <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ESCOLAEFCO")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_ESCOLAME <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_ESCOLAME")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IDEBFU1a5 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IDEBFU1a5")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IDEBFU6a9 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IDEBFU6a9")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IQEP11 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IQEP11")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IQEM4 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IQEM4")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IQEM8 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IQEM8")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_valid_EO_IQEM11 <- df_rules_valid_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("EO_IQEM11")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_valid}
-
-## Lista com os dfs por indicador
-# lista_df <- list(
-#   "EO_ALUNOSP8" = df_rules_valid_EO_ALUNOSP8,
-#   "EO_ALUNOSM8"        = df_rules_valid_EO_ALUNOSM8,
-#   "EO_ALUNOSM11"       = df_rules_valid_EO_ALUNOSM11,
-#   "EO_ALUNOSP11"    = df_rules_valid_EO_ALUNOSP11,
-#   "EO_ESCOLAEFAI"       = df_rules_valid_EO_ESCOLAEFAI,
-#   "EO_ESCOLAEFAF"     = df_rules_valid_EO_ESCOLAEFAF,
-#   "EO_ESCOLAEFCO"     = df_rules_valid_EO_ESCOLAEFCO,
-#   "EO_ESCOLAME"      = df_rules_valid_EO_ESCOLAME,
-#   "EO_IDEBFU1a5"       = df_rules_valid_EO_IDEBFU1a5,
-#   "EO_IDEBFU6a9"      = df_rules_valid_EO_IDEBFU6a9,
-#   "EO_IQEP11"     = df_rules_valid_EO_IQEP11,
-#   "ma_reflo"      = df_rules_valid_ma_reflo,
-#   "EO_IQEM4"  = df_rules_valid_EO_IQEM4,
-#   "EO_IQEM8"      = df_rules_valid_EO_IQEM8,
-#   "EO_IQEM11"       = df_rules_valid_EO_IQEM11
-# )
-# 
-# ## Add dados à pasta de trabalho
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_valid_")
-#   openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-#   openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
-# }
-```
-
-```{r df_build_viol_consist}
-
-# Criar base com as observações que violaram uma ou mais regras de consistência
-
-## Consistência
-# df_rules_consist_EO_ESCOLAME <- df_rules_consist_eo_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::contains("_FOCOS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-```
-
-```{r df_export_viol_consist}
-
-## Lista com os dfs por indicador
-# lista_df <- list(
-#   "EO_ESCOLAME" = df_rules_valid_EO_ESCOLAME
-# )
-# 
-# ## Add dados à pasta de trabalho
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_consist_")
-#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
-#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
-# }
-```
 
 ```{r df_build_viol_dist}
   df_dist = list(
@@ -11408,142 +11163,8 @@ for(i in names(df_obs_dist)){
 }
 
 
-
-# Criar base com as observações que violaram uma ou mais regras de distribuição
-
-## Distribuição
-# df_rules_dist_EO_ALUNOSP8 <- df_rules_dist_EO_ALUNOSP8 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_ALUNOSM8 <- df_rules_dist_EO_ALUNOSM8 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_ALUNOSM11 <- df_rules_dist_EO_ALUNOSM11 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_ESCOLAME <- df_rules_dist_EO_ESCOLAME |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IDEBFU1a5 <- df_rules_dist_EO_IDEBFU1a5 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IDEBFU6a9 <- df_rules_dist_EO_IDEBFU6a9 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IQEP11 <- df_rules_dist_EO_IQEP11 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ma_reflo <- df_rules_dist_ma_reflo |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IQEM4 <- df_rules_dist_EO_IQEM4 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IQEM8 <- df_rules_dist_EO_IQEM8 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_EO_IQEM11 <- df_rules_dist_EO_IQEM11 |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_dist}
-
-# lista_df <- list(
-#   "EO_ALUNOSP8" = df_rules_dist_EO_ALUNOSP8,
-#   "EO_ALUNOSM8"        = df_rules_dist_EO_ALUNOSM8,
-#   "EO_ALUNOSM11"       = df_rules_dist_EO_ALUNOSM11,
-#   "EO_ESCOLAME"      = df_rules_dist_EO_ESCOLAME,
-#   "EO_IDEBFU1a5"       = df_rules_dist_EO_IDEBFU1a5,
-#   "EO_IDEBFU6a9"      = df_rules_dist_EO_IDEBFU6a9,
-#   "EO_IQEP11"     = df_rules_dist_EO_IQEP11,
-#   "EO_IQEM4"  = df_rules_dist_EO_IQEM4,
-#   "EO_IQEM8"      = df_rules_dist_EO_IQEM8,
-#   "EO_IQEM11"       = df_rules_dist_EO_IQEM11
-# )
-# 
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_dist_")
-#   openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
-#   openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
-# }
-```
 
 ```{r excel_save_wb}
 
