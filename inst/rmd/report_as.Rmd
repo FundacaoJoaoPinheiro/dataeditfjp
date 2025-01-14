@@ -174,7 +174,7 @@ ano_base_alter <- c(
    "AS_NCREAS"               = 2012,          
    "AS_FCADMEIOSAL"          = 2012,    
    "AS_RHTOTALA"             = 2012,     
-   "AS_RHTOTALB"             = 2012,      
+   #"AS_RHTOTALB"             = 2012,      
    "AS_RHAS"                 = 2012,        
    "AS_RHPSI"                = 2012,      
    "AS_RHENME"               = 2012,     
@@ -190,7 +190,7 @@ ano_base_alter <- c(
    "AS_COBBF"                = 2014,              
    "AS_POPIDCADSPOP"         = 2014,      
    "AS_POPRURALPOP"          = 2014,         
-   "AS_POPPOBEXTRPOB"        = 2014,  
+   #"AS_POPPOBEXTRPOB"        = 2014,  
    "AS_PCOBBFMEIOSAL"        = 2014,      
    "AS_POPPOBEXTRCAD"        = 2014,      
    "AS_POPIDPOBEXTRCAD"      = 2014,      
@@ -262,7 +262,7 @@ desc_regra_valid_var <- data.frame(
     "VI_AS_NCREAS",
     "VI_AS_FCADMEIOSAL",
     "VI_AS_RHTOTALA",
-    "VI_AS_RHTOTALB",
+    #"VI_AS_RHTOTALB",
     "VI_AS_RHAS",
     "VI_AS_RHPSI",
     "VI_AS_RHENME",
@@ -278,7 +278,7 @@ desc_regra_valid_var <- data.frame(
     "VI_AS_COBBF",
     "VI_AS_POPIDCADSPOP",
     "VI_AS_POPRURALPOP",
-    "VI_AS_POPPOBEXTRPOB",
+    #"VI_AS_POPPOBEXTRPOB",
     "VI_AS_PCOBBFMEIOSAL",
     "VI_AS_POPPOBEXTRCAD",
     "VI_AS_POPIDPOBEXTRCAD",
@@ -325,7 +325,7 @@ desc_regra_valid_var <- data.frame(
       "VI_AS_NCREAS"               ~ desc_regra_valid[1],
       "VI_AS_FCADMEIOSAL"          ~ desc_regra_valid[1],
       "VI_AS_RHTOTALA"             ~ desc_regra_valid[1],
-      "VI_AS_RHTOTALB"             ~ desc_regra_valid[1],
+      #"VI_AS_RHTOTALB"             ~ desc_regra_valid[1],
       "VI_AS_RHAS"                 ~ desc_regra_valid[1],
       "VI_AS_RHPSI"                ~ desc_regra_valid[1],
       "VI_AS_RHENME"               ~ desc_regra_valid[1],
@@ -341,7 +341,7 @@ desc_regra_valid_var <- data.frame(
       "VI_AS_COBBF"                ~ desc_regra_valid[5],
       "VI_AS_POPIDCADSPOP"         ~ desc_regra_valid[5],
       "VI_AS_POPRURALPOP"          ~ desc_regra_valid[5],
-      "VI_AS_POPPOBEXTRPOB"        ~ desc_regra_valid[5],
+      #"VI_AS_POPPOBEXTRPOB"        ~ desc_regra_valid[5],
       "VI_AS_PCOBBFMEIOSAL"        ~ desc_regra_valid[5],
       "VI_AS_POPPOBEXTRCAD"        ~ desc_regra_valid[5],
       "VI_AS_POPIDPOBEXTRCAD"      ~ desc_regra_valid[5],
@@ -418,7 +418,7 @@ rules_type <- validate::validator(
   TI_AS_NCREAS               = is.numeric(AS_NCREAS),
   TI_AS_FCADMEIOSAL          = is.numeric(AS_FCADMEIOSAL),
   TI_AS_RHTOTALA             = is.numeric(AS_RHTOTALA),
-  TI_AS_RHTOTALB             = is.numeric(AS_RHTOTALB),
+  #TI_AS_RHTOTALB             = is.numeric(AS_RHTOTALB),
   TI_AS_RHAS                 = is.numeric(AS_RHAS),
   TI_AS_RHPSI                = is.numeric(AS_RHPSI),
   TI_AS_RHENME               = is.numeric(AS_RHENME),
@@ -434,7 +434,7 @@ rules_type <- validate::validator(
   TI_AS_COBBF                = is.numeric(AS_COBBF),
   TI_AS_POPIDCADSPOP         = is.numeric(AS_POPIDCADSPOP),
   TI_AS_POPRURALPOP          = is.numeric(AS_POPRURALPOP),
-  TI_AS_POPPOBEXTRPOB        = is.numeric(AS_POPPOBEXTRPOB),
+  #TI_AS_POPPOBEXTRPOB        = is.numeric(AS_POPPOBEXTRPOB),
   TI_AS_PCOBBFMEIOSAL        = is.numeric(AS_PCOBBFMEIOSAL),
   TI_AS_POPPOBEXTRCAD        = is.numeric(AS_POPPOBEXTRCAD),
   TI_AS_POPIDPOBEXTRCAD      = is.numeric(AS_POPIDPOBEXTRCAD),
@@ -503,7 +503,7 @@ df_rules_valid_as_all <- data |>
     VI_NA_AS_NCREAS               = dplyr::if_else(!is.na(AS_NCREAS), F, T),
     VI_NA_AS_FCADMEIOSAL          = dplyr::if_else(!is.na(AS_FCADMEIOSAL), F, T),
     VI_NA_AS_RHTOTALA             = dplyr::if_else(!is.na(AS_RHTOTALA), F, T),
-    VI_NA_AS_RHTOTALB             = dplyr::if_else(!is.na(AS_RHTOTALB), F, T),
+    #VI_NA_AS_RHTOTALB             = dplyr::if_else(!is.na(AS_RHTOTALB), F, T),
     VI_NA_AS_RHAS                 = dplyr::if_else(!is.na(AS_RHAS), F, T),
     VI_NA_AS_RHPSI                = dplyr::if_else(!is.na(AS_RHPSI), F, T),
     VI_NA_AS_RHENME               = dplyr::if_else(!is.na(AS_RHENME), F, T),
@@ -519,7 +519,7 @@ df_rules_valid_as_all <- data |>
     VI_NA_AS_COBBF                = dplyr::if_else(!is.na(AS_COBBF), F, T),
     VI_NA_AS_POPIDCADSPOP         = dplyr::if_else(!is.na(AS_POPIDCADSPOP), F, T),
     VI_NA_AS_POPRURALPOP          = dplyr::if_else(!is.na(AS_POPRURALPOP), F, T),
-    VI_NA_AS_POPPOBEXTRPOB        = dplyr::if_else(!is.na(AS_POPPOBEXTRPOB), F, T),
+    #VI_NA_AS_POPPOBEXTRPOB        = dplyr::if_else(!is.na(AS_POPPOBEXTRPOB), F, T),
     VI_NA_AS_PCOBBFMEIOSAL        = dplyr::if_else(!is.na(AS_PCOBBFMEIOSAL), F, T),
     VI_NA_AS_POPPOBEXTRCAD        = dplyr::if_else(!is.na(AS_POPPOBEXTRCAD), F, T),
     VI_NA_AS_POPIDPOBEXTRCAD      = dplyr::if_else(!is.na(AS_POPIDPOBEXTRCAD), F, T),  
@@ -564,7 +564,7 @@ df_rules_valid_as_all <- data |>
     VI_AS_COBBF                   = dplyr::if_else(dplyr::between(AS_COBBF, 0, 100), F, T),
     VI_AS_POPIDCADSPOP            = dplyr::if_else(dplyr::between(AS_POPIDCADSPOP, 0, 100), F, T),
     VI_AS_POPRURALPOP             = dplyr::if_else(dplyr::between(AS_POPRURALPOP, 0, 100), F, T),
-    VI_AS_POPPOBEXTRPOB           = dplyr::if_else(dplyr::between(AS_POPPOBEXTRPOB , 0, 100), F, T),
+    #VI_AS_POPPOBEXTRPOB           = dplyr::if_else(dplyr::between(AS_POPPOBEXTRPOB , 0, 100), F, T),
     VI_AS_PCOBBFMEIOSAL           = dplyr::if_else(dplyr::between(AS_PCOBBFMEIOSAL, 0, 100), F, T),
     VI_AS_POPPOBEXTRCAD           = dplyr::if_else(dplyr::between(AS_POPPOBEXTRCAD, 0, 100), F, T),
     VI_AS_DEFPOBEXTRCAD           = dplyr::if_else(dplyr::between(AS_DEFPOBEXTRCAD, 0, 100), F, T),
@@ -591,7 +591,7 @@ df_rules_valid_as_all <- data |>
     VI_AS_NCREAS                  = dplyr::if_else(AS_NCREAS >= 0, F, T),
     VI_AS_FCADMEIOSAL             = dplyr::if_else(AS_FCADMEIOSAL >= 0, F, T),
     VI_AS_RHTOTALA                = dplyr::if_else(AS_RHTOTALA >= 0, F, T),
-    VI_AS_RHTOTALB                = dplyr::if_else(AS_RHTOTALB >= 0, F, T),
+    #VI_AS_RHTOTALB                = dplyr::if_else(AS_RHTOTALB >= 0, F, T),
     VI_AS_RHAS                    = dplyr::if_else(AS_RHAS >= 0, F, T),
     VI_AS_RHPSI                   = dplyr::if_else(AS_RHPSI >= 0, F, T),
     VI_AS_RHENME                  = dplyr::if_else(AS_RHENME >= 0, F, T),
@@ -1356,9 +1356,9 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_RHTOTALB
+<!-- ### AS_RHTOTALB -->
 
-```{r rules_dist_as_rhtotalb}
+```{r rules_dist_as_rhtotalb, eval=FALSE}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_rhtotalb <- data |> 
@@ -1377,7 +1377,7 @@ df_rules_dist_as_rhtotalb <- data |>
   )
 ```
 
-```{r data_wrangling_dist_as_rhtotalb}
+```{r data_wrangling_dist_as_rhtotalb, eval=FALSE}
 
 ## Transformação dos resultados
 df_sumario_dist_as <- df_rules_dist_as_rhtotalb |> 
@@ -1399,7 +1399,7 @@ df_sumario <- df_sumario_dist_as |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_as_rhtotalb}
+```{r table_dist_as_rhtotalb, eval=FALSE}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -1409,7 +1409,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_as_rhtotalb}
+```{r chart_dist_as_rhtotalb, eval=FALSE}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -2408,9 +2408,9 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### AS_POPPOBEXTRPOB
+<!-- ### AS_POPPOBEXTRPOB -->
 
-```{r rules_dist_as_poppobextrpob}
+```{r rules_dist_as_poppobextrpob, eval=FALSE}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_poppobextrpob <- data |> 
@@ -2441,7 +2441,7 @@ df_rules_dist_as_poppobextrpob <- data |>
   )
 ```
 
-```{r data_wrangling_dist_as_poppobextrpob}
+```{r data_wrangling_dist_as_poppobextrpob, eval=FALSE}
 
 ## Transformação dos resultados
 df_sumario_dist_ma <- df_rules_dist_as_poppobextrpob |> 
@@ -2463,7 +2463,7 @@ df_sumario <- df_sumario_dist_ma |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_as_poppobextrpob}
+```{r table_dist_as_poppobextrpob, eval=FALSE}
 #| column: screen-inset-right
 
 df_sumario |> 
@@ -2473,7 +2473,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_as_poppobextrpob}
+```{r chart_dist_as_poppobextrpob, eval=FALSE}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -4436,7 +4436,7 @@ variables = c(
      "AS_NCREAS",    
      "AS_FCADMEIOSAL",  
      "AS_RHTOTALA", 
-     "AS_RHTOTALB",  
+     #"AS_RHTOTALB",  
      "AS_RHAS",  
      "AS_RHPSI",       
      "AS_RHENME",        
@@ -4452,7 +4452,7 @@ variables = c(
      "AS_COBBF",  
      "AS_POPIDCADSPOP",       
      "AS_POPRURALPOP", 
-     "AS_POPPOBEXTRPOB",      
+     #"AS_POPPOBEXTRPOB",      
      "AS_PCOBBFMEIOSAL",    
      "AS_POPPOBEXTRCAD",     
      "AS_POPIDPOBEXTRCAD",     
@@ -4594,7 +4594,7 @@ df_dist <- list(
   "AS_NCREAS"               = df_rules_dist_as_ncreas,
   "AS_FCADMEIOSAL"          = df_rules_dist_as_fcadmeiosal,
   "AS_RHTOTALA"             = df_rules_dist_as_rhtotala,
-  "AS_RHTOTALB"             = df_rules_dist_as_rhtotalb,
+  #"AS_RHTOTALB"             = df_rules_dist_as_rhtotalb,
   "AS_RHAS"                 = df_rules_dist_as_rhas,
   "AS_RHPSI"                = df_rules_dist_as_rhpsi,
   "AS_RHENME"               = df_rules_dist_as_rhenme,
@@ -4610,7 +4610,7 @@ df_dist <- list(
   "AS_COBBF"                = df_rules_dist_as_cobbf,
   "AS_POPIDCADSPOP"         = df_rules_dist_as_popidcadspop,
   "AS_POPRURALPOP"          = df_rules_dist_as_popruralpop,
-  "AS_POPPOBEXTRPOB"        = df_rules_dist_as_poppobextrpob,
+  #"AS_POPPOBEXTRPOB"        = df_rules_dist_as_poppobextrpob,
   "AS_PCOBBFMEIOSAL"        = df_rules_dist_as_pcobbfmeiosal,
   "AS_POPPOBEXTRCAD"        = df_rules_dist_as_poppobextrcad,
   "AS_POPIDPOBEXTRCAD"      = df_rules_dist_as_popidpobextrcad,
