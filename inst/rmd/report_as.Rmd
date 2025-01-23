@@ -164,34 +164,34 @@ cat_regulaprog <- c("Sim", "Não")
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição
 # no ano inicial de análise devido a fatores como mudança de metodologia
 ano_base_alter <- c(
-  "AS_INDCRAS"               = 2012,
+  "AS_INDCRAS"               = 2014,
   "AS_IDCRASME"              = 2012,
    "AS_IDCREASNOR"           = 2014,   
    "AS_IDCONSELHO"           = 2014, 
-   "AS_IGDM"                 = 2014,    
+   "AS_IGDM"                 = 2007,    
    "AS_IGDSUASM"             = 2012,     
-   "AS_NCRAS"                = 2012,        
-   "AS_NCREAS"               = 2012,          
-   "AS_FCADMEIOSAL"          = 2012,    
-   "AS_RHTOTALA"             = 2012,     
+   "AS_NCRAS"                = 2007,        
+   "AS_NCREAS"               = 2009,          
+   "AS_FCADMEIOSAL"          = 2007,    
+   "AS_RHTOTALA"             = 2017,     
    #"AS_RHTOTALB"             = 2012,      
-   "AS_RHAS"                 = 2012,        
-   "AS_RHPSI"                = 2012,      
-   "AS_RHENME"               = 2012,     
-   "AS_RHCURSU"              = 2012,       
-   "AS_RHTOEST"              = 2012,    
-   "AS_RHTOCEL"              = 2012,    
-   "AS_BPCDEF"               = 2012,     
-   "AS_BPCID"                = 2012,     
-   "AS_BPC"                  = 2012,          
-   "AS_RHTPOASPH"            = 2012,     
-   "AS_BPCIDPOPI"            = 2012,        
+   "AS_RHAS"                 = 2017,        
+   "AS_RHPSI"                = 2017,      
+   "AS_RHENME"               = 2017,     
+   "AS_RHCURSU"              = 2017,       
+   "AS_RHTOEST"              = 2017,    
+   "AS_RHTOCEL"              = 2017,    
+   "AS_BPCDEF"               = 2004,     
+   "AS_BPCID"                = 2004,     
+   "AS_BPC"                  = 2004,          
+   "AS_RHTPOASPH"            = 2005,     
+   "AS_BPCIDPOPI"            = 2004,        
    "AS_POPCADUNICO"          = 2014,     
    "AS_COBBF"                = 2014,              
    "AS_POPIDCADSPOP"         = 2014,      
    "AS_POPRURALPOP"          = 2014,         
    #"AS_POPPOBEXTRPOB"        = 2014,  
-   "AS_PCOBBFMEIOSAL"        = 2014,      
+   "AS_PCOBBFMEIOSAL"        = 2007,      
    "AS_POPPOBEXTRCAD"        = 2014,      
    "AS_POPIDPOBEXTRCAD"      = 2014,      
    "AS_IDOSOPOBEXTRPOBCADS"  = 2014,  
@@ -206,16 +206,16 @@ ano_base_alter <- c(
    "AS_PVULSANEACAD"         = 2014,      
    "AS_SANEACAD"             = 2014,           
    "AS_POPRURALCADS"         = 2014,        
-   "AS_IGDMCONDE"            = 2014,       
-   "AS_IGDMCONDS"            = 2014,       
-   "AS_IGDMATU"              = 2014,        
-   "AS_IGDMCOBCAD"           = 2014,        
-   "AS_BPCPID"               = 2014,          
-   "AS_BPCPDEF"              = 2014,      
-   "AS_RHASPS"               = 2014,       
-   "AS_RHPSIPS"              = 2014,        
-   "AS_RHVPOAAS"             = 2014,           
-   "AS_RHVINEST"             = 2014   
+   "AS_IGDMCONDE"            = 2007,       
+   "AS_IGDMCONDS"            = 2007,       
+   "AS_IGDMATU"              = 2007,        
+   "AS_IGDMCOBCAD"           = 2007,        
+   "AS_BPCPID"               = 2004,          
+   "AS_BPCPDEF"              = 2004,      
+   "AS_RHASPS"               = 2017,       
+   "AS_RHPSIPS"              = 2017,        
+   "AS_RHVPOAAS"             = 2017,           
+   "AS_RHVINEST"             = 2017   
 )
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
@@ -224,10 +224,12 @@ ano_base_alter <- c(
 #   "NA" = NA_integer_
 # )
 
-# exclusions_years <- c(
-#   "EO_IDEBFU6A9"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
-#   "EO_TXAPROV6A9"      = c(2006,2008)
-#   )
+exclusions_years <- c(
+  #"AS_IGDMCONDE"       = c(2019, 2020),       
+   "AS_IGDMCONDS"      = 2021       
+  # "AS_IGDMATU"        = 2021,
+  # "AS_IGDMCOBCAD"     = c(2015,2016,2017,2019,2020),
+  )
 
 ```
 
@@ -554,7 +556,7 @@ df_rules_valid_as_all <- data |>
     
     # between 0 and 1, and rules with variables between 1 and 5 or between 0 and 100 or between 0 and 1000
     VI_AS_INDCRAS                 = dplyr::if_else(dplyr::between(AS_INDCRAS, 1, 5), F, T),
-    VI_AS_IDCRASME                = dplyr::if_else(dplyr::between(AS_IDCRASME, 1, 5), F, T),
+    VI_AS_IDCRASME                = dplyr::if_else(dplyr::between(AS_IDCRASME, 0, 1), F, T),
     VI_AS_IDCREASNOR              = dplyr::if_else(dplyr::between(AS_IDCREASNOR, 0, 1), F, T),
     VI_AS_IDCONSELHO              = dplyr::if_else(dplyr::between(AS_IDCONSELHO, 0, 1), F, T),
     VI_AS_IGDM                    = dplyr::if_else(dplyr::between(AS_IGDM, 0, 1) , F, T), ## muda de 0 a 100 para 0 a 1
@@ -690,13 +692,11 @@ df_rules_consist_as_all <- data |>
   dplyr::group_by(Ano) |> 
   dplyr::mutate(
     BPC_total_year  = AS_BPCDEF + AS_BPCID,
-    bpc_inf = 0.995*AS_BPC,
-    bpc_sup = 1.005*AS_BPC,
+    bpc_inf = 0.95*AS_BPC,
+    bpc_sup = 1.05*AS_BPC,
     BPCP_total_year = AS_BPCPDEF + AS_BPCPID,
-    CF_AS_BPC_total_year  = dplyr::if_else(dplyr::between(BPC_total_year, bpc_inf, bpc_sup), F, T),
-    #CF_AS_BPC_total_year  = dplyr::if_else( BPC_total_year ==  AS_BPC, F, T),
-    CF_AS_BPCP_total_year = dplyr::if_else(dplyr::between(BPCP_total_year, 99, 101), F, T)
-  ) |> dplyr::select(Ano,ibge7, CF_AS_BPC_total_year, CF_AS_BPCP_total_year) |> dplyr::ungroup()
+    CF_AS_BPC_total_year  = dplyr::if_else(dplyr::between(BPC_total_year, bpc_inf, bpc_sup), F, T)
+  ) |> dplyr::select(Ano,ibge7, CF_AS_BPC_total_year) |> dplyr::ungroup()
 ```
 
 ```{r data_wrangling_consist_as_all}
@@ -2630,7 +2630,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### POPIDPOBEXTRCAD
+### AS_POPIDPOBEXTRCAD
 
 ```{r rules_dist_as_popidpobextrcad}
 
@@ -3672,6 +3672,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_as_igdmconds <- data |> 
+  remove_year_variable(variable = "AS_IGDMCONDS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "AS_IGDMCONDS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["AS_IGDMCONDS"],
@@ -4546,8 +4547,7 @@ for(i in names(lista_df)){
 
 ```{r df_build_viol_consist}
 variables = c(
-    "AS_BPC",
-    "AS_BPCP")
+    "AS_BPC")
 
 lis <- split(variables,f = variables)
 df_obs_consist <- names(lis)|>
