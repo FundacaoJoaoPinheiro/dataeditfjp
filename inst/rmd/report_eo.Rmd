@@ -10822,6 +10822,9 @@ for(var in var_numeric){
 
 ## Criar pasta de trabalho
 pt <- openxlsx::createWorkbook()
+path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
+cidades <- openxlsx::read.xlsx(path_data)
+
 ```
 
 ```{r df_build_viol_valid}
@@ -10982,6 +10985,8 @@ lis[[i]] <- df_rules_valid_eo_all |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
 return(lis[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)
@@ -11150,6 +11155,8 @@ df_dist[[i]] <- df_dist[[i]] |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
 return(df_dist[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)

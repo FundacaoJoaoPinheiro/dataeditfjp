@@ -623,7 +623,7 @@ df_sumario_valid_as <- df_rules_valid_as_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with("VI_")
+    dplyr::starts_with(c("VI_", "VI_NA"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
@@ -4424,6 +4424,9 @@ for(var in var_numeric){
 
 ## Criar pasta de trabalho
 pt <- openxlsx::createWorkbook()
+path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
+cidades <- openxlsx::read.xlsx(path_data)
+
 ```
 
 ```{r df_build_viol_valid}
@@ -4504,6 +4507,8 @@ lis[[i]] <- df_rules_valid_as_all |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(ano, ibge7, cidade, obs_suspeita, regra) |>
   dplyr::arrange(ano, ibge7)
 return(lis[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)
@@ -4567,6 +4572,8 @@ lis[[i]] <- df_rules_consist_as_all |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
 return(lis[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)
@@ -4649,6 +4656,8 @@ df_dist[[i]] <- df_dist[[i]] |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
 return(df_dist[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)
