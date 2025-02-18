@@ -25,7 +25,7 @@ This is a basic example which shows you how to use:
 ``` r
 ## basic example code
 library(dataeditfjp)
-dataeditfjp::create_report()
+dataeditfjp::creating_report()
 ```
 
 In that case, don’t forget to commit and push the resulting figure
