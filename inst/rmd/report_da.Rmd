@@ -7110,6 +7110,9 @@ for(var in var_numeric){
 
 ## Criar pasta de trabalho
 pt <- openxlsx::createWorkbook()
+path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
+cidades <- openxlsx::read.xlsx(path_data)
+
 ```
 
 ```{r df_build_viol_valid}
