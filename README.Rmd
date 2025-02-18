@@ -25,7 +25,7 @@ The goal of dataeditfjp is to ...
 You can install the development version of **dataeditfjp** from [GitHub](https://github.com/) with:
 
 ```{r eval=FALSE}
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp@development")
 ```
 
@@ -36,7 +36,7 @@ This is a basic example which shows you how to use:
 ```{r example, eval=FALSE}
 ## basic example code
 library(dataeditfjp)
-dataeditfjp::create_report()
+dataeditfjp::creating_report()
 ```
 
 
