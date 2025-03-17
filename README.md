@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of dataeditfjp is to …
+The dataeditfjp package aims to facilitate data manipulation, analysis, and report generation, with a focus on applications related to data editing. It was developed to support researchers and analysts at the João Pinheiro Foundation (FJP) and the broader community.
 
 ## Installation
 
@@ -14,19 +14,27 @@ You can install the development version of **dataeditfjp** from
 [GitHub](https://github.com/) with:
 
 ``` r
+# Install the 'remotes' package if you haven't already
 # install.packages("remotes")
+
+# Install the dataeditfjp package
 remotes::install_github("FundacaoJoaoPinheiro/dataeditfjp")
 ```
 
-## Example
+## Usage Example
 
-This is a basic example which shows you how to use:
+Here is a basic example showing how to use the package to generate a report:
 
 ``` r
-## basic example code
+# Load the package
 library(dataeditfjp)
+
+# Generate a report
 dataeditfjp::creating_report()
 ```
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+## Funding
+This study was developed with financial support from the Research Support Foundation of the State of Minas Gerais (Fapemig) under the project "Building Capacities and Expanding Frontiers in Research at FJP" - Call No. 003/2023.
+
+## Contributions
+Contributions are welcome! If you wish to contribute to the development of this package, please open an issue or a pull request on the GitHub repository.
