@@ -264,29 +264,29 @@ ano_base_alter <- c(
 exclusions_years <- c(
   "EO_IDEBFU6A9"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
   "EO_IDEBFU1A5"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
-  "EO_IQEP11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEP11"          = c(2004,2005,2020),
   "EO_IQEM4"           = c(2004,2005,2015,2017,2020),
   "EO_IQEM8"           = c(2004,2005,2015,2017,2020),
-  "EO_IQEM11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEM11"          = c(2004,2005,2020),
   "EO_IQEP4"           = c(2004,2005,2015,2017,2020),
   "EO_IQEP8"           = c(2004,2005,2015,2017,2020),
-  "EO_IQE4"            = c(2004,2005,2015,2017,2020),
+  "EO_IQE4"            = c(2004,2005,2015,2020),
   "EO_IQE8"            = c(2004,2005,2015,2017,2020),
-  "EO_IQE11"           = c(2004,2005,2015,2017,2020),
+  "EO_IQE11"           = c(2004,2005,2020),
   "EO_IQE"             = c(2004,2005,2015,2017,2020),
   "EO_PCAPM8"          = c(2004,2005,2010,2015,2017,2020),
   "EO_PCAPP8"          = c(2004,2005,2010,2015,2017,2020),
-  "EO_PCAPM11"         = c(2004,2005,2010,2015,2017,2020),
-  "EO_PCAPP11"         = c(2004,2005,2010,2015,2017,2020),
+  "EO_PCAPM11"         = c(2004,2005,2010,2020),
+  "EO_PCAPP11"         = c(2004,2005,2010,2020),
   "EO_ALUNOSM8"        = c(2004,2005,2015,2017,2020),
   "EO_ALUNOSP8"        = c(2004,2005,2015,2017,2020),
   "EO_ALUNOSM11"       = c(2004,2005,2020),
   "EO_ALUNOSP11"       = c(2004,2005,2020),
-  "EO_PALUNOSM8"       = c(2004,2005,2015,2017,2020),
-  "EO_PALUNOSP8"       = c(2004,2005,2015,2017,2020),
+  "EO_PALUNOSM8"       = c(2004,2005,2010,2015,2017,2020),
+  "EO_PALUNOSP8"       = c(2004,2005,2010,2015,2017,2020),
   "EO_PALUNOSM11"      = c(2004,2005,2010,2020),
   "EO_PALUNOSP11"      = c(2004,2005,2010,2020),
-  "EO_TXAPROV1A5"      = c(2006,2008,2020),
+  "EO_TXAPROV1A5"      = c(2006,2008),
   "EO_TXAPROV6A9"      = c(2006,2008)
   )
 
@@ -1070,7 +1070,7 @@ df_sumario_valid_eo <- df_rules_valid_eo_all |>
   dplyr::select(
     Ano, 
     ibge7, 
-    dplyr::starts_with(c("VI_", "VI_NA"))
+    dplyr::starts_with(c("VI_", "VI_NA_"))
   ) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
@@ -1116,7 +1116,8 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> 
+  unique() |># Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -1130,6 +1131,7 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_ALUNOSP8 <- data |> 
+  remove_year_variable(variable = "EO_ALUNOSP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_ALUNOSP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSP8"],
@@ -1204,6 +1206,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_ALUNOSM8 <- data |> 
+  remove_year_variable(variable = "EO_ALUNOSM8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_ALUNOSM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSM8"],
@@ -1722,6 +1725,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IDEBFU1A5 <- data |>
+  remove_year_variable(variable = "EO_IDEBFU1A5", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IDEBFU1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU1A5"],
@@ -1947,7 +1951,8 @@ chart_vbar(df_sumario)
 ```{r rules_dist_eo_iqem4}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IQEM4 <- data |> remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years) |>
+df_rules_dist_EO_IQEM4 <- data |> 
+  remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM4"],
@@ -2097,6 +2102,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEM11 <- data |> 
+  remove_year_variable(variable = "EO_IQEM11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM11"],
@@ -2171,6 +2177,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEP4 <- data |> 
+  remove_year_variable(variable = "EO_IQEP4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEP4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP4"],
@@ -2245,6 +2252,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEP8 <- data |> 
+  remove_year_variable(variable = "EO_IQEP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP8"],
@@ -2318,6 +2326,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE4 <- data |> 
+  remove_year_variable(variable = "EO_IQE4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE4"],
@@ -2391,6 +2400,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE8 <- data |> 
+  remove_year_variable(variable = "EO_IQE8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE8"],
@@ -2464,6 +2474,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE11 <- data |> 
+  remove_year_variable(variable = "EO_IQE11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE11"],
@@ -2537,6 +2548,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE <- data |> 
+  remove_year_variable(variable = "EO_IQE", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE"],
@@ -3635,6 +3647,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_TXAPROV1A5 <- data |> 
+  remove_year_variable(variable = "EO_TXAPROV1A5", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_TXAPROV1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1A5"],
@@ -3708,6 +3721,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_TXAPROV6A9 <- data |> 
+  remove_year_variable(variable = "EO_TXAPROV6A9", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_TXAPROV6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV6A9"],
@@ -4965,6 +4979,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPM8 <- data |> 
+  remove_year_variable(variable = "EO_PCAPM8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPM8"],
@@ -5039,6 +5054,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPM11 <- data |> 
+  remove_year_variable(variable = "EO_PCAPM11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPM11"],
@@ -5113,6 +5129,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPP8 <- data |> 
+  remove_year_variable(variable = "EO_PCAPP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPP8"],
@@ -5187,6 +5204,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPP11 <- data |> 
+  remove_year_variable(variable = "EO_PCAPP11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPP11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPP11"],
@@ -11169,7 +11187,6 @@ for(i in names(df_obs_dist)){
   openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
 }
 
-
 ```
 
 
@@ -11179,7 +11196,6 @@ openxlsx::saveWorkbook(pt, "fjpdados_educacao_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
-
 rm(list = ls())
 gc()
 ```

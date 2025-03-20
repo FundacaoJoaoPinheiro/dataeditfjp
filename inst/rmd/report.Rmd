@@ -1,6 +1,6 @@
 ---
 title: "FJP Dados"
-subtitle: "Assistência Social"
+subtitle: "Área Temática"
 author:
   - name: "Coordenação de Indicadores Sociais (CIS)"
     affiliation: "Diretoria de Estatística e Informações (Direi)"
@@ -11,7 +11,7 @@ author:
     url: "https://fjp.mg.gov.br/"
 lang: pt
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
-description: "Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão."
+description: "Relatório contendo os resultados das regras de crítica dos dados e uma análise estatística."
 output:
   html_document:
     toc: true
@@ -33,7 +33,11 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_as.html"
+  file_rules: file.xlsx
+  deleted_variable: deleted_variable
+  begin_years: begin_years
+  deleted_years: deleted_years
+output-file: "relatorio.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -49,23 +53,38 @@ k <- 1.2
 ```{r import_data}
 data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
+file_rules <- openxlsx::read.xlsx(params$file_rules)
 ```
 
 ```{r get_var_numeric}
 
 # Obter as siglas das variáveis do tipo numérico
+numericas <- file_rules %>% dplyr::filter(TYPE == "numeric") %>% dplyr::select(VARIABLE) %>% dplyr::pull()
+
+categoricas <- file_rules %>% dplyr::filter(TYPE != "numeric") %>% dplyr::select(VARIABLE) %>% dplyr::pull()
+
 var_numeric <- data |> 
   dplyr::select(
-    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & !!numericas
   ) |> 
   colnames() |> 
   unlist()
 
-qualitative_var <- c("AS_ORGGESTOR","AS_PFMPMUAS","AS_PSENOR","AS_ORGCADU","AS_LEIMAS","AS_IPROBA")
+newnames <- seq(1,length(var_numeric))
+newnames <- paste0("variable",newnames)
+names(newnames) <- var_numeric
 
-deleted_var <- c("AS_IMINST","AS_IPROME","AS_PLANOAS","AS_FINFEES","AS_FUNCON","AS_DELIOR","AS_EXESOC","AS_SAMAS","AS_PUSIMOAVAS","AS_IRHAS","AS_RHPOSGRA","AS_PMOSESOAS", "AS_CONSDELIB","AS_RHGIPOAS","AS_EXEORCA","AS_IMINSTI","AS_FUNDOAS","AS_GESTSUAS","AS_MOSESOAS","AS_REGULAOFERTA","AS_PREVORCAS","AS_POLITICAAS","AS_USIMOAVAS")
+data_aux <- data
 
-var_numeric <- var_numeric[!(var_numeric %in% c(qualitative_var,deleted_var))]
+data_aux <- sapply(names(data_aux),
+       function(i){
+         if(names(data_aux[i]) %in% var_numeric){
+          data_aux <- data_aux %>% dplyr::select(IBGE7,ANO,!!newnames[i] := i)
+         }
+         return(data_aux)
+       }, USE.NAMES = T, simplify = FALSE)
+
+data_aux <- Reduce(function(x,y){merge(x,y, all = TRUE)}, data_aux ) %>% dplyr::select(-all_of(var_numeric))
 
 ```
 
@@ -74,12 +93,10 @@ var_numeric <- var_numeric[!(var_numeric %in% c(qualitative_var,deleted_var))]
 # Obter as siglas variáveis do tipo string
 var_char <- data |> 
   dplyr::select(
-    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & !!categoricas
   ) |> 
   colnames() |> 
   unlist()
-
-var_char <- c(qualitative_var, var_char[!(var_char %in% c(deleted_var))])
 
 ```
 
@@ -111,23 +128,23 @@ Consistência (C): refere-se aos casos em que se verificam as relações matemá
 
 Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
--   \*\*DF\_[...]\_hampel_munic\*\*: método de identificação de um possível valor *outlier* na série histórica;
+-   \*\*DF\_[...]\_hampel\*\*: método de identificação de um possível valor *outlier* na série histórica;
 
--   \*\*DF\_[...]\_out_munic\*\*: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   \*\*DF\_[...]\_outlier\*\*: segundo método de identificação de um possível valor *outlier* na série histórica;
 
--   \*\*DF\_[...]\_min_munic\*\*: o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   \*\*DF\_[...]\_minimo\*\*: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
--   \*\*DF\_[...]\_max_munic\*\*: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   \*\*DF\_[...]\_maximo\*\*: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
--   \*\*DF\_[...]\_min_k_munic\*\*: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   \*\*DF\_[...]\_minimo_k\*\*: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
 
--   \*\*DF\_[...]\_max_k_munic\*\*: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   \*\*DF\_[...]\_maximo_k\*\*: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   \*\*DF\_[...]\_med_mov_munic:\*\* o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   \*\*DF\_[...]\_mediana_movel:\*\* o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
 
--   \*\*DF\_[...]\_dif_munic\*\*: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   \*\*DF\_[...]\_diferenca\*\*: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
--   \*\*DF\_[...]\_estoque_munic\*\*: valor atual é maior ou igual ao valor imediatamente anterior.
+-   \*\*DF\_[...]\_estoque\*\*: valor atual é maior ou igual ao valor imediatamente anterior.
 
 **Classificação por flexibilidade (F ou I)**
 
@@ -138,23 +155,9 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 ```{r get_cat}
 
 ## variaveis Categoricas
-
-## Categorias politomica
-cat_gestsuas <- c(
-  "Básica",
-  "Inicial",
-  "Plena",
-  "Município sob Gestão do Estado"
-)
-
-cat_orggestor <- c(0,1,2,3)
-cat_iminst <- seq(0,28,1)
-cat_pfmpmuas <- c(1,0.80,0.60,0.30,0.20,0.05,0)
-cat_psenor <- c(0,1,2)
-cat_orgcadu <- c(0,1,2,3)
-cat_leimas <- c(0,1,2)
-cat_iproba <- c(1,2,3)
-cat_regulaprog <- c("Sim", "Não")
+categorias <- file_rules %>% dplyr::filter(TYPE == "categorical") %>% dplyr::select(VI_CATEGORY)
+strsplit(x = categorias$VI_CATEGORY, split = "[ "," ]" )
+dicotomica <- c("Sim", "Não")
 
 ```
 
@@ -162,73 +165,24 @@ cat_regulaprog <- c("Sim", "Não")
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição
 # no ano inicial de análise devido a fatores como mudança de metodologia
+
+#ano_base_alter <- begin_years
 ano_base_alter <- c(
-  "AS_INDCRAS"               = 2014,
-  "AS_IDCRASME"              = 2012,
-   "AS_IDCREASNOR"           = 2014,   
-   "AS_IDCONSELHO"           = 2014, 
-   "AS_IGDM"                 = 2007,    
-   "AS_IGDSUASM"             = 2012,     
-   "AS_NCRAS"                = 2007,        
-   "AS_NCREAS"               = 2009,          
-   "AS_FCADMEIOSAL"          = 2007,    
-   "AS_RHTOTALA"             = 2017,     
-   #"AS_RHTOTALB"             = 2012,      
-   "AS_RHAS"                 = 2017,        
-   "AS_RHPSI"                = 2017,      
-   "AS_RHENME"               = 2017,     
-   "AS_RHCURSU"              = 2017,       
-   "AS_RHTOEST"              = 2017,    
-   "AS_RHTOCEL"              = 2017,    
-   "AS_BPCDEF"               = 2004,     
-   "AS_BPCID"                = 2004,     
-   "AS_BPC"                  = 2004,          
-   "AS_RHTPOASPH"            = 2005,     
-   "AS_BPCIDPOPI"            = 2004,        
-   "AS_POPCADUNICO"          = 2014,     
-   "AS_COBBF"                = 2014,              
-   "AS_POPIDCADSPOP"         = 2014,      
-   "AS_POPRURALPOP"          = 2014,         
-   #"AS_POPPOBEXTRPOB"        = 2014,  
-   "AS_PCOBBFMEIOSAL"        = 2007,      
-   "AS_POPPOBEXTRCAD"        = 2014,      
-   "AS_POPIDPOBEXTRCAD"      = 2014,      
-   "AS_IDOSOPOBEXTRPOBCADS"  = 2014,  
-   "AS_DEFPOBEXTRCAD"        = 2014,        
-   "AS_CRIANADOLEPOBEXTRPOP" = 2014, 
-   "AS_POPIDPOBEXTRCADS"     = 2014,     
-   "AS_POPIDCADS"            = 2014,        
-   "AS_EFINCOMPCAD"          = 2014,         
-   "AS_PENLECAD"             = 2014,          
-   "AS_POPINDIGENACADS"      = 2014,      
-   "AS_POPPRETAPARDACADS"    = 2014,    
-   "AS_PVULSANEACAD"         = 2014,      
-   "AS_SANEACAD"             = 2014,           
-   "AS_POPRURALCADS"         = 2014,        
-   "AS_IGDMCONDE"            = 2007,       
-   "AS_IGDMCONDS"            = 2007,       
-   "AS_IGDMATU"              = 2007,        
-   "AS_IGDMCOBCAD"           = 2007,        
-   "AS_BPCPID"               = 2004,          
-   "AS_BPCPDEF"              = 2004,      
-   "AS_RHASPS"               = 2017,       
-   "AS_RHPSIPS"              = 2017,        
-   "AS_RHVPOAAS"             = 2017,           
-   "AS_RHVINEST"             = 2017   
+  "MA_ICMSECOLOG" = 2010
 )
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
+
 # ano_base_alter <- c(
 #   "NA" = NA_integer_
 # )
 
-exclusions_years <- c(
-  "AS_IGDMCONDE"      = c(2019, 2020),       
-  "AS_IGDMCONDS"      = 2021       
-  # "AS_IGDMATU"        = 2021,
-  # "AS_IGDMCOBCAD"     = c(2015,2016,2017,2019,2020),
-  )
+#exclusions_years <- deleted_years
+exclusions_years = c(
+   "NA" = NA_integer_
+)
+
 
 ```
 
@@ -252,67 +206,8 @@ desc_regra_valid <- c(
 
 # df com o nome da regra e a respectiva descrição
 desc_regra_valid_var <- data.frame(
-  Regra = c(
-    "VI_AS_INDCRAS",      
-    "VI_AS_IDCRASME",       
-    "VI_AS_IDCREASNOR",             
-    "VI_AS_IDCONSELHO",             
-    "VI_AS_IGDM",        
-    "VI_AS_IGDSUASM",           
-    "VI_AS_NCRAS",
-    "VI_AS_NCREAS",
-    "VI_AS_FCADMEIOSAL",
-    "VI_AS_RHTOTALA",
-    #"VI_AS_RHTOTALB",
-    "VI_AS_RHAS",
-    "VI_AS_RHPSI",
-    "VI_AS_RHENME",
-    "VI_AS_RHCURSU",
-    "VI_AS_RHTOEST",
-    "VI_AS_RHTOCEL",          
-    "VI_AS_BPCDEF",
-    "VI_AS_BPCID",
-    "VI_AS_BPC",
-    "VI_AS_RHTPOASPH",
-    "VI_AS_BPCIDPOPI",
-    "VI_AS_POPCADUNICO",
-    "VI_AS_COBBF",
-    "VI_AS_POPIDCADSPOP",
-    "VI_AS_POPRURALPOP",
-    #"VI_AS_POPPOBEXTRPOB",
-    "VI_AS_PCOBBFMEIOSAL",
-    "VI_AS_POPPOBEXTRCAD",
-    "VI_AS_POPIDPOBEXTRCAD",
-    "VI_AS_IDOSOPOBEXTRPOBCADS",
-    "VI_AS_DEFPOBEXTRCAD",
-    "VI_AS_CRIANADOLEPOBEXTRPOP",
-    "VI_AS_POPIDPOBEXTRCADS",
-    "VI_AS_POPIDCADS",
-    "VI_AS_EFINCOMPCAD",
-    "VI_AS_PENLECAD",      
-    "VI_AS_POPINDIGENACADS",
-    "VI_AS_POPPRETAPARDACADS",      
-    "VI_AS_PVULSANEACAD",
-    "VI_AS_SANEACAD",  
-    "VI_AS_POPRURALCADS",        
-    "VI_AS_IGDMCONDE",        
-    "VI_AS_IGDMCONDS",
-    "VI_AS_IGDMATU",    
-    "VI_AS_IGDMCOBCAD",
-    "VI_AS_BPCPID",
-    "VI_AS_BPCPDEF",
-    "VI_AS_RHASPS",
-    "VI_AS_RHPSIPS",
-    "VI_AS_RHVPOAAS",
-    "VI_AS_RHVINEST",
-    "VI_AS_ORGGESTOR",
-    "VI_AS_PFMPMUAS", 
-    "VI_AS_IPROBA",
-    "VI_AS_PSENOR",
-    "VI_AS_ORGCADU",
-    "VI_AS_REGULAPROG"
-  )
-) |> 
+  Regra = paste0("variable",seq(1,length(var_numeric)))
+  ) |> 
   dplyr::mutate(
     `Descrição` = dplyr::case_match(
       Regra,
@@ -322,58 +217,7 @@ desc_regra_valid_var <- data.frame(
       "VI_AS_IDCONSELHO"           ~ desc_regra_valid[3],             
       "VI_AS_IGDM"                 ~ desc_regra_valid[3],        
       "VI_AS_IGDSUASM"             ~ desc_regra_valid[3],           
-      "VI_AS_NCRAS"                ~ desc_regra_valid[1],
-      "VI_AS_NCREAS"               ~ desc_regra_valid[1],
-      "VI_AS_FCADMEIOSAL"          ~ desc_regra_valid[1],
-      "VI_AS_RHTOTALA"             ~ desc_regra_valid[1],
-      #"VI_AS_RHTOTALB"             ~ desc_regra_valid[1],
-      "VI_AS_RHAS"                 ~ desc_regra_valid[1],
-      "VI_AS_RHPSI"                ~ desc_regra_valid[1],
-      "VI_AS_RHENME"               ~ desc_regra_valid[1],
-      "VI_AS_RHCURSU"              ~ desc_regra_valid[1],
-      "VI_AS_RHTOEST"              ~ desc_regra_valid[1],
-      "VI_AS_RHTOCEL"              ~ desc_regra_valid[1],          
-      "VI_AS_BPCDEF"               ~ desc_regra_valid[6],
-      "VI_AS_BPCID"                ~ desc_regra_valid[1],
-      "VI_AS_BPC"                  ~ desc_regra_valid[1],
-      "VI_AS_RHTPOASPH"            ~ desc_regra_valid[7],
-      "VI_AS_BPCIDPOPI"            ~ desc_regra_valid[5],
-      "VI_AS_POPCADUNICO"          ~ desc_regra_valid[5],
-      "VI_AS_COBBF"                ~ desc_regra_valid[5],
-      "VI_AS_POPIDCADSPOP"         ~ desc_regra_valid[5],
-      "VI_AS_POPRURALPOP"          ~ desc_regra_valid[5],
-      #"VI_AS_POPPOBEXTRPOB"        ~ desc_regra_valid[5],
-      "VI_AS_PCOBBFMEIOSAL"        ~ desc_regra_valid[5],
-      "VI_AS_POPPOBEXTRCAD"        ~ desc_regra_valid[5],
-      "VI_AS_POPIDPOBEXTRCAD"      ~ desc_regra_valid[5],
-      "VI_AS_IDOSOPOBEXTRPOBCADS"  ~ desc_regra_valid[5],
-      "VI_AS_DEFPOBEXTRCAD"        ~ desc_regra_valid[5],
-      "VI_AS_CRIANADOLEPOBEXTRPOP" ~ desc_regra_valid[5],
-      "VI_AS_POPIDPOBEXTRCADS"     ~ desc_regra_valid[5],
-      "VI_AS_POPIDCADS"            ~ desc_regra_valid[5],
-      "VI_AS_EFINCOMPCAD"          ~ desc_regra_valid[5],
-      "VI_AS_PENLECAD"             ~ desc_regra_valid[5],      
-      "VI_AS_POPINDIGENACADS"      ~ desc_regra_valid[5],
-      "VI_AS_POPPRETAPARDACADS"    ~ desc_regra_valid[5],      
-      "VI_AS_PVULSANEACAD"         ~ desc_regra_valid[5],
-      "VI_AS_SANEACAD"             ~ desc_regra_valid[5],  
-      "VI_AS_POPRURALCADS"         ~ desc_regra_valid[5],        
-      "VI_AS_IGDMCONDE"            ~ desc_regra_valid[5],        
-      "VI_AS_IGDMCONDS"            ~ desc_regra_valid[5],
-      "VI_AS_IGDMATU"              ~ desc_regra_valid[5],    
-      "VI_AS_IGDMCOBCAD"           ~ desc_regra_valid[5],
-      "VI_AS_BPCPID"               ~ desc_regra_valid[5],
-      "VI_AS_BPCPDEF"              ~ desc_regra_valid[5],
-      "VI_AS_RHASPS"               ~ desc_regra_valid[5],
-      "VI_AS_RHPSIPS"              ~ desc_regra_valid[5],
-      "VI_AS_RHVPOAAS"             ~ desc_regra_valid[5],
-      "VI_AS_RHVINEST"             ~ desc_regra_valid[5],
-      "VI_AS_ORGGESTOR"            ~ desc_regra_valid[2],
-      "VI_AS_PFMPMUAS"             ~ desc_regra_valid[2], 
-      "VI_AS_IPROBA"               ~ desc_regra_valid[2],
-      "VI_AS_PSENOR"               ~ desc_regra_valid[2],
-      "VI_AS_ORGCADU"              ~ desc_regra_valid[2],
-      "VI_AS_REGULAPROG"           ~ desc_regra_valid[2]
+      "VI_AS_NCRAS"                ~ desc_regra_valid[1]
     )
   )
 ```
@@ -409,68 +253,25 @@ desc_regra_consist_var <- data.frame(
 ```{r rules_type}
   
 rules_type <- validate::validator(
-  TI_AS_INDCRAS              = is.numeric(AS_INDCRAS),
-  TI_AS_IDCRASME             = is.numeric(AS_IDCRASME),
-  TI_AS_IDCREASNOR           = is.numeric(AS_IDCREASNOR),
-  TI_AS_IDCONSELHO           = is.numeric(AS_IDCONSELHO),
-  TI_AS_IGDM                 = is.numeric(AS_IGDM),
-  TI_AS_AS_IGDSUASM          = is.numeric(AS_IGDSUASM),
-  TI_AS_NCRAS                = is.numeric(AS_NCRAS),
-  TI_AS_NCREAS               = is.numeric(AS_NCREAS),
-  TI_AS_FCADMEIOSAL          = is.numeric(AS_FCADMEIOSAL),
-  TI_AS_RHTOTALA             = is.numeric(AS_RHTOTALA),
-  #TI_AS_RHTOTALB             = is.numeric(AS_RHTOTALB),
-  TI_AS_RHAS                 = is.numeric(AS_RHAS),
-  TI_AS_RHPSI                = is.numeric(AS_RHPSI),
-  TI_AS_RHENME               = is.numeric(AS_RHENME),
-  TI_AS_RHCURSU              = is.numeric(AS_RHCURSU),
-  TI_as_rhtoest              = is.numeric(AS_RHTOEST),
-  TI_AS_RHTOCEL              = is.numeric(AS_RHTOCEL),
-  TI_AS_BPCDEF               = is.numeric(AS_BPCDEF),
-  TI_AS_BPCID                = is.numeric(AS_BPCID),
-  TI_AS_BPC                  = is.numeric(AS_BPC),
-  TI_AS_RHTPOASPH            = is.numeric(AS_RHTPOASPH),
-  TI_AS_BPCIDPOPI            = is.numeric(AS_BPCIDPOPI),
-  TI_AS_POPCADUNICO          = is.numeric(AS_POPCADUNICO),
-  TI_AS_COBBF                = is.numeric(AS_COBBF),
-  TI_AS_POPIDCADSPOP         = is.numeric(AS_POPIDCADSPOP),
-  TI_AS_POPRURALPOP          = is.numeric(AS_POPRURALPOP),
-  #TI_AS_POPPOBEXTRPOB        = is.numeric(AS_POPPOBEXTRPOB),
-  TI_AS_PCOBBFMEIOSAL        = is.numeric(AS_PCOBBFMEIOSAL),
-  TI_AS_POPPOBEXTRCAD        = is.numeric(AS_POPPOBEXTRCAD),
-  TI_AS_POPIDPOBEXTRCAD      = is.numeric(AS_POPIDPOBEXTRCAD),
-  TI_AS_IDOSOPOBEXTRPOBCADS  = is.numeric(AS_IDOSOPOBEXTRPOBCADS),
-  TI_AS_DEFPOBEXTRCAD        = is.numeric(AS_DEFPOBEXTRCAD),
-  TI_AS_CRIANADOLEPOBEXTRPOP = is.numeric(AS_CRIANADOLEPOBEXTRPOP),
-  TI_AS_POPIDPOBEXTRCADS     = is.numeric(AS_POPIDPOBEXTRCADS),
-  TI_AS_POPIDCADS            = is.numeric(AS_POPIDCADS),
-  TI_AS_EFINCOMPCAD          = is.numeric(AS_EFINCOMPCAD),
-  TI_AS_PENLECAD             = is.numeric(AS_PENLECAD),
-  TI_AS_POPINDIGENACADS      = is.numeric(AS_POPINDIGENACADS),
-  TI_AS_POPPRETAPARDACADS    = is.numeric(AS_POPPRETAPARDACADS),
-  TI_AS_PVULSANEACAD         = is.numeric(AS_PVULSANEACAD),
-  TI_AS_SANEACAD             = is.numeric(AS_SANEACAD),
-  TI_AS_POPRURALCADS         = is.numeric(AS_POPRURALCADS),
-  TI_AS_IGDMCONDE            = is.numeric(AS_IGDMCONDE),
-  TI_AS_IGDMCONDS            = is.numeric(AS_IGDMCONDS),
-  TI_AS_IGDMATU              = is.numeric(AS_IGDMATU),
-  TI_AS_IGDMCOBCAD           = is.numeric(AS_IGDMCOBCAD),
-  TI_AS_BPCPID               = is.numeric(AS_BPCPID),
-  TI_AS_BPCPDEF              = is.numeric(AS_BPCPDEF),
-  TI_AS_RHASPS               = is.numeric(AS_RHASPS),
-  TI_AS_RHPSIPS              = is.numeric(AS_RHPSIPS),
-  TI_AS_RHVPOAAS             = is.numeric(AS_RHVPOAAS),
-  TI_AS_RHVINEST             = is.numeric(AS_RHVINEST)#,
-#  TI_AS_ORGGESTOR            = is.numeric(AS_ORGGESTOR), ### categorica
-#  TI_AS_PFMPMUAS             = is.numeric(AS_PFMPMUAS), ### categorica. Eh quantitativa
-#  TI_AS_PSENOR               = is.numeric(AS_PSENOR) ### categorica
+   variable1       = is.numeric(variable1),
+   variable2       = is.numeric(variable2),
+   variable3       = is.numeric(variable3),
+   variable4       = is.numeric(variable4),
+   variable5       = is.numeric(variable5),
+   variable6       = is.numeric(variable6),
+   variable7       = is.numeric(variable7),
+   variable8       = is.numeric(variable8),
+   variable9       = is.numeric(variable9)#,
+  # variable10      = is.numeric(variable10), ### categorica
+  # variable11      = is.numeric(variable11), ### categorica. Eh quantitativa
+  # variable12      = is.numeric(variable12) ### categorica
 )
 ```
 
 ```{r confront_type}
 
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
-check_type <- validate::confront(data, rules_type)
+check_type <- validate::confront(data_aux, rules_type)
 
 validate::summary(check_type) |> 
   dplyr::select(
