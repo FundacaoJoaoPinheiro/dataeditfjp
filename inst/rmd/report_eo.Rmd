@@ -1081,7 +1081,7 @@ df_sumario <- df_sumario_valid_eo |>
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
+    Ausente      = Total - Validada - Suspeita,
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
@@ -1094,12 +1094,13 @@ df_sumario <- df_sumario_valid_eo |>
 ```{r table_valid_eo_na_all}
 
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
