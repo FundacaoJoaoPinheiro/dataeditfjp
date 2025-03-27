@@ -356,7 +356,7 @@ df_sumario <- df_sumario_valid_ma |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()

@@ -33,7 +33,7 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_se.html"
+output-file: "relatorio_ca.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -246,36 +246,36 @@ desc_regra_valid <- c(
 # df com o nome da regra e a respectiva descrição
 desc_regra_valid_var <- data.frame(
   Regra = c(
-    "CA_MUSEU",
-    "CA_TEATRO",
-    "CA_CINEMA",
-    "CA_BIBLIOTECA",
-    "CA_CENTROC",
-    "CA_EQUIP",
-    "CA_BANDA",
-    "CA_GARTISTICO",
-    "CA_ATIVCULT",
-    "CA_MEIOC",
-    "CA_ORGAOC",
-    "CA_INSTCONS",
-    "CA_TOMBEF",
-    "CA_TOMBMUN",
-    "CA_PCL",
-    "CA_APRESPC",
-    "CA_GPRESPC",
-    "CA_AREABIB",
-    "CA_ACERVOBIB",
-    "CA_WEBBIB",
-    "CA_COMPBIB",
-    "CA_LEITMESBIB",
-    "CA_EMPMESBIB",
-    "CA_ICMSPATCULT",
-    "CA_FUNDO",
-    "CA_REGISTRO",
-    "CA_ESTRUOGC",
-    "CA_LEGPAT",
-    "CA_ARQPUB",
-    "CA_NUMBIB"
+    "VI_CA_MUSEU",
+    "VI_CA_TEATRO",
+    "VI_CA_CINEMA",
+    "VI_CA_BIBLIOTECA",
+    "VI_CA_CENTROC",
+    "VI_CA_EQUIP",
+    "VI_CA_BANDA",
+    "VI_CA_GARTISTICO",
+    "VI_CA_ATIVCULT",
+    "VI_CA_MEIOC",
+    "VI_CA_ORGAOC",
+    "VI_CA_INSTCONS",
+    "VI_CA_TOMBEF",
+    "VI_CA_TOMBMUN",
+    "VI_CA_PCL",
+    "VI_CA_APRESPC",
+    "VI_CA_GPRESPC",
+    "VI_CA_AREABIB",
+    "VI_CA_ACERVOBIB",
+    "VI_CA_WEBBIB",
+    "VI_CA_COMPBIB",
+    "VI_CA_LEITMESBIB",
+    "VI_CA_EMPMESBIB",
+    "VI_CA_ICMSPATCULT",
+    "VI_CA_FUNDO",
+    "VI_CA_REGISTRO",
+    "VI_CA_ESTRUOGC",
+    "VI_CA_LEGPAT",
+    "VI_CA_ARQPUB",
+    "VI_CA_NUMBIB"
   )
 ) |> 
   dplyr::mutate(
