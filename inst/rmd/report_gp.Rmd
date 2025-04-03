@@ -1,0 +1,885 @@
+---
+title: "FJP Dados"
+subtitle: "Educação"
+author:
+  - name: "Coordenação de Indicadores Sociais (CIS)"
+    affiliation: "Diretoria de Estatística e Informações (Direi)"
+    address: "Alameda das Acácias, 70 - São Luiz"
+    city: "Belo Horizonte"
+    state: "Minas Gerais"
+    postal_code: "31.275-150"
+    url: "https://fjp.mg.gov.br/"
+lang: pt
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+description: "Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão."
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+    table_caption: true
+    embed-resources: true
+    smooth-scroll: true
+    toc-location: left
+    toc-title: MENU
+    theme: journal
+editor: visual
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+params:
+  data: file.xlsx
+output-file: "relatorio_gp.html"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r set_param_global}
+
+k <- 1.5 
+
+```
+
+```{r import_data}
+
+data <- openxlsx::read.xlsx(params$data)
+data$ANO <- as.character(data$ANO)
+```
+
+```{r get_var_numeric}
+
+# Obter as siglas das variáveis do tipo numérico
+var_numeric <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+```{r get_var_character}
+
+# Obter as siglas variáveis do tipo string
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+```
+
+# Introdução
+
+A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
+
+# Regras de crítica
+
+As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados.
+
+A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
+
+*1 carácter indicando finalidade + 1 carácter indicando flexibilidade + Sigla da variável*
+
+**Classificação por finalidade**
+
+Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
+
+-   **TI_\[...\]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+
+-   **VI_NA_\[...\]**: dado não tem valor ausente/*missing*;
+-   **VI_\[...\]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+
+Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
+
+-   **CF_\[...\]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+
+-   **DF_\[...\]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF_\[...\]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+
+-   **DF_\[...\]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+
+-   **DF_\[...\]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+
+-   **DF_\[...\]\_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+
+-   **DF_\[...\]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+
+-   **DF_\[...\]\_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+
+-   **DF_\[...\]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+
+-   **DF_\[...\]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
+**Classificação por flexibilidade (F ou I)**
+
+-   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
+
+-   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
+
+```{r set_year}
+
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
+
+# Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
+# para nenhuma variável
+ano_base_alter <- c(
+  "NA" = NA_integer_
+)
+
+exclusions_years = list(
+  "NA" = NA_integer_
+)
+
+```
+
+```{r get_cat}
+
+## Categorias variáveis dicotômicas
+cat_dic <- c(
+  "Sim",
+  "Não"
+)
+
+## Categorias encontradas na série histórica
+cat_estoquesaude <- c(
+  "Sim (manual)",
+  "Sim (informatizada)",
+  "Não"
+)
+```
+
+```{r map_valid_desc}
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+desc_regra_valid <- c(
+  # Casos mais comuns
+  `1`  = "Valor é ≥ 0",
+  `2`  = "Valor está dentro da categoria esperada",
+  `3`  = "Valor está dentro da faixa esperada (0 a 100)",
+  `4`  = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5`  = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6`  = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7`  = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8`  = "Valor é ≥ 8", # SP_PM1
+  `9`  = "Valor está dentro da faixa esperada (0 a 0,33)", # HS_POLITICA e HS_PLANOSAN
+  `10` = "Valor está dentro da faixa esperada (0 a 0,34)", # HS_CONSELHO
+  `11` = "Valor está dentro da faixa esperada (0 a 1)",    # HS_GESTAO, GP_INDTRANSPGES,
+                                                           #            GP_INDIGITGES 
+  `12` = "Valor está dentro da faixa esperada (0 a 50)",   # CA_TOMBMUN
+  `13` = "Valor está dentro da faixa esperada (0 a 20)",   # CA_PCL
+  `14` = "Valor está dentro da faixa esperada (0 a 3)",    # CA_FUNDO
+  `15` = "Valor está dentro da faixa esperada (0 a 4)",    # CA_REGISTRO
+  `16` = "Valor está dentro da faixa esperada (0 a 30)"    # CA_NUMBIB
+)
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_valid_var <- data.frame(
+  Regra = c(
+    "VI_GP_CONSSAU",
+    "VI_GP_CONSEDU",
+    "VI_GP_CONSCULT",
+    "VI_GP_CONSP",
+    "VI_GP_CONSASOC",
+    "VI_GP_CONSTUTELAR",
+    "VI_GP_CONSSALIM",
+    "VI_GP_CONSCA",
+    "VI_GP_CONSMULHER",
+    "VI_GP_CONSHAB",
+    "VI_GP_CONSTRANS",
+    "VI_GP_CONSMAMB",
+    "VI_GP_TIPOSCONSELHOS",
+    "VI_GP_CCONVMAMB",
+    "VI_GP_ESTRUTPLANEJORCA",
+    "VI_GP_TREINASERVPLANEJA",
+    "VI_GP_TREINASERVDEMAIS",
+    "VI_GP_TREINASERVTI",
+    "VI_GP_PMEDUCA",
+    "VI_GP_PMSAUDE",
+    "VI_GP_PMASSOC",
+    "VI_GP_LEIACESSOINFOR",
+    "VI_GP_DIVULGORCA",
+    "VI_GP_DIVULGESTAOFISCAL",
+    "VI_GP_SITEATUAL",
+    "VI_GP_CONSULMEDUBS",
+    "VI_GP_SISTCONTPONTOMED",
+    "VI_GP_SISTINFPLANEJ",
+    "VI_GP_ARRECADISS",
+    "VI_GP_CONTROLAIPTU",
+    "VI_GP_CONTRATOSINTERNET",
+    "VI_GP_EDITAISLICITA",
+    "VI_GP_ATASDIVULG",
+    "VI_GP_TECCOMPRASPUB",
+    "VI_GP_ESTOQUESAUDE",
+    "VI_GP_PLPROTDEFCIVIL",
+    "VI_GP_INDTRANSPGES",
+    "VI_GP_INDIGITGES",
+    "VI_GP_FUNCULT",
+    "VI_GP_FUNDSAU",
+    "VI_GP_FUNDMUNIC",
+    "VI_GP_PLANODIRETOR"
+  )
+) |> 
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "VI_GP_CONSSAU"           ~ desc_regra_valid[2],
+      "VI_GP_CONSEDU"           ~ desc_regra_valid[2],
+      "VI_GP_CONSCULT"          ~ desc_regra_valid[2],
+      "VI_GP_CONSP"             ~ desc_regra_valid[2],
+      "VI_GP_CONSASOC"          ~ desc_regra_valid[2],
+      "VI_GP_CONSTUTELAR"       ~ desc_regra_valid[2],
+      "VI_GP_CONSSALIM"         ~ desc_regra_valid[2],
+      "VI_GP_CONSCA"            ~ desc_regra_valid[2],
+      "VI_GP_CONSMULHER"        ~ desc_regra_valid[2],
+      "VI_GP_CONSHAB"           ~ desc_regra_valid[2],
+      "VI_GP_CONSTRANS"         ~ desc_regra_valid[2],
+      "VI_GP_CONSMAMB"          ~ desc_regra_valid[2],
+      # "VI_GP_TIPOSCONSELHOS"    ~ desc_regra_valid[],
+      "VI_GP_CCONVMAMB"         ~ desc_regra_valid[2],
+      "VI_GP_ESTRUTPLANEJORCA"  ~ desc_regra_valid[2],
+      "VI_GP_TREINASERVPLANEJA" ~ desc_regra_valid[2],
+      "VI_GP_TREINASERVDEMAIS"  ~ desc_regra_valid[2],
+      "VI_GP_TREINASERVTI"      ~ desc_regra_valid[2],
+      "VI_GP_PMEDUCA"           ~ desc_regra_valid[2],
+      "VI_GP_PMSAUDE"           ~ desc_regra_valid[2],
+      "VI_GP_PMASSOC"           ~ desc_regra_valid[2],
+      "VI_GP_LEIACESSOINFOR"    ~ desc_regra_valid[2],
+      "VI_GP_DIVULGORCA"        ~ desc_regra_valid[2],
+      "VI_GP_DIVULGESTAOFISCAL" ~ desc_regra_valid[2],
+      "VI_GP_SITEATUAL"         ~ desc_regra_valid[2],
+      "VI_GP_CONSULMEDUBS"      ~ desc_regra_valid[2],
+      "VI_GP_SISTCONTPONTOMED"  ~ desc_regra_valid[2],
+      "VI_GP_SISTINFPLANEJ"     ~ desc_regra_valid[2],
+      "VI_GP_ARRECADISS"        ~ desc_regra_valid[2],
+      "VI_GP_CONTROLAIPTU"      ~ desc_regra_valid[2],
+      "VI_GP_CONTRATOSINTERNET" ~ desc_regra_valid[2],
+      "VI_GP_EDITAISLICITA"     ~ desc_regra_valid[2],
+      "VI_GP_ATASDIVULG"        ~ desc_regra_valid[2],
+      "VI_GP_TECCOMPRASPUB"     ~ desc_regra_valid[2],
+      "VI_GP_ESTOQUESAUDE"      ~ desc_regra_valid[2],
+      "VI_GP_PLPROTDEFCIVIL"    ~ desc_regra_valid[2],
+      "VI_GP_INDTRANSPGES"      ~ desc_regra_valid[11],
+      "VI_GP_INDIGITGES"        ~ desc_regra_valid[11],
+      "VI_GP_FUNCULT"           ~ desc_regra_valid[2],
+      "VI_GP_FUNDSAU"           ~ desc_regra_valid[2],
+      # "VI_GP_FUNDMUNIC"         ~ desc_regra_valid[],
+      "VI_GP_PLANODIRETOR"      ~ desc_regra_valid[2]
+    )
+  )
+```
+
+## Tipo
+
+### Todos os indicadores
+
+```{r rules_type}
+  
+rules_type <- validate::validator(
+  TI_GP_CONSSAU           = is.character(GP_CONSSAU),
+  TI_GP_CONSEDU           = is.character(GP_CONSEDU),
+  TI_GP_CONSCULT          = is.character(GP_CONSCULT),
+  TI_GP_CONSP             = is.character(GP_CONSP),
+  TI_GP_CONSASOC          = is.character(GP_CONSASOC),
+  TI_GP_CONSTUTELAR       = is.character(GP_CONSTUTELAR),
+  TI_GP_CONSSALIM         = is.character(GP_CONSSALIM),
+  TI_GP_CONSCA            = is.character(GP_CONSCA),
+  TI_GP_CONSMULHER        = is.character(GP_CONSMULHER),
+  TI_GP_CONSHAB           = is.character(GP_CONSHAB),
+  TI_GP_CONSTRANS         = is.character(GP_CONSTRANS),
+  TI_GP_CONSMAMB          = is.character(GP_CONSMAMB),
+  TI_GP_TIPOSCONSELHOS    = is.character(GP_TIPOSCONSELHOS),
+  TI_GP_CCONVMAMB         = is.character(GP_CCONVMAMB),
+  TI_GP_ESTRUTPLANEJORCA  = is.character(GP_ESTRUTPLANEJORCA),
+  TI_GP_TREINASERVPLANEJA = is.character(GP_TREINASERVPLANEJA),
+  TI_GP_TREINASERVDEMAIS  = is.character(GP_TREINASERVDEMAIS),
+  TI_GP_TREINASERVTI      = is.character(GP_TREINASERVTI),
+  TI_GP_PMEDUCA           = is.character(GP_PMEDUCA),
+  TI_GP_PMSAUDE           = is.character(GP_PMSAUDE),
+  TI_GP_PMASSOC           = is.character(GP_PMASSOC),
+  TI_GP_LEIACESSOINFOR    = is.character(GP_LEIACESSOINFOR),
+  TI_GP_DIVULGORCA        = is.character(GP_DIVULGORCA),
+  TI_GP_DIVULGESTAOFISCAL = is.character(GP_DIVULGESTAOFISCAL),
+  TI_GP_SITEATUAL         = is.character(GP_SITEATUAL),
+  TI_GP_CONSULMEDUBS      = is.character(GP_CONSULMEDUBS),
+  TI_GP_SISTCONTPONTOMED  = is.character(GP_SISTCONTPONTOMED),
+  TI_GP_SISTINFPLANEJ     = is.character(GP_SISTINFPLANEJ),
+  TI_GP_ARRECADISS        = is.character(GP_ARRECADISS),
+  TI_GP_CONTROLAIPTU      = is.character(GP_CONTROLAIPTU),
+  TI_GP_CONTRATOSINTERNET = is.character(GP_CONTRATOSINTERNET),
+  TI_GP_EDITAISLICITA     = is.character(GP_EDITAISLICITA),
+  TI_GP_ATASDIVULG        = is.character(GP_ATASDIVULG),
+  TI_GP_TECCOMPRASPUB     = is.character(GP_TECCOMPRASPUB),
+  TI_GP_ESTOQUESAUDE      = is.character(GP_ESTOQUESAUDE),
+  TI_GP_PLPROTDEFCIVIL    = is.character(GP_PLPROTDEFCIVIL),
+  TI_GP_INDTRANSPGES      = is.numeric(GP_INDTRANSPGES),
+  TI_GP_INDIGITGES        = is.numeric(GP_INDIGITGES),
+  TI_GP_FUNCULT           = is.character(GP_FUNCULT),
+  TI_GP_FUNDSAU           = is.character(GP_FUNDSAU),
+  TI_GP_FUNDMUNIC         = is.character(GP_FUNDMUNIC),
+  TI_GP_PLANODIRETOR      = is.character(GP_PLANODIRETOR)
+)
+```
+
+```{r confront_type}
+
+## Confrontar os dados com as regras e exibir uma tabela com os resultados
+check_type <- validate::confront(data, rules_type)
+
+validate::summary(check_type) |> 
+  dplyr::select(
+    Regra    = name,
+    Validada = passes
+  ) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+
+## Validade
+
+```{r data_rules_valid_gp_all}
+
+## df com o resultado das aplicações das regras
+df_rules_valid_gp_all <- data |> 
+  dplyr::select(
+    Ano   = ANO, 
+    ibge7 = IBGE7, 
+    dplyr::starts_with("GP_")
+  ) |> 
+  dplyr::mutate(
+    # Missing
+    VI_NA_GP_CONSSAU           = dplyr::if_else(!is.na(GP_CONSSAU), F, T),
+    VI_NA_GP_CONSEDU           = dplyr::if_else(!is.na(GP_CONSEDU), F, T),
+    VI_NA_GP_CONSCULT          = dplyr::if_else(!is.na(GP_CONSCULT), F, T),
+    VI_NA_GP_CONSP             = dplyr::if_else(!is.na(GP_CONSP), F, T),
+    VI_NA_GP_CONSASOC          = dplyr::if_else(!is.na(GP_CONSASOC), F, T),
+    VI_NA_GP_CONSTUTELAR       = dplyr::if_else(!is.na(GP_CONSTUTELAR), F, T),
+    VI_NA_GP_CONSSALIM         = dplyr::if_else(!is.na(GP_CONSSALIM), F, T),
+    VI_NA_GP_CONSCA            = dplyr::if_else(!is.na(GP_CONSCA), F, T),
+    VI_NA_GP_CONSMULHER        = dplyr::if_else(!is.na(GP_CONSMULHER), F, T),
+    VI_NA_GP_CONSHAB           = dplyr::if_else(!is.na(GP_CONSHAB), F, T),
+    VI_NA_GP_CONSTRANS         = dplyr::if_else(!is.na(GP_CONSTRANS), F, T),
+    VI_NA_GP_CONSMAMB          = dplyr::if_else(!is.na(GP_CONSMAMB), F, T),
+    VI_NA_GP_TIPOSCONSELHOS    = dplyr::if_else(!is.na(GP_TIPOSCONSELHOS), F, T),
+    VI_NA_GP_CCONVMAMB         = dplyr::if_else(!is.na(GP_CCONVMAMB), F, T),
+    VI_NA_GP_ESTRUTPLANEJORCA  = dplyr::if_else(!is.na(GP_ESTRUTPLANEJORCA), F, T),
+    VI_NA_GP_TREINASERVPLANEJA = dplyr::if_else(!is.na(GP_TREINASERVPLANEJA), F, T),
+    VI_NA_GP_TREINASERVDEMAIS  = dplyr::if_else(!is.na(GP_TREINASERVDEMAIS), F, T),
+    VI_NA_GP_TREINASERVTI      = dplyr::if_else(!is.na(GP_TREINASERVTI), F, T),
+    VI_NA_GP_PMEDUCA           = dplyr::if_else(!is.na(GP_PMEDUCA), F, T),
+    VI_NA_GP_PMSAUDE           = dplyr::if_else(!is.na(GP_PMSAUDE), F, T),
+    VI_NA_GP_PMASSOC           = dplyr::if_else(!is.na(GP_PMASSOC), F, T),
+    VI_NA_GP_LEIACESSOINFOR    = dplyr::if_else(!is.na(GP_LEIACESSOINFOR), F, T),
+    VI_NA_GP_DIVULGORCA        = dplyr::if_else(!is.na(GP_DIVULGORCA), F, T),
+    VI_NA_GP_DIVULGESTAOFISCAL = dplyr::if_else(!is.na(GP_DIVULGESTAOFISCAL), F, T),
+    VI_NA_GP_SITEATUAL         = dplyr::if_else(!is.na(GP_SITEATUAL), F, T),
+    VI_NA_GP_CONSULMEDUBS      = dplyr::if_else(!is.na(GP_CONSULMEDUBS), F, T),
+    VI_NA_GP_SISTCONTPONTOMED  = dplyr::if_else(!is.na(GP_SISTCONTPONTOMED), F, T),
+    VI_NA_GP_SISTINFPLANEJ     = dplyr::if_else(!is.na(GP_SISTINFPLANEJ), F, T),
+    VI_NA_GP_ARRECADISS        = dplyr::if_else(!is.na(GP_ARRECADISS), F, T),
+    VI_NA_GP_CONTROLAIPTU      = dplyr::if_else(!is.na(GP_CONTROLAIPTU), F, T),
+    VI_NA_GP_CONTRATOSINTERNET = dplyr::if_else(!is.na(GP_CONTRATOSINTERNET), F, T),
+    VI_NA_GP_EDITAISLICITA     = dplyr::if_else(!is.na(GP_EDITAISLICITA), F, T),
+    VI_NA_GP_ATASDIVULG        = dplyr::if_else(!is.na(GP_ATASDIVULG), F, T),
+    VI_NA_GP_TECCOMPRASPUB     = dplyr::if_else(!is.na(GP_TECCOMPRASPUB), F, T),
+    VI_NA_GP_ESTOQUESAUDE      = dplyr::if_else(!is.na(GP_ESTOQUESAUDE), F, T),
+    VI_NA_GP_PLPROTDEFCIVIL    = dplyr::if_else(!is.na(GP_PLPROTDEFCIVIL), F, T),
+    VI_NA_GP_INDTRANSPGES      = dplyr::if_else(!is.na(GP_INDTRANSPGES), F, T),
+    VI_NA_GP_INDIGITGES        = dplyr::if_else(!is.na(GP_INDIGITGES), F, T),
+    VI_NA_GP_FUNCULT           = dplyr::if_else(!is.na(GP_FUNCULT), F, T),
+    VI_NA_GP_FUNDSAU           = dplyr::if_else(!is.na(GP_FUNDSAU), F, T),
+    VI_NA_GP_FUNDMUNIC         = dplyr::if_else(!is.na(GP_FUNDMUNIC), F, T),
+    VI_NA_GP_PLANODIRETOR      = dplyr::if_else(!is.na(GP_PLANODIRETOR), F, T),
+    # Others
+    VI_GP_CONSSAU           = dplyr::if_else(GP_CONSSAU %in% cat_dic, F, T),
+    VI_GP_CONSEDU           = dplyr::if_else(GP_CONSEDU %in% cat_dic, F, T),
+    VI_GP_CONSCULT          = dplyr::if_else(GP_CONSCULT %in% cat_dic, F, T),
+    VI_GP_CONSP             = dplyr::if_else(GP_CONSP %in% cat_dic, F, T),
+    VI_GP_CONSASOC          = dplyr::if_else(GP_CONSASOC %in% cat_dic, F, T),
+    VI_GP_CONSTUTELAR       = dplyr::if_else(GP_CONSTUTELAR %in% cat_dic, F, T),
+    VI_GP_CONSSALIM         = dplyr::if_else(GP_CONSSALIM %in% cat_dic, F, T),
+    VI_GP_CONSCA            = dplyr::if_else(GP_CONSCA %in% cat_dic, F, T),
+    VI_GP_CONSMULHER        = dplyr::if_else(GP_CONSMULHER %in% cat_dic, F, T),
+    VI_GP_CONSHAB           = dplyr::if_else(GP_CONSHAB %in% cat_dic, F, T),
+    VI_GP_CONSTRANS         = dplyr::if_else(GP_CONSTRANS %in% cat_dic, F, T),
+    VI_GP_CONSMAMB          = dplyr::if_else(GP_CONSMAMB %in% cat_dic, F, T),
+    # VI_GP_TIPOSCONSELHOS    = dplyr::if_else(GP_TIPOSCONSELHOS %in% cat_dic, F, T),
+    VI_GP_CCONVMAMB         = dplyr::if_else(GP_CCONVMAMB %in% cat_dic, F, T),
+    VI_GP_ESTRUTPLANEJORCA  = dplyr::if_else(GP_ESTRUTPLANEJORCA %in% cat_dic, F, T),
+    VI_GP_TREINASERVPLANEJA = dplyr::if_else(GP_TREINASERVPLANEJA %in% cat_dic, F, T),
+    VI_GP_TREINASERVDEMAIS  = dplyr::if_else(GP_TREINASERVDEMAIS %in% cat_dic, F, T),
+    VI_GP_TREINASERVTI      = dplyr::if_else(GP_TREINASERVTI %in% cat_dic, F, T),
+    VI_GP_PMEDUCA           = dplyr::if_else(GP_PMEDUCA %in% cat_dic, F, T),
+    VI_GP_PMSAUDE           = dplyr::if_else(GP_PMSAUDE %in% cat_dic, F, T),
+    VI_GP_PMASSOC           = dplyr::if_else(GP_PMASSOC %in% cat_dic, F, T),
+    VI_GP_LEIACESSOINFOR    = dplyr::if_else(GP_LEIACESSOINFOR %in% cat_dic, F, T),
+    VI_GP_DIVULGORCA        = dplyr::if_else(GP_DIVULGORCA %in% cat_dic, F, T),
+    VI_GP_DIVULGESTAOFISCAL = dplyr::if_else(GP_DIVULGESTAOFISCAL %in% cat_dic, F, T),
+    VI_GP_SITEATUAL         = dplyr::if_else(GP_SITEATUAL %in% cat_dic, F, T),
+    VI_GP_CONSULMEDUBS      = dplyr::if_else(GP_CONSULMEDUBS %in% cat_dic, F, T),
+    VI_GP_SISTCONTPONTOMED  = dplyr::if_else(GP_SISTCONTPONTOMED %in% cat_dic, F, T),
+    VI_GP_SISTINFPLANEJ     = dplyr::if_else(GP_SISTINFPLANEJ %in% cat_dic, F, T),
+    VI_GP_ARRECADISS        = dplyr::if_else(GP_ARRECADISS %in% cat_dic, F, T),
+    VI_GP_CONTROLAIPTU      = dplyr::if_else(GP_CONTROLAIPTU %in% cat_dic, F, T),
+    VI_GP_CONTRATOSINTERNET = dplyr::if_else(GP_CONTRATOSINTERNET %in% cat_dic, F, T),
+    VI_GP_EDITAISLICITA     = dplyr::if_else(GP_EDITAISLICITA %in% cat_dic, F, T),
+    VI_GP_ATASDIVULG        = dplyr::if_else(GP_ATASDIVULG %in% cat_dic, F, T),
+    VI_GP_TECCOMPRASPUB     = dplyr::if_else(GP_TECCOMPRASPUB %in% cat_dic, F, T),
+    VI_GP_ESTOQUESAUDE      = dplyr::if_else(GP_ESTOQUESAUDE %in% cat_estoquesaude, F, T),
+    VI_GP_PLPROTDEFCIVIL    = dplyr::if_else(GP_PLPROTDEFCIVIL %in% cat_dic, F, T),
+    VI_GP_INDTRANSPGES      = dplyr::if_else(dplyr::between(GP_INDTRANSPGES, 0, 1), F, T),
+    VI_GP_INDIGITGES        = dplyr::if_else(dplyr::between(GP_INDIGITGES, 0, 1), F, T),
+    VI_GP_FUNCULT           = dplyr::if_else(GP_FUNCULT %in% cat_dic, F, T),
+    VI_GP_FUNDSAU           = dplyr::if_else(GP_FUNDSAU %in% cat_dic, F, T),
+    # VI_GP_FUNDMUNIC         = dplyr::if_else(GP_FUNDMUNIC %in% cat_dic, F, T),
+    VI_GP_PLANODIRETOR      = dplyr::if_else(GP_PLANODIRETOR %in% cat_dic, F, T)
+  )
+```
+
+```{r data_wrangling_valid_gp_all}
+
+## Transformação dos resultados
+df_sumario_valid_gp <- df_rules_valid_gp_all |> 
+  dplyr::select(
+    Ano, 
+    ibge7, 
+    dplyr::starts_with(c("VI_", "VI_NA"))
+  ) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_valid_gp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = Total - Validada - Suspeita,
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+### Todos os indicadores - Valores ausentes
+
+```{r table_valid_gp_na_all}
+
+df_sumario |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_")
+  ) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+### Todos os indicadores - Demais regras
+
+```{r table_valid_gp_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(
+    Ano == max(Ano) & 
+    stringr::str_detect(Regra, "_NA_", negate = T)
+  ) |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> 
+  unique() |># Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+
+
+## Distribuição
+
+### GP_INDTRANSPGES
+
+```{r data_rules_dist_gp_indtranspges}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_gp_indtranspges <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "GP_INDTRANSPGES" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["GP_INDTRANSPGES"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, GP_INDTRANSPGES) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_GP_INDTRANSPGES_hampel_munic  = dplyr::if_else(!hampel_filter(GP_INDTRANSPGES), F, T), # Longitudinal (município)
+    
+    DF_GP_INDTRANSPGES_out_munic     = dplyr::if_else(!outlier_function(GP_INDTRANSPGES), F, T), # Longitudinal (município)
+    
+    DF_GP_INDTRANSPGES_min_munic     = dplyr::if_else(GP_INDTRANSPGES >= (min(dplyr::lag(GP_INDTRANSPGES), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_GP_INDTRANSPGES_max_munic     = dplyr::if_else(GP_INDTRANSPGES <= (max(dplyr::lag(GP_INDTRANSPGES), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_GP_INDTRANSPGES_min_k_munic   = dplyr::if_else(GP_INDTRANSPGES >= (min(dplyr::lag(GP_INDTRANSPGES), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_GP_INDTRANSPGES_max_k_munic   = dplyr::if_else(GP_INDTRANSPGES <= (k * max(dplyr::lag(GP_INDTRANSPGES), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_GP_INDTRANSPGES_med_mov_munic = dplyr::if_else(GP_INDTRANSPGES <= (k * zoo::rollmedian(GP_INDTRANSPGES, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_GP_INDTRANSPGES_dif_munic     = dplyr::if_else(!compare_first_dif(GP_INDTRANSPGES), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_gp_indtranspges}
+
+## Transformação dos resultados
+df_sumario_dist_gp <- df_rules_dist_gp_indtranspges |> 
+  dplyr::select(!GP_INDTRANSPGES) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_gp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_gp_indtranspges}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_gp_indtranspges}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+### GP_INDIGITGES
+
+```{r rules_dist_gp_indigitges}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_gp_indigitges <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "GP_INDIGITGES" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["GP_INDIGITGES"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, GP_INDIGITGES) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_GP_INDIGITGES_hampel_munic  = dplyr::if_else(!hampel_filter(GP_INDIGITGES), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_out_munic     = dplyr::if_else(!outlier_function(GP_INDIGITGES), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_min_munic     = dplyr::if_else(GP_INDIGITGES >= (min(dplyr::lag(GP_INDIGITGES), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_max_munic     = dplyr::if_else(GP_INDIGITGES <= (max(dplyr::lag(GP_INDIGITGES), na.rm = T)), F, T), # Longitudinal (município)
+  
+    DF_GP_INDIGITGES_min_k_munic   = dplyr::if_else(GP_INDIGITGES >= (min(dplyr::lag(GP_INDIGITGES), na.rm = T) / k), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_max_k_munic   = dplyr::if_else(GP_INDIGITGES <= (k * max(dplyr::lag(GP_INDIGITGES), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_med_mov_munic = dplyr::if_else(GP_INDIGITGES <= (k * zoo::rollmedian(GP_INDIGITGES, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_GP_INDIGITGES_dif_munic     = dplyr::if_else(!compare_first_dif(GP_INDIGITGES), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_gp_indigitges}
+
+## Transformação dos resultados
+df_sumario_dist_gp <- df_rules_dist_gp_indigitges |> 
+  dplyr::select(!GP_INDIGITGES) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_gp |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_gp_indigitges}
+#| column: screen-inset-right
+
+df_sumario |> 
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_gp_indigitges}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+# Análise descritiva
+
+As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
+
+-   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+
+-   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+
+-   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+
+-   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+
+-   **Valor Máximo:** Indica o maior valor observado para o indicador.
+
+-   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+
+-   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+
+-   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+
+-   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+
+**Observações Importantes:**
+
+-   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+
+-   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+
+Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
+
+## Tabelas
+
+```{r show_desc_table, results='asis'}
+#| column: screen-inset-right
+
+pander::pandoc.header("Descritiva", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+  pander::pandoc.table(
+    table_descriptive(variable = var, data = data, ano_base_alter), 
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+  cat("\\pagebreak\n")
+}
+```
+
+## Gráficos
+
+::: {.callout-note appearance="minimal"}
+Observação: os gráficos abaixo são mostrados na escala logarítmica para facilitar a visualização dos dados em certos casos. Para conferir os valores reais, consultar as tabelas descritivas.
+:::
+
+```{r show_boxplot_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  pander::pandoc.header(var, level = 4)
+    data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
+  print(chart_boxplot(variable = var, data = data_aux, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r show_hist_chart, results='asis'}
+#| out-width: 100%
+#| fig-format: svg
+
+pander::pandoc.header("Histograma", level = 3)
+
+# Loop para mostrar os resultados por variável
+for(var in var_numeric){
+  data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
+  pander::pandoc.header(var, level = 4)
+  print(chart_histogram(variable = var, data = data_aux, ano_base_alter))
+  cat("\\pagebreak\n")
+}
+```
+
+```{r excel_create_wb}
+
+## Criar pasta de trabalho
+pt <- openxlsx::createWorkbook()
+path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
+cidades <- openxlsx::read.xlsx(path_data)
+
+```
+
+```{r df_build_viol_valid}
+  variables = c(
+    "GP_CONSSAU",
+    "GP_CONSEDU",
+    "GP_CONSCULT",
+    "GP_CONSP",
+    "GP_CONSASOC",
+    "GP_CONSTUTELAR",
+    "GP_CONSSALIM",
+    "GP_CONSCA",
+    "GP_CONSMULHER",
+    "GP_CONSHAB",
+    "GP_CONSTRANS",
+    "GP_CONSMAMB",
+    "GP_TIPOSCONSELHOS",
+    "GP_CCONVMAMB",
+    "GP_ESTRUTPLANEJORCA",
+    "GP_TREINASERVPLANEJA",
+    "GP_TREINASERVDEMAIS",
+    "GP_TREINASERVTI",
+    "GP_PMEDUCA",
+    "GP_PMSAUDE",
+    "GP_PMASSOC",
+    "GP_LEIACESSOINFOR",
+    "GP_DIVULGORCA",
+    "GP_DIVULGESTAOFISCAL",
+    "GP_SITEATUAL",
+    "GP_CONSULMEDUBS",
+    "GP_SISTCONTPONTOMED",
+    "GP_SISTINFPLANEJ",
+    "GP_ARRECADISS",
+    "GP_CONTROLAIPTU",
+    "GP_CONTRATOSINTERNET",
+    "GP_EDITAISLICITA",
+    "GP_ATASDIVULG",
+    "GP_TECCOMPRASPUB",
+    "GP_ESTOQUESAUDE",
+    "GP_PLPROTDEFCIVIL",
+    "GP_INDTRANSPGES",
+    "GP_INDIGITGES",
+    "GP_FUNCULT",
+    "GP_FUNDSAU",
+    "GP_FUNDMUNIC",
+    "GP_PLANODIRETOR"
+    )
+
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|> 
+sapply(function(i){
+lis[[i]] <- df_rules_valid_gp_all |> 
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |> 
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("GP_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+}
+
+
+
+```
+
+```{r df_build_viol_dist}
+  df_dist = list(
+  "GP_INDTRANSPGES" = df_rules_dist_gp_indtranspges,
+  "GP_INDIGITGES"   = df_rules_dist_gp_indigitges
+  )
+
+df_obs_dist <- names(df_dist)|>
+sapply(function(i){
+df_dist[[i]] <- df_dist[[i]] |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("GP_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
+  dplyr::arrange(ano, ibge7)
+return(df_dist[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_dist, nrow)!=0
+df_obs_dist <- df_obs_dist[index]
+
+for(i in names(df_obs_dist)){
+  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
+  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+}
+
+```
+
+```{r excel_save_wb}
+
+openxlsx::saveWorkbook(pt, "fjpdados_gestaopublica_violacoes.xlsx", overwrite = T)
+```
+
+```{r clean_env, results='hide'}
+rm(list = ls())
+gc()
+```
