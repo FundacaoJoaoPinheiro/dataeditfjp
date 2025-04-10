@@ -33,7 +33,7 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_se.html"
+output-file: "relatorio_eo.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -94,34 +94,35 @@ A padronização dos nomes permite que seja possível a identificação da class
 
 Tipo (T): refere-se a classe da variável, são realizadas verificações no sentido de identificar se os dados são numéricos, caracteres, lógicos, entre outros.
 
--   **TI_[...]**: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
+-   **TI\_**[...]: tipo do dado está de acordo com o esperado (numérico, textual ou categórico).
 
-Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes;
 
--   **VI_NA_[...]**: dado não tem valor ausente/*missing*;
--   **VI_[...]**: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
+-   **VI_NA\_**[...]: dado não tem valor ausente/*missing*;
+
+-   **VI\_**[...]: dado é não negativo, está devidamente categorizado ou está entre o intervalo esperado (ex.: 0% e 100%).
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
--   **CF_[...]_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+-   **CF\_[...]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
 
-Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de outliers.
+Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
--   **DF_[...]_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_[...]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF_[...]_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_[...]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF_[...]_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   **DF\_[...]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
--   **DF_[...]_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **DF\_[...]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
--   **DF_[...]_min_k_munic**: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   **DF\_[...]\_min_k_munic**: o valor mais recente é maior ou igual ao $\dfrac{menor}{k}$ valor da série histórica;
 
--   **DF_[...]_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   **DF\_[...]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   **DF_[...]_med_mov_munic:** o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   **DF\_[...]\_med_mov_munic**: o valor atual é menor ou igual a $mediana ~móvel \times k$;
 
--   **DF_[...]_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
 
 **Classificação por flexibilidade (F ou I)**
@@ -264,29 +265,29 @@ ano_base_alter <- c(
 exclusions_years <- c(
   "EO_IDEBFU6A9"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
   "EO_IDEBFU1A5"       = c(2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022),
-  "EO_IQEP11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEP11"          = c(2004,2005,2020),
   "EO_IQEM4"           = c(2004,2005,2015,2017,2020),
   "EO_IQEM8"           = c(2004,2005,2015,2017,2020),
-  "EO_IQEM11"          = c(2004,2005,2015,2017,2020),
+  "EO_IQEM11"          = c(2004,2005,2020),
   "EO_IQEP4"           = c(2004,2005,2015,2017,2020),
   "EO_IQEP8"           = c(2004,2005,2015,2017,2020),
-  "EO_IQE4"            = c(2004,2005,2015,2017,2020),
+  "EO_IQE4"            = c(2004,2005,2015,2020),
   "EO_IQE8"            = c(2004,2005,2015,2017,2020),
-  "EO_IQE11"           = c(2004,2005,2015,2017,2020),
+  "EO_IQE11"           = c(2004,2005,2020),
   "EO_IQE"             = c(2004,2005,2015,2017,2020),
   "EO_PCAPM8"          = c(2004,2005,2010,2015,2017,2020),
   "EO_PCAPP8"          = c(2004,2005,2010,2015,2017,2020),
-  "EO_PCAPM11"         = c(2004,2005,2010,2015,2017,2020),
-  "EO_PCAPP11"         = c(2004,2005,2010,2015,2017,2020),
+  "EO_PCAPM11"         = c(2004,2005,2010,2020),
+  "EO_PCAPP11"         = c(2004,2005,2010,2020),
   "EO_ALUNOSM8"        = c(2004,2005,2015,2017,2020),
   "EO_ALUNOSP8"        = c(2004,2005,2015,2017,2020),
   "EO_ALUNOSM11"       = c(2004,2005,2020),
   "EO_ALUNOSP11"       = c(2004,2005,2020),
-  "EO_PALUNOSM8"       = c(2004,2005,2015,2017,2020),
-  "EO_PALUNOSP8"       = c(2004,2005,2015,2017,2020),
+  "EO_PALUNOSM8"       = c(2004,2005,2010,2015,2017,2020),
+  "EO_PALUNOSP8"       = c(2004,2005,2010,2015,2017,2020),
   "EO_PALUNOSM11"      = c(2004,2005,2010,2020),
   "EO_PALUNOSP11"      = c(2004,2005,2010,2020),
-  "EO_TXAPROV1A5"      = c(2006,2008,2020),
+  "EO_TXAPROV1A5"      = c(2006,2008),
   "EO_TXAPROV6A9"      = c(2006,2008)
   )
 
@@ -787,141 +788,141 @@ df_rules_valid_eo_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_EO_ALUNOSP8        = dplyr::if_else(!is.na(EO_ALUNOSP8), F, NA),
-    VI_NA_EO_ALUNOSM8        = dplyr::if_else(!is.na(EO_ALUNOSM8), F, NA),
-    VI_NA_EO_ALUNOSM11       = dplyr::if_else(!is.na(EO_ALUNOSM11), F, NA),
-    VI_NA_EO_ESCOLAME        = dplyr::if_else(!is.na(EO_ESCOLAME), F, NA),
-    VI_NA_EO_IDEBFU1A5       = dplyr::if_else(!is.na(EO_IDEBFU1A5), F, NA),
-    VI_NA_EO_IDEBFU6A9       = dplyr::if_else(!is.na(EO_IDEBFU6A9), F, NA),
-    VI_NA_EO_IQEP11          = dplyr::if_else(!is.na(EO_IQEP11), F, NA),
-    VI_NA_EO_IQEM4           = dplyr::if_else(!is.na(EO_IQEM4), F, NA),
-    VI_NA_EO_IQEM8           = dplyr::if_else(!is.na(EO_IQEM8), F, NA),
-    VI_NA_EO_IQEM11          = dplyr::if_else(!is.na(EO_IQEM11), F, NA),
-    VI_NA_EO_IQEP4           = dplyr::if_else(!is.na(EO_IQEP4), F, NA),
-    VI_NA_EO_IQEP8           = dplyr::if_else(!is.na(EO_IQEP8), F, NA),
-    VI_NA_EO_IQE4            = dplyr::if_else(!is.na(EO_IQE4), F, NA),
-    VI_NA_EO_IQE8            = dplyr::if_else(!is.na(EO_IQE8), F, NA),
-    VI_NA_EO_IQE11           = dplyr::if_else(!is.na(EO_IQE11), F, NA),
-    VI_NA_EO_IQE             = dplyr::if_else(!is.na(EO_IQE), F, NA),
-    VI_NA_EO_PC15            = dplyr::if_else(!is.na(EO_PC15), F, NA),
-    VI_NA_EO_PC18            = dplyr::if_else(!is.na(EO_PC18), F, NA),
-    VI_NA_EO_EJAFU15         = dplyr::if_else(!is.na(EO_EJAFU15), F, NA),
-    VI_NA_EO_EJAME18         = dplyr::if_else(!is.na(EO_EJAME18), F, NA),
-    VI_NA_EO_TAXA0A3         = dplyr::if_else(!is.na(EO_TAXA0A3), F, NA),
-    VI_NA_EO_TAXA4A5         = dplyr::if_else(!is.na(EO_TAXA4A5), F, NA),
-    VI_NA_EO_TAXA15A17       = dplyr::if_else(!is.na(EO_TAXA15A17), F, NA),
-    VI_NA_EO_TXATBASICA      = dplyr::if_else(!is.na(EO_TXATBASICA), F, NA),
-    #VI_NA_EO_ANALF10        = dplyr::if_else(!is.na(EO_ANALF10), F, NA),
-    #VI_NA_EO_ANALF          = dplyr::if_else(!is.na(EO_ANALF), F, NA),
-    #VI_NA_EO_ANALF15a17     = dplyr::if_else(!is.na(EO_ANALF15a17), F, NA),
-    #VI_NA_EO_ANALF18a24     = dplyr::if_else(!is.na(EO_ANALF18a24), F, NA),
-    #VI_NA_EO_ANALF25        = dplyr::if_else(!is.na(EO_ANALF25), F, NA),
-    #VI_NA_EO_FUND15         = dplyr::if_else(!is.na(EO_FUND15), F, NA),
-    #VI_NA_EO_FUND25M        = dplyr::if_else(!is.na(EO_FUND25M), F, NA),
-    #VI_NA_EO_MED25M         = dplyr::if_else(!is.na(EO_MED25M), F, NA),
-    VI_NA_EO_TAXA6A14        = dplyr::if_else(!is.na(EO_TAXA6A14), F, NA),
-    VI_NA_EO_TAXALIQ7        = dplyr::if_else(!is.na(EO_TAXALIQ7), F, NA),
-    VI_NA_EO_TAXA15          = dplyr::if_else(!is.na(EO_TAXA15), F, NA),
-    VI_NA_EO_TAXALIQ15       = dplyr::if_else(!is.na(EO_TAXALIQ15), F, NA),
-    VI_NA_EO_DISTEM          = dplyr::if_else(!is.na(EO_DISTEM), F, NA), 
-    VI_NA_EO_TXAPROV1A5      = dplyr::if_else(!is.na(EO_TXAPROV1A5), F, NA),
-    VI_NA_EO_TXAPROV1A9      = dplyr::if_else(!is.na(EO_TXAPROV1A9), F, NA),
-    VI_NA_EO_TXAPROV6A9      = dplyr::if_else(!is.na(EO_TXAPROV6A9), F, NA),
-    VI_NA_EO_TXAPROV10A12    = dplyr::if_else(!is.na(EO_TXAPROV10A12), F, NA),
-    VI_NA_EO_TXREP1A9        = dplyr::if_else(!is.na(EO_TXREP1A9), F, NA),
-    VI_NA_EO_TXREP1A5        = dplyr::if_else(!is.na(EO_TXREP1A5), F, NA),
-    VI_NA_EO_TXREP10A12      = dplyr::if_else(!is.na(EO_TXREP10A12), F, NA),
-    VI_NA_EO_TXREP6A9        = dplyr::if_else(!is.na(EO_TXREP6A9), F, NA),
-    VI_NA_EO_TXABA1A9        = dplyr::if_else(!is.na(EO_TXABA1A9), F, NA),
-    VI_NA_EO_TXABA1A5        = dplyr::if_else(!is.na(EO_TXABA1A5), F, NA),
-    VI_NA_EO_TXABA6A9        = dplyr::if_else(!is.na(EO_TXABA6A9), F, NA),
-    VI_NA_EO_TXABA10A12      = dplyr::if_else(!is.na(EO_TXABA10A12), F, NA),
-    VI_NA_EO_DISTEF          = dplyr::if_else(!is.na(EO_DISTEF), F, NA),
-    VI_NA_EO_DISTEFAI        = dplyr::if_else(!is.na(EO_DISTEFAI), F, NA),
-    VI_NA_EO_DISTEFAF        = dplyr::if_else(!is.na(EO_DISTEFAF), F, NA),
-    VI_NA_EO_PCINF           = dplyr::if_else(!is.na(EO_PCINF), F, NA),
-    VI_NA_EO_PCITF           = dplyr::if_else(!is.na(EO_PCITF), F, NA),
-    VI_NA_EO_PCINFM          = dplyr::if_else(!is.na(EO_PCINFM), F, NA),
-    VI_NA_EO_PCITM           = dplyr::if_else(!is.na(EO_PCITM), F, NA),
-    VI_NA_EO_PCAPM8          = dplyr::if_else(!is.na(EO_PCAPM8), F, NA),
-    VI_NA_EO_PCAPM11         = dplyr::if_else(!is.na(EO_PCAPM11), F, NA),
-    VI_NA_EO_PCAPP8          = dplyr::if_else(!is.na(EO_PCAPP8), F, NA),
-    VI_NA_EO_PCAPP11         = dplyr::if_else(!is.na(EO_PCAPP11), F, NA),
-    VI_NA_EO_PALUNOSM8       = dplyr::if_else(!is.na(EO_PALUNOSM8), F, NA),
-    VI_NA_EO_PALUNOSP8       = dplyr::if_else(!is.na(EO_PALUNOSP8), F, NA),
-    VI_NA_EO_PALUNOSM11      = dplyr::if_else(!is.na(EO_PALUNOSM11), F, NA),
-    VI_NA_EO_PALUNOSP11      = dplyr::if_else(!is.na(EO_PALUNOSP11), F, NA),
-    VI_NA_EO_ANALF25_PP      = dplyr::if_else(!is.na(EO_ANALF25_PP), F, NA),
-    VI_NA_EO_ANALF25_PP      = dplyr::if_else(!is.na(EO_ANALF25_PP), F, NA),
-    VI_NA_EO_FUND25_B        = dplyr::if_else(!is.na(EO_FUND25_B), F, NA),
-    VI_NA_EO_FUND25_PP       = dplyr::if_else(!is.na(EO_FUND25_PP), F, NA),
-    VI_NA_EO_MED25M_B        = dplyr::if_else(!is.na(EO_MED25M_B), F, NA),
-    VI_NA_EO_MED25M_PP       = dplyr::if_else(!is.na(EO_MED25M_PP), F, NA),
-    VI_NA_EO_DOCSUPEI        = dplyr::if_else(!is.na(EO_DOCSUPEI), F, NA),
-    VI_NA_EO_DOCSUPEF        = dplyr::if_else(!is.na(EO_DOCSUPEF), F, NA),
-    VI_NA_EO_DOCSUPEFAF      = dplyr::if_else(!is.na(EO_DOCSUPEFAF), F, NA),
-    VI_NA_EO_DOCSUPEFAI      = dplyr::if_else(!is.na(EO_DOCSUPEFAI), F, NA),
-    VI_NA_EO_DOCSUPEM        = dplyr::if_else(!is.na(EO_DOCSUPEM), F, NA),
-    VI_NA_EO_ADEDG1EI        = dplyr::if_else(!is.na(EO_ADEDG1EI), F, NA),
-    VI_NA_EO_ADEDG2EI        = dplyr::if_else(!is.na(EO_ADEDG2EI), F, NA),
-    VI_NA_EO_ADEDG3EI        = dplyr::if_else(!is.na(EO_ADEDG3EI), F, NA),
-    VI_NA_EO_ADEDG4EI        = dplyr::if_else(!is.na(EO_ADEDG4EI), F, NA),
-    VI_NA_EO_ADEDG5EI        = dplyr::if_else(!is.na(EO_ADEDG5EI), F, NA),
-    VI_NA_EO_ADEDG1EF        = dplyr::if_else(!is.na(EO_ADEDG1EF), F, NA),
-    VI_NA_EO_ADEDG2EF        = dplyr::if_else(!is.na(EO_ADEDG2EF), F, NA),
-    VI_NA_EO_ADEDG3EF        = dplyr::if_else(!is.na(EO_ADEDG3EF), F, NA),
-    VI_NA_EO_ADEDG4EF        = dplyr::if_else(!is.na(EO_ADEDG4EF), F, NA),
-    VI_NA_EO_ADEDG5EF        = dplyr::if_else(!is.na(EO_ADEDG5EF), F, NA),
-    VI_NA_EO_ADEDG1EFAI      = dplyr::if_else(!is.na(EO_ADEDG1EFAI), F, NA),
-    VI_NA_EO_ADEDG2EFAI      = dplyr::if_else(!is.na(EO_ADEDG2EFAI), F, NA),
-    VI_NA_EO_ADEDG3EFAI      = dplyr::if_else(!is.na(EO_ADEDG3EFAI), F, NA),
-    VI_NA_EO_ADEDG4EFAI      = dplyr::if_else(!is.na(EO_ADEDG4EFAI), F, NA),
-    VI_NA_EO_ADEDG5EFAI      = dplyr::if_else(!is.na(EO_ADEDG5EFAI), F, NA),
-    VI_NA_EO_ADEDG1EFAF      = dplyr::if_else(!is.na(EO_ADEDG1EFAF), F, NA),
-    VI_NA_EO_ADEDG2EFAF      = dplyr::if_else(!is.na(EO_ADEDG2EFAF), F, NA),
-    VI_NA_EO_ADEDG3EFAF      = dplyr::if_else(!is.na(EO_ADEDG3EFAF), F, NA),
-    VI_NA_EO_ADEDG4EFAF      = dplyr::if_else(!is.na(EO_ADEDG4EFAF), F, NA),
-    VI_NA_EO_ADEDG5EFAF      = dplyr::if_else(!is.na(EO_ADEDG5EFAF), F, NA),
-    VI_NA_EO_ADEDG1EM        = dplyr::if_else(!is.na(EO_ADEDG1EM), F, NA),
-    VI_NA_EO_ADEDG2EM        = dplyr::if_else(!is.na(EO_ADEDG2EM), F, NA),
-    VI_NA_EO_ADEDG3EM        = dplyr::if_else(!is.na(EO_ADEDG3EM), F, NA),
-    VI_NA_EO_ADEDG4EM        = dplyr::if_else(!is.na(EO_ADEDG4EM), F, NA),
-    VI_NA_EO_ADEDG5EM        = dplyr::if_else(!is.na(EO_ADEDG5EM), F, NA),
-    VI_NA_EO_ADEDG1EJAF      = dplyr::if_else(!is.na(EO_ADEDG1EJAF), F, NA),
-    VI_NA_EO_ADEDG2EJAF      = dplyr::if_else(!is.na(EO_ADEDG2EJAF), F, NA),
-    VI_NA_EO_ADEDG3EJAF      = dplyr::if_else(!is.na(EO_ADEDG3EJAF), F, NA),
-    VI_NA_EO_ADEDG4EJAF      = dplyr::if_else(!is.na(EO_ADEDG4EJAF), F, NA),
-    VI_NA_EO_ADEDG5EJAF      = dplyr::if_else(!is.na(EO_ADEDG5EJAF), F, NA),
-    VI_NA_EO_ADEDG1EJAM      = dplyr::if_else(!is.na(EO_ADEDG1EJAM), F, NA),
-    VI_NA_EO_ADEDG2EJAM      = dplyr::if_else(!is.na(EO_ADEDG2EJAM), F, NA),
-    VI_NA_EO_ADEDG3EJAM      = dplyr::if_else(!is.na(EO_ADEDG3EJAM), F, NA),
-    VI_NA_EO_ADEDG4EJAM      = dplyr::if_else(!is.na(EO_ADEDG4EJAM), F, NA),
-    VI_NA_EO_ADEDG5EJAM      = dplyr::if_else(!is.na(EO_ADEDG5EJAM), F, NA),
-    VI_NA_EO_MATFEI          = dplyr::if_else(!is.na(EO_MATFEI), F, NA),
-    VI_NA_EO_MATEEI          = dplyr::if_else(!is.na(EO_MATEEI), F, NA),
-    VI_NA_EO_MATMEI          = dplyr::if_else(!is.na(EO_MATMEI), F, NA),
-    VI_NA_EO_MATPEI          = dplyr::if_else(!is.na(EO_MATPEI), F, NA),
-    VI_NA_EO_MATFEF          = dplyr::if_else(!is.na(EO_MATFEF), F, NA),
-    VI_NA_EO_MATEEF          = dplyr::if_else(!is.na(EO_MATEEF), F, NA),
-    VI_NA_EO_MATMEF          = dplyr::if_else(!is.na(EO_MATMEF), F, NA),
-    VI_NA_EO_MATPEF          = dplyr::if_else(!is.na(EO_MATPEF), F, NA),
-    VI_NA_EO_MATFEFAI        = dplyr::if_else(!is.na(EO_MATFEFAI), F, NA),
-    VI_NA_EO_MATEEFAI        = dplyr::if_else(!is.na(EO_MATEEFAI), F, NA),
-    VI_NA_EO_MATMEFAI        = dplyr::if_else(!is.na(EO_MATMEFAI), F, NA),
-    VI_NA_EO_MATPEFAI        = dplyr::if_else(!is.na(EO_MATPEFAI), F, NA),
-    VI_NA_EO_MATFEFAF        = dplyr::if_else(!is.na(EO_MATFEFAF), F, NA),
-    VI_NA_EO_MATEEFAF        = dplyr::if_else(!is.na(EO_MATEEFAF), F, NA),
-    VI_NA_EO_MATMEFAF        = dplyr::if_else(!is.na(EO_MATMEFAF), F, NA),
-    VI_NA_EO_MATPEFAF        = dplyr::if_else(!is.na(EO_MATPEFAF), F, NA),
-    VI_NA_EO_MATFEM          = dplyr::if_else(!is.na(EO_MATFEM), F, NA),
-    VI_NA_EO_MATEEM          = dplyr::if_else(!is.na(EO_MATEEM), F, NA),
-    VI_NA_EO_MATMEM          = dplyr::if_else(!is.na(EO_MATMEM), F, NA),
-    VI_NA_EO_MATPEM          = dplyr::if_else(!is.na(EO_MATPEM), F, NA),
-    VI_NA_EO_MATTICR         = dplyr::if_else(!is.na(EO_MATTICR), F, NA),
-    VI_NA_EO_MATTIPE         = dplyr::if_else(!is.na(EO_MATTIPE), F, NA),
-    VI_NA_EO_MATTIEFAI       = dplyr::if_else(!is.na(EO_MATTIEFAI), F, NA),
-    VI_NA_EO_MATTIEFAF       = dplyr::if_else(!is.na(EO_MATTIEFAF), F, NA),
-    VI_NA_EO_MATTIEM         = dplyr::if_else(!is.na(EO_MATTIEM), F, NA),
+    VI_NA_EO_ALUNOSP8        = dplyr::if_else(!is.na(EO_ALUNOSP8), F, T),
+    VI_NA_EO_ALUNOSM8        = dplyr::if_else(!is.na(EO_ALUNOSM8), F, T),
+    VI_NA_EO_ALUNOSM11       = dplyr::if_else(!is.na(EO_ALUNOSM11), F, T),
+    VI_NA_EO_ESCOLAME        = dplyr::if_else(!is.na(EO_ESCOLAME), F, T),
+    VI_NA_EO_IDEBFU1A5       = dplyr::if_else(!is.na(EO_IDEBFU1A5), F, T),
+    VI_NA_EO_IDEBFU6A9       = dplyr::if_else(!is.na(EO_IDEBFU6A9), F, T),
+    VI_NA_EO_IQEP11          = dplyr::if_else(!is.na(EO_IQEP11), F, T),
+    VI_NA_EO_IQEM4           = dplyr::if_else(!is.na(EO_IQEM4), F, T),
+    VI_NA_EO_IQEM8           = dplyr::if_else(!is.na(EO_IQEM8), F, T),
+    VI_NA_EO_IQEM11          = dplyr::if_else(!is.na(EO_IQEM11), F, T),
+    VI_NA_EO_IQEP4           = dplyr::if_else(!is.na(EO_IQEP4), F, T),
+    VI_NA_EO_IQEP8           = dplyr::if_else(!is.na(EO_IQEP8), F, T),
+    VI_NA_EO_IQE4            = dplyr::if_else(!is.na(EO_IQE4), F, T),
+    VI_NA_EO_IQE8            = dplyr::if_else(!is.na(EO_IQE8), F, T),
+    VI_NA_EO_IQE11           = dplyr::if_else(!is.na(EO_IQE11), F, T),
+    VI_NA_EO_IQE             = dplyr::if_else(!is.na(EO_IQE), F, T),
+    VI_NA_EO_PC15            = dplyr::if_else(!is.na(EO_PC15), F, T),
+    VI_NA_EO_PC18            = dplyr::if_else(!is.na(EO_PC18), F, T),
+    VI_NA_EO_EJAFU15         = dplyr::if_else(!is.na(EO_EJAFU15), F, T),
+    VI_NA_EO_EJAME18         = dplyr::if_else(!is.na(EO_EJAME18), F, T),
+    VI_NA_EO_TAXA0A3         = dplyr::if_else(!is.na(EO_TAXA0A3), F, T),
+    VI_NA_EO_TAXA4A5         = dplyr::if_else(!is.na(EO_TAXA4A5), F, T),
+    VI_NA_EO_TAXA15A17       = dplyr::if_else(!is.na(EO_TAXA15A17), F, T),
+    VI_NA_EO_TXATBASICA      = dplyr::if_else(!is.na(EO_TXATBASICA), F, T),
+    #VI_NA_EO_ANALF10        = dplyr::if_else(!is.na(EO_ANALF10), F, T),
+    #VI_NA_EO_ANALF          = dplyr::if_else(!is.na(EO_ANALF), F, T),
+    #VI_NA_EO_ANALF15a17     = dplyr::if_else(!is.na(EO_ANALF15a17), F, T),
+    #VI_NA_EO_ANALF18a24     = dplyr::if_else(!is.na(EO_ANALF18a24), F, T),
+    #VI_NA_EO_ANALF25        = dplyr::if_else(!is.na(EO_ANALF25), F, T),
+    #VI_NA_EO_FUND15         = dplyr::if_else(!is.na(EO_FUND15), F, T),
+    #VI_NA_EO_FUND25M        = dplyr::if_else(!is.na(EO_FUND25M), F, T),
+    #VI_NA_EO_MED25M         = dplyr::if_else(!is.na(EO_MED25M), F, T),
+    VI_NA_EO_TAXA6A14        = dplyr::if_else(!is.na(EO_TAXA6A14), F, T),
+    VI_NA_EO_TAXALIQ7        = dplyr::if_else(!is.na(EO_TAXALIQ7), F, T),
+    VI_NA_EO_TAXA15          = dplyr::if_else(!is.na(EO_TAXA15), F, T),
+    VI_NA_EO_TAXALIQ15       = dplyr::if_else(!is.na(EO_TAXALIQ15), F, T),
+    VI_NA_EO_DISTEM          = dplyr::if_else(!is.na(EO_DISTEM), F, T), 
+    VI_NA_EO_TXAPROV1A5      = dplyr::if_else(!is.na(EO_TXAPROV1A5), F, T),
+    VI_NA_EO_TXAPROV1A9      = dplyr::if_else(!is.na(EO_TXAPROV1A9), F, T),
+    VI_NA_EO_TXAPROV6A9      = dplyr::if_else(!is.na(EO_TXAPROV6A9), F, T),
+    VI_NA_EO_TXAPROV10A12    = dplyr::if_else(!is.na(EO_TXAPROV10A12), F, T),
+    VI_NA_EO_TXREP1A9        = dplyr::if_else(!is.na(EO_TXREP1A9), F, T),
+    VI_NA_EO_TXREP1A5        = dplyr::if_else(!is.na(EO_TXREP1A5), F, T),
+    VI_NA_EO_TXREP10A12      = dplyr::if_else(!is.na(EO_TXREP10A12), F, T),
+    VI_NA_EO_TXREP6A9        = dplyr::if_else(!is.na(EO_TXREP6A9), F, T),
+    VI_NA_EO_TXABA1A9        = dplyr::if_else(!is.na(EO_TXABA1A9), F, T),
+    VI_NA_EO_TXABA1A5        = dplyr::if_else(!is.na(EO_TXABA1A5), F, T),
+    VI_NA_EO_TXABA6A9        = dplyr::if_else(!is.na(EO_TXABA6A9), F, T),
+    VI_NA_EO_TXABA10A12      = dplyr::if_else(!is.na(EO_TXABA10A12), F, T),
+    VI_NA_EO_DISTEF          = dplyr::if_else(!is.na(EO_DISTEF), F, T),
+    VI_NA_EO_DISTEFAI        = dplyr::if_else(!is.na(EO_DISTEFAI), F, T),
+    VI_NA_EO_DISTEFAF        = dplyr::if_else(!is.na(EO_DISTEFAF), F, T),
+    VI_NA_EO_PCINF           = dplyr::if_else(!is.na(EO_PCINF), F, T),
+    VI_NA_EO_PCITF           = dplyr::if_else(!is.na(EO_PCITF), F, T),
+    VI_NA_EO_PCINFM          = dplyr::if_else(!is.na(EO_PCINFM), F, T),
+    VI_NA_EO_PCITM           = dplyr::if_else(!is.na(EO_PCITM), F, T),
+    VI_NA_EO_PCAPM8          = dplyr::if_else(!is.na(EO_PCAPM8), F, T),
+    VI_NA_EO_PCAPM11         = dplyr::if_else(!is.na(EO_PCAPM11), F, T),
+    VI_NA_EO_PCAPP8          = dplyr::if_else(!is.na(EO_PCAPP8), F, T),
+    VI_NA_EO_PCAPP11         = dplyr::if_else(!is.na(EO_PCAPP11), F, T),
+    VI_NA_EO_PALUNOSM8       = dplyr::if_else(!is.na(EO_PALUNOSM8), F, T),
+    VI_NA_EO_PALUNOSP8       = dplyr::if_else(!is.na(EO_PALUNOSP8), F, T),
+    VI_NA_EO_PALUNOSM11      = dplyr::if_else(!is.na(EO_PALUNOSM11), F, T),
+    VI_NA_EO_PALUNOSP11      = dplyr::if_else(!is.na(EO_PALUNOSP11), F, T),
+    VI_NA_EO_ANALF25_PP      = dplyr::if_else(!is.na(EO_ANALF25_PP), F, T),
+    VI_NA_EO_ANALF25_PP      = dplyr::if_else(!is.na(EO_ANALF25_PP), F, T),
+    VI_NA_EO_FUND25_B        = dplyr::if_else(!is.na(EO_FUND25_B), F, T),
+    VI_NA_EO_FUND25_PP       = dplyr::if_else(!is.na(EO_FUND25_PP), F, T),
+    VI_NA_EO_MED25M_B        = dplyr::if_else(!is.na(EO_MED25M_B), F, T),
+    VI_NA_EO_MED25M_PP       = dplyr::if_else(!is.na(EO_MED25M_PP), F, T),
+    VI_NA_EO_DOCSUPEI        = dplyr::if_else(!is.na(EO_DOCSUPEI), F, T),
+    VI_NA_EO_DOCSUPEF        = dplyr::if_else(!is.na(EO_DOCSUPEF), F, T),
+    VI_NA_EO_DOCSUPEFAF      = dplyr::if_else(!is.na(EO_DOCSUPEFAF), F, T),
+    VI_NA_EO_DOCSUPEFAI      = dplyr::if_else(!is.na(EO_DOCSUPEFAI), F, T),
+    VI_NA_EO_DOCSUPEM        = dplyr::if_else(!is.na(EO_DOCSUPEM), F, T),
+    VI_NA_EO_ADEDG1EI        = dplyr::if_else(!is.na(EO_ADEDG1EI), F, T),
+    VI_NA_EO_ADEDG2EI        = dplyr::if_else(!is.na(EO_ADEDG2EI), F, T),
+    VI_NA_EO_ADEDG3EI        = dplyr::if_else(!is.na(EO_ADEDG3EI), F, T),
+    VI_NA_EO_ADEDG4EI        = dplyr::if_else(!is.na(EO_ADEDG4EI), F, T),
+    VI_NA_EO_ADEDG5EI        = dplyr::if_else(!is.na(EO_ADEDG5EI), F, T),
+    VI_NA_EO_ADEDG1EF        = dplyr::if_else(!is.na(EO_ADEDG1EF), F, T),
+    VI_NA_EO_ADEDG2EF        = dplyr::if_else(!is.na(EO_ADEDG2EF), F, T),
+    VI_NA_EO_ADEDG3EF        = dplyr::if_else(!is.na(EO_ADEDG3EF), F, T),
+    VI_NA_EO_ADEDG4EF        = dplyr::if_else(!is.na(EO_ADEDG4EF), F, T),
+    VI_NA_EO_ADEDG5EF        = dplyr::if_else(!is.na(EO_ADEDG5EF), F, T),
+    VI_NA_EO_ADEDG1EFAI      = dplyr::if_else(!is.na(EO_ADEDG1EFAI), F, T),
+    VI_NA_EO_ADEDG2EFAI      = dplyr::if_else(!is.na(EO_ADEDG2EFAI), F, T),
+    VI_NA_EO_ADEDG3EFAI      = dplyr::if_else(!is.na(EO_ADEDG3EFAI), F, T),
+    VI_NA_EO_ADEDG4EFAI      = dplyr::if_else(!is.na(EO_ADEDG4EFAI), F, T),
+    VI_NA_EO_ADEDG5EFAI      = dplyr::if_else(!is.na(EO_ADEDG5EFAI), F, T),
+    VI_NA_EO_ADEDG1EFAF      = dplyr::if_else(!is.na(EO_ADEDG1EFAF), F, T),
+    VI_NA_EO_ADEDG2EFAF      = dplyr::if_else(!is.na(EO_ADEDG2EFAF), F, T),
+    VI_NA_EO_ADEDG3EFAF      = dplyr::if_else(!is.na(EO_ADEDG3EFAF), F, T),
+    VI_NA_EO_ADEDG4EFAF      = dplyr::if_else(!is.na(EO_ADEDG4EFAF), F, T),
+    VI_NA_EO_ADEDG5EFAF      = dplyr::if_else(!is.na(EO_ADEDG5EFAF), F, T),
+    VI_NA_EO_ADEDG1EM        = dplyr::if_else(!is.na(EO_ADEDG1EM), F, T),
+    VI_NA_EO_ADEDG2EM        = dplyr::if_else(!is.na(EO_ADEDG2EM), F, T),
+    VI_NA_EO_ADEDG3EM        = dplyr::if_else(!is.na(EO_ADEDG3EM), F, T),
+    VI_NA_EO_ADEDG4EM        = dplyr::if_else(!is.na(EO_ADEDG4EM), F, T),
+    VI_NA_EO_ADEDG5EM        = dplyr::if_else(!is.na(EO_ADEDG5EM), F, T),
+    VI_NA_EO_ADEDG1EJAF      = dplyr::if_else(!is.na(EO_ADEDG1EJAF), F, T),
+    VI_NA_EO_ADEDG2EJAF      = dplyr::if_else(!is.na(EO_ADEDG2EJAF), F, T),
+    VI_NA_EO_ADEDG3EJAF      = dplyr::if_else(!is.na(EO_ADEDG3EJAF), F, T),
+    VI_NA_EO_ADEDG4EJAF      = dplyr::if_else(!is.na(EO_ADEDG4EJAF), F, T),
+    VI_NA_EO_ADEDG5EJAF      = dplyr::if_else(!is.na(EO_ADEDG5EJAF), F, T),
+    VI_NA_EO_ADEDG1EJAM      = dplyr::if_else(!is.na(EO_ADEDG1EJAM), F, T),
+    VI_NA_EO_ADEDG2EJAM      = dplyr::if_else(!is.na(EO_ADEDG2EJAM), F, T),
+    VI_NA_EO_ADEDG3EJAM      = dplyr::if_else(!is.na(EO_ADEDG3EJAM), F, T),
+    VI_NA_EO_ADEDG4EJAM      = dplyr::if_else(!is.na(EO_ADEDG4EJAM), F, T),
+    VI_NA_EO_ADEDG5EJAM      = dplyr::if_else(!is.na(EO_ADEDG5EJAM), F, T),
+    VI_NA_EO_MATFEI          = dplyr::if_else(!is.na(EO_MATFEI), F, T),
+    VI_NA_EO_MATEEI          = dplyr::if_else(!is.na(EO_MATEEI), F, T),
+    VI_NA_EO_MATMEI          = dplyr::if_else(!is.na(EO_MATMEI), F, T),
+    VI_NA_EO_MATPEI          = dplyr::if_else(!is.na(EO_MATPEI), F, T),
+    VI_NA_EO_MATFEF          = dplyr::if_else(!is.na(EO_MATFEF), F, T),
+    VI_NA_EO_MATEEF          = dplyr::if_else(!is.na(EO_MATEEF), F, T),
+    VI_NA_EO_MATMEF          = dplyr::if_else(!is.na(EO_MATMEF), F, T),
+    VI_NA_EO_MATPEF          = dplyr::if_else(!is.na(EO_MATPEF), F, T),
+    VI_NA_EO_MATFEFAI        = dplyr::if_else(!is.na(EO_MATFEFAI), F, T),
+    VI_NA_EO_MATEEFAI        = dplyr::if_else(!is.na(EO_MATEEFAI), F, T),
+    VI_NA_EO_MATMEFAI        = dplyr::if_else(!is.na(EO_MATMEFAI), F, T),
+    VI_NA_EO_MATPEFAI        = dplyr::if_else(!is.na(EO_MATPEFAI), F, T),
+    VI_NA_EO_MATFEFAF        = dplyr::if_else(!is.na(EO_MATFEFAF), F, T),
+    VI_NA_EO_MATEEFAF        = dplyr::if_else(!is.na(EO_MATEEFAF), F, T),
+    VI_NA_EO_MATMEFAF        = dplyr::if_else(!is.na(EO_MATMEFAF), F, T),
+    VI_NA_EO_MATPEFAF        = dplyr::if_else(!is.na(EO_MATPEFAF), F, T),
+    VI_NA_EO_MATFEM          = dplyr::if_else(!is.na(EO_MATFEM), F, T),
+    VI_NA_EO_MATEEM          = dplyr::if_else(!is.na(EO_MATEEM), F, T),
+    VI_NA_EO_MATMEM          = dplyr::if_else(!is.na(EO_MATMEM), F, T),
+    VI_NA_EO_MATPEM          = dplyr::if_else(!is.na(EO_MATPEM), F, T),
+    VI_NA_EO_MATTICR         = dplyr::if_else(!is.na(EO_MATTICR), F, T),
+    VI_NA_EO_MATTIPE         = dplyr::if_else(!is.na(EO_MATTIPE), F, T),
+    VI_NA_EO_MATTIEFAI       = dplyr::if_else(!is.na(EO_MATTIEFAI), F, T),
+    VI_NA_EO_MATTIEFAF       = dplyr::if_else(!is.na(EO_MATTIEFAF), F, T),
+    VI_NA_EO_MATTIEM         = dplyr::if_else(!is.na(EO_MATTIEM), F, T),
                                               
     # Others
     VI_EO_ALUNOSP8      = dplyr::if_else(EO_ALUNOSP8 >= 0, F, T),
@@ -1081,9 +1082,9 @@ df_sumario <- df_sumario_valid_eo |>
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
+    Ausente      = Total - Validada - Suspeita,
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1094,12 +1095,13 @@ df_sumario <- df_sumario_valid_eo |>
 ```{r table_valid_eo_na_all}
 
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -1116,7 +1118,8 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> 
+  unique() |># Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -1130,6 +1133,7 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_ALUNOSP8 <- data |> 
+  remove_year_variable(variable = "EO_ALUNOSP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_ALUNOSP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSP8"],
@@ -1204,6 +1208,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_ALUNOSM8 <- data |> 
+  remove_year_variable(variable = "EO_ALUNOSM8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_ALUNOSM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_ALUNOSM8"],
@@ -1722,6 +1727,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IDEBFU1A5 <- data |>
+  remove_year_variable(variable = "EO_IDEBFU1A5", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IDEBFU1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IDEBFU1A5"],
@@ -1947,7 +1953,8 @@ chart_vbar(df_sumario)
 ```{r rules_dist_eo_iqem4}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_EO_IQEM4 <- data |> remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years) |>
+df_rules_dist_EO_IQEM4 <- data |> 
+  remove_year_variable(variable = "EO_IQEM4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM4"],
@@ -2097,6 +2104,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEM11 <- data |> 
+  remove_year_variable(variable = "EO_IQEM11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEM11"],
@@ -2171,6 +2179,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEP4 <- data |> 
+  remove_year_variable(variable = "EO_IQEP4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEP4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP4"],
@@ -2245,6 +2254,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQEP8 <- data |> 
+  remove_year_variable(variable = "EO_IQEP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQEP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQEP8"],
@@ -2318,6 +2328,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE4 <- data |> 
+  remove_year_variable(variable = "EO_IQE4", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE4"],
@@ -2391,6 +2402,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE8 <- data |> 
+  remove_year_variable(variable = "EO_IQE8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE8"],
@@ -2464,6 +2476,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE11 <- data |> 
+  remove_year_variable(variable = "EO_IQE11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE11"],
@@ -2537,6 +2550,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_IQE <- data |> 
+  remove_year_variable(variable = "EO_IQE", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_IQE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_IQE"],
@@ -3635,6 +3649,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_TXAPROV1A5 <- data |> 
+  remove_year_variable(variable = "EO_TXAPROV1A5", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_TXAPROV1A5" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV1A5"],
@@ -3708,6 +3723,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_TXAPROV6A9 <- data |> 
+  remove_year_variable(variable = "EO_TXAPROV6A9", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_TXAPROV6A9" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_TXAPROV6A9"],
@@ -4965,6 +4981,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPM8 <- data |> 
+  remove_year_variable(variable = "EO_PCAPM8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPM8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPM8"],
@@ -5039,6 +5056,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPM11 <- data |> 
+  remove_year_variable(variable = "EO_PCAPM11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPM11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPM11"],
@@ -5113,6 +5131,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPP8 <- data |> 
+  remove_year_variable(variable = "EO_PCAPP8", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPP8" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPP8"],
@@ -5187,6 +5206,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_EO_PCAPP11 <- data |> 
+  remove_year_variable(variable = "EO_PCAPP11", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "EO_PCAPP11" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EO_PCAPP11"],
@@ -11169,7 +11189,6 @@ for(i in names(df_obs_dist)){
   openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
 }
 
-
 ```
 
 
@@ -11179,7 +11198,6 @@ openxlsx::saveWorkbook(pt, "fjpdados_educacao_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
-
 rm(list = ls())
 gc()
 ```

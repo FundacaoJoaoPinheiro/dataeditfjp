@@ -33,7 +33,7 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_se.html"
+output-file: "relatorio_ca.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -104,27 +104,27 @@ Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicament
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
--   **CF\_**[...]\_total_year: a soma da proporção anual é igual a $\approx$ 100%.
+-   **CF\_[...]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
 
 Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
--   **DF\_**[...]\_hampel_munic: método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_[...]\_hampel_munic**: método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_**[...]\_out_munic: segundo método de identificação de um possível valor *outlier* na série histórica;
+-   **DF\_[...]\_out_munic**: segundo método de identificação de um possível valor *outlier* na série histórica;
 
--   **DF\_**[...]\_min_munic: o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   **DF\_[...]\_min_munic**: o valor mais recente é maior ou igual ao menor valor da série histórica;
 
--   **DF\_**[...]\_max_munic: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **DF\_[...]\_max_munic**: o valor mais recente é menor ou igual ao maior valor da série histórica;
 
--   **DF\_**[...]\_min_k_munic: o valor mais recente é maior ou igual ao $\frac{menor}{k}$ valor da série histórica;
+-   **DF\_[...]\_min_k_munic**: o valor mais recente é maior ou igual ao $\dfrac{menor}{k}$ valor da série histórica;
 
--   **DF\_**[...]\_max_k_munic: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
+-   **DF\_[...]\_max_k_munic**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   **DF\_**[...]\_med_mov_munic: o valor atual é menor ou igual a $\text{mediana móvel} \times k$;
+-   **DF\_[...]\_med_mov_munic**: o valor atual é menor ou igual a $mediana ~móvel \times k$;
 
--   **DF\_**[...]\_dif_munic: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
+-   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
--   **DF\_**[...]\_estoque_munic: valor atual é maior ou igual ao valor imediatamente anterior.
+-   **DF\_[...]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
 
 **Classificação por flexibilidade (F ou I)**
 
@@ -246,36 +246,36 @@ desc_regra_valid <- c(
 # df com o nome da regra e a respectiva descrição
 desc_regra_valid_var <- data.frame(
   Regra = c(
-    "CA_MUSEU",
-    "CA_TEATRO",
-    "CA_CINEMA",
-    "CA_BIBLIOTECA",
-    "CA_CENTROC",
-    "CA_EQUIP",
-    "CA_BANDA",
-    "CA_GARTISTICO",
-    "CA_ATIVCULT",
-    "CA_MEIOC",
-    "CA_ORGAOC",
-    "CA_INSTCONS",
-    "CA_TOMBEF",
-    "CA_TOMBMUN",
-    "CA_PCL",
-    "CA_APRESPC",
-    "CA_GPRESPC",
-    "CA_AREABIB",
-    "CA_ACERVOBIB",
-    "CA_WEBBIB",
-    "CA_COMPBIB",
-    "CA_LEITMESBIB",
-    "CA_EMPMESBIB",
-    "CA_ICMSPATCULT",
-    "CA_FUNDO",
-    "CA_REGISTRO",
-    "CA_ESTRUOGC",
-    "CA_LEGPAT",
-    "CA_ARQPUB",
-    "CA_NUMBIB"
+    "VI_CA_MUSEU",
+    "VI_CA_TEATRO",
+    "VI_CA_CINEMA",
+    "VI_CA_BIBLIOTECA",
+    "VI_CA_CENTROC",
+    "VI_CA_EQUIP",
+    "VI_CA_BANDA",
+    "VI_CA_GARTISTICO",
+    "VI_CA_ATIVCULT",
+    "VI_CA_MEIOC",
+    "VI_CA_ORGAOC",
+    "VI_CA_INSTCONS",
+    "VI_CA_TOMBEF",
+    "VI_CA_TOMBMUN",
+    "VI_CA_PCL",
+    "VI_CA_APRESPC",
+    "VI_CA_GPRESPC",
+    "VI_CA_AREABIB",
+    "VI_CA_ACERVOBIB",
+    "VI_CA_WEBBIB",
+    "VI_CA_COMPBIB",
+    "VI_CA_LEITMESBIB",
+    "VI_CA_EMPMESBIB",
+    "VI_CA_ICMSPATCULT",
+    "VI_CA_FUNDO",
+    "VI_CA_REGISTRO",
+    "VI_CA_ESTRUOGC",
+    "VI_CA_LEGPAT",
+    "VI_CA_ARQPUB",
+    "VI_CA_NUMBIB"
   )
 ) |> 
   dplyr::mutate(
@@ -403,36 +403,36 @@ df_rules_valid_ca_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_CA_MUSEU       = dplyr::if_else(!is.na(CA_MUSEU), F, NA),
-    VI_NA_CA_TEATRO      = dplyr::if_else(!is.na(CA_TEATRO), F, NA),
-    VI_NA_CA_CINEMA      = dplyr::if_else(!is.na(CA_CINEMA), F, NA),
-    VI_NA_CA_BIBLIOTECA  = dplyr::if_else(!is.na(CA_BIBLIOTECA), F, NA),
-    VI_NA_CA_CENTROC     = dplyr::if_else(!is.na(CA_CENTROC), F, NA),
-    VI_NA_CA_EQUIP       = dplyr::if_else(!is.na(CA_EQUIP), F, NA),
-    VI_NA_CA_BANDA       = dplyr::if_else(!is.na(CA_BANDA), F, NA),
-    VI_NA_CA_GARTISTICO  = dplyr::if_else(!is.na(CA_GARTISTICO), F, NA),
-    VI_NA_CA_ATIVCULT    = dplyr::if_else(!is.na(CA_ATIVCULT), F, NA),
-    VI_NA_CA_MEIOC       = dplyr::if_else(!is.na(CA_MEIOC), F, NA),
-    VI_NA_CA_ORGAOC      = dplyr::if_else(!is.na(CA_ORGAOC), F, NA),
-    VI_NA_CA_INSTCONS    = dplyr::if_else(!is.na(CA_INSTCONS), F, NA),
-    VI_NA_CA_TOMBEF      = dplyr::if_else(!is.na(CA_TOMBEF), F, NA),
-    VI_NA_CA_TOMBMUN     = dplyr::if_else(!is.na(CA_TOMBMUN), F, NA),
-    VI_NA_CA_PCL         = dplyr::if_else(!is.na(CA_PCL), F, NA),
-    VI_NA_CA_APRESPC     = dplyr::if_else(!is.na(CA_APRESPC), F, NA),
-    VI_NA_CA_GPRESPC     = dplyr::if_else(!is.na(CA_GPRESPC), F, NA),
-    VI_NA_CA_AREABIB     = dplyr::if_else(!is.na(CA_AREABIB), F, NA),
-    VI_NA_CA_ACERVOBIB   = dplyr::if_else(!is.na(CA_ACERVOBIB), F, NA),
-    VI_NA_CA_WEBBIB      = dplyr::if_else(!is.na(CA_WEBBIB), F, NA),
-    VI_NA_CA_COMPBIB     = dplyr::if_else(!is.na(CA_COMPBIB), F, NA),
-    VI_NA_CA_LEITMESBIB  = dplyr::if_else(!is.na(CA_LEITMESBIB), F, NA),
-    VI_NA_CA_EMPMESBIB   = dplyr::if_else(!is.na(CA_EMPMESBIB), F, NA),
-    VI_NA_CA_ICMSPATCULT = dplyr::if_else(!is.na(CA_ICMSPATCULT), F, NA),
-    VI_NA_CA_FUNDO       = dplyr::if_else(!is.na(CA_FUNDO), F, NA),
-    VI_NA_CA_REGISTRO    = dplyr::if_else(!is.na(CA_REGISTRO), F, NA),
-    VI_NA_CA_ESTRUOGC    = dplyr::if_else(!is.na(CA_ESTRUOGC), F, NA),
-    VI_NA_CA_LEGPAT      = dplyr::if_else(!is.na(CA_LEGPAT), F, NA),
-    VI_NA_CA_ARQPUB      = dplyr::if_else(!is.na(CA_ARQPUB), F, NA),
-    VI_NA_CA_NUMBIB      = dplyr::if_else(!is.na(CA_NUMBIB), F, NA),
+    VI_NA_CA_MUSEU       = dplyr::if_else(!is.na(CA_MUSEU), F, T),
+    VI_NA_CA_TEATRO      = dplyr::if_else(!is.na(CA_TEATRO), F, T),
+    VI_NA_CA_CINEMA      = dplyr::if_else(!is.na(CA_CINEMA), F, T),
+    VI_NA_CA_BIBLIOTECA  = dplyr::if_else(!is.na(CA_BIBLIOTECA), F, T),
+    VI_NA_CA_CENTROC     = dplyr::if_else(!is.na(CA_CENTROC), F, T),
+    VI_NA_CA_EQUIP       = dplyr::if_else(!is.na(CA_EQUIP), F, T),
+    VI_NA_CA_BANDA       = dplyr::if_else(!is.na(CA_BANDA), F, T),
+    VI_NA_CA_GARTISTICO  = dplyr::if_else(!is.na(CA_GARTISTICO), F, T),
+    VI_NA_CA_ATIVCULT    = dplyr::if_else(!is.na(CA_ATIVCULT), F, T),
+    VI_NA_CA_MEIOC       = dplyr::if_else(!is.na(CA_MEIOC), F, T),
+    VI_NA_CA_ORGAOC      = dplyr::if_else(!is.na(CA_ORGAOC), F, T),
+    VI_NA_CA_INSTCONS    = dplyr::if_else(!is.na(CA_INSTCONS), F, T),
+    VI_NA_CA_TOMBEF      = dplyr::if_else(!is.na(CA_TOMBEF), F, T),
+    VI_NA_CA_TOMBMUN     = dplyr::if_else(!is.na(CA_TOMBMUN), F, T),
+    VI_NA_CA_PCL         = dplyr::if_else(!is.na(CA_PCL), F, T),
+    VI_NA_CA_APRESPC     = dplyr::if_else(!is.na(CA_APRESPC), F, T),
+    VI_NA_CA_GPRESPC     = dplyr::if_else(!is.na(CA_GPRESPC), F, T),
+    VI_NA_CA_AREABIB     = dplyr::if_else(!is.na(CA_AREABIB), F, T),
+    VI_NA_CA_ACERVOBIB   = dplyr::if_else(!is.na(CA_ACERVOBIB), F, T),
+    VI_NA_CA_WEBBIB      = dplyr::if_else(!is.na(CA_WEBBIB), F, T),
+    VI_NA_CA_COMPBIB     = dplyr::if_else(!is.na(CA_COMPBIB), F, T),
+    VI_NA_CA_LEITMESBIB  = dplyr::if_else(!is.na(CA_LEITMESBIB), F, T),
+    VI_NA_CA_EMPMESBIB   = dplyr::if_else(!is.na(CA_EMPMESBIB), F, T),
+    VI_NA_CA_ICMSPATCULT = dplyr::if_else(!is.na(CA_ICMSPATCULT), F, T),
+    VI_NA_CA_FUNDO       = dplyr::if_else(!is.na(CA_FUNDO), F, T),
+    VI_NA_CA_REGISTRO    = dplyr::if_else(!is.na(CA_REGISTRO), F, T),
+    VI_NA_CA_ESTRUOGC    = dplyr::if_else(!is.na(CA_ESTRUOGC), F, T),
+    VI_NA_CA_LEGPAT      = dplyr::if_else(!is.na(CA_LEGPAT), F, T),
+    VI_NA_CA_ARQPUB      = dplyr::if_else(!is.na(CA_ARQPUB), F, T),
+    VI_NA_CA_NUMBIB      = dplyr::if_else(!is.na(CA_NUMBIB), F, T),
     # Others
     VI_CA_MUSEU       = dplyr::if_else(CA_MUSEU %in% cat_dic, F, T),
     VI_CA_TEATRO      = dplyr::if_else(CA_TEATRO %in% cat_dic, F, T),
@@ -485,7 +485,7 @@ df_sumario <- df_sumario_valid_ca |>
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
+    Ausente      = sum(resultado),
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
@@ -1435,7 +1435,7 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(variable = var, data = data), 
+    table_descriptive(variable = var,data = data, ano_base_alter), 
     decimal.mark = ",", 
     big.mark     = ".", 
     round        = 2,
@@ -1460,7 +1460,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_boxplot(variable = var, data = data))
+  print(chart_boxplot(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -1474,7 +1474,7 @@ pander::pandoc.header("Histograma", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data))
+  print(chart_histogram(variable = var,data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -1526,7 +1526,7 @@ cidades <- openxlsx::read.xlsx(path_data)
 lis <- split(variables,f = variables)
 df_obs_valid <- names(lis)|> 
 sapply(function(i){
-lis[[i]] <- df_rules_valid_eo_all |> 
+lis[[i]] <- df_rules_valid_ca_all |> 
   dplyr::select(
     Ano,
     ibge7,
@@ -1539,6 +1539,8 @@ lis[[i]] <- df_rules_valid_eo_all |>
   ) |>
   dplyr::filter(obs_suspeita) |>
   dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
 return(lis[[i]])
 }, USE.NAMES=TRUE, simplify = FALSE)
@@ -2118,35 +2120,35 @@ for(i in names(df_obs_valid)){
 ```{r df_build_viol_dist}
 
   df_dist = list(
-    "CA_MUSEU"       = df_rules_dist_ca_museu,
-    "CA_TEATRO"      = df_rules_dist_ca_teatro,
-    "CA_CINEMA"      = df_rules_dist_ca_cinema,
-    "CA_BIBLIOTECA"  = df_rules_dist_ca_biblioteca,
-    "CA_CENTROC"     = df_rules_dist_ca_centroc,
-    "CA_EQUIP"       = df_rules_dist_ca_equip,
-    "CA_BANDA"       = df_rules_dist_ca_banda,
-    "CA_GARTISTICO"  = df_rules_dist_ca_gartistico,
-    "CA_ATIVCULT"    = df_rules_dist_ca_ativcult,
-    "CA_MEIOC"       = df_rules_dist_ca_meioc,
-    "CA_ORGAOC"      = df_rules_dist_ca_orgaoc,
-    "CA_INSTCONS"    = df_rules_dist_ca_instcons,
+    #"CA_MUSEU"       = df_rules_dist_ca_museu,
+    #"CA_TEATRO"      = df_rules_dist_ca_teatro,
+    #"CA_CINEMA"      = df_rules_dist_ca_cinema,
+    #"CA_BIBLIOTECA"  = df_rules_dist_ca_biblioteca,
+    #"CA_CENTROC"     = df_rules_dist_ca_centroc,
+    #"CA_EQUIP"       = df_rules_dist_ca_equip,
+    #"CA_BANDA"       = df_rules_dist_ca_banda,
+    #"CA_GARTISTICO"  = df_rules_dist_ca_gartistico,
+    #"CA_ATIVCULT"    = df_rules_dist_ca_ativcult,
+    #"CA_MEIOC"       = df_rules_dist_ca_meioc,
+    #"CA_ORGAOC"      = df_rules_dist_ca_orgaoc,
+    #"CA_INSTCONS"    = df_rules_dist_ca_instcons,
     "CA_TOMBEF"      = df_rules_dist_ca_tombef,
     "CA_TOMBMUN"     = df_rules_dist_ca_tombmun,
     "CA_PCL"         = df_rules_dist_ca_pcl,
     "CA_APRESPC"     = df_rules_dist_ca_aprespc,
     "CA_GPRESPC"     = df_rules_dist_ca_gprespc,
-    "CA_AREABIB"     = df_rules_dist_ca_aprespc,
-    "CA_ACERVOBIB"   = df_rules_dist_ca_acervobib,
-    "CA_WEBBIB"      = df_rules_dist_ca_webbib,
-    "CA_COMPBIB"     = df_rules_dist_ca_compbib,
+    #"CA_AREABIB"     = df_rules_dist_ca_aprespc,
+    #"CA_ACERVOBIB"   = df_rules_dist_ca_acervobib,
+    #"CA_WEBBIB"      = df_rules_dist_ca_webbib,
+    #"CA_COMPBIB"     = df_rules_dist_ca_compbib,
     "CA_LEITMESBIB"  = df_rules_dist_ca_leitmesbib,
     "CA_EMPMESBIB"   = df_rules_dist_ca_empmesbib,
     "CA_ICMSPATCULT" = df_rules_dist_ca_icmspatcult,
     "CA_FUNDO"       = df_rules_dist_ca_fundo,
     "CA_REGISTRO"    = df_rules_dist_ca_registro,
-    "CA_ESTRUOGC"    = df_rules_dist_ca_estruogc,
-    "CA_LEGPAT"      = df_rules_dist_ca_legpat,
-    "CA_ARQPUB"      = df_rules_dist_ca_arqpub,
+    #"CA_ESTRUOGC"    = df_rules_dist_ca_estruogc,
+    #"CA_LEGPAT"      = df_rules_dist_ca_legpat,
+    #"CA_ARQPUB"      = df_rules_dist_ca_arqpub,
     "CA_NUMBIB"      = df_rules_dist_ca_numbib
   )
 
