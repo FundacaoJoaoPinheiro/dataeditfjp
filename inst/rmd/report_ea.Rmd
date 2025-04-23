@@ -4720,8 +4720,7 @@ cidades <- openxlsx::read.xlsx(path_data)
     "EA_EMPRSFUP",
     "EA_EMPRSFIC",
     "EA_EMPRSFCO",
-    "EA_EMPRSFSE",
-    ""
+    "EA_EMPRSFSE"
     
     )
 
@@ -4735,7 +4734,7 @@ lis[[i]] <- df_rules_valid_ea_all |>
     dplyr::ends_with(i)
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")),
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")),
     names_to  = "regra",
     values_to = "obs_suspeita"
   ) |>
