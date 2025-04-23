@@ -295,7 +295,6 @@ desc_regra_valid_var <- data.frame(
   )
 ```
 
-
 ## Tipo
 
 ### Todos os indicadores
@@ -544,7 +543,6 @@ df_sumario |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
-
 
 ## Distribuição
 
@@ -4345,36 +4343,56 @@ cidades <- openxlsx::read.xlsx(path_data)
 ```{r df_build_viol_valid}
 
   variables = c(
-    "CA_MUSEU",
-    "CA_TEATRO",
-    "CA_CINEMA",
-    "CA_BIBLIOTECA",
-    "CA_CENTROC",
-    "CA_EQUIP",
-    "CA_BANDA",
-    "CA_GARTISTICO",
-    "CA_ATIVCULT",
-    "CA_MEIOC",
-    "CA_ORGAOC",
-    "CA_INSTCONS",
-    "CA_TOMBEF",
-    "CA_TOMBMUN",
-    "CA_PCL",
-    "CA_APRESPC",
-    "CA_GPRESPC",
-    "CA_AREABIB",
-    "CA_ACERVOBIB",
-    "CA_WEBBIB",
-    "CA_COMPBIB",
-    "CA_LEITMESBIB",
-    "CA_EMPMESBIB",
-    "CA_ICMSPATCULT",
-    "CA_FUNDO",
-    "CA_REGISTRO",
-    "CA_ESTRUOGC",
-    "CA_LEGPAT",
-    "CA_ARQPUB",
-    "CA_NUMBIB"
+   "FS_PES",
+   "FS_DCLRCL",
+   "FS_OCDC",
+   "FS_EQUILF",
+   "FS_GLPC",
+   "FS_GLEC25",
+   "FS_CUSTRCL",
+   "FS_IGT ",
+   "FS_GEDUC",
+   "FS_GSAUDE",
+   "FS_CONVRCL",
+   "FS_IDTE",
+   "FS_RCL",
+   "FS_RCLPC",
+   "FS_AGRO",
+   "FS_DESENV",
+   "FS_DIFCULT",
+   "FS_EDUCACAO",
+   "FS_ESPORTE",
+   "FS_HABITA",
+   "FS_INFRA ",
+   "FS_OUTRAS",
+   "FS_PATRI",  
+   "FS_REFAGR",
+   "FS_SANEAMENTO",
+   "FS_SAUDE", 
+   "FS_SEGURAN",
+   "FS_SMAMB",
+   "FS_SOCIAL",
+   "FS_TOTAL",
+   "FS_TRAB",
+   "FS_TURISMO", 
+   "FS_EAGRO ",
+   "FS_EDESENV",
+   "FS_EDIFCULT",
+   "FS_EEDUCACAO",
+   "FS_EESPORTE",
+   "FS_EHABITA ",
+   "FS_EINFRA ",
+   "FS_EOUTRAS",
+   "FS_EPATRI ",
+   "FS_EREFAGR",
+   "FS_ESANEAMENTO",
+   "FS_ESAUDE",
+   "FS_ESEGURAN",
+   "FS_ESMAMB", 
+   "FS_ESOCIAL", 
+   "FS_ETRAB ",
+   "FS_ETURISMO",
+   "FS_EHABSANMA"
     )
 
 lis <- split(variables,f = variables)
@@ -4387,7 +4405,7 @@ lis[[i]] <- df_rules_valid_ca_all |>
     dplyr::ends_with(i)
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")),
+    cols      = !c(Ano, ibge7, dplyr::starts_with("FS_")),
     names_to  = "regra",
     values_to = "obs_suspeita"
   ) |>
@@ -4412,43 +4430,43 @@ for(i in names(df_obs_valid)){
 ```{r df_build_viol_dist}
 
   df_dist = list(
-    #"CA_MUSEU"       = df_rules_dist_ca_museu,
-    #"CA_TEATRO"      = df_rules_dist_ca_teatro,
-    #"CA_CINEMA"      = df_rules_dist_ca_cinema,
-    #"CA_BIBLIOTECA"  = df_rules_dist_ca_biblioteca,
-    #"CA_CENTROC"     = df_rules_dist_ca_centroc,
-    #"CA_EQUIP"       = df_rules_dist_ca_equip,
-    #"CA_BANDA"       = df_rules_dist_ca_banda,
-    #"CA_GARTISTICO"  = df_rules_dist_ca_gartistico,
-    #"CA_ATIVCULT"    = df_rules_dist_ca_ativcult,
-    #"CA_MEIOC"       = df_rules_dist_ca_meioc,
-    #"CA_ORGAOC"      = df_rules_dist_ca_orgaoc,
-    #"CA_INSTCONS"    = df_rules_dist_ca_instcons,
-    "CA_TOMBEF"      = df_rules_dist_ca_tombef,
-    "CA_TOMBMUN"     = df_rules_dist_ca_tombmun,
-    "CA_PCL"         = df_rules_dist_ca_pcl,
-    "CA_APRESPC"     = df_rules_dist_ca_aprespc,
-    "CA_GPRESPC"     = df_rules_dist_ca_gprespc,
-    #"CA_AREABIB"     = df_rules_dist_ca_aprespc,
-    #"CA_ACERVOBIB"   = df_rules_dist_ca_acervobib,
-    #"CA_WEBBIB"      = df_rules_dist_ca_webbib,
-    #"CA_COMPBIB"     = df_rules_dist_ca_compbib,
-    "CA_LEITMESBIB"  = df_rules_dist_ca_leitmesbib,
-    "CA_EMPMESBIB"   = df_rules_dist_ca_empmesbib,
-    "CA_ICMSPATCULT" = df_rules_dist_ca_icmspatcult,
-    "CA_FUNDO"       = df_rules_dist_ca_fundo,
-    "CA_REGISTRO"    = df_rules_dist_ca_registro,
-    #"CA_ESTRUOGC"    = df_rules_dist_ca_estruogc,
-    #"CA_LEGPAT"      = df_rules_dist_ca_legpat,
-    #"CA_ARQPUB"      = df_rules_dist_ca_arqpub,
-    "CA_NUMBIB"      = df_rules_dist_ca_numbib
+    "FS_PES"         = df_rules_dist_fs_pes,
+    "FS_DCLRCL"      = df_rules_dist_fs_dclrcl,
+    "FS_OCDC"        = df_rules_dist_fs_ocdc,
+    "FS_EQUILF"      = df_rules_dist_fs_equilf,
+    "FS_GLPC"        = df_rules_dist_fs_glpc,
+    "FS_GLEC25"      = df_rules_dist_fs_glec25,
+    "FS_CUSTRCL"     = df_rules_dist_fs_custrcl,
+    "FS_IGT"         = df_rules_dist_fs_igt,
+    "FS_GEDUC"       = df_rules_dist_fs_geduc,
+    "FS_GSAUDE"      = df_rules_dist_fs_gsaude,
+    "FS_"      = df_rules_dist_fs_orgaoc,
+    "FS_"    = df_rules_dist_fs_instcons,
+    "FS_"      = df_rules_dist_fs_tombef,
+    "FS_"     = df_rules_dist_fs_tombmun,
+    "FS_"         = df_rules_dist_fs_pcl,
+    "FS_"     = df_rules_dist_fs_aprespc,
+    "FS_"     = df_rules_dist_fs_gprespc,
+    "FS_"     = df_rules_dist_fs_aprespc,
+    "FS_"   = df_rules_dist_fs_acervobib,
+    "FS_"      = df_rules_dist_fs_webbib,
+    "FS_"     = df_rules_dist_fs_compbib,
+    "FS_"  = df_rules_dist_fs_leitmesbib,
+    "FS_"   = df_rules_dist_fs_empmesbib,
+    "FS_" = df_rules_dist_fs_icmspatcult,
+    "FS_"       = df_rules_dist_fs_fundo,
+    "FS_"    = df_rules_dist_fs_registro,
+    "FS_"    = df_rules_dist_fs_estruogc,
+    "FS_"      = df_rules_dist_fs_legpat,
+    "FS_"      = df_rules_dist_fs_arqpub,
+    "FS_"      = df_rules_dist_fs_numbib
   )
 
 df_obs_dist <- names(df_dist)|>
 sapply(function(i){
 df_dist[[i]] <- df_dist[[i]] |>
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")),
+    cols      = !c(Ano, ibge7, dplyr::starts_with("FS_")),
     names_to  = "regra",
     values_to = "obs_suspeita"
   ) |>
@@ -4472,7 +4490,7 @@ for(i in names(df_obs_dist)){
 
 ```{r excel_save_wb}
 
-openxlsx::saveWorkbook(pt, "fjpdados_cultura_violacoes.xlsx", overwrite = T)
+openxlsx::saveWorkbook(pt, "fjpdados_financaspublicas_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}

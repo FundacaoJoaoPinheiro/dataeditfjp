@@ -1,34 +1,30 @@
 ---
-title: FJP Dados
-subtitle: Economia
-description: Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão.
-author: 
-  name: Coordenação de Indicadores Sociais (CIS)
-  affiliation: 
-    name: Diretoria de Estatística e Informações (Direi)
-    address: Alameda das Acácias, 70 - São Luiz 
-    city: Belo Horizonte
-    state: Minas Gerais
-    postal-code: 31.275-150
-    url: https://fjp.mg.gov.br/
-output: 
-  html_document: 
-    toc: true
+title: "FJP Dados"
+subtitle: "Economia"
+author:
+  - name: "Coordenação de Indicadores Sociais (CIS)"
+    affiliation: "Diretoria de Estatística e Informações (Direi)"
+    address: "Alameda das Acácias, 70 - São Luiz"
+    city: "Belo Horizonte"
+    state: "Minas Gerais"
+    postal_code: "31.275-150"
+    url: "https://fjp.mg.gov.br/"
 lang: pt
-date: "`r Sys.Date()`"
-title-block-banner: "#68bb59"
-title-block-banner-color: "#ffffff"
-format: 
-  html:
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+description: "Relatório contendo uma análise descritiva e os resultados das regras de crítica dos dados da dimensão."
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    df_print: kable
+    fig_caption: true
+    table_caption: true
     embed-resources: true
     smooth-scroll: true
-    toc: true
     toc-location: left
     toc-title: MENU
-    linkcolor: "#68bb59"
-    css: css/all_custom.css
-    theme:
-      light: [flatly, css/ma_custom.scss]
+    theme: journal
 editor: visual
 execute:
   echo: false
@@ -4667,949 +4663,100 @@ cidades <- openxlsx::read.xlsx(path_data)
 
 # Criar base com as observações que violaram uma ou mais regras de validade
 
-## Validade
-df_rules_valid_ea_bffam <- df_rules_valid_ea_all |> 
+  variables = c(
+    "EA_BFFAM",
+    "EA_TRFAM",
+    "EA_TRPF",
+    "EA_BPCDEF",
+    "EA_BPCIDO",
+    "EA_BFBPC",
+    "EA_TRBPCDEF",
+    "EA_TRBPCIDO",
+    "EA_TRBPC",
+    "EA_TRBPCPB",
+    "EA_TRBFBPC",
+    "EA_TRPC",
+    "EA_TRPCBF",
+    "EA_TRPCBPC",
+    "EA_VAAGR",
+    "EA_VAIND",
+    "EA_VAADM",
+    "EA_VASERV",
+    "EA_PVAAGR",
+    "EA_PVAIND",
+    "EA_PVAADM",
+    "EA_PVASERV",
+    "EA_VATOT",
+    "EA_IMPLIQ",
+    "EA_PIB",
+    "EA_PIBPC",
+    "EA_VAFAG",
+    "EA_VAF",
+    "EA_VAFMI",
+    "EA_VAFIT",
+    "EA_VAFIC",
+    "EA_VAFUP",
+    "EA_VAFCV",
+    "EA_VAFCA",
+    "EA_VAFSE",
+    "EA_VAFO",
+    "EA_PVAFAG",
+    "EA_PVAFMI",
+    "EA_PVAFIT",
+    "EA_PVAFIC",
+    "EA_PVAFUP",
+    "EA_PVAFCV",
+    "EA_PVAFCA",
+    "EA_PVAFSE",
+    "EA_VAFPC",
+    "EA_VAFCVPC",
+    "EA_EMPRSF",
+    "EA_EMPRSFTX",
+    "EA_RENSF",
+    "EA_RENPCSF",
+    "EA_EMPRSFAG",
+    "EA_EMPRSFMI",
+    "EA_EMPRSFIT",
+    "EA_EMPRSFUP",
+    "EA_EMPRSFIC",
+    "EA_EMPRSFCO",
+    "EA_EMPRSFSE",
+    ""
+    
+    )
+
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|> 
+sapply(function(i){
+lis[[i]] <- df_rules_valid_ea_all |> 
   dplyr::select(
     Ano,
     ibge7,
-    dplyr::ends_with("EA_BFFAM")
+    dplyr::ends_with(i)
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
+    cols      = !c(Ano, ibge7, dplyr::starts_with("EO_")),
+    names_to  = "regra",
     values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(-obs_suspeita) |>
   dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
 
-df_rules_valid_ea_trfam <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRFAM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
 
-df_rules_valid_ea_trpf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRPF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_bpcdef <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_BPCDEF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_bpcido <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_BPCIDO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_bfbpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_BFBPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trbpcdef <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRBPCDEF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trbpcido <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRBPCIDO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trbpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRBPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trbpcpb <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRBPCPB")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trbfbpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRBFBPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trpcbf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRPCBF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_trpcbpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_TRPCBPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vaagr <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAAGR")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vaind <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAIND")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vaadm <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAADM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vaserv <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VASERV")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvaagr <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAAGR")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvaind <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAIND")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvaadm <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAADM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvaserv <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVASERV")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vatot <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VATOT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_impliq <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_IMPLIQ")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pib <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PIB")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pibpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PIBPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafag <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFAG")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vaf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafmi <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFMI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafit <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFIT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafic <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFIC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafup <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFUP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafcv <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFCV")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafca <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFCA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafse <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFSE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafo <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafag <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFAG")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafmi <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFMI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafit <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFIT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafic <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFIC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafup <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFUP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafcv <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFCV")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafca <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFCA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafse <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFSE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_pvafo <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_PVAFO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_vafcvpc <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_VAFCVPC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsftx <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFTX")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_rensf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_RENSF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_renpcsf <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_RENPCSF")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfag <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFAG")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfmi <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFMI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfit <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFIT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfup <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFUP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfic <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFIC")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfco <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFCO")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_ea_emprsfse <- df_rules_valid_ea_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("EA_EMPRSFSE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-```
-
-```{r df_export_viol_valid}
-
-## Lista com os dfs por indicador
-lista_df <- list(
-  "ea_bffam"    = df_rules_valid_ea_bffam,
-  "ea_trfam"    = df_rules_valid_ea_trfam,
-  "ea_trpf"     = df_rules_valid_ea_trpf,
-  "ea_bpcdef"   = df_rules_valid_ea_bpcdef,
-  "ea_bpcido"   = df_rules_valid_ea_bpcido,
-  "ea_bfbpc"    = df_rules_valid_ea_bfbpc,
-  "ea_trbpcdef" = df_rules_valid_ea_trbpcdef,
-  "ea_trbpcido" = df_rules_valid_ea_trbpcido,
-  "ea_trbpc"    = df_rules_valid_ea_trbpc,
-  "ea_trbpcpb"  = df_rules_valid_ea_trbpcpb,
-  "ea_trbfbpc"  = df_rules_valid_ea_trbfbpc,
-  "ea_trpc"     = df_rules_valid_ea_trpc,
-  "ea_trpcbf"   = df_rules_valid_ea_trpcbf,
-  "ea_trpcbpc"  = df_rules_valid_ea_trpcbpc,
-  "ea_vaagr"    = df_rules_valid_ea_vaagr,
-  "ea_vaind"    = df_rules_valid_ea_vaind,
-  "ea_vaadm"    = df_rules_valid_ea_vaadm,
-  "ea_vaserv"   = df_rules_valid_ea_vaserv,
-  "ea_pvaagr"   = df_rules_valid_ea_pvaagr,
-  "ea_pvaind"   = df_rules_valid_ea_pvaind,
-  "ea_pvaadm"   = df_rules_valid_ea_pvaadm,
-  "ea_pvaserv"  = df_rules_valid_ea_pvaserv,
-  "ea_vatot"    = df_rules_valid_ea_vatot,
-  "ea_impliq"   = df_rules_valid_ea_impliq,
-  "ea_pib"      = df_rules_valid_ea_pib,
-  "ea_pibpc"    = df_rules_valid_ea_pibpc,
-  "ea_vaf"      = df_rules_valid_ea_vaf,
-  "ea_vafag"    = df_rules_valid_ea_vafag,
-  "ea_vafmi"    = df_rules_valid_ea_vafmi,
-  "ea_vafit"    = df_rules_valid_ea_vafit,
-  "ea_vafic"    = df_rules_valid_ea_vafic,
-  "ea_vafup"    = df_rules_valid_ea_vafup,
-  "ea_vafcv"    = df_rules_valid_ea_vafcv,
-  "ea_vafca"    = df_rules_valid_ea_vafca,
-  "ea_vafse"    = df_rules_valid_ea_vafse,
-  "ea_vafo"     = df_rules_valid_ea_vafo,
-  "ea_pvafag"   = df_rules_valid_ea_pvafag,
-  "ea_pvafmi"   = df_rules_valid_ea_pvafmi,
-  "ea_pvafit"   = df_rules_valid_ea_pvafit,
-  "ea_pvafic"   = df_rules_valid_ea_pvafic,
-  "ea_pvafup"   = df_rules_valid_ea_pvafup,
-  "ea_pvafcv"   = df_rules_valid_ea_pvafcv,
-  "ea_pvafca"   = df_rules_valid_ea_pvafca,
-  "ea_pvafse"   = df_rules_valid_ea_pvafse,
-  "ea_pvafo"    = df_rules_valid_ea_pvafo,
-  "ea_vafpc"    = df_rules_valid_ea_vafpc,
-  "ea_vafcvpc"  = df_rules_valid_ea_vafcvpc,
-  "ea_emprsf"   = df_rules_valid_ea_emprsf,
-  "ea_emprsftx" = df_rules_valid_ea_emprsftx,
-  "ea_rensf"    = df_rules_valid_ea_rensf,
-  "ea_renpcsf"  = df_rules_valid_ea_renpcsf,
-  "ea_emprsfag" = df_rules_valid_ea_emprsfag,
-  "ea_emprsfmi" = df_rules_valid_ea_emprsfmi,
-  "ea_emprsfit" = df_rules_valid_ea_emprsfit,
-  "ea_emprsfup" = df_rules_valid_ea_emprsfup,
-  "ea_emprsfic" = df_rules_valid_ea_emprsfic,
-  "ea_emprsfco" = df_rules_valid_ea_emprsfco,
-  "ea_emprsfse" = df_rules_valid_ea_emprsfse
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_valid_")
-  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid - ", i))
+  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
 }
+
 ```
+
 
 ```{r df_build_viol_consist}
 
