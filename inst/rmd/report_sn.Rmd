@@ -141,6 +141,14 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 ano_base_alter <- c(
   "NA" = NA_integer_
 )
+
+exclusions_years <- c(
+  "AS_IGDMCONDE"      = c(2019, 2020),       
+  "AS_IGDMCONDS"      = 2021       
+  # "AS_IGDMATU"        = 2021,
+  # "AS_IGDMCOBCAD"     = c(2015,2016,2017,2019,2020),
+  )
+
 ```
 
 ```{r get_cat}
@@ -167,6 +175,8 @@ desc_regra_valid <- c(
 desc_regra_valid_var <- data.frame(
   Regra = c(
     "VI_SN_BAIXO_PESO_NASCER",
+    "VI_SN_COR_TOTAL",
+    "VI_SN_COR_BAIXOPESO",
     "VI_SN_RECURSO_PAA",
     "VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA",
     "VI_SN_MULHERES_PAA_SOMA",
@@ -175,7 +185,10 @@ desc_regra_valid_var <- data.frame(
     "VI_SN_DEMANDA_PAA",
     "VI_SN_REPASSE_AGRIC_PNAE",
     "VI_SN_ESCOLAS_PNAE",
+    "VI_SN_RAZAO_NUTRI",
     "VI_SN_ESCOLAS_POTAVEL",
+    "VI_SN_MEDIA_ARMAZEM",
+    "VI_SN_MEDIA_ARMAZEM_NORM",
     "VI_SN_ENERGIA_ESCOLAS",
     "VI_SN_VULNERABILIDADE_ESCOLAS",
     "VI_SN_AGUA_ESCOLAS",
@@ -189,15 +202,20 @@ desc_regra_valid_var <- data.frame(
     `Descrição` = dplyr::case_match(
       Regra,
       "VI_SN_BAIXO_PESO_NASCER"                 ~ desc_regra_valid[3],
-      "VI_SN_RECURSO_PAA"                       ~ desc_regra_valid[3],
-      "VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA"      ~ desc_regra_valid[3],
+      "VI_SN_COR_TOTAL"                         ~ desc_regra_valid[3],
+      "VI_SN_COR_BAIXOPESO"                     ~ desc_regra_valid[3],
+      "VI_SN_RECURSO_PAA"                       ~ desc_regra_valid[1],
+      "VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA"      ~ desc_regra_valid[1],
       "VI_SN_MULHERES_PAA_SOMA"                 ~ desc_regra_valid[3],
-      "VI_SN_ADESAO_PAA"                        ~ desc_regra_valid[3],
+      "VI_SN_ADESAO_PAA"                        ~ desc_regra_valid[2],
       "VI_SN_AGRICULTOR_PAA_CADUNICO"           ~ desc_regra_valid[3],
-      "VI_SN_DEMANDA_PAA"                       ~ desc_regra_valid[3],
+      "VI_SN_DEMANDA_PAA"                       ~ desc_regra_valid[1],
       "VI_SN_REPASSE_AGRIC_PNAE"                ~ desc_regra_valid[3],
       "VI_SN_ESCOLAS_PNAE"                      ~ desc_regra_valid[3],
+      "VI_SN_RAZAO_NUTRI"                       ~ desc_regra_valid[1],
       "VI_SN_ESCOLAS_POTAVEL"                   ~ desc_regra_valid[3],
+      "VI_SN_MEDIA_ARMAZEM"                     ~ desc_regra_valid[1],
+      "VI_SN_MEDIA_ARMAZEM_NORM"                ~ desc_regra_valid[1],
       "VI_SN_ENERGIA_ESCOLAS"                   ~ desc_regra_valid[3],
       "VI_SN_VULNERABILIDADE_ESCOLAS"           ~ desc_regra_valid[3],
       "VI_SN_AGUA_ESCOLAS"                      ~ desc_regra_valid[3],
@@ -217,23 +235,28 @@ desc_regra_valid_var <- data.frame(
 ```{r rules_type}
   
 rules_type <- validate::validator(
-  TI_SN_BAIXO_PESO_NASCER            = numeric(SN_BAIXO_PESO_NASCER), 
-  TI_SN_RECURSO_PAA                  = numeric(SN_RECURSO_PAA), 
-  TI_SN_MEDIA_RECURSO_AGRICULTOR_PAA = numeric(SN_MEDIA_RECURSO_AGRICULTOR_PAA), 
-  TI_SN_MULHERES_PAA_SOMA            = numeric(SN_MULHERES_PAA_SOMA), 
-  TI_SN_ADESAO_PAA                   = numeric(SN_ADESAO_PAA), 
-  TI_SN_AGRICULTOR_PAA_CADUNICO      = numeric(SN_AGRICULTOR_PAA_CADUNICO), 
-  TI_SN_DEMANDA_PAA                  = numeric(SN_DEMANDA_PAA), 
-  TI_SN_REPASSE_AGRIC_PNAE           = numeric(SN_REPASSE_AGRIC_PNAE), 
-  TI_SN_ESCOLAS_PNAE                 = numeric(SN_ESCOLAS_PNAE), 
-  TI_SN_ESCOLAS_POTAVEL              = numeric(SN_ESCOLAS_POTAVEL), 
-  TI_SN_ENERGIA_ESCOLAS              = numeric(SN_ENERGIA_ESCOLAS), 
-  TI_SN_VULNERABILIDADE_ESCOLAS      = numeric(SN_VULNERABILIDADE_ESCOLAS), 
-  TI_SN_AGUA_ESCOLAS                 = numeric(SN_AGUA_ESCOLAS), 
-  TI_SN_ESGOTO_ESCOLAS               = numeric(SN_ESGOTO_ESCOLAS), 
-  TI_SN_LIXO_ESCOLAS                 = numeric(SN_LIXO_ESCOLAS), 
-  TI_SN_TRABAGRICU                   = numeric(SN_TRABAGRICU), 
-  TI_SN_TRABAGRIMUL                  = numeric(SN_TRABAGRIMUL)
+  TI_SN_BAIXO_PESO_NASCER            = is.numeric(SN_BAIXO_PESO_NASCER), 
+  TI_SN_COR_TOTAL                    = is.numeric(SN_COR_TOTAL),
+  TI_SN_COR_BAIXOPESO                = is.numeric(SN_COR_BAIXOPESO),
+  TI_SN_RECURSO_PAA                  = is.numeric(SN_RECURSO_PAA), 
+  TI_SN_MEDIA_RECURSO_AGRICULTOR_PAA = is.numeric(SN_MEDIA_RECURSO_AGRICULTOR_PAA), 
+  TI_SN_MULHERES_PAA_SOMA            = is.numeric(SN_MULHERES_PAA_SOMA), 
+  TI_SN_ADESAO_PAA                   = is.numeric(SN_ADESAO_PAA), 
+  TI_SN_AGRICULTOR_PAA_CADUNICO      = is.numeric(SN_AGRICULTOR_PAA_CADUNICO), 
+  TI_SN_DEMANDA_PAA                  = is.numeric(SN_DEMANDA_PAA), 
+  TI_SN_REPASSE_AGRIC_PNAE           = is.numeric(SN_REPASSE_AGRIC_PNAE), 
+  TI_SN_ESCOLAS_PNAE                 = is.numeric(SN_ESCOLAS_PNAE), 
+  TI_SN_RAZAO_NUTRI                  = is.numeric(SN_RAZAO_NUTRI),
+  TI_SN_ESCOLAS_POTAVEL              = is.numeric(SN_ESCOLAS_POTAVEL), 
+  TI_SN_MEDIA_ARMAZEM                = is.numeric(SN_MEDIA_ARMAZEM),
+  TI_SN_MEDIA_ARMAZEM_NORM           = is.numeric(SN_MEDIA_ARMAZEM_NORM),
+  TI_SN_ENERGIA_ESCOLAS              = is.numeric(SN_ENERGIA_ESCOLAS), 
+  TI_SN_VULNERABILIDADE_ESCOLAS      = is.numeric(SN_VULNERABILIDADE_ESCOLAS), 
+  TI_SN_AGUA_ESCOLAS                 = is.numeric(SN_AGUA_ESCOLAS), 
+  TI_SN_ESGOTO_ESCOLAS               = is.numeric(SN_ESGOTO_ESCOLAS), 
+  TI_SN_LIXO_ESCOLAS                 = is.numeric(SN_LIXO_ESCOLAS), 
+  TI_SN_TRABAGRICU                   = is.numeric(SN_TRABAGRICU), 
+  TI_SN_TRABAGRIMUL                  = is.numeric(SN_TRABAGRIMUL)
 )
 ```
 
@@ -256,7 +279,7 @@ validate::summary(check_type) |>
 ```{r data_rules_valid_sn_all}
 
 ## df com o resultado das aplicações das regras
-df_rules_valid_ca_all <- data |> 
+df_rules_valid_sn_all <- data |> 
   dplyr::select(
     Ano   = ANO, 
     ibge7 = IBGE7, 
@@ -265,6 +288,8 @@ df_rules_valid_ca_all <- data |>
   dplyr::mutate(
     # Missing
     VI_NA_SN_BAIXO_PESO_NASCER            = dplyr::if_else(!is.na(SN_BAIXO_PESO_NASCER), F, T),
+    VI_NA_SN_COR_TOTAL                    = dplyr::if_else(!is.na(SN_COR_TOTAL), F, T),
+    VI_NA_SN_COR_BAIXOPESO                = dplyr::if_else(!is.na(SN_COR_BAIXOPESO), F, T),
     VI_NA_SN_RECURSO_PAA                  = dplyr::if_else(!is.na(SN_RECURSO_PAA), F, T),
     VI_NA_SN_MEDIA_RECURSO_AGRICULTOR_PAA = dplyr::if_else(!is.na(SN_MEDIA_RECURSO_AGRICULTOR_PAA), F, T),
     VI_NA_SN_MULHERES_PAA_SOMA            = dplyr::if_else(!is.na(SN_MULHERES_PAA_SOMA), F, T),
@@ -281,38 +306,32 @@ df_rules_valid_ca_all <- data |>
     VI_NA_SN_LIXO_ESCOLAS                 = dplyr::if_else(!is.na(SN_LIXO_ESCOLAS), F, T),
     VI_NA_SN_TRABAGRICU                   = dplyr::if_else(!is.na(SN_TRABAGRICU), F, T),
     VI_NA_SN_TRABAGRIMUL                  = dplyr::if_else(!is.na(SN_TRABAGRIMUL), F, T),
-    VI_NA_CA_AREABIB                      = dplyr::if_else(!is.na(CA_AREABIB), F, T),
-    VI_NA_CA_ACERVOBIB                    = dplyr::if_else(!is.na(CA_ACERVOBIB), F, T),
-    VI_NA_CA_WEBBIB                       = dplyr::if_else(!is.na(CA_WEBBIB), F, T),
-    VI_NA_CA_COMPBIB                      = dplyr::if_else(!is.na(CA_COMPBIB), F, T),
-    VI_NA_CA_LEITMESBIB                   = dplyr::if_else(!is.na(CA_LEITMESBIB), F, T),
-    VI_NA_CA_EMPMESBIB                    = dplyr::if_else(!is.na(CA_EMPMESBIB), F, T),
-    VI_NA_CA_ICMSPATCULT                  = dplyr::if_else(!is.na(CA_ICMSPATCULT), F, T),
-    VI_NA_CA_FUNDO                        = dplyr::if_else(!is.na(CA_FUNDO), F, T),
-    VI_NA_CA_REGISTRO                     = dplyr::if_else(!is.na(CA_REGISTRO), F, T),
-    VI_NA_CA_ESTRUOGC                     = dplyr::if_else(!is.na(CA_ESTRUOGC), F, T),
-    VI_NA_CA_LEGPAT                       = dplyr::if_else(!is.na(CA_LEGPAT), F, T),
-    VI_NA_CA_ARQPUB                       = dplyr::if_else(!is.na(CA_ARQPUB), F, T),
-    VI_NA_CA_NUMBIB                       = dplyr::if_else(!is.na(CA_NUMBIB), F, T),
+    
     # Others
-    VI_SN_BAIXO_PESO_NASCER       = dplyr::if_else(SN_BAIXO_PESO_NASCER %in% cat_dic, F, T),
-    VI_SN_RECURSO_PAA      = dplyr::if_else(SN_RECURSO_PAA %in% cat_dic, F, T),
-    VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA      = dplyr::if_else(SN_MEDIA_RECURSO_AGRICULTOR_PAA %in% cat_dic, F, T),
-    VI_SN_MULHERES_PAA_SOMA  = dplyr::if_else(SN_MULHERES_PAA_SOMA %in% cat_dic, F, T),
-    VI_SN_ADESAO_PAA     = dplyr::if_else(SN_ADESAO_PAA %in% cat_dic, F, T),
-    VI_SN_AGRICULTOR_PAA_CADUNICO       = dplyr::if_else(SN_AGRICULTOR_PAA_CADUNICO %in% cat_dic, F, T),
-    VI_SN_DEMANDA_PAA       = dplyr::if_else(SN_DEMANDA_PAA %in% cat_dic, F, T),
-    VI_SN_REPASSE_AGRIC_PNAE  = dplyr::if_else(SN_REPASSE_AGRIC_PNAE %in% cat_gartistico, F, T),
-    VI_SN_ESCOLAS_PNAE    = dplyr::if_else(SN_ESCOLAS_PNAE %in% cat_ativcult, F, T),
-    VI_SN_ESCOLAS_POTAVEL       = dplyr::if_else(SN_ESCOLAS_POTAVEL %in% cat_meioc, F, T),
-    VI_SN_ENERGIA_ESCOLAS      = dplyr::if_else(SN_ENERGIA_ESCOLAS %in% cat_orgaoc, F, T),
-    VI_SN_VULNERABILIDADE_ESCOLAS    = dplyr::if_else(SN_VULNERABILIDADE_ESCOLAS %in% cat_instcons, F, T),
-    VI_SN_AGUA_ESCOLAS      = dplyr::if_else(dplyr::between(SN_AGUA_ESCOLAS, 0, 100), F, T),
-    VI_SN_ESGOTO_ESCOLAS     = dplyr::if_else(dplyr::between(SN_ESGOTO_ESCOLAS, 0, 50), F, T),
-    VI_SN_LIXO_ESCOLAS         = dplyr::if_else(dplyr::between(SN_LIXO_ESCOLAS, 0, 20), F, T),
-    VI_SN_TRABAGRICU     = dplyr::if_else(dplyr::between(SN_TRABAGRICU, 0, 100), F, T),
-    VI_SN_TRABAGRIMUL     = dplyr::if_else(dplyr::between(SN_TRABAGRIMUL, 0, 100), F, T)
+    VI_SN_BAIXO_PESO_NASCER  = dplyr::if_else(dplyr::between(SN_BAIXO_PESO_NASCER, 0, 100), F, T),
+    VI_SN_COR_TOTAL          = dplyr::if_else(dplyr::between(SN_COR_TOTAL, 0, 100), F, T),
+    VI_SN_COR_BAIXOPESO      = dplyr::if_else(dplyr::between(SN_COR_BAIXOPESO, 0, 100), F, T),
+    VI_SN_RECURSO_PAA        = dplyr::if_else(dplyr::between(SN_RECURSO_PAA, 0, 100), F, T),
+    VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA = dplyr::if_else(SN_MEDIA_RECURSO_AGRICULTOR_PAA >= 0, F, T),
+    VI_SN_MULHERES_PAA_SOMA       = dplyr::if_else(dplyr::between(SN_MULHERES_PAA_SOMA, 0, 100), F, T),
+    VI_SN_ADESAO_PAA              = dplyr::if_else(SN_ADESAO_PAA %in% cat_dic, F, T),
+    VI_SN_AGRICULTOR_PAA_CADUNICO = dplyr::if_else(dplyr::between(SN_AGRICULTOR_PAA_CADUNICO, 0, 100), F, T),
+    VI_SN_DEMANDA_PAA             = dplyr::if_else(SN_DEMANDA_PAA>= 0, F, T),
+    VI_SN_REPASSE_AGRIC_PNAE      = dplyr::if_else(dplyr::between(SN_REPASSE_AGRIC_PNAE, 0, 100), F, T),
+    VI_SN_ESCOLAS_PNAE            = dplyr::if_else(dplyr::between(SN_ESCOLAS_PNAE, 0, 100), F, T),
+    VI_SN_RAZAO_NUTRI             = dplyr::if_else(SN_RAZAO_NUTRI >= 0, F, T),
+    VI_SN_ESCOLAS_POTAVEL         = dplyr::if_else(dplyr::between(SN_ESCOLAS_POTAVEL, 0, 100), F, T),
+    VI_SN_MEDIA_ARMAZEM           = dplyr::if_else(SN_MEDIA_ARMAZEM >= 0, F, T),
+    VI_SN_MEDIA_ARMAZEM_NORM      = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM >= 0, F, T),
+    VI_SN_ENERGIA_ESCOLAS         = dplyr::if_else(dplyr::between(SN_ENERGIA_ESCOLAS, 0, 100), F, T),
+    VI_SN_VULNERABILIDADE_ESCOLAS = dplyr::if_else(dplyr::between(SN_VULNERABILIDADE_ESCOLAS, 0, 100), F, T),
+    VI_SN_AGUA_ESCOLAS            = dplyr::if_else(dplyr::between(SN_AGUA_ESCOLAS, 0, 100), F, T),
+    VI_SN_ESGOTO_ESCOLAS          = dplyr::if_else(dplyr::between(SN_ESGOTO_ESCOLAS, 0, 100), F, T),
+    VI_SN_LIXO_ESCOLAS            = dplyr::if_else(dplyr::between(SN_LIXO_ESCOLAS, 0, 100), F, T),
+    VI_SN_TRABAGRICU              = dplyr::if_else(dplyr::between(SN_TRABAGRICU, 0, 100), F, T),
+    VI_SN_TRABAGRIMUL             = dplyr::if_else(dplyr::between(SN_TRABAGRIMUL, 0, 100), F, T)
   )
+data$SN_ADESAO_PAA <- as.character(data$SN_ADESAO_PAA)
 ```
 
 ```{r data_wrangling_valid_sn_all}
@@ -321,13 +340,13 @@ df_rules_valid_ca_all <- data |>
 df_sumario_valid_sn <- df_rules_valid_sn_all |>
   dplyr::select(Ano,
                 ibge7,
-                dplyr::starts_with(c("VI_", "VF_"))) |>
+                dplyr::starts_with(c("VI_", "VI_NA"))) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7),
                       names_to = "Regra",
                       values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_valid_ca |> 
+df_sumario <- df_sumario_valid_sn |> 
   dplyr::group_by(Ano, Regra) |> 
   dplyr::summarise(
     Total        = dplyr::n(),
@@ -335,7 +354,7 @@ df_sumario <- df_sumario_valid_ca |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(resultado),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -346,12 +365,13 @@ df_sumario <- df_sumario_valid_ca |>
 ```{r table_valid_sn_na_all}
 
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -368,7 +388,8 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>
+  unique() |> # Introdução coluna descrição
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -449,6 +470,169 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
+
+
+
+### SN_COR_TOTAL
+
+```{r data_rules_dist_SN_COR_TOTAL}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_SN_COR_TOTAL <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SN_COR_TOTAL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_COR_TOTAL"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_COR_TOTAL) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SN_COR_TOTAL_hampel_munic  = dplyr::if_else(!hampel_filter(SN_COR_TOTAL), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_TOTAL_out_munic     = dplyr::if_else(!outlier_function(SN_COR_TOTAL), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_TOTAL_min_munic     = dplyr::if_else(SN_COR_TOTAL >= (min(dplyr::lag(SN_COR_TOTAL), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SN_COR_TOTAL_max_munic     = dplyr::if_else(SN_COR_TOTAL <= (max(dplyr::lag(SN_COR_TOTAL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_TOTAL_min_k_munic   = dplyr::if_else(SN_COR_TOTAL >= (min(dplyr::lag(SN_COR_TOTAL), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_SN_COR_TOTAL_max_k_munic   = dplyr::if_else(SN_COR_TOTAL <= (k * max(dplyr::lag(SN_COR_TOTAL), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_TOTAL_med_mov_munic = dplyr::if_else(SN_COR_TOTAL <= (k * zoo::rollmedian(SN_COR_TOTAL, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_TOTAL_dif_munic     = dplyr::if_else(!compare_first_dif(SN_COR_TOTAL), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_SN_COR_TOTAL}
+
+## Transformação dos resultados
+df_sumario_dist_sn <- df_rules_dist_SN_COR_TOTAL |> 
+  dplyr::select(!SN_COR_TOTAL) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_SN_COR_TOTAL}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_SN_COR_TOTAL}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+
+
+
+
+
+### SN_COR_BAIXOPESO
+
+```{r data_rules_dist_SN_COR_BAIXOPESO}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_SN_COR_BAIXOPESO <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SN_COR_BAIXOPESO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_COR_BAIXOPESO"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_COR_BAIXOPESO) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SN_COR_BAIXOPESO_hampel_munic  = dplyr::if_else(!hampel_filter(SN_COR_BAIXOPESO), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_BAIXOPESO_out_munic     = dplyr::if_else(!outlier_function(SN_COR_BAIXOPESO), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_BAIXOPESO_min_munic     = dplyr::if_else(SN_COR_BAIXOPESO >= (min(dplyr::lag(SN_COR_BAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SN_COR_BAIXOPESO_max_munic     = dplyr::if_else(SN_COR_BAIXOPESO <= (max(dplyr::lag(SN_COR_BAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_BAIXOPESO_min_k_munic   = dplyr::if_else(SN_COR_BAIXOPESO >= (min(dplyr::lag(SN_COR_BAIXOPESO), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_SN_COR_BAIXOPESO_max_k_munic   = dplyr::if_else(SN_COR_BAIXOPESO <= (k * max(dplyr::lag(SN_COR_BAIXOPESO), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_BAIXOPESO_med_mov_munic = dplyr::if_else(SN_COR_BAIXOPESO <= (k * zoo::rollmedian(SN_COR_BAIXOPESO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SN_COR_BAIXOPESO_dif_munic     = dplyr::if_else(!compare_first_dif(SN_COR_BAIXOPESO), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_SN_COR_BAIXOPESO}
+
+## Transformação dos resultados
+df_sumario_dist_sn <- df_rules_dist_SN_COR_BAIXOPESO |> 
+  dplyr::select(!SN_COR_BAIXOPESO) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_SN_COR_BAIXOPESO}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_SN_COR_BAIXOPESO}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+
+
+
+
 
 
 
@@ -1125,6 +1309,98 @@ chart_vbar(df_sumario)
 
 
 
+### SN_RAZAO_NUTRI
+
+```{r data_rules_dist_SN_RAZAO_NUTRI}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_SN_RAZAO_NUTRI <- data |> 
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SN_RAZAO_NUTRI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_RAZAO_NUTRI"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_RAZAO_NUTRI) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SN_RAZAO_NUTRI_hampel_munic  = dplyr::if_else(!hampel_filter(SN_RAZAO_NUTRI), F, T), # Longitudinal (município)
+    
+    DF_SN_RAZAO_NUTRI_out_munic     = dplyr::if_else(!outlier_function(SN_RAZAO_NUTRI), F, T), # Longitudinal (município)
+    
+    DF_SN_RAZAO_NUTRI_min_munic     = dplyr::if_else(SN_RAZAO_NUTRI >= (min(dplyr::lag(SN_RAZAO_NUTRI), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SN_RAZAO_NUTRI_max_munic     = dplyr::if_else(SN_RAZAO_NUTRI <= (max(dplyr::lag(SN_RAZAO_NUTRI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_RAZAO_NUTRI_min_k_munic   = dplyr::if_else(SN_RAZAO_NUTRI >= (min(dplyr::lag(SN_RAZAO_NUTRI), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_SN_RAZAO_NUTRI_max_k_munic   = dplyr::if_else(SN_RAZAO_NUTRI <= (k * max(dplyr::lag(SN_RAZAO_NUTRI), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_RAZAO_NUTRI_med_mov_munic = dplyr::if_else(SN_RAZAO_NUTRI <= (k * zoo::rollmedian(SN_RAZAO_NUTRI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SN_RAZAO_NUTRI_dif_munic     = dplyr::if_else(!compare_first_dif(SN_RAZAO_NUTRI), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_SN_RAZAO_NUTRI}
+
+## Transformação dos resultados
+df_sumario_dist_sn <- df_rules_dist_SN_RAZAO_NUTRI |> 
+  dplyr::select(!SN_RAZAO_NUTRI) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_SN_RAZAO_NUTRI}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_SN_RAZAO_NUTRI}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### SN_ESCOLAS_POTAVEL
 
 ```{r data_rules_dist_SN_ESCOLAS_POTAVEL}
@@ -1409,7 +1685,6 @@ chart_vbar(df_sumario)
 
 
 
-
 ### SN_AGUA_ESCOLAS
 
 ```{r data_rules_dist_SN_AGUA_ESCOLAS}
@@ -1483,6 +1758,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### SN_ESGOTO_ESCOLAS
 
@@ -1558,6 +1834,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### SN_LIXO_ESCOLAS
 
 ```{r data_rules_dist_SN_LIXO_ESCOLAS}
@@ -1632,6 +1909,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### SN_TRABAGRICU
 
 ```{r data_rules_dist_SN_TRABAGRICU}
@@ -1705,6 +1983,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### SN_TRABAGRIMUL
 
