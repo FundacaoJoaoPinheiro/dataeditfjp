@@ -36,9 +36,9 @@ dataeditfjp::creating_report()
 This study was developed with financial support from the Research Support Foundation of the State of Minas Gerais (Fapemig) under the project "Building Capacities and Expanding Frontiers in Research at FJP" - Call No. 003/2023.
 
 ## Team
-Coordination Social Indicators: Caio Gonçalves
-Unit of Statistics and Data Management: Renato Vale
-Script Development: Erick Amorim, Igor Souza and Luiz Pataca
+- Coordination Social Indicators: Caio Gonçalves
+- Unit of Statistics and Data Management: Renato Vale
+- Script Development: Erick Amorim, Igor Souza and Luiz Pataca
 
 ## Contributions
 Contributions are welcome! If you wish to contribute to the development of this package, please open an issue or a pull request on the GitHub repository or contact us at: dados@fjp.mg.gov.br
