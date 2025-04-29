@@ -132,21 +132,53 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
 # no ano inicial de análise devido a fatores como mudança de metodologia
-# ano_base_alter <- c(
-#   "MA_ICMSECOLOG" = 2010
-# )
+ano_base_alter <- c(
+   "SN_BAIXO_PESO_NASCER"            = 2019,
+   "SN_COR_TOTAL"                    = 2019,
+   "SN_COR_BAIXOPESO"                = 2019,
+   "SN_RECURSO_PAA"                  = 2019,
+   "SN_MEDIA_RECURSO_AGRICULTOR_PAA" = 2019,
+   "SN_MULHERES_PAA_SOMA"            = 2019,
+   "SN_AGRICULTOR_PAA_CADUNICO"      = 2019,
+   "SN_DEMANDA_PAA"                  = 2019,
+   "SN_REPASSE_AGRIC_PNAE"           = 2016,
+   "SN_ESCOLAS_PNAE"                 = 2016,
+   "SN_RAZAO_NUTRI"                  = 2019,
+   "SN_ESCOLAS_POTAVEL"              = 2016,
+   "SN_MEDIA_ARMAZEM"                = 2016,
+   "SN_MEDIA_ARMAZEM_NORM"           = 2016,
+   "SN_ENERGIA_ESCOLAS"              = 2016,
+   "SN_VULNERABILIDADE_ESCOLAS"      = 2016,
+   "SN_AGUA_ESCOLAS"                 = 2016,
+   "SN_ESGOTO_ESCOLAS"               = 2016,
+   "SN_LIXO_ESCOLAS"                 = 2016,
+   "SN_TRABAGRICU"                   = 2014,
+   "SN_TRABAGRIMUL"                  = 2014
+)
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
-ano_base_alter <- c(
-  "NA" = NA_integer_
-)
+# ano_base_alter <- c(
+#   "NA" = NA_integer_
+# )
 
 exclusions_years <- c(
-  "AS_IGDMCONDE"      = c(2019, 2020),       
-  "AS_IGDMCONDS"      = 2021       
-  # "AS_IGDMATU"        = 2021,
-  # "AS_IGDMCOBCAD"     = c(2015,2016,2017,2019,2020),
+   "SN_BAIXO_PESO_NASCER"            = c(2024),
+   "SN_COR_TOTAL"                    = c(2024),
+   "SN_COR_BAIXOPESO"                = c(2024),
+   "SN_REPASSE_AGRIC_PNAE"           = c(2020,2021,2023,2024),
+   "SN_ESCOLAS_PNAE"                 = c(2020,2021,2024),
+   "SN_RAZAO_NUTRI"                  = c(2020,2021,2024),
+   "SN_ESCOLAS_POTAVEL"              = c(2020,2021,2024),
+   "SN_MEDIA_ARMAZEM"                = c(2020,2021,2024),
+   "SN_MEDIA_ARMAZEM_NORM"           = c(2020,2021,2024),
+   "SN_ENERGIA_ESCOLAS"              = c(2020,2021,2024),
+   "SN_VULNERABILIDADE_ESCOLAS"      = c(2020,2021,2024),
+   "SN_AGUA_ESCOLAS"                 = c(2020,2021,2024),
+   "SN_ESGOTO_ESCOLAS"               = c(2020,2021,2024),
+   "SN_LIXO_ESCOLAS"                 = c(2020,2021,2024),
+   "SN_TRABAGRICU"                   = c(2024),
+   "SN_TRABAGRIMUL"                  = c(2024)
   )
 
 ```
@@ -332,6 +364,13 @@ df_rules_valid_sn_all <- data |>
     VI_SN_TRABAGRIMUL             = dplyr::if_else(dplyr::between(SN_TRABAGRIMUL, 0, 100), F, T)
   )
 data$SN_ADESAO_PAA <- as.character(data$SN_ADESAO_PAA)
+var_char <- data |> 
+  dplyr::select(
+    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
+  ) |> 
+  colnames() |> 
+  unlist()
+var_numeric <- var_numeric[var_numeric != var_char]
 ```
 
 ```{r data_wrangling_valid_sn_all}
@@ -372,6 +411,7 @@ df_sumario |>
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
   dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  dplyr::mutate(`% Ausente` = ifelse(is.infinite(`% Ausente`),100,`% Ausente`)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -388,8 +428,10 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>
-  unique() |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>  # Introdução coluna descrição
+  unique() |> 
+  dplyr::select(-c(Ausente,`% Ausente`))|> 
+  dplyr::mutate( `% Suspeita`= ifelse(is.na(`% Suspeita`),0,`% Suspeita`))|>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -403,6 +445,7 @@ df_sumario |>
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_BAIXO_PESO_NASCER <- data |> 
+  remove_year_variable(variable = "SN_BAIXO_PESO_NASCER", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_BAIXO_PESO_NASCER" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_BAIXO_PESO_NASCER"],
@@ -450,6 +493,19 @@ df_sumario <- df_sumario_dist_sn |>
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
+
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
 ```
 
 ```{r table_dist_SN_BAIXO_PESO_NASCER}
@@ -460,6 +516,7 @@ df_sumario |>
   dplyr::mutate(Ano = as.character(Ano)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
+
 ```
 
 ```{r chart_dist_SN_BAIXO_PESO_NASCER}
@@ -480,6 +537,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_COR_TOTAL <- data |> 
+  remove_year_variable(variable = "SN_COR_TOTAL", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_COR_TOTAL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_COR_TOTAL"],
@@ -523,10 +581,11 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
+
 ```
 
 ```{r table_dist_SN_COR_TOTAL}
@@ -560,6 +619,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_COR_BAIXOPESO <- data |> 
+  remove_year_variable(variable = "SN_COR_BAIXOPESO", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_COR_BAIXOPESO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_COR_BAIXOPESO"],
@@ -603,7 +663,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -685,7 +745,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -762,7 +822,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -843,7 +903,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -867,90 +927,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
-
-
-### SN_ADESAO_PAA
-
-```{r data_rules_dist_SN_ADESAO_PAA}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_SN_ADESAO_PAA <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "SN_ADESAO_PAA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_ADESAO_PAA"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_ADESAO_PAA) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_SN_ADESAO_PAA_hampel_munic  = dplyr::if_else(!hampel_filter(SN_ADESAO_PAA), F, T), # Longitudinal (município)
-    
-    DF_SN_ADESAO_PAA_out_munic     = dplyr::if_else(!outlier_function(SN_ADESAO_PAA), F, T), # Longitudinal (município)
-    
-    DF_SN_ADESAO_PAA_min_munic     = dplyr::if_else(SN_ADESAO_PAA >= (min(dplyr::lag(SN_ADESAO_PAA), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_SN_ADESAO_PAA_max_munic     = dplyr::if_else(SN_ADESAO_PAA <= (max(dplyr::lag(SN_ADESAO_PAA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_SN_ADESAO_PAA_min_k_munic   = dplyr::if_else(SN_ADESAO_PAA >= (min(dplyr::lag(SN_ADESAO_PAA), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_SN_ADESAO_PAA_max_k_munic   = dplyr::if_else(SN_ADESAO_PAA <= (k * max(dplyr::lag(SN_ADESAO_PAA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_SN_ADESAO_PAA_med_mov_munic = dplyr::if_else(SN_ADESAO_PAA <= (k * zoo::rollmedian(SN_ADESAO_PAA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_SN_ADESAO_PAA_dif_munic     = dplyr::if_else(!compare_first_dif(SN_ADESAO_PAA), F, T) # Longitudinal (município)
-)
-```
-
-```{r data_wrangling_dist_SN_ADESAO_PAA}
-
-## Transformação dos resultados
-df_sumario_dist_sn <- df_rules_dist_SN_ADESAO_PAA |> 
-  dplyr::select(!SN_ADESAO_PAA) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_sn |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_SN_ADESAO_PAA}
-#| column: screen-inset-right
-
-df_sumario |>
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_SN_ADESAO_PAA}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-
 
 
 
@@ -1009,7 +985,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1033,13 +1009,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
-
-
-
-
-
-
 
 
 
@@ -1094,7 +1063,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1121,22 +1090,13 @@ chart_vbar(df_sumario)
 
 
 
-
-
-
-
-
-
-
-
-
-
 ### SN_REPASSE_AGRIC_PNAE
 
 ```{r data_rules_dist_SN_REPASSE_AGRIC_PNAE}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_REPASSE_AGRIC_PNAE <- data |> 
+  remove_year_variable(variable = "SN_REPASSE_AGRIC_PNAE", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_REPASSE_AGRIC_PNAE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_REPASSE_AGRIC_PNAE"],
@@ -1180,7 +1140,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1207,24 +1167,13 @@ chart_vbar(df_sumario)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ### SN_ESCOLAS_PNAE
 
 ```{r data_rules_dist_SN_ESCOLAS_PNAE}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_ESCOLAS_PNAE <- data |> 
+  remove_year_variable(variable = "SN_ESCOLAS_PNAE", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_ESCOLAS_PNAE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_ESCOLAS_PNAE"],
@@ -1268,7 +1217,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1295,26 +1244,13 @@ chart_vbar(df_sumario)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### SN_RAZAO_NUTRI
 
 ```{r data_rules_dist_SN_RAZAO_NUTRI}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_RAZAO_NUTRI <- data |> 
+  remove_year_variable(variable = "SN_RAZAO_NUTRI", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_RAZAO_NUTRI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_RAZAO_NUTRI"],
@@ -1358,7 +1294,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1384,29 +1320,13 @@ chart_vbar(df_sumario)
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### SN_ESCOLAS_POTAVEL
 
 ```{r data_rules_dist_SN_ESCOLAS_POTAVEL}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_ESCOLAS_POTAVEL <- data |> 
+  remove_year_variable(variable = "SN_ESCOLAS_POTAVEL", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_ESCOLAS_POTAVEL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_ESCOLAS_POTAVEL"],
@@ -1450,7 +1370,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1476,22 +1396,156 @@ chart_vbar(df_sumario)
 ```
 
 
+### SN_MEDIA_ARMAZEM
+
+```{r data_rules_dist_SN_MEDIA_ARMAZEM}
+
+## df com o resultado das aplicações das regras
+df_rules_dist_SN_MEDIA_ARMAZEM <- data |> 
+  remove_year_variable(variable = "SN_MEDIA_ARMAZEM", exclusions_years = exclusions_years) |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SN_MEDIA_ARMAZEM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_MEDIA_ARMAZEM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_MEDIA_ARMAZEM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SN_MEDIA_ARMAZEM_hampel_munic  = dplyr::if_else(!hampel_filter(SN_MEDIA_ARMAZEM), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_out_munic     = dplyr::if_else(!outlier_function(SN_MEDIA_ARMAZEM), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_min_munic     = dplyr::if_else(SN_MEDIA_ARMAZEM >= (min(dplyr::lag(SN_MEDIA_ARMAZEM), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SN_MEDIA_ARMAZEM_max_munic     = dplyr::if_else(SN_MEDIA_ARMAZEM <= (max(dplyr::lag(SN_MEDIA_ARMAZEM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_min_k_munic   = dplyr::if_else(SN_MEDIA_ARMAZEM >= (min(dplyr::lag(SN_MEDIA_ARMAZEM), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_SN_MEDIA_ARMAZEM_max_k_munic   = dplyr::if_else(SN_MEDIA_ARMAZEM <= (k * max(dplyr::lag(SN_MEDIA_ARMAZEM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_med_mov_munic = dplyr::if_else(SN_MEDIA_ARMAZEM <= (k * zoo::rollmedian(SN_MEDIA_ARMAZEM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_dif_munic     = dplyr::if_else(!compare_first_dif(SN_MEDIA_ARMAZEM), F, T) # Longitudinal (município)
+)
+```
+
+```{r data_wrangling_dist_SN_MEDIA_ARMAZEM}
+
+## Transformação dos resultados
+df_sumario_dist_sn <- df_rules_dist_SN_MEDIA_ARMAZEM |> 
+  dplyr::select(!SN_MEDIA_ARMAZEM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
+
+```{r table_dist_SN_MEDIA_ARMAZEM}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+```{r chart_dist_SN_MEDIA_ARMAZEM}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
+
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
 
 
+### SN_MEDIA_ARMAZEM_NORM
 
+```{r data_rules_dist_SN_MEDIA_ARMAZEM_NORM}
 
+## df com o resultado das aplicações das regras
+df_rules_dist_SN_MEDIA_ARMAZEM_NORM <- data |> 
+  remove_year_variable(variable = "SN_MEDIA_ARMAZEM_NORM", exclusions_years = exclusions_years) |>
+  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
+    dplyr::case_when(
+      "SN_MEDIA_ARMAZEM_NORM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_MEDIA_ARMAZEM_NORM"],
+      TRUE ~ ANO >= min(ANO, na.rm = T)
+    )
+  ) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, SN_MEDIA_ARMAZEM_NORM) |> 
+  dplyr::group_by(ibge7) |> 
+  dplyr::mutate(
+    DF_SN_MEDIA_ARMAZEM_NORM_hampel_munic  = dplyr::if_else(!hampel_filter(SN_MEDIA_ARMAZEM_NORM), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_NORM_out_munic     = dplyr::if_else(!outlier_function(SN_MEDIA_ARMAZEM_NORM), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_NORM_min_munic     = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM >= (min(dplyr::lag(SN_MEDIA_ARMAZEM_NORM), na.rm = T)), F, T), # Longitudinal (município)
+     
+    DF_SN_MEDIA_ARMAZEM_NORM_max_munic     = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM <= (max(dplyr::lag(SN_MEDIA_ARMAZEM_NORM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_NORM_min_k_munic   = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM >= (min(dplyr::lag(SN_MEDIA_ARMAZEM_NORM), na.rm = T) / k), F, T), # Longitudinal (município)
+     
+    DF_SN_MEDIA_ARMAZEM_NORM_max_k_munic   = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM <= (k * max(dplyr::lag(SN_MEDIA_ARMAZEM_NORM), na.rm = T)), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_NORM_med_mov_munic = dplyr::if_else(SN_MEDIA_ARMAZEM_NORM <= (k * zoo::rollmedian(SN_MEDIA_ARMAZEM_NORM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    
+    DF_SN_MEDIA_ARMAZEM_NORM_dif_munic     = dplyr::if_else(!compare_first_dif(SN_MEDIA_ARMAZEM_NORM), F, T) # Longitudinal (município)
+)
+```
 
+```{r data_wrangling_dist_SN_MEDIA_ARMAZEM_NORM}
 
+## Transformação dos resultados
+df_sumario_dist_sn <- df_rules_dist_SN_MEDIA_ARMAZEM_NORM |> 
+  dplyr::select(!SN_MEDIA_ARMAZEM_NORM) |> 
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
+## df com um sumário dos resultados
+df_sumario <- df_sumario_dist_sn |> 
+  dplyr::group_by(Ano, Regra) |> 
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |> 
+  dplyr::ungroup()
+```
 
+```{r table_dist_SN_MEDIA_ARMAZEM_NORM}
+#| column: screen-inset-right
 
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kable_paper("hover", full_width = F)
+```
 
+```{r chart_dist_SN_MEDIA_ARMAZEM_NORM}
+#| column: screen-inset-right
+#| layout-ncol: 2
+#| out-width: 100%
 
-
-
-
-
-
+chart_heatmap(df_sumario)
+chart_vbar(df_sumario)
+```
 
 
 ### SN_ENERGIA_ESCOLAS
@@ -1500,6 +1554,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_ENERGIA_ESCOLAS <- data |> 
+  remove_year_variable(variable = "SN_ENERGIA_ESCOLAS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_ENERGIA_ESCOLAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_ENERGIA_ESCOLAS"],
@@ -1543,7 +1598,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1569,32 +1624,13 @@ chart_vbar(df_sumario)
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### SN_VULNERABILIDADE_ESCOLAS
 
 ```{r data_rules_dist_SN_VULNERABILIDADE_ESCOLAS}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_VULNERABILIDADE_ESCOLAS <- data |> 
+  remove_year_variable(variable = "SN_VULNERABILIDADE_ESCOLAS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_VULNERABILIDADE_ESCOLAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_VULNERABILIDADE_ESCOLAS"],
@@ -1638,7 +1674,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1664,33 +1700,13 @@ chart_vbar(df_sumario)
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### SN_AGUA_ESCOLAS
 
 ```{r data_rules_dist_SN_AGUA_ESCOLAS}
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_AGUA_ESCOLAS <- data |> 
+  remove_year_variable(variable = "SN_AGUA_ESCOLAS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_AGUA_ESCOLAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_AGUA_ESCOLAS"],
@@ -1734,7 +1750,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1766,6 +1782,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_ESGOTO_ESCOLAS <- data |> 
+  remove_year_variable(variable = "SN_ESGOTO_ESCOLAS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_ESGOTO_ESCOLAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_ESGOTO_ESCOLAS"],
@@ -1809,7 +1826,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1841,6 +1858,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_LIXO_ESCOLAS <- data |> 
+  remove_year_variable(variable = "SN_LIXO_ESCOLAS", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_LIXO_ESCOLAS" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_LIXO_ESCOLAS"],
@@ -1884,7 +1902,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1916,6 +1934,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_TRABAGRICU <- data |> 
+  remove_year_variable(variable = "SN_TRABAGRICU", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_TRABAGRICU" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_TRABAGRICU"],
@@ -1959,7 +1978,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1991,6 +2010,7 @@ chart_vbar(df_sumario)
 
 ## df com o resultado das aplicações das regras
 df_rules_dist_SN_TRABAGRIMUL <- data |> 
+  remove_year_variable(variable = "SN_TRABAGRIMUL", exclusions_years = exclusions_years) |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
       "SN_TRABAGRIMUL" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SN_TRABAGRIMUL"],
@@ -2034,7 +2054,7 @@ df_sumario <- df_sumario_dist_sn |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2160,48 +2180,39 @@ cidades <- openxlsx::read.xlsx(path_data)
 
   variables = c(
     "SN_BAIXO_PESO_NASCER",
+    "SN_COR_TOTAL",
+    "SN_COR_BAIXOPESO",
     "SN_RECURSO_PAA",
     "SN_MEDIA_RECURSO_AGRICULTOR_PAA",
     "SN_MULHERES_PAA_SOMA",
-    "SN_ADESAO_PAA",
     "SN_AGRICULTOR_PAA_CADUNICO",
     "SN_DEMANDA_PAA",
     "SN_REPASSE_AGRIC_PNAE",
     "SN_ESCOLAS_PNAE",
+    "SN_RAZAO_NUTRI",
     "SN_ESCOLAS_POTAVEL",
+    "SN_MEDIA_ARMAZEM",
+    "SN_MEDIA_ARMAZEM_NORM",
     "SN_ENERGIA_ESCOLAS",
     "SN_VULNERABILIDADE_ESCOLAS",
     "SN_AGUA_ESCOLAS",
     "SN_ESGOTO_ESCOLAS",
     "SN_LIXO_ESCOLAS",
     "SN_TRABAGRICU",
-    "SN_TRABAGRIMUL",
-    "CA_AREABIB",
-    "CA_ACERVOBIB",
-    "CA_WEBBIB",
-    "CA_COMPBIB",
-    "CA_LEITMESBIB",
-    "CA_EMPMESBIB",
-    "CA_ICMSPATCULT",
-    "CA_FUNDO",
-    "CA_REGISTRO",
-    "CA_ESTRUOGC",
-    "CA_LEGPAT",
-    "CA_ARQPUB",
-    "CA_NUMBIB"
+    "SN_TRABAGRIMUL"
     )
 
 lis <- split(variables,f = variables)
 df_obs_valid <- names(lis)|> 
 sapply(function(i){
-lis[[i]] <- df_rules_valid_ca_all |> 
+lis[[i]] <- df_rules_valid_sn_all |> 
   dplyr::select(
     Ano,
     ibge7,
     dplyr::ends_with(i)
   ) |> 
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")),
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SN_")),
     names_to  = "regra",
     values_to = "obs_suspeita"
   ) |>
@@ -2217,614 +2228,45 @@ index <- sapply(df_obs_valid, nrow)!=0
 df_obs_valid <- df_obs_valid[index]
 
 for(i in names(df_obs_valid)){
-  openxlsx::addWorksheet(pt, paste0("valid - ", i))
-  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+  j = gsub(pattern = "SN_",replacement = "",x = i)
+  openxlsx::addWorksheet(pt, paste0("va-", j))
+  openxlsx::writeData(pt, paste0("va-", j), df_obs_valid[[i]])
 }
 
-
-# Criar base com as observações que violaram uma ou mais regras de validade
-
-## Validade
-# df_rules_valid_SN_BAIXO_PESO_NASCER <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_BAIXO_PESO_NASCER")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_RECURSO_PAA <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_RECURSO_PAA")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_MEDIA_RECURSO_AGRICULTOR_PAA <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_MEDIA_RECURSO_AGRICULTOR_PAA")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_MULHERES_PAA_SOMA <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_MULHERES_PAA_SOMA")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_ADESAO_PAA <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_ADESAO_PAA")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_AGRICULTOR_PAA_CADUNICO <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_AGRICULTOR_PAA_CADUNICO")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_DEMANDA_PAA <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_DEMANDA_PAA")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_REPASSE_AGRIC_PNAE <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_REPASSE_AGRIC_PNAE")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_ESCOLAS_PNAE <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_ESCOLAS_PNAE")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_ESCOLAS_POTAVEL <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_ESCOLAS_POTAVEL")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_ENERGIA_ESCOLAS <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_ENERGIA_ESCOLAS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_VULNERABILIDADE_ESCOLAS <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_VULNERABILIDADE_ESCOLAS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_AGUA_ESCOLAS <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_AGUA_ESCOLAS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_ESGOTO_ESCOLAS <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_ESGOTO_ESCOLAS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_LIXO_ESCOLAS <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_LIXO_ESCOLAS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_TRABAGRICU <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_TRABAGRICU")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_SN_TRABAGRIMUL <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("SN_TRABAGRIMUL")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_areabib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_AREABIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_acervobib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_ACERVOBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_webbib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_WEBBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_compbib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_COMPBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_leitmesbib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_LEITMESBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_empmesbib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_EMPMESBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_icmspatcult <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_ICMSPATCULT")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_fundo <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_FUNDO")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_registro <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_REGISTRO")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_estruogc <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_ESTRUOGC")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_legpat <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_LEGPAT")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_arqpub <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_ARQPUB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# ## Validade
-# df_rules_valid_ca_numbib <- df_rules_valid_ca_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::ends_with("CA_NUMBIB")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
 ```
 
-```{r df_export_viol_valid}
 
-## Lista com os dfs por indicador
-# lista_df <- list(
-#   "SN_BAIXO_PESO_NASCER"       = df_rules_valid_SN_BAIXO_PESO_NASCER,
-#   "SN_RECURSO_PAA"      = df_rules_valid_SN_RECURSO_PAA,
-#   "SN_MEDIA_RECURSO_AGRICULTOR_PAA"      = df_rules_valid_SN_MEDIA_RECURSO_AGRICULTOR_PAA,
-#   "SN_MULHERES_PAA_SOMA"  = df_rules_valid_SN_MULHERES_PAA_SOMA,
-#   "SN_ADESAO_PAA"     = df_rules_valid_SN_ADESAO_PAA,
-#   "SN_AGRICULTOR_PAA_CADUNICO"       = df_rules_valid_SN_AGRICULTOR_PAA_CADUNICO,
-#   "SN_DEMANDA_PAA"       = df_rules_valid_SN_DEMANDA_PAA,
-#   "SN_REPASSE_AGRIC_PNAE"  = df_rules_valid_SN_REPASSE_AGRIC_PNAE,
-#   "SN_ESCOLAS_PNAE"    = df_rules_valid_SN_ESCOLAS_PNAE,
-#   "SN_ESCOLAS_POTAVEL"       = df_rules_valid_SN_ESCOLAS_POTAVEL,
-#   "SN_ENERGIA_ESCOLAS"      = df_rules_valid_SN_ENERGIA_ESCOLAS,
-#   "SN_VULNERABILIDADE_ESCOLAS"    = df_rules_valid_SN_VULNERABILIDADE_ESCOLAS,
-#   "SN_AGUA_ESCOLAS"      = df_rules_valid_SN_AGUA_ESCOLAS,
-#   "SN_ESGOTO_ESCOLAS"     = df_rules_valid_SN_ESGOTO_ESCOLAS,
-#   "SN_LIXO_ESCOLAS"         = df_rules_valid_SN_LIXO_ESCOLAS,
-#   "SN_TRABAGRICU"     = df_rules_valid_SN_TRABAGRICU,
-#   "SN_TRABAGRIMUL"     = df_rules_valid_SN_TRABAGRIMUL,
-#   "ca_areabib"     = df_rules_valid_ca_areabib,
-#   "ca_acervobib"   = df_rules_valid_ca_acervobib,
-#   "ca_webbib"      = df_rules_valid_ca_webbib,
-#   "ca_compbib"     = df_rules_valid_ca_compbib,
-#   "ca_leitmesbib"  = df_rules_valid_ca_leitmesbib,
-#   "ca_empmesbib"   = df_rules_valid_ca_empmesbib,
-#   "ca_icmspatcult" = df_rules_valid_ca_icmspatcult,
-#   "ca_fundo"       = df_rules_valid_ca_fundo,
-#   "ca_registro"    = df_rules_valid_ca_registro,
-#   "ca_estruogc"    = df_rules_valid_ca_estruogc,
-#   "ca_legpat"      = df_rules_valid_ca_legpat,
-#   "ca_arqpub"      = df_rules_valid_ca_arqpub,
-#   "ca_numbib"      = df_rules_valid_ca_numbib
-# )
-# 
-# ## Add dados à pasta de trabalho
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_valid_")
-#   openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-#   openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
-# }
-```
-
-```{r df_build_viol_consist}
-
-# # Criar base com as observações que violaram uma ou mais regras de consistência
-# 
-# ## Consistência
-# df_rules_consist_ma_focos <- df_rules_consist_ma_all |> 
-#   dplyr::select(
-#     Ano,
-#     ibge7,
-#     dplyr::contains("_FOCOS")
-#   ) |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("MA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-```
-
-```{r df_export_viol_consist}
-
-# ## Lista com os dfs por indicador
-# lista_df <- list(
-#   "ma_focos" = df_rules_valid_ma_focos
-# )
-# 
-# ## Add dados à pasta de trabalho
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_consist_")
-#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
-#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
-# }
-```
 
 ```{r df_build_viol_dist}
 
   df_dist = list(
-    #"SN_BAIXO_PESO_NASCER"       = df_rules_dist_SN_BAIXO_PESO_NASCER,
-    #"SN_RECURSO_PAA"      = df_rules_dist_SN_RECURSO_PAA,
-    #"SN_MEDIA_RECURSO_AGRICULTOR_PAA"      = df_rules_dist_SN_MEDIA_RECURSO_AGRICULTOR_PAA,
-    #"SN_MULHERES_PAA_SOMA"  = df_rules_dist_SN_MULHERES_PAA_SOMA,
-    #"SN_ADESAO_PAA"     = df_rules_dist_SN_ADESAO_PAA,
-    #"SN_AGRICULTOR_PAA_CADUNICO"       = df_rules_dist_SN_AGRICULTOR_PAA_CADUNICO,
-    #"SN_DEMANDA_PAA"       = df_rules_dist_SN_DEMANDA_PAA,
-    #"SN_REPASSE_AGRIC_PNAE"  = df_rules_dist_SN_REPASSE_AGRIC_PNAE,
-    #"SN_ESCOLAS_PNAE"    = df_rules_dist_SN_ESCOLAS_PNAE,
-    #"SN_ESCOLAS_POTAVEL"       = df_rules_dist_SN_ESCOLAS_POTAVEL,
-    #"SN_ENERGIA_ESCOLAS"      = df_rules_dist_SN_ENERGIA_ESCOLAS,
-    #"SN_VULNERABILIDADE_ESCOLAS"    = df_rules_dist_SN_VULNERABILIDADE_ESCOLAS,
-    "SN_AGUA_ESCOLAS"      = df_rules_dist_SN_AGUA_ESCOLAS,
-    "SN_ESGOTO_ESCOLAS"     = df_rules_dist_SN_ESGOTO_ESCOLAS,
-    "SN_LIXO_ESCOLAS"         = df_rules_dist_SN_LIXO_ESCOLAS,
-    "SN_TRABAGRICU"     = df_rules_dist_SN_TRABAGRICU,
-    "SN_TRABAGRIMUL"     = df_rules_dist_SN_TRABAGRIMUL,
-    #"CA_AREABIB"     = df_rules_dist_SN_TRABAGRICU,
-    #"CA_ACERVOBIB"   = df_rules_dist_ca_acervobib,
-    #"CA_WEBBIB"      = df_rules_dist_ca_webbib,
-    #"CA_COMPBIB"     = df_rules_dist_ca_compbib,
-    "CA_LEITMESBIB"  = df_rules_dist_ca_leitmesbib,
-    "CA_EMPMESBIB"   = df_rules_dist_ca_empmesbib,
-    "CA_ICMSPATCULT" = df_rules_dist_ca_icmspatcult,
-    "CA_FUNDO"       = df_rules_dist_ca_fundo,
-    "CA_REGISTRO"    = df_rules_dist_ca_registro,
-    #"CA_ESTRUOGC"    = df_rules_dist_ca_estruogc,
-    #"CA_LEGPAT"      = df_rules_dist_ca_legpat,
-    #"CA_ARQPUB"      = df_rules_dist_ca_arqpub,
-    "CA_NUMBIB"      = df_rules_dist_ca_numbib
+    "SN_BAIXO_PESO_NASCER"             = df_rules_dist_SN_BAIXO_PESO_NASCER,
+    "SN_COR_TOTAL"                     = df_rules_dist_SN_COR_TOTAL,
+    "SN_COR_BAIXOPESO"                 = df_rules_dist_SN_COR_BAIXOPESO,
+    "SN_RECURSO_PAA"                   = df_rules_dist_SN_RECURSO_PAA,
+    "SN_MEDIA_RECURSO_AGRICULTOR_PAA"  = df_rules_dist_SN_MEDIA_RECURSO_AGRICULTOR_PAA,
+    "SN_MULHERES_PAA_SOMA"             = df_rules_dist_SN_MULHERES_PAA_SOMA,
+    "SN_AGRICULTOR_PAA_CADUNICO"       = df_rules_dist_SN_AGRICULTOR_PAA_CADUNICO,
+    "SN_DEMANDA_PAA"                   = df_rules_dist_SN_DEMANDA_PAA,
+    "SN_REPASSE_AGRIC_PNAE"            = df_rules_dist_SN_REPASSE_AGRIC_PNAE,
+    "SN_ESCOLAS_PNAE"                  = df_rules_dist_SN_ESCOLAS_PNAE,
+    "SN_ESCOLAS_POTAVEL"               = df_rules_dist_SN_ESCOLAS_POTAVEL,
+    "SN_MEDIA_ARMAZEM"                 = df_rules_dist_SN_MEDIA_ARMAZEM,
+    "SN_MEDIA_ARMAZEM_NORM"            = df_rules_dist_SN_MEDIA_ARMAZEM_NORM,
+    "SN_ENERGIA_ESCOLAS"               = df_rules_dist_SN_ENERGIA_ESCOLAS,
+    "SN_VULNERABILIDADE_ESCOLAS"       = df_rules_dist_SN_VULNERABILIDADE_ESCOLAS,
+    "SN_AGUA_ESCOLAS"                  = df_rules_dist_SN_AGUA_ESCOLAS,
+    "SN_ESGOTO_ESCOLAS"                = df_rules_dist_SN_ESGOTO_ESCOLAS,
+    "SN_LIXO_ESCOLAS"                  = df_rules_dist_SN_LIXO_ESCOLAS,
+    "SN_TRABAGRICU"                    = df_rules_dist_SN_TRABAGRICU,
+    "SN_TRABAGRIMUL"                   = df_rules_dist_SN_TRABAGRIMUL
   )
 
 df_obs_dist <- names(df_dist)|>
 sapply(function(i){
 df_dist[[i]] <- df_dist[[i]] |>
   tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")),
+    cols      = !c(Ano, ibge7, dplyr::starts_with("SN_")),
     names_to  = "regra",
     values_to = "obs_suspeita"
   ) |>
@@ -2840,151 +2282,17 @@ index <- sapply(df_obs_dist, nrow)!=0
 df_obs_dist <- df_obs_dist[index]
 
 for(i in names(df_obs_dist)){
-  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
-  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+  j = gsub(pattern = "SN_",replacement = "",x = i)
+  openxlsx::addWorksheet(pt, paste0("D-", j))
+  openxlsx::writeData(pt, paste0("D-", j), df_obs_dist[[i]])
 }
 
 
-# Criar base com as observações que violaram uma ou mais regras de distribuição
-
-## Distribuição
-# df_rules_dist_SN_AGUA_ESCOLAS <- df_rules_dist_SN_AGUA_ESCOLAS |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_SN_ESGOTO_ESCOLAS <- df_rules_dist_SN_ESGOTO_ESCOLAS |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_SN_LIXO_ESCOLAS <- df_rules_dist_SN_LIXO_ESCOLAS |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_SN_TRABAGRICU <- df_rules_dist_SN_TRABAGRICU |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_SN_TRABAGRIMUL <- df_rules_dist_SN_TRABAGRIMUL |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_leitmesbib <- df_rules_dist_ca_leitmesbib |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_empmesbib <- df_rules_dist_ca_empmesbib |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_icmspatcult <- df_rules_dist_ca_icmspatcult |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_fundo <- df_rules_dist_ca_fundo |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_registro <- df_rules_dist_ca_registro |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# 
-# df_rules_dist_ca_numbib <- df_rules_dist_ca_numbib |> 
-#   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("CA_")), 
-#     names_to  = "regra", 
-#     values_to = "obs_suspeita"
-#   ) |> 
-#   dplyr::filter(obs_suspeita) |> 
-#   dplyr::rename_with(tolower) |> 
-#   dplyr::arrange(ano, ibge7)
-# ```
-# 
-# ```{r df_export_viol_dist}
-# 
-# lista_df <- list(
-#     "SN_AGUA_ESCOLAS"      = df_rules_dist_SN_AGUA_ESCOLAS,
-#     "SN_ESGOTO_ESCOLAS"     = df_rules_dist_SN_ESGOTO_ESCOLAS,
-#     "SN_LIXO_ESCOLAS"         = df_rules_dist_SN_LIXO_ESCOLAS,
-#     "SN_TRABAGRICU"     = df_rules_dist_SN_TRABAGRICU,
-#     "SN_TRABAGRIMUL"     = df_rules_dist_SN_TRABAGRIMUL,
-#     "ca_leitmesbib"  = df_rules_dist_ca_leitmesbib,
-#     "ca_empmesbib"   = df_rules_dist_ca_empmesbib,
-#     "ca_icmspatcult" = df_rules_dist_ca_icmspatcult,
-#     "ca_fundo"       = df_rules_dist_ca_fundo,
-#     "ca_registro"    = df_rules_dist_ca_registro,
-#     "ca_numbib"      = df_rules_dist_ca_numbib
-# )
-# 
-# for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_dist_")
-#   openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
-#   openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
-# }
 ```
 
 ```{r excel_save_wb}
 
-openxlsx::saveWorkbook(pt, "fjpdados_cultura_violacoes.xlsx", overwrite = T)
+openxlsx::saveWorkbook(pt, "fjpdados_segurancaalimentar_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
