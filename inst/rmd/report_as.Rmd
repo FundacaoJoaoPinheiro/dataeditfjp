@@ -651,6 +651,7 @@ df_sumario |>
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
   dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  dplyr::mutate(`% Ausente` = ifelse(is.infinite(`% Ausente`),100,`% Ausente`)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -667,8 +668,10 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>
-  unique() |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>  # Introdução coluna descrição
+  unique() |> 
+  dplyr::select(-c(Ausente,`% Ausente`))|> 
+  dplyr::mutate( `% Suspeita`= ifelse(is.na(`% Suspeita`),0,`% Suspeita`))|>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```

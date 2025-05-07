@@ -44,7 +44,7 @@ knitr::opts_chunk$set(warning = FALSE)
 
 ```{r set_param_global}
 
-k <- 1.5 
+k <- 1.2
 
 ## "Truque" para setar "k" como uma constante
 #lockBinding("k", globalenv())

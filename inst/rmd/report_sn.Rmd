@@ -402,7 +402,6 @@ df_sumario <- df_sumario_valid_sn |>
 ### Todos os indicadores - Valores ausentes
 
 ```{r table_valid_sn_na_all}
-
 df_sumario |>
   dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
