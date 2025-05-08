@@ -419,7 +419,6 @@ df_sumario |>
 
 ```{r table_valid_ca_all}
 #| column: screen-inset-right
-
 df_sumario |>
   dplyr::filter(
     Ano == max(Ano) & 

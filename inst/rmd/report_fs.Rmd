@@ -43,15 +43,10 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
-
 k <- 1.2
-
-## "Truque" para setar "k" como uma constante
-#lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
-
 data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
@@ -191,7 +186,7 @@ desc_regra_valid_var <- data.frame(
     "VI_FS_OCDC",
     "VF_FS_EQUILF",
     "VI_FS_GLPC",
-    "VI_FS_GLEC25",
+    "VI_FS_GL_EC25",
     "VI_FS_CUSTRCL",
     "VI_FS_IGT",
     "VI_FS_GEDUC",
@@ -246,7 +241,7 @@ desc_regra_valid_var <- data.frame(
       "VI_FS_OCDC"        ~ desc_regra_valid[3],
       "VF_FS_EQUILF"      ~ desc_regra_valid[18],
       "VI_FS_GLPC"        ~ desc_regra_valid[1],
-      "VI_FS_GLEC25"      ~ desc_regra_valid[3],
+      "VI_FS_GL_EC25"      ~ desc_regra_valid[3],
       "VI_FS_CUSTRCL"     ~ desc_regra_valid[3],
       "VI_FS_IGT"         ~ desc_regra_valid[3],
       "VI_FS_GEDUC"       ~ desc_regra_valid[3],
@@ -307,7 +302,7 @@ rules_type <- validate::validator(
   TI_FS_OCDC        = is.numeric(FS_OCDC),
   TI_FS_EQUILF      = is.numeric(FS_EQUILF),
   TI_FS_GLPC        = is.numeric(FS_GLPC),
-  TI_FS_GLEC25      = is.numeric(FS_GLEC25),
+  TI_FS_GL_EC25      = is.numeric(FS_GL_EC25),
   TI_FS_CUSTRCL     = is.numeric(FS_CUSTRCL),
   TI_FS_IGT         = is.numeric(FS_IGT),
   TI_FS_GEDUC       = is.numeric(FS_GEDUC),
@@ -387,7 +382,7 @@ df_rules_valid_fs_all <- data |>
     VI_NA_FS_OCDC        = dplyr::if_else(!is.na(FS_OCDC), F, T),
     VI_NA_FS_EQUILF      = dplyr::if_else(!is.na(FS_EQUILF), F, T),
     VI_NA_FS_GLPC        = dplyr::if_else(!is.na(FS_GLPC), F, T),
-    VI_NA_FS_GLEC25      = dplyr::if_else(!is.na(FS_GLEC25), F, T),
+    VI_NA_FS_GL_EC25      = dplyr::if_else(!is.na(FS_GL_EC25), F, T),
     VI_NA_FS_CUSTRCL     = dplyr::if_else(!is.na(FS_CUSTRCL), F, T),
     VI_NA_FS_IGT         = dplyr::if_else(!is.na(FS_IGT), F, T),
     VI_NA_FS_GEDUC       = dplyr::if_else(!is.na(FS_GEDUC), F, T),
@@ -438,7 +433,7 @@ df_rules_valid_fs_all <- data |>
     VI_FS_OCDC        = dplyr::if_else(dplyr::between(FS_OCDC, 0, 100), F, T),
     VF_FS_EQUILF      = dplyr::if_else(dplyr::between(FS_EQUILF, -300, 100), F, T),
     VI_FS_GLPC        = dplyr::if_else(FS_GLPC >= 0, F, T),
-    VI_FS_GLEC25      = dplyr::if_else(dplyr::between(FS_GLEC25, 0, 100), F, T),
+    VI_FS_GL_EC25      = dplyr::if_else(dplyr::between(FS_GL_EC25, 0, 100), F, T),
     VI_FS_CUSTRCL     = dplyr::if_else(dplyr::between(FS_CUSTRCL, 0, 100), F, T),
     VI_FS_IGT         = dplyr::if_else(dplyr::between(FS_IGT, 0, 100), F, T),
     VI_FS_GEDUC       = dplyr::if_else(dplyr::between(FS_GEDUC, 0, 100), F, T),
@@ -506,7 +501,7 @@ df_sumario <- df_sumario_valid_fs |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(resultado),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -515,14 +510,15 @@ df_sumario <- df_sumario_valid_fs |>
 ### Todos os indicadores - Valores ausentes
 
 ```{r table_valid_fs_na_all}
-
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
     Ano == max(Ano) & 
     stringr::str_detect(Regra, "_NA_")
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  dplyr::mutate(`% Ausente` = ifelse(is.infinite(`% Ausente`),100,`% Ausente`)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -539,7 +535,10 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>  # Introdução coluna descrição
+  unique() |> 
+  dplyr::select(-c(Ausente,`% Ausente`))|> 
+  dplyr::mutate( `% Suspeita`= ifelse(is.na(`% Suspeita`),0,`% Suspeita`))|>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -594,8 +593,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -668,8 +667,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -742,8 +741,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -816,8 +815,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -890,8 +889,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -916,44 +915,44 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### FS_GLEC25
+### FS_GL_EC25
 
-```{r data_rules_dist_fs_glec25}
+```{r data_rules_dist_FS_GL_EC25}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_fs_glec25 <- data |> 
+df_rules_dist_FS_GL_EC25 <- data |> 
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "FS_GLEC25" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["FS_GLEC25"],
+      "FS_GL_EC25" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["FS_GL_EC25"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
   ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, FS_GLEC25) |> 
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, FS_GL_EC25) |> 
   dplyr::group_by(ibge7) |> 
   dplyr::mutate(
-    DF_FS_GLEC25_hampel_munic  = dplyr::if_else(!hampel_filter(FS_GLEC25), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_hampel_munic  = dplyr::if_else(!hampel_filter(FS_GL_EC25), F, T), # Longitudinal (município)
     
-    DF_FS_GLEC25_out_munic     = dplyr::if_else(!outlier_function(FS_GLEC25), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_out_munic     = dplyr::if_else(!outlier_function(FS_GL_EC25), F, T), # Longitudinal (município)
     
-    DF_FS_GLEC25_min_munic     = dplyr::if_else(FS_GLEC25 >= (min(dplyr::lag(FS_GLEC25), na.rm = T)), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_min_munic     = dplyr::if_else(FS_GL_EC25 >= (min(dplyr::lag(FS_GL_EC25), na.rm = T)), F, T), # Longitudinal (município)
      
-    DF_FS_GLEC25_max_munic     = dplyr::if_else(FS_GLEC25 <= (max(dplyr::lag(FS_GLEC25), na.rm = T)), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_max_munic     = dplyr::if_else(FS_GL_EC25 <= (max(dplyr::lag(FS_GL_EC25), na.rm = T)), F, T), # Longitudinal (município)
     
-    DF_FS_GLEC25_min_k_munic   = dplyr::if_else(FS_GLEC25 >= (min(dplyr::lag(FS_GLEC25), na.rm = T) / k), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_min_k_munic   = dplyr::if_else(FS_GL_EC25 >= (min(dplyr::lag(FS_GL_EC25), na.rm = T) / k), F, T), # Longitudinal (município)
      
-    DF_FS_GLEC25_max_k_munic   = dplyr::if_else(FS_GLEC25 <= (k * max(dplyr::lag(FS_GLEC25), na.rm = T)), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_max_k_munic   = dplyr::if_else(FS_GL_EC25 <= (k * max(dplyr::lag(FS_GL_EC25), na.rm = T)), F, T), # Longitudinal (município)
     
-    DF_FS_GLEC25_med_mov_munic = dplyr::if_else(FS_GLEC25 <= (k * zoo::rollmedian(FS_GLEC25, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+    DF_FS_GL_EC25_med_mov_munic = dplyr::if_else(FS_GL_EC25 <= (k * zoo::rollmedian(FS_GL_EC25, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
     
-    DF_FS_GLEC25_dif_munic     = dplyr::if_else(!compare_first_dif(FS_GLEC25), F, T) # Longitudinal (município)
+    DF_FS_GL_EC25_dif_munic     = dplyr::if_else(!compare_first_dif(FS_GL_EC25), F, T) # Longitudinal (município)
 )
 ```
 
-```{r data_wrangling_dist_fs_glec25}
+```{r data_wrangling_dist_FS_GL_EC25}
 
 ## Transformação dos resultados
-df_sumario_dist_fs <- df_rules_dist_fs_glec25 |> 
-  dplyr::select(!FS_GLEC25) |> 
+df_sumario_dist_fs <- df_rules_dist_FS_GL_EC25 |> 
+  dplyr::select(!FS_GL_EC25) |> 
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
@@ -964,14 +963,14 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
 ```
 
-```{r table_dist_fs_glec25}
+```{r table_dist_FS_GL_EC25}
 #| column: screen-inset-right
 
 df_sumario |>
@@ -981,7 +980,7 @@ df_sumario |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_fs_glec25}
+```{r chart_dist_FS_GL_EC25}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -1038,8 +1037,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1112,8 +1111,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1186,8 +1185,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1260,8 +1259,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1334,8 +1333,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1408,8 +1407,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1482,8 +1481,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1556,8 +1555,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1630,8 +1629,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1704,8 +1703,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1778,8 +1777,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1852,8 +1851,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -1926,8 +1925,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2000,8 +1999,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2074,8 +2073,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2148,8 +2147,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2222,8 +2221,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2296,8 +2295,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2370,8 +2369,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2444,8 +2443,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2518,8 +2517,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2592,8 +2591,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2666,8 +2665,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2740,8 +2739,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2814,8 +2813,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2888,8 +2887,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -2962,8 +2961,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3036,8 +3035,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3110,8 +3109,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3184,8 +3183,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3258,8 +3257,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3332,8 +3331,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3406,8 +3405,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3480,8 +3479,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3554,8 +3553,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3628,8 +3627,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3702,8 +3701,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3776,8 +3775,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3850,8 +3849,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3924,8 +3923,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -3998,8 +3997,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -4072,8 +4071,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -4146,8 +4145,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -4220,8 +4219,8 @@ df_sumario <- df_sumario_dist_fs |>
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()
@@ -4348,7 +4347,7 @@ cidades <- openxlsx::read.xlsx(path_data)
    "FS_OCDC",
    "FS_EQUILF",
    "FS_GLPC",
-   "FS_GLEC25",
+   "FS_GL_EC25",
    "FS_CUSTRCL",
    "FS_IGT ",
    "FS_GEDUC",
@@ -4421,8 +4420,8 @@ index <- sapply(df_obs_valid, nrow)!=0
 df_obs_valid <- df_obs_valid[index]
 
 for(i in names(df_obs_valid)){
-  openxlsx::addWorksheet(pt, paste0("valid - ", i))
-  openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
+  openxlsx::addWorksheet(pt, paste0("val-", i))
+  openxlsx::writeData(pt, paste0("val-", i), df_obs_valid[[i]])
 }
 
 ```
@@ -4435,31 +4434,51 @@ for(i in names(df_obs_valid)){
     "FS_OCDC"        = df_rules_dist_fs_ocdc,
     "FS_EQUILF"      = df_rules_dist_fs_equilf,
     "FS_GLPC"        = df_rules_dist_fs_glpc,
-    "FS_GLEC25"      = df_rules_dist_fs_glec25,
+    "FS_GL_EC25"      = df_rules_dist_FS_GL_EC25,
     "FS_CUSTRCL"     = df_rules_dist_fs_custrcl,
     "FS_IGT"         = df_rules_dist_fs_igt,
     "FS_GEDUC"       = df_rules_dist_fs_geduc,
     "FS_GSAUDE"      = df_rules_dist_fs_gsaude,
-    "FS_"      = df_rules_dist_fs_orgaoc,
-    "FS_"    = df_rules_dist_fs_instcons,
-    "FS_"      = df_rules_dist_fs_tombef,
-    "FS_"     = df_rules_dist_fs_tombmun,
-    "FS_"         = df_rules_dist_fs_pcl,
-    "FS_"     = df_rules_dist_fs_aprespc,
-    "FS_"     = df_rules_dist_fs_gprespc,
-    "FS_"     = df_rules_dist_fs_aprespc,
-    "FS_"   = df_rules_dist_fs_acervobib,
-    "FS_"      = df_rules_dist_fs_webbib,
-    "FS_"     = df_rules_dist_fs_compbib,
-    "FS_"  = df_rules_dist_fs_leitmesbib,
-    "FS_"   = df_rules_dist_fs_empmesbib,
-    "FS_" = df_rules_dist_fs_icmspatcult,
-    "FS_"       = df_rules_dist_fs_fundo,
-    "FS_"    = df_rules_dist_fs_registro,
-    "FS_"    = df_rules_dist_fs_estruogc,
-    "FS_"      = df_rules_dist_fs_legpat,
-    "FS_"      = df_rules_dist_fs_arqpub,
-    "FS_"      = df_rules_dist_fs_numbib
+    "FS_CONVRCL"     = df_rules_dist_fs_convrcl,
+    "FS_IDTE"        = df_rules_dist_fs_idte,
+    "FS_RCL"         = df_rules_dist_FS_RCL,
+    "FS_RCLPC"       = df_rules_dist_fs_rclpc,
+    "FS_AGRO"        = df_rules_dist_fs_agro,
+    "FS_DESENV"      = df_rules_dist_fs_desenv,
+    "FS_DIFCULT"     = df_rules_dist_fs_difcult,
+    "FS_EDUCACAO"     = df_rules_dist_fs_educacao,
+    "FS_ESPORTE"   = df_rules_dist_fs_esporte,
+    "FS_HABITA"      = df_rules_dist_fs_habita,
+    "FS_INFRA"     = df_rules_dist_fs_infra,
+    "FS_OUTRAS"  = df_rules_dist_fs_outras,
+    "FS_PATRI"   = df_rules_dist_fs_patri,
+    "FS_REFAGR" = df_rules_dist_fs_refagr,
+    "FS_SANEAMENTO"  = df_rules_dist_fs_saneamento,
+    "FS_SAUDE"    = df_rules_dist_fs_saude,
+    "FS_SEGURAN"    = df_rules_dist_fs_seguran,
+    "FS_SMAMB"      = df_rules_dist_fs_smamb,
+    "FS_SOCIAL"      = df_rules_dist_fs_social,
+    "FS_TOTAL"      = df_rules_dist_fs_total,
+    "FS_TRAB"    = df_rules_dist_fs_trab,
+    "FS_TURISMO"   = df_rules_dist_fs_turismo,
+    "FS_EAGRO"    = df_rules_dist_fs_eagro,
+    "FS_EDESENV"    = df_rules_dist_fs_edesenv,
+    "FS_EDIFCULT"     = df_rules_dist_fs_edifcult,
+    "FS_EEDUCACAO"     = df_rules_dist_fs_eeducacao,
+    "FS_EESPORTE"   = df_rules_dist_fs_eesporte,
+    "FS_EHABITA"      = df_rules_dist_fs_ehabita,
+    "FS_EINFRA"     = df_rules_dist_fs_einfra,
+    "FS_EOUTRAS"  = df_rules_dist_fs_eoutras,
+    "FS_EPATRI"   = df_rules_dist_fs_epatri,
+    "FS_EREFAGR" = df_rules_dist_fs_erefagr,
+    "FS_ESANEAMENTO"       = df_rules_dist_fs_esaneamento,
+    "FS_ESAUDE"    = df_rules_dist_fs_esaude,
+    "FS_ESEGURAN"    = df_rules_dist_fs_eseguran,
+    "FS_ESMAMB"      = df_rules_dist_fs_esmamb,
+    "FS_ESOCIAL"      = df_rules_dist_fs_esocial,
+    "FS_ETRAB"   = df_rules_dist_fs_etrab,
+    "FS_ETURISMO"   = df_rules_dist_fs_eturismo,
+    "FS_EHABSANMA"    = df_rules_dist_fs_ehabsanma
   )
 
 df_obs_dist <- names(df_dist)|>
@@ -4482,8 +4501,8 @@ index <- sapply(df_obs_dist, nrow)!=0
 df_obs_dist <- df_obs_dist[index]
 
 for(i in names(df_obs_dist)){
-  openxlsx::addWorksheet(pt, paste0("distrib - ", i))
-  openxlsx::writeData(pt, paste0("distrib - ", i), df_obs_dist[[i]])
+  openxlsx::addWorksheet(pt, paste0("dist-", i))
+  openxlsx::writeData(pt, paste0("dist-", i), df_obs_dist[[i]])
 }
 
 ```
