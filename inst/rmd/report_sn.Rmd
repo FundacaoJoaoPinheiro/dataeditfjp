@@ -343,7 +343,7 @@ df_rules_valid_sn_all <- data |>
     VI_SN_BAIXO_PESO_NASCER  = dplyr::if_else(dplyr::between(SN_BAIXO_PESO_NASCER, 0, 100), F, T),
     VI_SN_COR_TOTAL          = dplyr::if_else(dplyr::between(SN_COR_TOTAL, 0, 100), F, T),
     VI_SN_COR_BAIXOPESO      = dplyr::if_else(dplyr::between(SN_COR_BAIXOPESO, 0, 100), F, T),
-    VI_SN_RECURSO_PAA        = dplyr::if_else(dplyr::between(SN_RECURSO_PAA, 0, 100), F, T),
+    VI_SN_RECURSO_PAA        = dplyr::if_else(SN_RECURSO_PAA >= 0, F, T),
     VI_SN_MEDIA_RECURSO_AGRICULTOR_PAA = dplyr::if_else(SN_MEDIA_RECURSO_AGRICULTOR_PAA >= 0, F, T),
     VI_SN_MULHERES_PAA_SOMA       = dplyr::if_else(dplyr::between(SN_MULHERES_PAA_SOMA, 0, 100), F, T),
     VI_SN_ADESAO_PAA              = dplyr::if_else(SN_ADESAO_PAA %in% cat_dic, F, T),
@@ -417,7 +417,7 @@ df_sumario |>
 
 ### Todos os indicadores - Demais regras
 
-```{r table_valid_ca_all}
+```{r table_valid_sn_all}
 #| column: screen-inset-right
 df_sumario |>
   dplyr::filter(
