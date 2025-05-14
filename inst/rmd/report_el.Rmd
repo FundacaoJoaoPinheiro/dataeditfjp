@@ -344,7 +344,6 @@ df_sumario |>
 ### EL_QUANT
 
 ```{r data_rules_dist_el_quant}
-data$EL_QUANT <- as.numeric(data$EL_QUANT)
 ## df com o resultado das aplicações das regras
 df_rules_dist_el_quant <- data |> 
   remove_year_variable(variable = "EL_QUANT", exclusions_years = exclusions_years) |>
