@@ -119,7 +119,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
-
 **Classificação por flexibilidade (F ou I)**
 
 -   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
@@ -211,7 +210,6 @@ desc_regra_valid_var <- data.frame(
     )
   )
 ```
-
 
 ## Tipo
 
@@ -639,7 +637,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 # Análise descritiva
 
