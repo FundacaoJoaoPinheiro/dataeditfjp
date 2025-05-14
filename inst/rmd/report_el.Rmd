@@ -43,15 +43,10 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
-
 k <- 1.5 
-
-## "Truque" para setar "k" como uma constante
-#lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
-
 data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
@@ -139,7 +134,13 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
 ano_base_alter <- c(
-  "NA" = NA_integer_
+   "EL_QUANT"   = 2015,
+   "EL_PARTESP" = 2015,
+   "EL_PROGE"   = 2009,
+   "EL_ESPESC"  = 2009,
+   "EL_ILRHE"   = 2009,
+   "EL_ORGESP"  = 2015,
+   "EL_CONVESP" = 2016
 )
 
 exclusions_years <- c(
@@ -211,26 +212,6 @@ desc_regra_valid_var <- data.frame(
   )
 ```
 
-```{r map_consist_desc, eval=FALSE}
-
-# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
-desc_regra_consist <- c(
-  `1` = "A soma da proporção anual é igual a 100%" # EO_ESCOLAME
-)
-
-# df com o nome da regra e a respectiva descrição
-desc_regra_consist_var <- data.frame(
-  Regra = c(
-    "CF_EO_ESCOLAME_total_year"
-  )
-) |> 
-  dplyr::mutate(
-    `Descrição` = dplyr::case_match(
-      Regra,
-      "CF_EO_ESCOLAME_total_year" ~ desc_regra_consist[1]
-    )
-  )
-```
 
 ## Tipo
 
@@ -365,7 +346,7 @@ df_sumario |>
 ### EL_QUANT
 
 ```{r data_rules_dist_el_quant}
-
+data$EL_QUANT <- as.numeric(data$EL_QUANT)
 ## df com o resultado das aplicações das regras
 df_rules_dist_el_quant <- data |> 
   remove_year_variable(variable = "EL_QUANT", exclusions_years = exclusions_years) |>
