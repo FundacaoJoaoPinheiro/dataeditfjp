@@ -592,7 +592,7 @@ df_rules_valid_da_all <- data |>
     VI_DA_RDEPP      = dplyr::if_else(dplyr::between(DA_RDEPP, 0, 100), F, T),
     VI_DA_PROPP15N   = dplyr::if_else(dplyr::between(DA_PROPP15N, 0, 100), F, T),
     VI_DA_PROPP65M   = dplyr::if_else(dplyr::between(DA_PROPP65M, 0, 100), F, T),
-    VI_DA_INDENVE    = dplyr::if_else(dplyr::between(DA_INDENVE, 0, 100), F, T),
+    VI_DA_INDENVE    = dplyr::if_else(DA_INDENVE >= 0, F, T),
   #  VI_DA_POPPURB    = dplyr::if_else(dplyr::between(DA_POPPURB, 0, 100), F, T),
   #  VI_DA_TFT        = dplyr::if_else(DA_TFT >= 0, F, T),
   #  VI_DA_TMI        = dplyr::if_else(dplyr::between(DA_TMI, 0, 1000), F, T),
