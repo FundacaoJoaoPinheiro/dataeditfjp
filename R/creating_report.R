@@ -23,7 +23,8 @@ creating_report <- function(mydir=getwd(), knitmydir = getwd()){
     "CA" = system.file("rmd", "report_ca.Rmd", package = "dataeditfjp"),
     "EL" = system.file("rmd", "report_el.Rmd", package = "dataeditfjp"),
     "FS" = system.file("rmd", "report_fs.Rmd", package = "dataeditfjp"),
-    "SN" = system.file("rmd", "report_sn.Rmd", package = "dataeditfjp")
+    "SN" = system.file("rmd", "report_sn.Rmd", package = "dataeditfjp"),
+    "EC" = system.file("rmd", "report_ec.Rmd", package = "dataeditfjp")
   )
 
 

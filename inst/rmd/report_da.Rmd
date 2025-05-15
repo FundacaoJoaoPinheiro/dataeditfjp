@@ -43,13 +43,10 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
-
 k <- 1.5 
-
 ```
 
 ```{r import_data}
-
 data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
@@ -148,28 +145,6 @@ ano_base_alter <- c(
 #   )
 ```
 
-```{r get_cat}
-
-## Categorias varíaveis dicotômicas
-# cat_dic <- c(
-#   "Sim",
-#   "Não"
-# )
-
-## Categorias encontradas na série histórica
-# cat_disposlixo <- c(
-#   "AAF em verificação",
-#   "AS Não Regularizado",
-#   "AS Regularizado",
-#   "AS+UTC Não Regularizados",
-#   "AS+UTC Regularizados",
-#   "Aterro Controlado",
-#   "Fora do Estado",
-#   "Lixão",
-#   "UTC Não Regularizada",
-#   "UTC Regularizada"
-#   )
-```
 
 ```{r map_valid_desc}
 
@@ -193,7 +168,7 @@ desc_regra_valid <- c(
 # df com o nome da regra e a respectiva descrição
 desc_regra_valid_var <- data.frame(
   Regra = c(
-    "VI_DA_POPT",
+  #  "VI_DA_POPT",
     "VI_DA_POPTA",
     "VI_DA_POPP0",
     "VI_DA_POPP1A4",
@@ -231,17 +206,17 @@ desc_regra_valid_var <- data.frame(
     "VI_DA_PROPP15N",
     "VI_DA_PROPP65M",
     "VI_DA_INDENVE",
-    "VI_DA_POPPURB",
-    "VI_DA_TFT",
-    "VI_DA_TMI",
-    "VI_DA_ESPVIDA",
-    "VI_DA_TBM",
-    "VI_DA_TBN",
-    "VI_DA_TCV",
-    "VI_DA_TLM",
-    "VI_DA_TCD",
-    "VI_DA_EMIGRA",
-    "VI_DA_IMIGRA",
+  #  "VI_DA_POPPURB",
+  #  "VI_DA_TFT",
+  #  "VI_DA_TMI",
+  #  "VI_DA_ESPVIDA",
+  #  "VI_DA_TBM",
+  #  "VI_DA_TBN",
+  #  "VI_DA_TCV",
+  #  "VI_DA_TLM",
+  #  "VI_DA_TCD",
+  #  "VI_DA_EMIGRA",
+  #  "VI_DA_IMIGRA",
     "VI_DA_HOMEM0A4",
     "VI_DA_HOMEM5A9",
     "VI_DA_HOMEM10A14",
@@ -283,7 +258,7 @@ desc_regra_valid_var <- data.frame(
   dplyr::mutate(
     `Descrição` = dplyr::case_match(
       Regra,
-    "VI_DA_POPT"       ~ desc_regra_valid[1],
+  #  "VI_DA_POPT"       ~ desc_regra_valid[1],
     "VI_DA_POPTA"      ~ desc_regra_valid[1],
     "VI_DA_POPP0"      ~ desc_regra_valid[1],
     "VI_DA_POPP1A4"    ~ desc_regra_valid[1],
@@ -321,17 +296,17 @@ desc_regra_valid_var <- data.frame(
     "VI_DA_PROPP15N"   ~ desc_regra_valid[3],
     "VI_DA_PROPP65M"   ~ desc_regra_valid[3],
     "VI_DA_INDENVE"    ~ desc_regra_valid[3],
-    "VI_DA_POPPURB"    ~ desc_regra_valid[3],
-    "VI_DA_TFT"        ~ desc_regra_valid[1],
-    "VI_DA_TMI"        ~ desc_regra_valid[4],
-    "VI_DA_ESPVIDA"    ~ desc_regra_valid[1],
-    "VI_DA_TBM"        ~ desc_regra_valid[4],
-    "VI_DA_TBN"        ~ desc_regra_valid[4],
-    "VI_DA_TCV"        ~ desc_regra_valid[1],
-    "VI_DA_TLM"        ~ desc_regra_valid[4],
-    "VI_DA_TCD"        ~ desc_regra_valid[1],
-    "VI_DA_EMIGRA"     ~ desc_regra_valid[1],
-    "VI_DA_IMIGRA"     ~ desc_regra_valid[1],
+  #  "VI_DA_POPPURB"    ~ desc_regra_valid[3],
+  #  "VI_DA_TFT"        ~ desc_regra_valid[1],
+  #  "VI_DA_TMI"        ~ desc_regra_valid[4],
+  #  "VI_DA_ESPVIDA"    ~ desc_regra_valid[1],
+  #  "VI_DA_TBM"        ~ desc_regra_valid[4],
+  #  "VI_DA_TBN"        ~ desc_regra_valid[4],
+  #  "VI_DA_TCV"        ~ desc_regra_valid[1],
+  #  "VI_DA_TLM"        ~ desc_regra_valid[4],
+  #  "VI_DA_TCD"        ~ desc_regra_valid[1],
+  #  "VI_DA_EMIGRA"     ~ desc_regra_valid[1],
+  #  "VI_DA_IMIGRA"     ~ desc_regra_valid[1],
     "VI_DA_HOMEM0A4"   ~ desc_regra_valid[1],
     "VI_DA_HOMEM5A9"   ~ desc_regra_valid[1],
     "VI_DA_HOMEM10A14" ~ desc_regra_valid[1],
@@ -379,7 +354,7 @@ desc_regra_valid_var <- data.frame(
 ```{r rules_type}
   
 rules_type <- validate::validator(
- TI_DA_POPT       = is.numeric(DA_POPT),
+# TI_DA_POPT       = is.numeric(DA_POPT),
  TI_DA_POPTA      = is.numeric(DA_POPTA),
  TI_DA_POPP0      = is.numeric(DA_POPP0),
  TI_DA_POPP1A4    = is.numeric(DA_POPP1A4),
@@ -417,17 +392,17 @@ rules_type <- validate::validator(
  TI_DA_PROPP15N   = is.numeric(DA_PROPP15N),
  TI_DA_PROPP65M   = is.numeric(DA_PROPP65M),
  TI_DA_INDENVE    = is.numeric(DA_INDENVE),
- TI_DA_POPPURB    = is.numeric(DA_POPPURB),
- TI_DA_TFT        = is.numeric(DA_TFT),
- TI_DA_TMI        = is.numeric(DA_TMI),
- TI_DA_ESPVIDA    = is.numeric(DA_ESPVIDA),
- TI_DA_TBM        = is.numeric(DA_TBM),
- TI_DA_TBN        = is.numeric(DA_TBN),
- TI_DA_TCV        = is.numeric(DA_TCV),
- TI_DA_TLM        = is.numeric(DA_TLM),
- TI_DA_TCD        = is.numeric(DA_TCD),
- TI_DA_EMIGRA     = is.numeric(DA_EMIGRA),
- TI_DA_IMIGRA     = is.numeric(DA_IMIGRA),
+# TI_DA_POPPURB    = is.numeric(DA_POPPURB),
+# TI_DA_TFT        = is.numeric(DA_TFT),
+# TI_DA_TMI        = is.numeric(DA_TMI),
+# TI_DA_ESPVIDA    = is.numeric(DA_ESPVIDA),
+# TI_DA_TBM        = is.numeric(DA_TBM),
+# TI_DA_TBN        = is.numeric(DA_TBN),
+# TI_DA_TCV        = is.numeric(DA_TCV),
+# TI_DA_TLM        = is.numeric(DA_TLM),
+# TI_DA_TCD        = is.numeric(DA_TCD),
+# TI_DA_EMIGRA     = is.numeric(DA_EMIGRA),
+# TI_DA_IMIGRA     = is.numeric(DA_IMIGRA),
  TI_DA_HOMEM0A4   = is.numeric(DA_HOMEM0A4),
  TI_DA_HOMEM5A9   = is.numeric(DA_HOMEM5A9),
  TI_DA_HOMEM10A14 = is.numeric(DA_HOMEM10A14),
@@ -494,7 +469,7 @@ df_rules_valid_da_all <- data |>
   ) |> 
   dplyr::mutate(
     # Missing
-    VI_NA_DA_POPT       = dplyr::if_else(!is.na(DA_POPT), F, NA),
+  #  VI_NA_DA_POPT       = dplyr::if_else(!is.na(DA_POPT), F, NA),
     VI_NA_DA_POPTA      = dplyr::if_else(!is.na(DA_POPTA), F, NA),
     VI_NA_DA_POPP0      = dplyr::if_else(!is.na(DA_POPP0), F, NA),
     VI_NA_DA_POPP1A4    = dplyr::if_else(!is.na(DA_POPP1A4), F, NA),
@@ -532,17 +507,17 @@ df_rules_valid_da_all <- data |>
     VI_NA_DA_PROPP15N   = dplyr::if_else(!is.na(DA_PROPP15N), F, NA),
     VI_NA_DA_PROPP65M   = dplyr::if_else(!is.na(DA_PROPP65M), F, NA),
     VI_NA_DA_INDENVE    = dplyr::if_else(!is.na(DA_INDENVE), F, NA),
-    VI_NA_DA_POPPURB    = dplyr::if_else(!is.na(DA_POPPURB), F, NA),
-    VI_NA_DA_TFT        = dplyr::if_else(!is.na(DA_TFT), F, NA),
-    VI_NA_DA_TMI        = dplyr::if_else(!is.na(DA_TMI), F, NA),
-    VI_NA_DA_ESPVIDA    = dplyr::if_else(!is.na(DA_ESPVIDA), F, NA),
-    VI_NA_DA_TBM        = dplyr::if_else(!is.na(DA_TBM), F, NA),
-    VI_NA_DA_TBN        = dplyr::if_else(!is.na(DA_TBN), F, NA),
-    VI_NA_DA_TCV        = dplyr::if_else(!is.na(DA_TCV), F, NA),
-    VI_NA_DA_TLM        = dplyr::if_else(!is.na(DA_TLM), F, NA),
-    VI_NA_DA_TCD        = dplyr::if_else(!is.na(DA_TCD), F, NA),
-    VI_NA_DA_EMIGRA     = dplyr::if_else(!is.na(DA_EMIGRA), F, NA),
-    VI_NA_DA_IMIGRA     = dplyr::if_else(!is.na(DA_IMIGRA), F, NA),
+  #  VI_NA_DA_POPPURB    = dplyr::if_else(!is.na(DA_POPPURB), F, NA),
+  #  VI_NA_DA_TFT        = dplyr::if_else(!is.na(DA_TFT), F, NA),
+  #  VI_NA_DA_TMI        = dplyr::if_else(!is.na(DA_TMI), F, NA),
+  #  VI_NA_DA_ESPVIDA    = dplyr::if_else(!is.na(DA_ESPVIDA), F, NA),
+  #  VI_NA_DA_TBM        = dplyr::if_else(!is.na(DA_TBM), F, NA),
+  #  VI_NA_DA_TBN        = dplyr::if_else(!is.na(DA_TBN), F, NA),
+  #  VI_NA_DA_TCV        = dplyr::if_else(!is.na(DA_TCV), F, NA),
+  #  VI_NA_DA_TLM        = dplyr::if_else(!is.na(DA_TLM), F, NA),
+  #  VI_NA_DA_TCD        = dplyr::if_else(!is.na(DA_TCD), F, NA),
+  #  VI_NA_DA_EMIGRA     = dplyr::if_else(!is.na(DA_EMIGRA), F, NA),
+  #  VI_NA_DA_IMIGRA     = dplyr::if_else(!is.na(DA_IMIGRA), F, NA),
     VI_NA_DA_HOMEM0A4   = dplyr::if_else(!is.na(DA_HOMEM0A4), F, NA),
     VI_NA_DA_HOMEM5A9   = dplyr::if_else(!is.na(DA_HOMEM5A9), F, NA),
     VI_NA_DA_HOMEM10A14 = dplyr::if_else(!is.na(DA_HOMEM10A14), F, NA),
@@ -580,7 +555,7 @@ df_rules_valid_da_all <- data |>
     VI_NA_DA_HOMEMTOT   = dplyr::if_else(!is.na(DA_HOMEMTOT), F, NA),
     VI_NA_DA_MULHERTOT  = dplyr::if_else(!is.na(DA_MULHERTOT), F, NA),
     # Others
-    VI_DA_POPT       = dplyr::if_else(DA_POPT >= 0, F, T),
+  #  VI_DA_POPT       = dplyr::if_else(DA_POPT >= 0, F, T),
     VI_DA_POPTA      = dplyr::if_else(DA_POPTA >= 0, F, T),
     VI_DA_POPP0      = dplyr::if_else(DA_POPP0 >= 0, F, T),
     VI_DA_POPP1A4    = dplyr::if_else(DA_POPP1A4 >= 0, F, T),
@@ -618,17 +593,17 @@ df_rules_valid_da_all <- data |>
     VI_DA_PROPP15N   = dplyr::if_else(dplyr::between(DA_PROPP15N, 0, 100), F, T),
     VI_DA_PROPP65M   = dplyr::if_else(dplyr::between(DA_PROPP65M, 0, 100), F, T),
     VI_DA_INDENVE    = dplyr::if_else(dplyr::between(DA_INDENVE, 0, 100), F, T),
-    VI_DA_POPPURB    = dplyr::if_else(dplyr::between(DA_POPPURB, 0, 100), F, T),
-    VI_DA_TFT        = dplyr::if_else(DA_TFT >= 0, F, T),
-    VI_DA_TMI        = dplyr::if_else(dplyr::between(DA_TMI, 0, 1000), F, T),
-    VI_DA_ESPVIDA    = dplyr::if_else(DA_ESPVIDA >= 0, F, T),
-    VI_DA_TBM        = dplyr::if_else(dplyr::between(DA_TBM, 0, 1000), F, T),
-    VI_DA_TBN        = dplyr::if_else(dplyr::between(DA_TBN, 0, 1000), F, T),
-    VI_DA_TCV        = dplyr::if_else(DA_TCV >= 0, F, T),
-    VI_DA_TLM        = dplyr::if_else(dplyr::between(DA_TLM, 0, 1000), F, T),
-    VI_DA_TCD        = dplyr::if_else(DA_TCD >= 0, F, T),
-    VI_DA_EMIGRA     = dplyr::if_else(DA_EMIGRA >= 0, F, T),
-    VI_DA_IMIGRA     = dplyr::if_else(DA_IMIGRA >= 0, F, T),
+  #  VI_DA_POPPURB    = dplyr::if_else(dplyr::between(DA_POPPURB, 0, 100), F, T),
+  #  VI_DA_TFT        = dplyr::if_else(DA_TFT >= 0, F, T),
+  #  VI_DA_TMI        = dplyr::if_else(dplyr::between(DA_TMI, 0, 1000), F, T),
+  #  VI_DA_ESPVIDA    = dplyr::if_else(DA_ESPVIDA >= 0, F, T),
+  #  VI_DA_TBM        = dplyr::if_else(dplyr::between(DA_TBM, 0, 1000), F, T),
+  #  VI_DA_TBN        = dplyr::if_else(dplyr::between(DA_TBN, 0, 1000), F, T),
+  #  VI_DA_TCV        = dplyr::if_else(DA_TCV >= 0, F, T),
+  #  VI_DA_TLM        = dplyr::if_else(dplyr::between(DA_TLM, 0, 1000), F, T),
+  #  VI_DA_TCD        = dplyr::if_else(DA_TCD >= 0, F, T),
+  #  VI_DA_EMIGRA     = dplyr::if_else(DA_EMIGRA >= 0, F, T),
+  #  VI_DA_IMIGRA     = dplyr::if_else(DA_IMIGRA >= 0, F, T),
     VI_DA_HOMEM0A4   = dplyr::if_else(DA_HOMEM0A4 >= 0, F, T),
     VI_DA_HOMEM5A9   = dplyr::if_else(DA_HOMEM5A9 >= 0, F, T),
     VI_DA_HOMEM10A14 = dplyr::if_else(DA_HOMEM10A14 >= 0, F, T),
@@ -686,27 +661,30 @@ df_sumario <- df_sumario_valid_da |>
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
+    Ausente      = sum(resultado),
+    `% Validada` = round(Validada / (Total - Ausente) * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
+    `% Ausente`  = round((Ausente / Total) * 100, 2)
   ) |> 
   dplyr::ungroup()
+
 ```
 
 ### Todos os indicadores - Valores ausentes
 
 ```{r table_valid_da_na_all}
-
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
+  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
   dplyr::filter(
     Ano == max(Ano) & 
-    stringr::str_detect(Regra, "_NA_")
+    stringr::str_detect(Regra, "_NA_",)
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  dplyr::mutate(`% Ausente` = ifelse(is.infinite(`% Ausente`),100,`% Ausente`)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
+
 ```
 
 ### Todos os indicadores - Demais regras
@@ -721,88 +699,21 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>  # Introdução coluna descrição
+  unique() |> 
+  dplyr::select(-c(Ausente,`% Ausente`))|> 
+  dplyr::mutate( `% Suspeita`= ifelse(is.na(`% Suspeita`),0,`% Suspeita`),
+                  aux = ifelse(Validada==Total, 1, 0),
+                 `% Validada` = ifelse(aux == 1, `% Validada`, round((Validada / Total) * 100, 2) 
+                 ) )|> 
+  dplyr::select(-aux)|>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
+
 ```
 
 
 ## Distribuição
-
-### DA_POPT
-
-```{r rules_dist_da_popt}
-
-## df com o resultado das aplicações das regras
-
-df_rules_dist_da_popt <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_POPT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPT"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPT) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_POPT_hampel_munic  = dplyr::if_else(!hampel_filter(DA_POPT), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_out_munic     = dplyr::if_else(!outlier_function(DA_POPT), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_min_munic     = dplyr::if_else(DA_POPT >= (min(dplyr::lag(DA_POPT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_max_munic     = dplyr::if_else(DA_POPT <= (max(dplyr::lag(DA_POPT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_min_k_munic   = dplyr::if_else(DA_POPT >= (min(dplyr::lag(DA_POPT), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_max_k_munic   = dplyr::if_else(DA_POPT <= (k * max(dplyr::lag(DA_POPT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_med_mov_munic = dplyr::if_else(DA_POPT <= (k * zoo::rollmedian(DA_POPT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_POPT_dif_munic     = dplyr::if_else(!compare_first_dif(DA_POPT), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_popt}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_popt |> 
-  dplyr::select(!DA_POPT) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_popt}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_popt}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
 
 ### DA_POPTA
 
@@ -878,6 +789,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP0
 
 ```{r rules_dist_da_popp0}
@@ -951,6 +863,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP1A4
 
@@ -1026,6 +939,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP4
 
 ```{r rules_dist_da_popp4}
@@ -1099,6 +1013,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP5
 
@@ -1174,6 +1089,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP4E5
 
 ```{r rules_dist_da_popp4e5}
@@ -1247,6 +1163,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP5A9
 
@@ -1322,6 +1239,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP6A14
 
 ```{r rules_dist_da_popp6a14}
@@ -1395,6 +1313,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP10A14
 
@@ -1470,6 +1389,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP15
 
 ```{r rules_dist_da_popp15}
@@ -1543,6 +1463,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP15A17
 
@@ -1618,6 +1539,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP15A19
 
 ```{r rules_dist_da_popp15a19}
@@ -1691,6 +1613,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP15M
 
@@ -1766,6 +1689,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP16A19
 
 ```{r rules_dist_da_popp16a19}
@@ -1839,6 +1763,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP16A64
 
@@ -1914,6 +1839,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP18M
 
 ```{r rules_dist_da_popp18m}
@@ -1987,6 +1913,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP20A24
 
@@ -2062,6 +1989,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP25A29
 
 ```{r rules_dist_da_popp25a29}
@@ -2135,6 +2063,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP30A34
 
@@ -2210,6 +2139,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP35A39
 
 ```{r rules_dist_da_popp35a39}
@@ -2283,6 +2213,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP40A44
 
@@ -2358,6 +2289,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP45A49
 
 ```{r rules_dist_da_popp45a49}
@@ -2431,6 +2363,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP50A54
 
@@ -2506,6 +2439,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP55A59
 
 ```{r rules_dist_da_popp55a59}
@@ -2579,6 +2513,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP60A64
 
@@ -2654,6 +2589,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP65A69
 
 ```{r rules_dist_da_popp65a69}
@@ -2727,6 +2663,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP70A74
 
@@ -2802,6 +2739,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_POPP75A79
 
 ```{r rules_dist_da_popp75a79}
@@ -2875,6 +2813,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_POPP80M
 
@@ -2950,6 +2889,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_DENSP
 
 ```{r rules_dist_da_densp}
@@ -3023,6 +2963,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_PROPP4E5
 
@@ -3098,6 +3039,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_PROPP0A5
 
 ```{r rules_dist_da_propp0a5}
@@ -3171,6 +3113,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_PROPP6A17
 
@@ -3246,6 +3189,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_RDEPP
 
 ```{r rules_dist_da_rdepp}
@@ -3319,6 +3263,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_PROPP15N
 
@@ -3394,6 +3339,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_PROPP65M
 
 ```{r rules_dist_da_propp65m}
@@ -3467,6 +3413,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_INDENVE
 
@@ -3542,819 +3489,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### DA_POPPURB
-
-```{r rules_dist_da_poppurb}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_poppurb <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_POPPURB" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_POPPURB"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_POPPURB) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_POPPURB_hampel_munic  = dplyr::if_else(!hampel_filter(DA_POPPURB), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_out_munic     = dplyr::if_else(!outlier_function(DA_POPPURB), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_min_munic     = dplyr::if_else(DA_POPPURB >= (min(dplyr::lag(DA_POPPURB), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_max_munic     = dplyr::if_else(DA_POPPURB <= (max(dplyr::lag(DA_POPPURB), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_min_k_munic   = dplyr::if_else(DA_POPPURB >= (min(dplyr::lag(DA_POPPURB), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_max_k_munic   = dplyr::if_else(DA_POPPURB <= (k * max(dplyr::lag(DA_POPPURB), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_med_mov_munic = dplyr::if_else(DA_POPPURB <= (k * zoo::rollmedian(DA_POPPURB, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_POPPURB_dif_munic     = dplyr::if_else(!compare_first_dif(DA_POPPURB), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_poppurb}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_poppurb |> 
-  dplyr::select(!DA_POPPURB) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_poppurb}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_poppurb}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TFT
-
-```{r rules_dist_da_tft}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tft <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TFT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TFT"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TFT) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TFT_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TFT), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_out_munic     = dplyr::if_else(!outlier_function(DA_TFT), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_min_munic     = dplyr::if_else(DA_TFT >= (min(dplyr::lag(DA_TFT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_max_munic     = dplyr::if_else(DA_TFT <= (max(dplyr::lag(DA_TFT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_min_k_munic   = dplyr::if_else(DA_TFT >= (min(dplyr::lag(DA_TFT), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_max_k_munic   = dplyr::if_else(DA_TFT <= (k * max(dplyr::lag(DA_TFT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_med_mov_munic = dplyr::if_else(DA_TFT <= (k * zoo::rollmedian(DA_TFT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TFT_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TFT), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tft}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tft |> 
-  dplyr::select(!DA_TFT) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tft}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tft}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TMI
-
-```{r rules_dist_da_tmi}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tmi <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TMI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TMI"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TMI) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TMI_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TMI), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_out_munic     = dplyr::if_else(!outlier_function(DA_TMI), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_min_munic     = dplyr::if_else(DA_TMI >= (min(dplyr::lag(DA_TMI), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_max_munic     = dplyr::if_else(DA_TMI <= (max(dplyr::lag(DA_TMI), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_min_k_munic   = dplyr::if_else(DA_TMI >= (min(dplyr::lag(DA_TMI), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_max_k_munic   = dplyr::if_else(DA_TMI <= (k * max(dplyr::lag(DA_TMI), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_med_mov_munic = dplyr::if_else(DA_TMI <= (k * zoo::rollmedian(DA_TMI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TMI_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TMI), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tmi}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tmi |> 
-  dplyr::select(!DA_TMI) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tmi}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tmi}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_ESPVIDA
-
-```{r rules_dist_da_espvida}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_espvida <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_ESPVIDA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_ESPVIDA"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_ESPVIDA) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_ESPVIDA_hampel_munic  = dplyr::if_else(!hampel_filter(DA_ESPVIDA), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_out_munic     = dplyr::if_else(!outlier_function(DA_ESPVIDA), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_min_munic     = dplyr::if_else(DA_ESPVIDA >= (min(dplyr::lag(DA_ESPVIDA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_max_munic     = dplyr::if_else(DA_ESPVIDA <= (max(dplyr::lag(DA_ESPVIDA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_min_k_munic   = dplyr::if_else(DA_ESPVIDA >= (min(dplyr::lag(DA_ESPVIDA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_max_k_munic   = dplyr::if_else(DA_ESPVIDA <= (k * max(dplyr::lag(DA_ESPVIDA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_med_mov_munic = dplyr::if_else(DA_ESPVIDA <= (k * zoo::rollmedian(DA_ESPVIDA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_ESPVIDA_dif_munic     = dplyr::if_else(!compare_first_dif(DA_ESPVIDA), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_espvida}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_espvida |> 
-  dplyr::select(!DA_ESPVIDA) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_espvida}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_espvida}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TBM
-
-```{r rules_dist_DA_TBM}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tbm <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TBM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TBM"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TBM) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TBM_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TBM), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_out_munic     = dplyr::if_else(!outlier_function(DA_TBM), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_min_munic     = dplyr::if_else(DA_TBM >= (min(dplyr::lag(DA_TBM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_max_munic     = dplyr::if_else(DA_TBM <= (max(dplyr::lag(DA_TBM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_min_k_munic   = dplyr::if_else(DA_TBM >= (min(dplyr::lag(DA_TBM), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_max_k_munic   = dplyr::if_else(DA_TBM <= (k * max(dplyr::lag(DA_TBM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_med_mov_munic = dplyr::if_else(DA_TBM <= (k * zoo::rollmedian(DA_TBM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TBM_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TBM), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tbm}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tbm |> 
-  dplyr::select(!DA_TBM) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tbm}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tbm}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TBN
-
-```{r rules_dist_da_tbn}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tbn <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TBN" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TBN"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TBN) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TBN_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TBN), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_out_munic     = dplyr::if_else(!outlier_function(DA_TBN), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_min_munic     = dplyr::if_else(DA_TBN >= (min(dplyr::lag(DA_TBN), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_max_munic     = dplyr::if_else(DA_TBN <= (max(dplyr::lag(DA_TBN), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_min_k_munic   = dplyr::if_else(DA_TBN >= (min(dplyr::lag(DA_TBN), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_max_k_munic   = dplyr::if_else(DA_TBN <= (k * max(dplyr::lag(DA_TBN), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_med_mov_munic = dplyr::if_else(DA_TBN <= (k * zoo::rollmedian(DA_TBN, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TBN_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TBN), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tbn}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tbn |> 
-  dplyr::select(!DA_TBN) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tbn}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tbn}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TCV
-
-```{r rules_dist_da_tcv}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tcv <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TCV" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TCV"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TCV) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TCV_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TCV), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_out_munic     = dplyr::if_else(!outlier_function(DA_TCV), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_min_munic     = dplyr::if_else(DA_TCV >= (min(dplyr::lag(DA_TCV), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_max_munic     = dplyr::if_else(DA_TCV <= (max(dplyr::lag(DA_TCV), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_min_k_munic   = dplyr::if_else(DA_TCV >= (min(dplyr::lag(DA_TCV), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_max_k_munic   = dplyr::if_else(DA_TCV <= (k * max(dplyr::lag(DA_TCV), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_med_mov_munic = dplyr::if_else(DA_TCV <= (k * zoo::rollmedian(DA_TCV, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TCV_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TCV), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tcv}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tcv |> 
-  dplyr::select(!DA_TCV) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tcv}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tcv}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TLM
-
-```{r rules_dist_da_tlm}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tlm <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TLM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TLM"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TLM) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TLM_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TLM), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_out_munic     = dplyr::if_else(!outlier_function(DA_TLM), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_min_munic     = dplyr::if_else(DA_TLM >= (min(dplyr::lag(DA_TLM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_max_munic     = dplyr::if_else(DA_TLM <= (max(dplyr::lag(DA_TLM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_min_k_munic   = dplyr::if_else(DA_TLM >= (min(dplyr::lag(DA_TLM), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_max_k_munic   = dplyr::if_else(DA_TLM <= (k * max(dplyr::lag(DA_TLM), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_med_mov_munic = dplyr::if_else(DA_TLM <= (k * zoo::rollmedian(DA_TLM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TLM_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TLM), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tlm}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tlm |> 
-  dplyr::select(!DA_TLM) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tlm}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tlm}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_TCD
-
-```{r rules_dist_da_tcd}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_tcd <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_TCD" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_TCD"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_TCD) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_TCD_hampel_munic  = dplyr::if_else(!hampel_filter(DA_TCD), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_out_munic     = dplyr::if_else(!outlier_function(DA_TCD), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_min_munic     = dplyr::if_else(DA_TCD >= (min(dplyr::lag(DA_TCD), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_max_munic     = dplyr::if_else(DA_TCD <= (max(dplyr::lag(DA_TCD), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_min_k_munic   = dplyr::if_else(DA_TCD >= (min(dplyr::lag(DA_TCD), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_max_k_munic   = dplyr::if_else(DA_TCD <= (k * max(dplyr::lag(DA_TCD), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_med_mov_munic = dplyr::if_else(DA_TCD <= (k * zoo::rollmedian(DA_TCD, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_TCD_dif_munic     = dplyr::if_else(!compare_first_dif(DA_TCD), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_tcd}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_tcd |> 
-  dplyr::select(!DA_TCD) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_tcd}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_tcd}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_EMIGRA
-
-```{r rules_dist_da_emigra}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_emigra <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_EMIGRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_EMIGRA"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_EMIGRA) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_EMIGRA_hampel_munic  = dplyr::if_else(!hampel_filter(DA_EMIGRA), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_out_munic     = dplyr::if_else(!outlier_function(DA_EMIGRA), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_min_munic     = dplyr::if_else(DA_EMIGRA >= (min(dplyr::lag(DA_EMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_max_munic     = dplyr::if_else(DA_EMIGRA <= (max(dplyr::lag(DA_EMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_min_k_munic   = dplyr::if_else(DA_EMIGRA >= (min(dplyr::lag(DA_EMIGRA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_max_k_munic   = dplyr::if_else(DA_EMIGRA <= (k * max(dplyr::lag(DA_EMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_med_mov_munic = dplyr::if_else(DA_EMIGRA <= (k * zoo::rollmedian(DA_EMIGRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_EMIGRA_dif_munic     = dplyr::if_else(!compare_first_dif(DA_EMIGRA), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_emigra}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_emigra |> 
-  dplyr::select(!DA_EMIGRA) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_emigra}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_emigra}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-### DA_IMIGRA
-
-```{r rules_dist_da_imigra}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_da_imigra <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "DA_IMIGRA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["DA_IMIGRA"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, DA_IMIGRA) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_DA_IMIGRA_hampel_munic  = dplyr::if_else(!hampel_filter(DA_IMIGRA), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_out_munic     = dplyr::if_else(!outlier_function(DA_IMIGRA), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_min_munic     = dplyr::if_else(DA_IMIGRA >= (min(dplyr::lag(DA_IMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_max_munic     = dplyr::if_else(DA_IMIGRA <= (max(dplyr::lag(DA_IMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_min_k_munic   = dplyr::if_else(DA_IMIGRA >= (min(dplyr::lag(DA_IMIGRA), na.rm = T) / k), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_max_k_munic   = dplyr::if_else(DA_IMIGRA <= (k * max(dplyr::lag(DA_IMIGRA), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_med_mov_munic = dplyr::if_else(DA_IMIGRA <= (k * zoo::rollmedian(DA_IMIGRA, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_DA_IMIGRA_dif_munic     = dplyr::if_else(!compare_first_dif(DA_IMIGRA), F, T) # Longitudinal (município)
-  )
-```
-
-```{r data_wrangling_dist_da_imigra}
-
-## Transformação dos resultados
-df_sumario_dist_da <- df_rules_dist_da_imigra |> 
-  dplyr::select(!DA_IMIGRA) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_da |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_da_imigra}
-#| column: screen-inset-right
-
-df_sumario |> 
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_da_imigra}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
 
 ### DA_HOMEM0A4
 
@@ -4430,6 +3564,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM5A9
 
 ```{r rules_dist_da_homem5a9}
@@ -4503,6 +3638,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM10A14
 
@@ -4578,6 +3714,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM15A19
 
 ```{r rules_dist_da_homem15a19}
@@ -4651,6 +3788,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM20A24
 
@@ -4726,6 +3864,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM25A29
 
 ```{r rules_dist_da_homem25a29}
@@ -4799,6 +3938,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM30A34
 
@@ -4874,6 +4014,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM35A39
 
 ```{r rules_dist_da_homem35a39}
@@ -4947,6 +4088,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM40A44
 
@@ -5022,6 +4164,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM45A49
 
 ```{r rules_dist_da_homem45a49}
@@ -5095,6 +4238,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM50A54
 
@@ -5170,6 +4314,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM55A59
 
 ```{r rules_dist_da_homem55a59}
@@ -5243,6 +4388,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM60A64
 
@@ -5318,6 +4464,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM65A69
 
 ```{r rules_dist_da_homem65a69}
@@ -5391,6 +4538,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM70A74
 
@@ -5466,6 +4614,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_HOMEM75A79
 
 ```{r rules_dist_da_homem75a79}
@@ -5539,6 +4688,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEM80
 
@@ -5614,6 +4764,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH0A4
 
 ```{r rules_dist_da_mulh0a4}
@@ -5687,6 +4838,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH5A9
 
@@ -5762,6 +4914,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH10A14
 
 ```{r rules_dist_da_mulh10a14}
@@ -5835,6 +4988,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH15A19
 
@@ -5910,6 +5064,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH20A24
 
 ```{r rules_dist_da_mulh20a24}
@@ -5983,6 +5138,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH25A29
 
@@ -6058,6 +5214,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH30A34
 
 ```{r rules_dist_da_mulh30a34}
@@ -6131,6 +5288,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH35A39
 
@@ -6206,6 +5364,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH40A44
 
 ```{r rules_dist_da_mulh40a44}
@@ -6279,6 +5438,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH45A49
 
@@ -6354,6 +5514,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH50A54
 
 ```{r rules_dist_da_mulh50a54}
@@ -6427,6 +5588,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH55A59
 
@@ -6502,6 +5664,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH60A64
 
 ```{r rules_dist_da_mulh60a64}
@@ -6575,6 +5738,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH65A69
 
@@ -6650,6 +5814,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULH70A74
 
 ```{r rules_dist_da_mulh70a74}
@@ -6723,6 +5888,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_MULH75A79
 
@@ -6798,6 +5964,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULHER80
 
 ```{r rules_dist_da_mulher80}
@@ -6871,6 +6038,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 ### DA_HOMEMTOT
 
@@ -6946,6 +6114,7 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
+
 ### DA_MULHERTOT
 
 ```{r rules_dist_da_mulhertot}
@@ -7019,6 +6188,7 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
+
 
 # Análise descritiva
 
@@ -7114,1431 +6284,1312 @@ cidades <- openxlsx::read.xlsx(path_data)
 
 ```
 
+
+
 ```{r df_build_viol_valid}
+variables <- c(
+               "DA_POPTA",
+               "DA_POPP0",
+               "DA_POPP1A4",
+               "DA_POPP4",
+               "DA_POPP5",
+               "DA_POPP4E5",
+               "DA_POPP5A9",
+               "DA_POPP6A14",
+               "DA_POPP10A14",
+               "DA_POPP15",
+               "DA_POPP15A17",
+               "DA_POPP15A19",
+               "DA_POPP15M",
+               "DA_POPP16A19",
+               "DA_POPP16A64",
+               "DA_POPP18M",
+               "DA_POPP20A24",
+               "DA_POPP25A29",
+               "DA_POPP30A34",
+               "DA_POPP35A39",
+               "DA_POPP40A44",
+               "DA_POPP45A49",
+               "DA_POPP50A54",
+               "DA_POPP55A59",
+               "DA_POPP60A64",
+               "DA_POPP65A69",
+               "DA_POPP70A74",
+               "DA_POPP75A79",
+               "DA_POPP80M",
+               "DA_DENSP",
+               "DA_PROPP4E5",
+               "DA_PROPP0A5",
+               "DA_PROPP6A17",
+               "DA_RDEPP",
+               "DA_PROPP15N",
+               "DA_PROPP65M",
+               "DA_INDENVE",
+               "DA_HOMEM0A4",
+               "DA_HOMEM5A9",
+               "DA_HOMEM10A14",
+               "DA_HOMEM15A19",
+               "DA_HOMEM20A24",
+               "DA_HOMEM25A29",
+               "DA_HOMEM30A34",
+               "DA_HOMEM35A39",
+               "DA_HOMEM40A44",
+               "DA_HOMEM45A49",
+               "DA_HOMEM50A54",
+               "DA_HOMEM55A59",
+               "DA_HOMEM60A64",
+               "DA_HOMEM65A69",
+               "DA_HOMEM70A74",
+               "DA_HOMEM75A79",
+               "DA_HOMEM80",
+               "DA_MULH0A4",
+               "DA_MULH5A9",
+               "DA_MULH10A14",
+               "DA_MULH15A19",
+               "DA_MULH20A24",
+               "DA_MULH25A29",
+               "DA_MULH30A34",
+               "DA_MULH35A39",
+               "DA_MULH40A44",
+               "DA_MULH45A49",
+               "DA_MULH50A54",
+               "DA_MULH55A59",
+               "DA_MULH60A64",
+               "DA_MULH65A69",
+               "DA_MULH70A74",
+               "DA_MULH75A79",
+               "DA_MULHER80",
+               "DA_HOMEMTOT",
+               "DA_MULHERTOT")
+
+lis <- split(variables,f = variables)
+df_obs_valid <- names(lis)|>
+sapply(function(i){
+lis[[i]] <- df_rules_valid_da_all |>
+  dplyr::select(
+    Ano,
+    ibge7,
+    dplyr::ends_with(i)
+  ) |>
+  tidyr::pivot_longer(
+    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")),
+    names_to  = "regra",
+    values_to = "obs_suspeita"
+  ) |>
+  dplyr::filter(obs_suspeita) |>
+  dplyr::rename_with(tolower) |>
+  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
+  dplyr::select(ano, ibge7, cidade, obs_suspeita, regra) |>
+  dplyr::arrange(ano, ibge7)
+return(lis[[i]])
+}, USE.NAMES=TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+for(i in names(df_obs_valid)){
+  openxlsx::addWorksheet(pt, paste0("valid-", i))
+  openxlsx::writeData(pt, paste0("valid-", i), df_obs_valid[[i]])
+}
+
+
 
 # Criar base com as observações que violaram uma ou mais regras de validade
 
 ## Validade
-df_rules_valid_da_popt <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
 
-df_rules_valid_da_popta <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPTA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp0 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP0")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp1a4 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP1A4")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp4 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP4")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp5 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP5")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp4e5 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP4E5")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp5a9 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP5A9")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp6a14 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP6A14")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp10a14 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP10A14")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp15 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP15")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp15a17 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP15A17")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp15a19 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP15A19")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp15m <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP15M")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp16a19 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP16A19")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp16a64 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP16A64")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp18m <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP18M")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp20a24 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP20A24")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp25a29 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP25A29")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp30a34 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP30A34")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp35a39 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP35A39")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp40a44 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP40A44")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp45a49 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP45A49")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp50a54 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP50A54")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp55a59 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP55A59")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp60a64 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP60A64")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp65a69 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP65A69")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp70a74 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP70A74")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp75a79 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP75A79")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_popp80m <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPP80M")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_densp <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_DENSP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_propp4e5 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_PROPP4E5")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_propp0a5 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_PROPP0A5")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_propp6a17 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_PROPP6A17")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_rdepp <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_RDEPP")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_propp15n <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_PROPP15N")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_propp65m <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_PROPP65M")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_indenve <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_INDENVE")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_poppurb <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_POPPURB")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tft <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TFT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tmi <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TMI")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_espvida <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_ESPVIDA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tbm <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TBM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tbn <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TBN")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tcv <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TCV")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tlm <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TLM")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_tcd <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_TCD")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_emigra <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_EMIGRA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_imigra <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_IMIGRA")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem0a4 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM0A4")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem5a9 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM5A9")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem10a14 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM10A14")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem15a19 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM15A19")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem20a24 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM20A24")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem25a29 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM25A29")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem30a34 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM30A34")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem35a39 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM35A39")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem40a44 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM40A44")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem45a49 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM45A49")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem50a54 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM50A54")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem55a59 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM55A59")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem60a64 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM60A64")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem65a69 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM65A69")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem70a74 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM70A74")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem75a79 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM75A79")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homem80 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEM80")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh0a4 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH0A4")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh5a9 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH5A9")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh10a14 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH10A14")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh15a19 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH15A19")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh20a24 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH20A24")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh25a29 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH25A29")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh30a34 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH30A34")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh35a39 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH35A39")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh40a44 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH40A44")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh45a49 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH45A49")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh50a54 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH50A54")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh55a59 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH55A59")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh60a64 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH60A64")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh65a69 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH65A69")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh70a74 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH70A74")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulh75a79 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULH75A79")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulher80 <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULHER80")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_homemtot <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_HOMEMTOT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_valid_da_mulhertot <- df_rules_valid_da_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with("DA_MULHERTOT")
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-```
-
-```{r df_export_viol_valid}
-
-## Lista com os dfs por indicador
-lista_df <- list(
-  "da_popt"       = df_rules_valid_da_popt,
-  "da_popta"      = df_rules_valid_da_popta,
-  "da_popp0"      = df_rules_valid_da_popp0,
-  "da_popp1a4"    = df_rules_valid_da_popp1a4,
-  "da_popp4"      = df_rules_valid_da_popp4,
-  "da_popp5"      = df_rules_valid_da_popp5,
-  "da_popp4e5"    = df_rules_valid_da_popp4e5,
-  "da_popp5a9"    = df_rules_valid_da_popp5a9,
-  "da_popp6a14"   = df_rules_valid_da_popp6a14,
-  "da_popp10a14"  = df_rules_valid_da_popp10a14,
-  "da_popp15"     = df_rules_valid_da_popp15,
-  "da_popp15a17"  = df_rules_valid_da_popp15a17,
-  "da_popp15a19"  = df_rules_valid_da_popp15a19,
-  "da_popp15m"    = df_rules_valid_da_popp15m,
-  "da_popp16a19"  = df_rules_valid_da_popp16a19,
-  "da_popp16a64"  = df_rules_valid_da_popp16a64,
-  "da_popp18m"    = df_rules_valid_da_popp18m,
-  "da_popp20a24"  = df_rules_valid_da_popp20a24,
-  "da_popp25a29"  = df_rules_valid_da_popp25a29,
-  "da_popp30a34"  = df_rules_valid_da_popp30a34,
-  "da_popp35a39"  = df_rules_valid_da_popp35a39,
-  "da_popp40a44"  = df_rules_valid_da_popp40a44,
-  "da_popp45a49"  = df_rules_valid_da_popp45a49,
-  "da_popp50a54"  = df_rules_valid_da_popp50a54,
-  "da_popp55a59"  = df_rules_valid_da_popp55a59,
-  "da_popp60a64"  = df_rules_valid_da_popp60a64,
-  "da_popp65a69"  = df_rules_valid_da_popp65a69,
-  "da_popp70a74"  = df_rules_valid_da_popp70a74,
-  "da_popp75a79"  = df_rules_valid_da_popp75a79,
-  "da_popp80m"    = df_rules_valid_da_popp80m,
-  "da_densp"      = df_rules_valid_da_densp,
-  "da_propp4e5"   = df_rules_valid_da_propp4e5,
-  "da_propp0a5"   = df_rules_valid_da_propp0a5,
-  "da_propp6a17"  = df_rules_valid_da_propp6a17,
-  "da_rdepp"      = df_rules_valid_da_rdepp,
-  "da_propp15n"   = df_rules_valid_da_propp15n,
-  "da_propp65m"   = df_rules_valid_da_propp65m,
-  "da_indenve"    = df_rules_valid_da_indenve,
-  "da_poppurb"    = df_rules_valid_da_poppurb,
-  "da_tft"        = df_rules_valid_da_tft,
-  "da_tmi"        = df_rules_valid_da_tmi,
-  "da_espvida"    = df_rules_valid_da_espvida,
-  "da_tbm"        = df_rules_valid_da_tbm,
-  "da_tbn"        = df_rules_valid_da_tbn,
-  "da_tcv"        = df_rules_valid_da_tcv,
-  "da_tlm"        = df_rules_valid_da_tlm,
-  "da_tcd"        = df_rules_valid_da_tcd,
-  "da_emigra"     = df_rules_valid_da_emigra,
-  "da_imigra"     = df_rules_valid_da_imigra,
-  "da_homem0a4"   = df_rules_valid_da_homem0a4,
-  "da_homem5a9"   = df_rules_valid_da_homem5a9,
-  "da_homem10a14" = df_rules_valid_da_homem10a14,
-  "da_homem15a19" = df_rules_valid_da_homem15a19,
-  "da_homem20a24" = df_rules_valid_da_homem20a24,
-  "da_homem25a29" = df_rules_valid_da_homem25a29,
-  "da_homem30a34" = df_rules_valid_da_homem30a34,
-  "da_homem35a39" = df_rules_valid_da_homem35a39,
-  "da_homem40a44" = df_rules_valid_da_homem40a44,
-  "da_homem45a49" = df_rules_valid_da_homem45a49,
-  "da_homem50a54" = df_rules_valid_da_homem50a54,
-  "da_homem55a59" = df_rules_valid_da_homem55a59,
-  "da_homem60a64" = df_rules_valid_da_homem60a64,
-  "da_homem65a69" = df_rules_valid_da_homem65a69,
-  "da_homem70a74" = df_rules_valid_da_homem70a74,
-  "da_homem75a79" = df_rules_valid_da_homem75a79,
-  "da_homem80"    = df_rules_valid_da_homem80,
-  "da_mulh0a4"    = df_rules_valid_da_mulh0a4,
-  "da_mulh5a9"    = df_rules_valid_da_mulh5a9,
-  "da_mulh10a14"  = df_rules_valid_da_mulh10a14,
-  "da_mulh15a19"  = df_rules_valid_da_mulh15a19,
-  "da_mulh20a24"  = df_rules_valid_da_mulh20a24,
-  "da_mulh25a29"  = df_rules_valid_da_mulh25a29,
-  "da_mulh30a34"  = df_rules_valid_da_mulh30a34,
-  "da_mulh35a39"  = df_rules_valid_da_mulh35a39,
-  "da_mulh40a44"  = df_rules_valid_da_mulh40a44,
-  "da_mulh45a49"  = df_rules_valid_da_mulh45a49,
-  "da_mulh50a54"  = df_rules_valid_da_mulh50a54,
-  "da_mulh55a59"  = df_rules_valid_da_mulh55a59,
-  "da_mulh60a64"  = df_rules_valid_da_mulh60a64,
-  "da_mulh65a69"  = df_rules_valid_da_mulh65a69,
-  "da_mulh70a74"  = df_rules_valid_da_mulh70a74,
-  "da_mulh75a79"  = df_rules_valid_da_mulh75a79,
-  "da_mulher80"   = df_rules_valid_da_mulher80,
-  "da_homemtot"   = df_rules_valid_da_homemtot,
-  "da_mulhertot"  = df_rules_valid_da_mulhertot
-)
-
-## Add dados à pasta de trabalho
-for(i in names(lista_df)){
-  nome <- stringr::str_remove(i, "df_rules_valid_")
-  openxlsx::addWorksheet(pt, paste0("valid - ", nome))
-  openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
-}
-```
-
-```{r df_build_viol_consist}
-
-# Criar base com as observacões que violaram uma ou mais regras de consistência
-
-## Consistência
-# df_rules_consist_hs_gestao_total <- df_rules_consist_hs_all |> 
+# df_rules_valid_da_popta <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPTA")
+#   ) |> 
 #   tidyr::pivot_longer(
-#     cols      = !c(Ano, ibge7, dplyr::starts_with("HS_")), 
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
 #     names_to  = "regra", 
 #     values_to = "obs_suspeita"
 #   ) |> 
 #   dplyr::filter(obs_suspeita) |> 
 #   dplyr::rename_with(tolower) |> 
 #   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp0 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP0")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp1a4 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP1A4")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp4 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP4")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp5 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP5")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp4e5 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP4E5")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp5a9 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP5A9")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp6a14 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP6A14")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp10a14 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP10A14")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp15 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP15")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp15a17 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP15A17")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp15a19 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP15A19")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp15m <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP15M")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp16a19 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP16A19")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp16a64 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP16A64")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp18m <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP18M")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp20a24 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP20A24")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp25a29 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP25A29")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp30a34 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP30A34")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp35a39 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP35A39")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp40a44 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP40A44")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp45a49 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP45A49")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp50a54 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP50A54")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp55a59 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP55A59")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp60a64 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP60A64")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp65a69 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP65A69")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp70a74 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP70A74")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp75a79 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP75A79")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_popp80m <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_POPP80M")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_densp <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_DENSP")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_propp4e5 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_PROPP4E5")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_propp0a5 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_PROPP0A5")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_propp6a17 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_PROPP6A17")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_rdepp <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_RDEPP")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_propp15n <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_PROPP15N")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_propp65m <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_PROPP65M")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_indenve <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_INDENVE")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem0a4 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM0A4")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem5a9 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM5A9")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem10a14 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM10A14")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem15a19 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM15A19")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem20a24 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM20A24")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem25a29 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM25A29")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem30a34 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM30A34")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem35a39 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM35A39")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem40a44 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM40A44")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem45a49 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM45A49")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem50a54 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM50A54")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem55a59 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM55A59")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem60a64 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM60A64")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem65a69 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM65A69")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem70a74 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM70A74")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem75a79 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM75A79")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homem80 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEM80")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh0a4 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH0A4")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh5a9 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH5A9")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh10a14 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH10A14")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh15a19 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH15A19")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh20a24 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH20A24")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh25a29 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH25A29")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh30a34 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH30A34")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh35a39 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH35A39")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh40a44 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH40A44")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh45a49 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH45A49")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh50a54 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH50A54")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh55a59 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH55A59")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh60a64 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH60A64")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh65a69 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH65A69")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh70a74 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH70A74")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulh75a79 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULH75A79")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulher80 <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULHER80")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_homemtot <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_HOMEMTOT")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+# 
+# df_rules_valid_da_mulhertot <- df_rules_valid_da_all |> 
+#   dplyr::select(
+#     Ano,
+#     ibge7,
+#     dplyr::ends_with("DA_MULHERTOT")
+#   ) |> 
+#   tidyr::pivot_longer(
+#     cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
+#     names_to  = "regra", 
+#     values_to = "obs_suspeita"
+#   ) |> 
+#   dplyr::filter(obs_suspeita) |> 
+#   dplyr::rename_with(tolower) |> 
+#   dplyr::arrange(ano, ibge7)
+
+
 ```
 
-```{r df_export_viol_consist}
+```{r df_export_viol_valid}
 
 ## Lista com os dfs por indicador
 # lista_df <- list(
-#   "hs_gestao_total"  = df_rules_consist_hs_gestao_total
+#   "da_popta"      = df_rules_valid_da_popta,
+#   "da_popp0"      = df_rules_valid_da_popp0,
+#   "da_popp1a4"    = df_rules_valid_da_popp1a4,
+#   "da_popp4"      = df_rules_valid_da_popp4,
+#   "da_popp5"      = df_rules_valid_da_popp5,
+#   "da_popp4e5"    = df_rules_valid_da_popp4e5,
+#   "da_popp5a9"    = df_rules_valid_da_popp5a9,
+#   "da_popp6a14"   = df_rules_valid_da_popp6a14,
+#   "da_popp10a14"  = df_rules_valid_da_popp10a14,
+#   "da_popp15"     = df_rules_valid_da_popp15,
+#   "da_popp15a17"  = df_rules_valid_da_popp15a17,
+#   "da_popp15a19"  = df_rules_valid_da_popp15a19,
+#   "da_popp15m"    = df_rules_valid_da_popp15m,
+#   "da_popp16a19"  = df_rules_valid_da_popp16a19,
+#   "da_popp16a64"  = df_rules_valid_da_popp16a64,
+#   "da_popp18m"    = df_rules_valid_da_popp18m,
+#   "da_popp20a24"  = df_rules_valid_da_popp20a24,
+#   "da_popp25a29"  = df_rules_valid_da_popp25a29,
+#   "da_popp30a34"  = df_rules_valid_da_popp30a34,
+#   "da_popp35a39"  = df_rules_valid_da_popp35a39,
+#   "da_popp40a44"  = df_rules_valid_da_popp40a44,
+#   "da_popp45a49"  = df_rules_valid_da_popp45a49,
+#   "da_popp50a54"  = df_rules_valid_da_popp50a54,
+#   "da_popp55a59"  = df_rules_valid_da_popp55a59,
+#   "da_popp60a64"  = df_rules_valid_da_popp60a64,
+#   "da_popp65a69"  = df_rules_valid_da_popp65a69,
+#   "da_popp70a74"  = df_rules_valid_da_popp70a74,
+#   "da_popp75a79"  = df_rules_valid_da_popp75a79,
+#   "da_popp80m"    = df_rules_valid_da_popp80m,
+#   "da_densp"      = df_rules_valid_da_densp,
+#   "da_propp4e5"   = df_rules_valid_da_propp4e5,
+#   "da_propp0a5"   = df_rules_valid_da_propp0a5,
+#   "da_propp6a17"  = df_rules_valid_da_propp6a17,
+#   "da_rdepp"      = df_rules_valid_da_rdepp,
+#   "da_propp15n"   = df_rules_valid_da_propp15n,
+#   "da_propp65m"   = df_rules_valid_da_propp65m,
+#   "da_indenve"    = df_rules_valid_da_indenve,
+#   "da_homem0a4"   = df_rules_valid_da_homem0a4,
+#   "da_homem5a9"   = df_rules_valid_da_homem5a9,
+#   "da_homem10a14" = df_rules_valid_da_homem10a14,
+#   "da_homem15a19" = df_rules_valid_da_homem15a19,
+#   "da_homem20a24" = df_rules_valid_da_homem20a24,
+#   "da_homem25a29" = df_rules_valid_da_homem25a29,
+#   "da_homem30a34" = df_rules_valid_da_homem30a34,
+#   "da_homem35a39" = df_rules_valid_da_homem35a39,
+#   "da_homem40a44" = df_rules_valid_da_homem40a44,
+#   "da_homem45a49" = df_rules_valid_da_homem45a49,
+#   "da_homem50a54" = df_rules_valid_da_homem50a54,
+#   "da_homem55a59" = df_rules_valid_da_homem55a59,
+#   "da_homem60a64" = df_rules_valid_da_homem60a64,
+#   "da_homem65a69" = df_rules_valid_da_homem65a69,
+#   "da_homem70a74" = df_rules_valid_da_homem70a74,
+#   "da_homem75a79" = df_rules_valid_da_homem75a79,
+#   "da_homem80"    = df_rules_valid_da_homem80,
+#   "da_mulh0a4"    = df_rules_valid_da_mulh0a4,
+#   "da_mulh5a9"    = df_rules_valid_da_mulh5a9,
+#   "da_mulh10a14"  = df_rules_valid_da_mulh10a14,
+#   "da_mulh15a19"  = df_rules_valid_da_mulh15a19,
+#   "da_mulh20a24"  = df_rules_valid_da_mulh20a24,
+#   "da_mulh25a29"  = df_rules_valid_da_mulh25a29,
+#   "da_mulh30a34"  = df_rules_valid_da_mulh30a34,
+#   "da_mulh35a39"  = df_rules_valid_da_mulh35a39,
+#   "da_mulh40a44"  = df_rules_valid_da_mulh40a44,
+#   "da_mulh45a49"  = df_rules_valid_da_mulh45a49,
+#   "da_mulh50a54"  = df_rules_valid_da_mulh50a54,
+#   "da_mulh55a59"  = df_rules_valid_da_mulh55a59,
+#   "da_mulh60a64"  = df_rules_valid_da_mulh60a64,
+#   "da_mulh65a69"  = df_rules_valid_da_mulh65a69,
+#   "da_mulh70a74"  = df_rules_valid_da_mulh70a74,
+#   "da_mulh75a79"  = df_rules_valid_da_mulh75a79,
+#   "da_mulher80"   = df_rules_valid_da_mulher80,
+#   "da_homemtot"   = df_rules_valid_da_homemtot,
+#   "da_mulhertot"  = df_rules_valid_da_mulhertot
 # )
-
-## Add dados à pasta de trabalho
+# 
+# ## Add dados à pasta de trabalho
 # for(i in names(lista_df)){
-#   nome <- stringr::str_remove(i, "df_rules_consist_")
-#   openxlsx::addWorksheet(pt, paste0("consist - ", nome))
-#   openxlsx::writeData(pt, paste0("consist - ", nome), lista_df[[i]])
+#   nome <- stringr::str_remove(i, "df_rules_valid_")
+#   openxlsx::addWorksheet(pt, paste0("valid - ", nome))
+#   openxlsx::writeData(pt, paste0("valid - ", nome), lista_df[[i]])
 # }
+
 ```
+
 
 ```{r df_build_viol_dist}
 
 # Criar base com as observações que violaram uma ou mais regras de distribuição
 
 ## Distribuição
-df_rules_dist_da_popt <- df_rules_dist_da_popt |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
 
 df_rules_dist_da_popta <- df_rules_dist_da_popta |> 
   tidyr::pivot_longer(
@@ -8910,115 +7961,6 @@ df_rules_dist_da_indenve <- df_rules_dist_da_indenve |>
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
 
-df_rules_dist_da_poppurb <- df_rules_dist_da_poppurb |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tft <- df_rules_dist_da_tft |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tmi <- df_rules_dist_da_tmi |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_espvida <- df_rules_dist_da_espvida |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tbm <- df_rules_dist_da_tbm |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tbn <- df_rules_dist_da_tbn |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tcv <- df_rules_dist_da_tcv |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tlm <- df_rules_dist_da_tlm |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_tcd <- df_rules_dist_da_tcd |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_emigra <- df_rules_dist_da_emigra |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
-
-df_rules_dist_da_imigra <- df_rules_dist_da_imigra |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("DA_")), 
-    names_to  = "regra", 
-    values_to = "obs_suspeita"
-  ) |> 
-  dplyr::filter(obs_suspeita) |> 
-  dplyr::rename_with(tolower) |> 
-  dplyr::arrange(ano, ibge7)
 
 df_rules_dist_da_homem0a4 <- df_rules_dist_da_homem0a4 |> 
   tidyr::pivot_longer(
@@ -9379,12 +8321,12 @@ df_rules_dist_da_mulhertot <- df_rules_dist_da_mulhertot |>
   dplyr::filter(obs_suspeita) |> 
   dplyr::rename_with(tolower) |> 
   dplyr::arrange(ano, ibge7)
+
 ```
 
 ```{r df_export_viol_dist}
 
 lista_df <- list(
-  "da_popt"       = df_rules_dist_da_popt,
   "da_popta"      = df_rules_dist_da_popta,
   "da_popp0"      = df_rules_dist_da_popp0,
   "da_popp1a4"    = df_rules_dist_da_popp1a4,
@@ -9422,17 +8364,6 @@ lista_df <- list(
   "da_propp15n"   = df_rules_dist_da_propp15n,
   "da_propp65m"   = df_rules_dist_da_propp65m,
   "da_indenve"    = df_rules_dist_da_indenve,
-  "da_poppurb"    = df_rules_dist_da_poppurb,
-  "da_tft"        = df_rules_dist_da_tft,
-  "da_tmi"        = df_rules_dist_da_tmi,
-  "da_espvida"    = df_rules_dist_da_espvida,
-  "da_tbm"        = df_rules_dist_da_tbm,
-  "da_tbn"        = df_rules_dist_da_tbn,
-  "da_tcv"        = df_rules_dist_da_tcv,
-  "da_tlm"        = df_rules_dist_da_tlm,
-  "da_tcd"        = df_rules_dist_da_tcd,
-  "da_emigra"     = df_rules_dist_da_emigra,
-  "da_imigra"     = df_rules_dist_da_imigra,
   "da_homem0a4"   = df_rules_dist_da_homem0a4,
   "da_homem5a9"   = df_rules_dist_da_homem5a9,
   "da_homem10a14" = df_rules_dist_da_homem10a14,
@@ -9473,8 +8404,8 @@ lista_df <- list(
 
 for(i in names(lista_df)){
   nome <- stringr::str_remove(i, "df_rules_dist_")
-  openxlsx::addWorksheet(pt, paste0("distrib - ", nome))
-  openxlsx::writeData(pt, paste0("distrib - ", nome), lista_df[[i]])
+  openxlsx::addWorksheet(pt, paste0("distrib-", nome))
+  openxlsx::writeData(pt, paste0("distrib-", nome), lista_df[[i]])
 }
 ```
 
