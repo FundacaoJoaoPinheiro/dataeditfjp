@@ -192,7 +192,7 @@ desc_regra_valid <- c(
   # Casos especiais
   `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
   `8` = "Valor é ≥ 8", # SP_PM1
-  `20` = "Valor é > 0" # PR_POPT
+  `9` = "Valor é > 0" # PR_POPT
 )
 
 # df com o nome da regra e a respectiva descrição
@@ -204,7 +204,7 @@ desc_regra_valid_var <- data.frame(
   dplyr::mutate(
     `Descrição` = dplyr::case_match(
       Regra,
-      "VI_PR_POPT" ~ desc_regra_valid[20]
+      "VI_PR_POPT" ~ desc_regra_valid[9]
     )
   )
 ```
