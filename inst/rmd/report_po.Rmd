@@ -3334,17 +3334,17 @@ df_dist <- list(
   "PO_TBN"         = df_rules_dist_po_tbn,
   "PO_TBM"         = df_rules_dist_po_tbm,
   "PO_TBMP"        = df_rules_dist_po_tbmp,
-  "PO_PROPP0A5"    = df_rules_dist_po,
-  "PO_PROPP60M"    = df_rules_dist_po,
-  "PO_PROPP65M"    = df_rules_dist_po,
-  "PO_INDENVE"     = df_rules_dist_po,
-  "PO_RDEPT"       = df_rules_dist_po,
-  "PO_RDEPJ"       = df_rules_dist_po,
-  "PO_RDEPI"       = df_rules_dist_po,
-  "PO_DENSP"       = df_rules_dist_po,
-  "PO_TMI_0_1"     = df_rules_dist_po,
-  "PO_TMI_0_4"     = df_rules_dist_po,
-  "PO_TMI_1_4"     = df_rules_dist_po
+  "PO_PROPP0A5"    = df_rules_dist_po_propp0a5,
+  "PO_PROPP60M"    = df_rules_dist_po_propp60m,
+  "PO_PROPP65M"    = df_rules_dist_po_propp65m,
+  "PO_INDENVE"     = df_rules_dist_po_indenve,
+  "PO_RDEPT"       = df_rules_dist_po_rdept,
+  "PO_RDEPJ"       = df_rules_dist_po_rdepj,
+  "PO_RDEPI"       = df_rules_dist_po_rdepi,
+  "PO_DENSP"       = df_rules_dist_po_densp,
+  "PO_TMI_0_1"     = df_rules_dist_po_tmi_0_1,
+  "PO_TMI_0_4"     = df_rules_dist_po_tmi_0_4,
+  "PO_TMI_1_4"     = df_rules_dist_po_tmi_1_4
 )
 
 df_obs_dist <- names(df_dist)|>
