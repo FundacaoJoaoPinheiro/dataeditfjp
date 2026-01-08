@@ -70,33 +70,24 @@ var_numeric <- data |>
   colnames() |> 
   unlist()
 
-newnames <- seq(1,length(var_numeric))
-newnames <- paste0("variable",newnames)
-names(newnames) <- var_numeric
 
-data_aux <- data
+data_aux1 <- data %>% dplyr::select(-all_of(categoricas))
+data_aux2 <- data %>% dplyr::select(-all_of(numericas))
 
-data_aux <- sapply(names(data_aux),
-       function(i){
-         if(names(data_aux[i]) %in% var_numeric){
-          data_aux <- data_aux %>% dplyr::select(IBGE7,ANO,!!newnames[i] := i)
-         }
-         return(data_aux)
-       }, USE.NAMES = T, simplify = FALSE)
+# newnames <- seq(1,length(var_numeric))
+# newnames <- paste0("variable",newnames)
+# names(newnames) <- var_numeric
 
-data_aux <- Reduce(function(x,y){merge(x,y, all = TRUE)}, data_aux ) %>% dplyr::select(-all_of(var_numeric))
 
-```
-
-```{r get_var_character}
-
-# Obter as siglas variáveis do tipo string
-var_char <- data |> 
-  dplyr::select(
-    !c("CHAVE", "IBGE6", "IBGE7", "ANO") & !!categoricas
-  ) |> 
-  colnames() |> 
-  unlist()
+# data_aux <- sapply(names(newnames),
+#        function(i){
+#          if(names(data_aux[i]) %in% var_numeric){
+#           data_aux <- data_aux %>% dplyr::select(IBGE7,ANO, eval_tidy(quote(i)))
+#          }
+#          return(data_aux)
+#        }, USE.NAMES = T, simplify = FALSE)
+# 
+# data_aux <- Reduce(function(x,y){merge(x,y, all = TRUE)}, data_aux ) %>% dplyr::select(-all_of(var_numeric))
 
 ```
 
@@ -125,7 +116,7 @@ Validade ou Intervalo (V): refere-se aos intervalos estabelecidos matematicament
 
 Consistência (C): refere-se aos casos em que se verificam as relações matemáticas com outras variáveis, por exemplo, parcelas de um total não podem ser maiores do que o próprio total.
 
--   **CF\_[...]\_total_year**: a soma da proporção anual é igual a $\approx$ 100%.
+-   **CF\_[...]\_total**: a soma da proporção anual é igual a $\approx$ 100%.
 
 Distribuição (D): regras de distribuição estabelecem parâmetros esperados para as estatísticas descritivas da variável como média, mediana, máximo, mínimo e regras de identificação de *outliers*;
 
@@ -141,7 +132,7 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   **DF\_[...]\_maximo_k**: o valor mais recente é menor ou igual ao $maior \times k$ valor da série histórica;
 
--   **DF\_[...]\_meddiana_k_movel**: o valor atual é menor ou igual a $mediana ~móvel \times k$;
+-   **DF\_[...]\_mediana_k_movel**: o valor atual é menor ou igual a $mediana ~móvel \times k$;
 
 -   **DF\_[...]\_diferenca**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
@@ -158,7 +149,7 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 ## variaveis Categoricas
 categorias <- file_rules %>% dplyr::filter(TYPE == "categorical") %>% dplyr::select(VI_CATEGORY)
-strsplit(x = categorias$VI_CATEGORY, split = "[ "," ]" )
+categorias <- strsplit(x = categorias$VI_CATEGORY, split = ";" ) |> unlist() 
 dicotomica <- c("Sim", "Não")
 
 ```
@@ -167,18 +158,20 @@ dicotomica <- c("Sim", "Não")
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição
 # no ano inicial de análise devido a fatores como mudança de metodologia
+if(is.null(begin_years)){
+   ano_base_alter <- c(
+   "NA" = NA_integer_
+   )} else {
+  ano_base_alter <- params$begin_years
+}
 
-#ano_base_alter <- begin_years
-ano_base_alter <- c(
-  "MA_ICMSECOLOG" = 2010
-)
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
 
-# ano_base_alter <- c(
-#   "NA" = NA_integer_
-# )
 
 #exclusions_years <- deleted_years
 exclusions_years = c(
@@ -193,35 +186,40 @@ exclusions_years = c(
 # Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
 desc_regra_valid <- c(
   # Casos mais comuns
-  `1` = "Valor é ≥ 0",
-  `2` = "Valor está dentro da categoria esperada",
-  `3` = "Valor está dentro da faixa esperada (0 a 1)",
-  `4` = "Valor está dentro da faixa esperada (0 a 10)",
-  `5` = "Valor está dentro da faixa esperada (0 a 100)",
-  `6` = "Valor está dentro da faixa esperada (0 a 1000)",
-  `7` = "Valor está dentro da faixa esperada (0 a 10000)",
-  `8` = "Valor está dentro da faixa esperada (1 a 5)",
+  `1` = "Value is greater than or equal to 0",
+  `2` = "Value belongs to the expected category",
+  `3` = "Value belongs to the expected range (0 a 1)",
+  `4` = "Value belongs to the expected range (0 a 10)",
+  `5` = "Value belongs to the expected range (0 a 100)",
+  `6` = "Value belongs to the expected range (0 a 1000)",
+  `7` = "Value belongs to the expected range (0 a 10000)",
+  `8` = "Value belongs to the expected range (1 a 5)",
   # Casos especiais
-  `9` = "Valor é ≥ 1", # SP_PM e SP_PMPC
-  `10` = "Valor é ≥ 8" # SP_PM1
+  `9`= "Value belongs to the expected range",
+  `10` = "Value is greater than or equal to 1", # SP_PM e SP_PMPC
+  `11`= "Value is greater than or equal to 8" # SP_PM1
+  
 )
 
+file_rules_aux <- file_rules |> 
+  dplyr::mutate(dplyr::across(dplyr::where(is.numeric), ~as.character(.x)) )|> 
+  dplyr::select(VARIABLE, grep(pattern = "VI", x = names(file_rules))) |>
+  tidyr::pivot_longer(cols = !c(VARIABLE), names_to = "rules", values_to = "result")
+
+
 # df com o nome da regra e a respectiva descrição
-desc_regra_valid_var <- data.frame(
-  Regra = paste0("variable",seq(1,length(var_numeric)))
-  ) |> 
+desc_regra_valid_var <- file_rules_aux |> 
   dplyr::mutate(
-    `Descrição` = dplyr::case_match(
-      Regra,
-      "VI_AS_INDCRAS"              ~ desc_regra_valid[8],      
-      "VI_AS_IDCRASME"             ~ desc_regra_valid[3],       
-      "VI_AS_IDCREASNOR"           ~ desc_regra_valid[3],             
-      "VI_AS_IDCONSELHO"           ~ desc_regra_valid[3],             
-      "VI_AS_IGDM"                 ~ desc_regra_valid[3],        
-      "VI_AS_IGDSUASM"             ~ desc_regra_valid[3],           
-      "VI_AS_NCRAS"                ~ desc_regra_valid[1]
-    )
+    Description = case_when(
+      rules == "VI_MORETHANZERO" & result == 1 ~ desc_regra_valid[1],
+      rules == "VI_0TO100" & result == 1       ~ desc_regra_valid[5]
+      
   )
+  )
+
+       
+
+
 ```
 
 ```{r map_consist_desc}

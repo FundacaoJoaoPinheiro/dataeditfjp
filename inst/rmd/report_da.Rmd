@@ -51,7 +51,6 @@ data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
 
-
 ```{r get_var_numeric}
 
 # Obter as siglas das variáveis do tipo numérico
@@ -118,7 +117,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
-
 **Classificação por flexibilidade (F ou I)**
 
 -   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
@@ -144,7 +142,6 @@ ano_base_alter <- c(
 #   "EO_TXAPROV6A9"      = c(2006,2008)
 #   )
 ```
-
 
 ```{r map_valid_desc}
 
@@ -712,7 +709,6 @@ df_sumario |>
 
 ```
 
-
 ## Distribuição
 
 ### DA_POPTA
@@ -789,7 +785,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP0
 
 ```{r rules_dist_da_popp0}
@@ -863,7 +858,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP1A4
 
@@ -939,7 +933,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP4
 
 ```{r rules_dist_da_popp4}
@@ -1013,7 +1006,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP5
 
@@ -1089,7 +1081,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP4E5
 
 ```{r rules_dist_da_popp4e5}
@@ -1163,7 +1154,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP5A9
 
@@ -1239,7 +1229,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP6A14
 
 ```{r rules_dist_da_popp6a14}
@@ -1313,7 +1302,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP10A14
 
@@ -1389,7 +1377,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP15
 
 ```{r rules_dist_da_popp15}
@@ -1463,7 +1450,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP15A17
 
@@ -1539,7 +1525,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP15A19
 
 ```{r rules_dist_da_popp15a19}
@@ -1613,7 +1598,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP15M
 
@@ -1689,7 +1673,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP16A19
 
 ```{r rules_dist_da_popp16a19}
@@ -1763,7 +1746,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP16A64
 
@@ -1839,7 +1821,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP18M
 
 ```{r rules_dist_da_popp18m}
@@ -1913,7 +1894,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP20A24
 
@@ -1989,7 +1969,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP25A29
 
 ```{r rules_dist_da_popp25a29}
@@ -2063,7 +2042,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP30A34
 
@@ -2139,7 +2117,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP35A39
 
 ```{r rules_dist_da_popp35a39}
@@ -2213,7 +2190,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP40A44
 
@@ -2289,7 +2265,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP45A49
 
 ```{r rules_dist_da_popp45a49}
@@ -2363,7 +2338,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP50A54
 
@@ -2439,7 +2413,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP55A59
 
 ```{r rules_dist_da_popp55a59}
@@ -2513,7 +2486,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP60A64
 
@@ -2589,7 +2561,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP65A69
 
 ```{r rules_dist_da_popp65a69}
@@ -2663,7 +2634,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP70A74
 
@@ -2739,7 +2709,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_POPP75A79
 
 ```{r rules_dist_da_popp75a79}
@@ -2813,7 +2782,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_POPP80M
 
@@ -2889,7 +2857,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_DENSP
 
 ```{r rules_dist_da_densp}
@@ -2963,7 +2930,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_PROPP4E5
 
@@ -3039,7 +3005,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_PROPP0A5
 
 ```{r rules_dist_da_propp0a5}
@@ -3113,7 +3078,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_PROPP6A17
 
@@ -3189,7 +3153,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_RDEPP
 
 ```{r rules_dist_da_rdepp}
@@ -3263,7 +3226,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_PROPP15N
 
@@ -3339,7 +3301,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_PROPP65M
 
 ```{r rules_dist_da_propp65m}
@@ -3413,7 +3374,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_INDENVE
 
@@ -3489,7 +3449,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM0A4
 
 ```{r rules_dist_da_homem0a4}
@@ -3563,7 +3522,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM5A9
 
@@ -3639,7 +3597,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM10A14
 
 ```{r rules_dist_da_homem10a14}
@@ -3713,7 +3670,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM15A19
 
@@ -3789,7 +3745,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM20A24
 
 ```{r rules_dist_da_homem20a24}
@@ -3863,7 +3818,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM25A29
 
@@ -3939,7 +3893,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM30A34
 
 ```{r rules_dist_da_homem30a34}
@@ -4013,7 +3966,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM35A39
 
@@ -4089,7 +4041,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM40A44
 
 ```{r rules_dist_da_homem40a44}
@@ -4163,7 +4114,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM45A49
 
@@ -4239,7 +4189,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM50A54
 
 ```{r rules_dist_da_homem50a54}
@@ -4313,7 +4262,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM55A59
 
@@ -4389,7 +4337,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM60A64
 
 ```{r rules_dist_da_homem60a64}
@@ -4463,7 +4410,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM65A69
 
@@ -4539,7 +4485,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM70A74
 
 ```{r rules_dist_da_homem70a74}
@@ -4613,7 +4558,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_HOMEM75A79
 
@@ -4689,7 +4633,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEM80
 
 ```{r rules_dist_da_homem80}
@@ -4763,7 +4706,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH0A4
 
@@ -4839,7 +4781,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH5A9
 
 ```{r rules_dist_da_mulh5a9}
@@ -4913,7 +4854,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH10A14
 
@@ -4989,7 +4929,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH15A19
 
 ```{r rules_dist_da_mulh15a19}
@@ -5063,7 +5002,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH20A24
 
@@ -5139,7 +5077,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH25A29
 
 ```{r rules_dist_da_mulh25a29}
@@ -5213,7 +5150,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH30A34
 
@@ -5289,7 +5225,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH35A39
 
 ```{r rules_dist_da_mulh35a39}
@@ -5363,7 +5298,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH40A44
 
@@ -5439,7 +5373,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH45A49
 
 ```{r rules_dist_da_mulh45a49}
@@ -5513,7 +5446,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH50A54
 
@@ -5589,7 +5521,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH55A59
 
 ```{r rules_dist_da_mulh55a59}
@@ -5663,7 +5594,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH60A64
 
@@ -5739,7 +5669,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH65A69
 
 ```{r rules_dist_da_mulh65a69}
@@ -5813,7 +5742,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULH70A74
 
@@ -5889,7 +5817,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULH75A79
 
 ```{r rules_dist_da_mulh75a79}
@@ -5963,7 +5890,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 ### DA_MULHER80
 
@@ -6039,7 +5965,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_HOMEMTOT
 
 ```{r rules_dist_da_homemtot}
@@ -6114,7 +6039,6 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 ### DA_MULHERTOT
 
 ```{r rules_dist_da_mulhertot}
@@ -6188,7 +6112,6 @@ df_sumario |>
 chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
-
 
 # Análise descritiva
 
@@ -6283,8 +6206,6 @@ path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
 cidades <- openxlsx::read.xlsx(path_data)
 
 ```
-
-
 
 ```{r df_build_viol_valid}
 variables <- c(
@@ -7583,7 +7504,6 @@ for(i in names(df_obs_valid)){
 # }
 
 ```
-
 
 ```{r df_build_viol_dist}
 

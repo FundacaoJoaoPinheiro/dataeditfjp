@@ -4,26 +4,18 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(
-  mydir = getwd(),
-  knitmydir = getwd(),
-  path_file_rules,
-  categorical_variable,
-  deleted_variable,
-  begin_years,
-  deleted_years = c(`NA` = NA_integer_)
-)
+create_output(mydir = getwd(), knitmydir = getwd(), begin_years = NULL)
 }
 \arguments{
 \item{mydir}{Output directory}
 
 \item{knitmydir}{output knit}
 
+\item{path_data}{Path to dataset}
+
 \item{categorical_variable}{List of qualitative variables}
 
 \item{deleted_variable}{List of deleted variables}
-
-\item{path_data}{Path to dataset}
 }
 \value{
 Report
