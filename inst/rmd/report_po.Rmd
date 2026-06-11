@@ -209,10 +209,10 @@ desc_regra_valid_var <- data.frame(
     "VI_PO_RAZAOSEXO",
     "VI_PO_TXCRESC",
     "VI_PO_TXURB",
-    "VI_PO_TFT",
+    #"VI_PO_TFT",
     "VI_PO_TBN",
     "VI_PO_TBM",
-    "VI_PO_TBMP",
+    #"VI_PO_TBMP",
     "VI_PO_PROPP0A5",
     "VI_PO_PROPP60M",
     "VI_PO_PROPP65M",
@@ -221,9 +221,9 @@ desc_regra_valid_var <- data.frame(
     "VI_PO_RDEPJ",
     "VI_PO_RDEPI",
     "VI_PO_DENSP",
-    "VI_PO_TMI_0_1",
-    "VI_PO_TMI_0_4",
-    "VI_PO_TMI_1_4"
+    "VI_PO_TMI_0_1"#,
+    #"VI_PO_TMI_0_4",
+    #"VI_PO_TMI_1_4"
   )
 ) |> 
   dplyr::mutate(
@@ -238,10 +238,10 @@ desc_regra_valid_var <- data.frame(
       "VI_PO_RAZAOSEXO" ~ desc_regra_valid[9],
       "VI_PO_TXCRESC" ~ desc_regra_valid[10],
       "VI_PO_TXURB" ~ desc_regra_valid[3],
-      "VI_PO_TFT" ~ desc_regra_valid[1],
+      #"VI_PO_TFT" ~ desc_regra_valid[1],
       "VI_PO_TBN" ~ desc_regra_valid[7],
       "VI_PO_TBM" ~ desc_regra_valid[7],
-      "VI_PO_TBMP" ~ desc_regra_valid[7],
+      #"VI_PO_TBMP" ~ desc_regra_valid[7],
       "VI_PO_PROPP0A5" ~ desc_regra_valid[3],
       "VI_PO_PROPP60M" ~ desc_regra_valid[3],
       "VI_PO_PROPP65M" ~ desc_regra_valid[3],
@@ -250,9 +250,9 @@ desc_regra_valid_var <- data.frame(
       "VI_PO_RDEPJ" ~ desc_regra_valid[3],
       "VI_PO_RDEPI" ~ desc_regra_valid[3],
       "VI_PO_DENSP" ~ desc_regra_valid[7],
-      "VI_PO_TMI_0_1" ~ desc_regra_valid[4],
-      "VI_PO_TMI_0_4" ~ desc_regra_valid[4],
-      "VI_PO_TMI_1_4" ~ desc_regra_valid[4]
+      "VI_PO_TMI_0_1" ~ desc_regra_valid[4]#,
+      #"VI_PO_TMI_0_4" ~ desc_regra_valid[4],
+      #"VI_PO_TMI_1_4" ~ desc_regra_valid[4]
     )
   )
 ```
@@ -294,10 +294,10 @@ rules_type <- validate::validator(
   TI_PO_RAZAOSEXO = is.numeric(PO_RAZAOSEXO),
   TI_PO_TXCRESC   = is.numeric(PO_TXCRESC),
   TI_PO_TXURB     = is.numeric(PO_TXURB),
-  TI_PO_TFT       = is.numeric(PO_TFT),
+  #TI_PO_TFT       = is.numeric(PO_TFT),
   TI_PO_TBN       = is.numeric(PO_TBN),
   TI_PO_TBM       = is.numeric(PO_TBM),
-  TI_PO_TBMP      = is.numeric(PO_TBMP),
+  #TI_PO_TBMP      = is.numeric(PO_TBMP),
   TI_PO_PROPP0A5  = is.numeric(PO_PROPP0A5),
   TI_PO_PROPP60M  = is.numeric(PO_PROPP60M),
   TI_PO_PROPP65M  = is.numeric(PO_PROPP65M),
@@ -306,9 +306,9 @@ rules_type <- validate::validator(
   TI_PO_RDEPJ     = is.numeric(PO_RDEPJ),
   TI_PO_RDEPI     = is.numeric(PO_RDEPI),
   TI_PO_DENSP     = is.numeric(PO_DENSP),
-  TI_PO_TMI_0_1   = is.numeric(PO_TMI_0_1),
-  TI_PO_TMI_0_4   = is.numeric(PO_TMI_0_4),
-  TI_PO_TMI_1_4   = is.numeric(PO_TMI_1_4)
+  TI_PO_TMI_0_1   = is.numeric(PO_TMI_0_1)#,
+  #TI_PO_TMI_0_4   = is.numeric(PO_TMI_0_4),
+  #TI_PO_TMI_1_4   = is.numeric(PO_TMI_1_4)
 )
 ```
 
@@ -348,10 +348,10 @@ df_rules_valid_po_all <- data |>
     VI_NA_PO_RAZAOSEXO = dplyr::if_else(!is.na(PO_RAZAOSEXO), F, NA),
     VI_NA_PO_TXCRESC = dplyr::if_else(!is.na(PO_TXCRESC), F, NA),
     VI_NA_PO_TXURB = dplyr::if_else(!is.na(PO_TXURB), F, NA),
-    VI_NA_PO_TFT = dplyr::if_else(!is.na(PO_TFT), F, NA),
+    #VI_NA_PO_TFT = dplyr::if_else(!is.na(PO_TFT), F, NA),
     VI_NA_PO_TBN = dplyr::if_else(!is.na(PO_TBN), F, NA),
     VI_NA_PO_TBM = dplyr::if_else(!is.na(PO_TBM), F, NA),
-    VI_NA_PO_TBMP = dplyr::if_else(!is.na(PO_TBMP), F, NA),
+    #VI_NA_PO_TBMP = dplyr::if_else(!is.na(PO_TBMP), F, NA),
     VI_NA_PO_PROPP0A5 = dplyr::if_else(!is.na(PO_PROPP0A5), F, NA),
     VI_NA_PO_PROPP60M = dplyr::if_else(!is.na(PO_PROPP60M), F, NA),
     VI_NA_PO_PROPP65M = dplyr::if_else(!is.na(PO_PROPP65M), F, NA),
@@ -361,8 +361,8 @@ df_rules_valid_po_all <- data |>
     VI_NA_PO_RDEPI = dplyr::if_else(!is.na(PO_RDEPI), F, NA),
     VI_NA_PO_DENSP = dplyr::if_else(!is.na(PO_DENSP), F, NA),
     VI_NA_PO_TMI_0_1 = dplyr::if_else(!is.na(PO_TMI_0_1), F, NA),
-    VI_NA_PO_TMI_0_4 = dplyr::if_else(!is.na(PO_TMI_0_4), F, NA),
-    VI_NA_PO_TMI_1_4 = dplyr::if_else(!is.na(PO_TMI_1_4), F, NA),
+    #VI_NA_PO_TMI_0_4 = dplyr::if_else(!is.na(PO_TMI_0_4), F, NA),
+    #VI_NA_PO_TMI_1_4 = dplyr::if_else(!is.na(PO_TMI_1_4), F, NA),
     # Others
     VI_PO_AREA       = dplyr::if_else(PO_AREA > 0, F, T),
     VI_PO_POPT       = dplyr::if_else(PO_POPT > 0, F, T),
@@ -373,10 +373,10 @@ df_rules_valid_po_all <- data |>
     VI_PO_RAZAOSEXO  = dplyr::if_else(PO_RAZAOSEXO > 0, F, T),
     VI_PO_TXCRESC    = dplyr::if_else(dplyr::between(PO_TXCRESC, -100, 100), F, T),
     VI_PO_TXURB      = dplyr::if_else(dplyr::between(PO_TXURB, 0, 100), F, T),
-    VI_PO_TFT        = dplyr::if_else(PO_TFT >= 0, F, T),
+    #VI_PO_TFT        = dplyr::if_else(PO_TFT >= 0, F, T),
     VI_PO_TBN        = dplyr::if_else(PO_TBN > 0 , F, T),
     VI_PO_TBM        = dplyr::if_else(PO_TBM > 0, F, T),
-    VI_PO_TBMP       = dplyr::if_else(PO_TBMP > 0, F, T),
+    #VI_PO_TBMP       = dplyr::if_else(PO_TBMP > 0, F, T),
     VI_PO_PROPP0A5   = dplyr::if_else(dplyr::between(PO_PROPP0A5, 0, 100), F, T),
     VI_PO_PROPP60M   = dplyr::if_else(dplyr::between(PO_PROPP60M, 0, 100), F, T),
     VI_PO_PROPP65M   = dplyr::if_else(dplyr::between(PO_PROPP65M, 0, 100), F, T),
@@ -385,9 +385,9 @@ df_rules_valid_po_all <- data |>
     VI_PO_RDEPJ      = dplyr::if_else(dplyr::between(PO_RDEPJ, 0, 100), F, T),
     VI_PO_RDEPI      = dplyr::if_else(dplyr::between(PO_RDEPI, 0, 100), F, T),
     VI_PO_DENSP      = dplyr::if_else(PO_DENSP > 0, F, T),
-    VI_PO_TMI_0_1    = dplyr::if_else(PO_TMI_0_1>= 0, F, T),
-    VI_PO_TMI_0_4    = dplyr::if_else(PO_TMI_0_4 >= 0, F, T),
-    VI_PO_TMI_1_4    = dplyr::if_else(PO_TMI_1_4 >=0, F, T)
+    VI_PO_TMI_0_1    = dplyr::if_else(PO_TMI_0_1>= 0, F, T)#,
+    #VI_PO_TMI_0_4    = dplyr::if_else(PO_TMI_0_4 >= 0, F, T),
+    #VI_PO_TMI_1_4    = dplyr::if_else(PO_TMI_1_4 >=0, F, T)
   )
 ```
 
@@ -1233,103 +1233,79 @@ chart_vbar(df_sumario)
 
 
 
-### PO_TFT
+<!-- ### PO_TFT -->
 
-```{r data_rules_dist_po_tft}
+<!-- ```{r data_rules_dist_po_tft} -->
 
-## df com o resultado das aplicações das regras
-df_rules_dist_po_tft <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "PO_TFT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TFT"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TFT) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_PO_TFT_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TFT), F, T), # Longitudinal (município)
-    
-    DF_PO_TFT_out_munic     = dplyr::if_else(!outlier_function(PO_TFT), F, T), # Longitudinal (município)
-    
-    DF_PO_TFT_min_munic     = dplyr::if_else(PO_TFT >= (min(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_PO_TFT_max_munic     = dplyr::if_else(PO_TFT <= (max(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TFT_min_k_munic   = dplyr::if_else(PO_TFT >= (min(dplyr::lag(PO_TFT), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_PO_TFT_max_k_munic   = dplyr::if_else(PO_TFT <= (k * max(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TFT_med_mov_munic = dplyr::if_else(PO_TFT <= (k * zoo::rollmedian(PO_TFT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_PO_TFT_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TFT), F, T) # Longitudinal (município)
-)
-```
+<!-- ## df com o resultado das aplicações das regras -->
+<!-- df_rules_dist_po_tft <- data |>  -->
+<!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+<!--     dplyr::case_when( -->
+<!--       "PO_TFT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TFT"], -->
+<!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+<!--     ) -->
+<!--   ) |>  -->
+<!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TFT) |>  -->
+<!--   dplyr::group_by(ibge7) |>  -->
+<!--   dplyr::mutate( -->
+<!--     DF_PO_TFT_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TFT), F, T), # Longitudinal (município) -->
 
-```{r data_wrangling_dist_po_tft}
+<!--     DF_PO_TFT_out_munic     = dplyr::if_else(!outlier_function(PO_TFT), F, T), # Longitudinal (município) -->
 
-## Transformação dos resultados
-df_sumario_dist_po <- df_rules_dist_po_tft |> 
-  dplyr::select(!PO_TFT) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+<!--     DF_PO_TFT_min_munic     = dplyr::if_else(PO_TFT >= (min(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município) -->
 
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_po |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
+<!--     DF_PO_TFT_max_munic     = dplyr::if_else(PO_TFT <= (max(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município) -->
 
-```{r table_dist_po_tft}
-#| column: screen-inset-right
+<!--     DF_PO_TFT_min_k_munic   = dplyr::if_else(PO_TFT >= (min(dplyr::lag(PO_TFT), na.rm = T) / k), F, T), # Longitudinal (município) -->
 
-df_sumario |>
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
+<!--     DF_PO_TFT_max_k_munic   = dplyr::if_else(PO_TFT <= (k * max(dplyr::lag(PO_TFT), na.rm = T)), F, T), # Longitudinal (município) -->
 
-```{r chart_dist_po_tft}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
+<!--     DF_PO_TFT_med_mov_munic = dplyr::if_else(PO_TFT <= (k * zoo::rollmedian(PO_TFT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
+<!--     DF_PO_TFT_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TFT), F, T) # Longitudinal (município) -->
+<!-- ) -->
+<!-- ``` -->
 
+<!-- ```{r data_wrangling_dist_po_tft} -->
 
+<!-- ## Transformação dos resultados -->
+<!-- df_sumario_dist_po <- df_rules_dist_po_tft |>  -->
+<!--   dplyr::select(!PO_TFT) |>  -->
+<!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
+<!-- ## df com um sumário dos resultados -->
+<!-- df_sumario <- df_sumario_dist_po |>  -->
+<!--   dplyr::group_by(Ano, Regra) |>  -->
+<!--   dplyr::summarise( -->
+<!--     Total        = dplyr::n(), -->
+<!--     Validada     = sum(!resultado, na.rm = T), -->
+<!--     Suspeita     = sum(resultado, na.rm = T), -->
+<!--     Ausente      = sum(is.na(resultado)), -->
+<!--     `% Validada` = round(Validada / Total * 100, 2), -->
+<!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+<!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+<!--   ) |>  -->
+<!--   dplyr::ungroup() -->
+<!-- ``` -->
 
+<!-- ```{r table_dist_po_tft} -->
+<!-- #| column: screen-inset-right -->
 
+<!-- df_sumario |> -->
+<!--   dplyr::filter(Ano == max(Ano)) |> -->
+<!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+<!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+<!--   kableExtra::kable_paper("hover", full_width = F) -->
+<!-- ``` -->
 
+<!-- ```{r chart_dist_po_tft} -->
+<!-- #| column: screen-inset-right -->
+<!-- #| layout-ncol: 2 -->
+<!-- #| out-width: 100% -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- chart_heatmap(df_sumario) -->
+<!-- chart_vbar(df_sumario) -->
+<!-- ``` -->
 
 
 
@@ -1545,116 +1521,79 @@ chart_vbar(df_sumario)
 
 
 
-### PO_TBMP
+<!-- ### PO_TBMP -->
 
-```{r data_rules_dist_po_tbmp}
+<!-- ```{r data_rules_dist_po_tbmp} -->
 
-## df com o resultado das aplicações das regras
-df_rules_dist_po_tbmp <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "PO_TBMP" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TBMP"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TBMP) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_PO_TBMP_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TBMP), F, T), # Longitudinal (município)
-    
-    DF_PO_TBMP_out_munic     = dplyr::if_else(!outlier_function(PO_TBMP), F, T), # Longitudinal (município)
-    
-    DF_PO_TBMP_min_munic     = dplyr::if_else(PO_TBMP >= (min(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_PO_TBMP_max_munic     = dplyr::if_else(PO_TBMP <= (max(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TBMP_min_k_munic   = dplyr::if_else(PO_TBMP >= (min(dplyr::lag(PO_TBMP), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_PO_TBMP_max_k_munic   = dplyr::if_else(PO_TBMP <= (k * max(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TBMP_med_mov_munic = dplyr::if_else(PO_TBMP <= (k * zoo::rollmedian(PO_TBMP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_PO_TBMP_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TBMP), F, T) # Longitudinal (município)
-)
-```
+<!-- ## df com o resultado das aplicações das regras -->
+<!-- df_rules_dist_po_tbmp <- data |>  -->
+<!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+<!--     dplyr::case_when( -->
+<!--       "PO_TBMP" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TBMP"], -->
+<!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+<!--     ) -->
+<!--   ) |>  -->
+<!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TBMP) |>  -->
+<!--   dplyr::group_by(ibge7) |>  -->
+<!--   dplyr::mutate( -->
+<!--     DF_PO_TBMP_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TBMP), F, T), # Longitudinal (município) -->
 
-```{r data_wrangling_dist_po_tbmp}
+<!--     DF_PO_TBMP_out_munic     = dplyr::if_else(!outlier_function(PO_TBMP), F, T), # Longitudinal (município) -->
 
-## Transformação dos resultados
-df_sumario_dist_po <- df_rules_dist_po_tbmp |> 
-  dplyr::select(!PO_TBMP) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+<!--     DF_PO_TBMP_min_munic     = dplyr::if_else(PO_TBMP >= (min(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município) -->
 
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_po |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
+<!--     DF_PO_TBMP_max_munic     = dplyr::if_else(PO_TBMP <= (max(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município) -->
 
-```{r table_dist_po_tbmp}
-#| column: screen-inset-right
+<!--     DF_PO_TBMP_min_k_munic   = dplyr::if_else(PO_TBMP >= (min(dplyr::lag(PO_TBMP), na.rm = T) / k), F, T), # Longitudinal (município) -->
 
-df_sumario |>
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
+<!--     DF_PO_TBMP_max_k_munic   = dplyr::if_else(PO_TBMP <= (k * max(dplyr::lag(PO_TBMP), na.rm = T)), F, T), # Longitudinal (município) -->
 
-```{r chart_dist_po_tbmp}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
+<!--     DF_PO_TBMP_med_mov_munic = dplyr::if_else(PO_TBMP <= (k * zoo::rollmedian(PO_TBMP, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
+<!--     DF_PO_TBMP_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TBMP), F, T) # Longitudinal (município) -->
+<!-- ) -->
+<!-- ``` -->
 
+<!-- ```{r data_wrangling_dist_po_tbmp} -->
 
+<!-- ## Transformação dos resultados -->
+<!-- df_sumario_dist_po <- df_rules_dist_po_tbmp |>  -->
+<!--   dplyr::select(!PO_TBMP) |>  -->
+<!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
+<!-- ## df com um sumário dos resultados -->
+<!-- df_sumario <- df_sumario_dist_po |>  -->
+<!--   dplyr::group_by(Ano, Regra) |>  -->
+<!--   dplyr::summarise( -->
+<!--     Total        = dplyr::n(), -->
+<!--     Validada     = sum(!resultado, na.rm = T), -->
+<!--     Suspeita     = sum(resultado, na.rm = T), -->
+<!--     Ausente      = sum(is.na(resultado)), -->
+<!--     `% Validada` = round(Validada / Total * 100, 2), -->
+<!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+<!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+<!--   ) |>  -->
+<!--   dplyr::ungroup() -->
+<!-- ``` -->
 
+<!-- ```{r table_dist_po_tbmp} -->
+<!-- #| column: screen-inset-right -->
 
+<!-- df_sumario |> -->
+<!--   dplyr::filter(Ano == max(Ano)) |> -->
+<!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+<!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+<!--   kableExtra::kable_paper("hover", full_width = F) -->
+<!-- ``` -->
 
+<!-- ```{r chart_dist_po_tbmp} -->
+<!-- #| column: screen-inset-right -->
+<!-- #| layout-ncol: 2 -->
+<!-- #| out-width: 100% -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- chart_heatmap(df_sumario) -->
+<!-- chart_vbar(df_sumario) -->
+<!-- ``` -->
 
 ### PO_PROPP0A5
 
@@ -2848,319 +2787,154 @@ chart_vbar(df_sumario)
 
 
 
-### PO_TMI_0_4
+<!-- ### PO_TMI_0_4 -->
+
+<!-- ```{r data_rules_dist_po_tmi_0_4} -->
 
-```{r data_rules_dist_po_tmi_0_4}
+<!-- ## df com o resultado das aplicações das regras -->
+<!-- df_rules_dist_po_tmi_0_4 <- data |>  -->
+<!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+<!--     dplyr::case_when( -->
+<!--       "PO_TMI_0_4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TMI_0_4"], -->
+<!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+<!--     ) -->
+<!--   ) |>  -->
+<!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TMI_0_4) |>  -->
+<!--   dplyr::group_by(ibge7) |>  -->
+<!--   dplyr::mutate( -->
+<!--     DF_PO_TMI_0_4_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TMI_0_4), F, T), # Longitudinal (município) -->
 
-## df com o resultado das aplicações das regras
-df_rules_dist_po_tmi_0_4 <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "PO_TMI_0_4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TMI_0_4"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TMI_0_4) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_PO_TMI_0_4_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TMI_0_4), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_0_4_out_munic     = dplyr::if_else(!outlier_function(PO_TMI_0_4), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_0_4_min_munic     = dplyr::if_else(PO_TMI_0_4 >= (min(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_PO_TMI_0_4_max_munic     = dplyr::if_else(PO_TMI_0_4 <= (max(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_0_4_min_k_munic   = dplyr::if_else(PO_TMI_0_4 >= (min(dplyr::lag(PO_TMI_0_4), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_PO_TMI_0_4_max_k_munic   = dplyr::if_else(PO_TMI_0_4 <= (k * max(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_0_4_med_mov_munic = dplyr::if_else(PO_TMI_0_4 <= (k * zoo::rollmedian(PO_TMI_0_4, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_0_4_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TMI_0_4), F, T) # Longitudinal (município)
-)
-```
+<!--     DF_PO_TMI_0_4_out_munic     = dplyr::if_else(!outlier_function(PO_TMI_0_4), F, T), # Longitudinal (município) -->
 
-```{r data_wrangling_dist_po_tmi_0_4}
+<!--     DF_PO_TMI_0_4_min_munic     = dplyr::if_else(PO_TMI_0_4 >= (min(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município) -->
 
-## Transformação dos resultados
-df_sumario_dist_po <- df_rules_dist_po_tmi_0_4 |> 
-  dplyr::select(!PO_TMI_0_4) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_po |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_po_tmi_0_4}
-#| column: screen-inset-right
-
-df_sumario |>
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_po_tmi_0_4}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### PO_TMI_1_4
-
-```{r data_rules_dist_po_tmi_1_4}
-
-## df com o resultado das aplicações das regras
-df_rules_dist_po_tmi_1_4 <- data |> 
-  dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
-    dplyr::case_when(
-      "PO_TMI_1_4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TMI_1_4"],
-      TRUE ~ ANO >= min(ANO, na.rm = T)
-    )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TMI_1_4) |> 
-  dplyr::group_by(ibge7) |> 
-  dplyr::mutate(
-    DF_PO_TMI_1_4_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TMI_1_4), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_1_4_out_munic     = dplyr::if_else(!outlier_function(PO_TMI_1_4), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_1_4_min_munic     = dplyr::if_else(PO_TMI_1_4 >= (min(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_PO_TMI_1_4_max_munic     = dplyr::if_else(PO_TMI_1_4 <= (max(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_1_4_min_k_munic   = dplyr::if_else(PO_TMI_1_4 >= (min(dplyr::lag(PO_TMI_1_4), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_PO_TMI_1_4_max_k_munic   = dplyr::if_else(PO_TMI_1_4 <= (k * max(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_1_4_med_mov_munic = dplyr::if_else(PO_TMI_1_4 <= (k * zoo::rollmedian(PO_TMI_1_4, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_PO_TMI_1_4_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TMI_1_4), F, T) # Longitudinal (município)
-)
-```
-
-```{r data_wrangling_dist_po_tmi_1_4}
-
-## Transformação dos resultados
-df_sumario_dist_po <- df_rules_dist_po_tmi_1_4 |> 
-  dplyr::select(!PO_TMI_1_4) |> 
-  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
-
-## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_po |> 
-  dplyr::group_by(Ano, Regra) |> 
-  dplyr::summarise(
-    Total        = dplyr::n(),
-    Validada     = sum(!resultado, na.rm = T),
-    Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = sum(is.na(resultado)),
-    `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
-    `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
-  dplyr::ungroup()
-```
-
-```{r table_dist_po_tmi_1_4}
-#| column: screen-inset-right
-
-df_sumario |>
-  dplyr::filter(Ano == max(Ano)) |>
-  dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  kableExtra::kable_paper("hover", full_width = F)
-```
-
-```{r chart_dist_po_tmi_1_4}
-#| column: screen-inset-right
-#| layout-ncol: 2
-#| out-width: 100%
-
-chart_heatmap(df_sumario)
-chart_vbar(df_sumario)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!--     DF_PO_TMI_0_4_max_munic     = dplyr::if_else(PO_TMI_0_4 <= (max(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_0_4_min_k_munic   = dplyr::if_else(PO_TMI_0_4 >= (min(dplyr::lag(PO_TMI_0_4), na.rm = T) / k), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_0_4_max_k_munic   = dplyr::if_else(PO_TMI_0_4 <= (k * max(dplyr::lag(PO_TMI_0_4), na.rm = T)), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_0_4_med_mov_munic = dplyr::if_else(PO_TMI_0_4 <= (k * zoo::rollmedian(PO_TMI_0_4, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_0_4_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TMI_0_4), F, T) # Longitudinal (município) -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- ```{r data_wrangling_dist_po_tmi_0_4} -->
+
+<!-- ## Transformação dos resultados -->
+<!-- df_sumario_dist_po <- df_rules_dist_po_tmi_0_4 |>  -->
+<!--   dplyr::select(!PO_TMI_0_4) |>  -->
+<!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
+
+<!-- ## df com um sumário dos resultados -->
+<!-- df_sumario <- df_sumario_dist_po |>  -->
+<!--   dplyr::group_by(Ano, Regra) |>  -->
+<!--   dplyr::summarise( -->
+<!--     Total        = dplyr::n(), -->
+<!--     Validada     = sum(!resultado, na.rm = T), -->
+<!--     Suspeita     = sum(resultado, na.rm = T), -->
+<!--     Ausente      = sum(is.na(resultado)), -->
+<!--     `% Validada` = round(Validada / Total * 100, 2), -->
+<!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+<!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+<!--   ) |>  -->
+<!--   dplyr::ungroup() -->
+<!-- ``` -->
+
+<!-- ```{r table_dist_po_tmi_0_4} -->
+<!-- #| column: screen-inset-right -->
+
+<!-- df_sumario |> -->
+<!--   dplyr::filter(Ano == max(Ano)) |> -->
+<!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+<!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+<!--   kableExtra::kable_paper("hover", full_width = F) -->
+<!-- ``` -->
+
+<!-- ```{r chart_dist_po_tmi_0_4} -->
+<!-- #| column: screen-inset-right -->
+<!-- #| layout-ncol: 2 -->
+<!-- #| out-width: 100% -->
+
+<!-- chart_heatmap(df_sumario) -->
+<!-- chart_vbar(df_sumario) -->
+<!-- ``` -->
+
+
+<!-- ### PO_TMI_1_4 -->
+
+<!-- ```{r data_rules_dist_po_tmi_1_4} -->
+
+<!-- ## df com o resultado das aplicações das regras -->
+<!-- df_rules_dist_po_tmi_1_4 <- data |>  -->
+<!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+<!--     dplyr::case_when( -->
+<!--       "PO_TMI_1_4" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["PO_TMI_1_4"], -->
+<!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+<!--     ) -->
+<!--   ) |>  -->
+<!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, PO_TMI_1_4) |>  -->
+<!--   dplyr::group_by(ibge7) |>  -->
+<!--   dplyr::mutate( -->
+<!--     DF_PO_TMI_1_4_hampel_munic  = dplyr::if_else(!hampel_filter(PO_TMI_1_4), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_out_munic     = dplyr::if_else(!outlier_function(PO_TMI_1_4), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_min_munic     = dplyr::if_else(PO_TMI_1_4 >= (min(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_max_munic     = dplyr::if_else(PO_TMI_1_4 <= (max(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_min_k_munic   = dplyr::if_else(PO_TMI_1_4 >= (min(dplyr::lag(PO_TMI_1_4), na.rm = T) / k), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_max_k_munic   = dplyr::if_else(PO_TMI_1_4 <= (k * max(dplyr::lag(PO_TMI_1_4), na.rm = T)), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_med_mov_munic = dplyr::if_else(PO_TMI_1_4 <= (k * zoo::rollmedian(PO_TMI_1_4, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
+
+<!--     DF_PO_TMI_1_4_dif_munic     = dplyr::if_else(!compare_first_dif(PO_TMI_1_4), F, T) # Longitudinal (município) -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- ```{r data_wrangling_dist_po_tmi_1_4} -->
+
+<!-- ## Transformação dos resultados -->
+<!-- df_sumario_dist_po <- df_rules_dist_po_tmi_1_4 |>  -->
+<!--   dplyr::select(!PO_TMI_1_4) |>  -->
+<!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
+
+<!-- ## df com um sumário dos resultados -->
+<!-- df_sumario <- df_sumario_dist_po |>  -->
+<!--   dplyr::group_by(Ano, Regra) |>  -->
+<!--   dplyr::summarise( -->
+<!--     Total        = dplyr::n(), -->
+<!--     Validada     = sum(!resultado, na.rm = T), -->
+<!--     Suspeita     = sum(resultado, na.rm = T), -->
+<!--     Ausente      = sum(is.na(resultado)), -->
+<!--     `% Validada` = round(Validada / Total * 100, 2), -->
+<!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+<!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+<!--   ) |>  -->
+<!--   dplyr::ungroup() -->
+<!-- ``` -->
+
+<!-- ```{r table_dist_po_tmi_1_4} -->
+<!-- #| column: screen-inset-right -->
+
+<!-- df_sumario |> -->
+<!--   dplyr::filter(Ano == max(Ano)) |> -->
+<!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+<!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+<!--   kableExtra::kable_paper("hover", full_width = F) -->
+<!-- ``` -->
+
+<!-- ```{r chart_dist_po_tmi_1_4} -->
+<!-- #| column: screen-inset-right -->
+<!-- #| layout-ncol: 2 -->
+<!-- #| out-width: 100% -->
+
+<!-- chart_heatmap(df_sumario) -->
+<!-- chart_vbar(df_sumario) -->
+<!-- ``` -->
 
 
 # Análise descritiva
@@ -3270,10 +3044,10 @@ variables = c(
   "PO_RAZAOSEXO",
   "PO_TXCRESC",
   "PO_TXURB",
-  "PO_TFT",
+#  "PO_TFT",
   "PO_TBN",
   "PO_TBM",
-  "PO_TBMP",
+#  "PO_TBMP",
   "PO_PROPP0A5",
   "PO_PROPP60M",
   "PO_PROPP65M",
@@ -3282,9 +3056,9 @@ variables = c(
   "PO_RDEPJ",
   "PO_RDEPI",
   "PO_DENSP",
-  "PO_TMI_0_1",
-  "PO_TMI_0_4",
-  "PO_TMI_1_4"
+  "PO_TMI_0_1"#,
+#  "PO_TMI_0_4",
+#  "PO_TMI_1_4"
   )
 
 lis <- split(variables,f = variables)
@@ -3330,10 +3104,10 @@ df_dist <- list(
   "PO_RAZAOSEXO"   = df_rules_dist_po_razaosexo,
   "PO_TXCRESC"     = df_rules_dist_po_txcresc,
   "PO_TXURB"       = df_rules_dist_po_txurb,
-  "PO_TFT"         = df_rules_dist_po_tft,
+#  "PO_TFT"         = df_rules_dist_po_tft,
   "PO_TBN"         = df_rules_dist_po_tbn,
   "PO_TBM"         = df_rules_dist_po_tbm,
-  "PO_TBMP"        = df_rules_dist_po_tbmp,
+#  "PO_TBMP"        = df_rules_dist_po_tbmp,
   "PO_PROPP0A5"    = df_rules_dist_po_propp0a5,
   "PO_PROPP60M"    = df_rules_dist_po_propp60m,
   "PO_PROPP65M"    = df_rules_dist_po_propp65m,
@@ -3342,9 +3116,9 @@ df_dist <- list(
   "PO_RDEPJ"       = df_rules_dist_po_rdepj,
   "PO_RDEPI"       = df_rules_dist_po_rdepi,
   "PO_DENSP"       = df_rules_dist_po_densp,
-  "PO_TMI_0_1"     = df_rules_dist_po_tmi_0_1,
-  "PO_TMI_0_4"     = df_rules_dist_po_tmi_0_4,
-  "PO_TMI_1_4"     = df_rules_dist_po_tmi_1_4
+  "PO_TMI_0_1"     = df_rules_dist_po_tmi_0_1#,
+#  "PO_TMI_0_4"     = df_rules_dist_po_tmi_0_4,
+#  "PO_TMI_1_4"     = df_rules_dist_po_tmi_1_4
 )
 
 df_obs_dist <- names(df_dist)|>
@@ -3377,7 +3151,6 @@ openxlsx::saveWorkbook(pt, "fjpdados_populacao_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
-
 rm(list = ls())
 gc()
 ```

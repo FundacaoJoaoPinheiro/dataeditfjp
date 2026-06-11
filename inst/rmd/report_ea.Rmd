@@ -129,7 +129,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
-
 ```{r set_year}
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
@@ -147,7 +146,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
    "NA" = NA_integer_
  )
 ```
-
 
 ```{r map_valid_desc}
 
@@ -4755,7 +4753,6 @@ for(i in names(df_obs_valid)){
 }
 
 ```
-
 
 ```{r df_build_viol_consist}
 

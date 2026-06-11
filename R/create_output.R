@@ -11,37 +11,46 @@
 #' @export
 
 create_output <- function(mydir=getwd(),
-                          knitmydir = getwd(),
+                          knitmydir = getwd()#,
                           # path_file_rules,
-                          # categorical_variable,
-                          # deleted_variable,
-                           begin_years = NULL
-                          # deleted_years = c("NA" = NA_integer_)
                           ){
 
   # Prompt para o usuario selecionar a base de dados
   path_data <- file.choose()
-  path_file_rules <- file.choose()
-  # Obter o prefixo das variaveis (identificar a dimensão)
-  #prefix <- substr(rev(colnames(openxlsx::read.xlsx(path_data, rows = 1)))[1], 1, 2)
-  # Opcoes de areas
-  #area <- c("MA", "AS", "EA", "SE", "HS", "SP", "DA", "EO", "GP", "CA", "EL", "FS")
+  #path_file_rules <- file.choose()
+  path_data <- split(path_data,f = path_data)
 
-  if(prefix %in% area){
+  noun <- sub(".*\\\\", "", names(path_data))
+  message("Verificando colunas do arquivo ",noun)
+  noun <- sub("\\.[^.]+$", "", noun)
+  names(path_data) <- noun
+  colunas_arquivo <- names(head(openxlsx::read.xlsx(path_data[[1]]),1) )
+  colunas <- c("IBGE7","ANO")
+  nome_colunas <- c("ano","codigo_municipio","indicador","valor")
+
+
+  if(sum(colunas %in% colunas_arquivo)!=0){
+    message("Formato valido!\nProcessando...")
     path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
+    data <- openxlsx::read.xlsx(path_data[[1]])|>
+      dplyr::select(-c("CHAVE", "IBGE6") & where(is.numeric))|>
+      tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
+
+  } else if (sum(colunas_arquivo %in% nome_colunas)!= 0) {
+    message("Formato valido!\nProcessando...")
+    path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
+    data <- openxlsx::read.xlsx(path_data[[1]])
   } else {
-    message("Erro no nome dos indicadore")
-  }
+    message("Formato invalido!\nVerifique o nome das colunas!")
+    }
+
 
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
                     output_dir = mydir,
-                    params = list(data = path_data,
-                                  file_rules = path_file_rules,
-                                  #categorical_variable = categorical_variable,
-                                  #deleted_variable = deleted_variable,
-                                  begin_years = begin_years,
-                                  deleted_years = deleted_years))
+                    params = list(data = data#,
+                                  #file_rules = path_file_rules,
+                                  ))
 
 }
 

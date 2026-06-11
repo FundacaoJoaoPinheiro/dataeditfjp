@@ -52,7 +52,6 @@ data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
 
-
 ```{r get_var_numeric}
 
 # Obter as siglas das variáveis do tipo numérico
@@ -709,15 +708,25 @@ df_sumario |>
 <!-- ```{r rules_dist_sp_cv} -->
 
 <!-- df_rules_dist_sp_cv <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_CV" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_CV"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CV) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_CV_hampel_munic  = dplyr::if_else(!hampel_filter(SP_CV), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_CV_out_munic     = dplyr::if_else(!outlier_function(SP_CV), F, T), # Longitudinal (município) -->
@@ -733,50 +742,78 @@ df_sumario |>
 <!--     DF_SP_CV_med_mov_munic = dplyr::if_else(SP_CV <= (k * zoo::rollmedian(SP_CV, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_CV_dif_munic     = dplyr::if_else(!compare_first_dif(SP_CV), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_cv} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_cv |>  -->
+
 <!--   dplyr::select(!SP_CV) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_cv} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_cv} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
-<!-- chart_vbar(df_sumario) -->
-<!-- ``` -->
 
+<!-- chart_vbar(df_sumario) -->
+
+<!-- ``` -->
 
 ### SP_CVPA
 
@@ -851,21 +888,30 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 <!-- ### SP_CVPE -->
 
 <!-- ```{r rules_dist_sp_cvpe} -->
 
 <!-- df_rules_dist_sp_cvpe <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_CVPE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_CVPE"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_CVPE) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_CVPE_hampel_munic  = dplyr::if_else(!hampel_filter(SP_CVPE), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_CVPE_out_munic     = dplyr::if_else(!outlier_function(SP_CVPE), F, T), # Longitudinal (município) -->
@@ -881,48 +927,77 @@ chart_vbar(df_sumario)
 <!--     DF_SP_CVPE_med_mov_munic = dplyr::if_else(SP_CVPE <= (k * zoo::rollmedian(SP_CVPE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_CVPE_dif_munic     = dplyr::if_else(!compare_first_dif(SP_CVPE), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_cvpe} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_cvpe |>  -->
+
 <!--   dplyr::select(!SP_CVPE) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_cvpe} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_cvpe} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_MPO -->
@@ -930,15 +1005,25 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_mpo} -->
 
 <!-- df_rules_dist_sp_mpo <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_MPO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_MPO"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MPO) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_MPO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_MPO), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_MPO_out_munic     = dplyr::if_else(!outlier_function(SP_MPO), F, T), # Longitudinal (município) -->
@@ -954,50 +1039,78 @@ chart_vbar(df_sumario)
 <!--     DF_SP_MPO_med_mov_munic = dplyr::if_else(SP_MPO <= (k * zoo::rollmedian(SP_MPO, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_MPO_dif_munic     = dplyr::if_else(!compare_first_dif(SP_MPO), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_mpo} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_mpo |>  -->
+
 <!--   dplyr::select(!SP_MPO) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_mpo} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_mpo} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
-<!-- chart_vbar(df_sumario) -->
-<!-- ``` -->
 
+<!-- chart_vbar(df_sumario) -->
+
+<!-- ``` -->
 
 ### SP_HOMTX
 
@@ -1072,66 +1185,104 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 <!-- ### SP_HOMI -->
 
 <!-- ```{r rules_dist_sp_homi} -->
 
 <!-- df_rules_dist_sp_homi <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMI"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMI) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMI), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMI_out_munic     = dplyr::if_else(!outlier_function(SP_HOMI), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_homi} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_homi |>  -->
+
 <!--   dplyr::select(!SP_HOMI) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_homi} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_homi} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_TENHOM -->
@@ -1139,60 +1290,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_tenhom} -->
 
 <!-- df_rules_dist_sp_tenhom <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_TENHOM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_TENHOM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TENHOM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_TENHOM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_TENHOM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_TENHOM_out_munic     = dplyr::if_else(!outlier_function(SP_TENHOM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_tenhom} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_tenhom |>  -->
+
 <!--   dplyr::select(!SP_TENHOM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_tenhom} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_tenhom} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_LATROCINIO -->
@@ -1200,60 +1390,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_latrocinio} -->
 
 <!-- df_rules_dist_sp_latrocinio <- data |>  -->
+
 <!--     dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_LATROCINIO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_LATROCINIO"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_LATROCINIO) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_LATROCINIO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_LATROCINIO), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_LATROCINIO_out_munic     = dplyr::if_else(!outlier_function(SP_LATROCINIO), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_latrocinio} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_latrocinio |>  -->
+
 <!--   dplyr::select(!SP_LATROCINIO) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_latrocinio} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_latrocinio} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_ROUBO -->
@@ -1261,60 +1490,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_roubo} -->
 
 <!-- df_rules_dist_sp_roubo <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_ROUBO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ROUBO"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ROUBO) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_ROUBO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ROUBO), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_ROUBO_out_munic     = dplyr::if_else(!outlier_function(SP_ROUBO), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_roubo} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_roubo |>  -->
+
 <!--   dplyr::select(!SP_ROUBO) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_roubo} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_roubo} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_TRAFICO -->
@@ -1322,60 +1590,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_trafico} -->
 
 <!-- df_rules_dist_sp_trafico <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_TRAFICO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_TRAFICO"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_TRAFICO) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_TRAFICO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_TRAFICO), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_TRAFICO_out_munic     = dplyr::if_else(!outlier_function(SP_TRAFICO), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_trafico} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_trafico |>  -->
+
 <!--   dplyr::select(!SP_TRAFICO) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_trafico} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_trafico} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_POSSE -->
@@ -1383,60 +1690,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_posse} -->
 
 <!-- df_rules_dist_sp_posse <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_POSSE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_POSSE"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_POSSE) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_POSSE_hampel_munic  = dplyr::if_else(!hampel_filter(SP_POSSE), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_POSSE_out_munic     = dplyr::if_else(!outlier_function(SP_POSSE), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_posse} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_posse |>  -->
+
 <!--   dplyr::select(!SP_POSSE) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_posse} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_posse} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_ARMA -->
@@ -1444,60 +1790,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_arma} -->
 
 <!-- df_rules_dist_sp_arma <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_ARMA" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ARMA"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ARMA) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_ARMA_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ARMA), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_ARMA_out_munic     = dplyr::if_else(!outlier_function(SP_ARMA), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_arma} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_arma |>  -->
+
 <!--   dplyr::select(!SP_ARMA) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_arma} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_arma} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_ESTUPRO -->
@@ -1505,60 +1890,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_estupro} -->
 
 <!-- df_rules_dist_sp_estupro <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_ESTUPRO" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_ESTUPRO"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_ESTUPRO) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_ESTUPRO_hampel_munic  = dplyr::if_else(!hampel_filter(SP_ESTUPRO), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_ESTUPRO_out_munic     = dplyr::if_else(!outlier_function(SP_ESTUPRO), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_estupro} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_estupro |>  -->
+
 <!--   dplyr::select(!SP_ESTUPRO) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_estupro} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_estupro} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_SUICIDIOSSIM -->
@@ -1566,60 +1990,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_suicidiossim} -->
 
 <!-- df_rules_dist_sp_suicidiossim <- data |>  -->
+
 <!--     dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_SUICIDIOSSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_SUICIDIOSSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_SUICIDIOSSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_SUICIDIOSSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_SUICIDIOSSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_SUICIDIOSSIM_out_munic     = dplyr::if_else(!outlier_function(SP_SUICIDIOSSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_suicidiossim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_suicidiossim |>  -->
+
 <!--   dplyr::select(!SP_SUICIDIOSSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_suicidiossim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_suicidiossim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_MORTESTRANSIM -->
@@ -1627,60 +2090,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_mortestransim} -->
 
 <!-- df_rules_dist_sp_mortestransim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_MORTESTRANSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_MORTESTRANSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_MORTESTRANSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_MORTESTRANSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_MORTESTRANSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_MORTESTRANSIM_out_munic     = dplyr::if_else(!outlier_function(SP_MORTESTRANSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_mortestransim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_mortestransim |>  -->
+
 <!--   dplyr::select(!SP_MORTESTRANSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_mortestransim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_mortestransim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMISIM -->
@@ -1688,60 +2190,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_homisim} -->
 
 <!-- df_rules_dist_sp_homisim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMISIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMISIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMISIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMISIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMISIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMISIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMISIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_homisim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_homisim |>  -->
+
 <!--   dplyr::select(!SP_HOMISIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_homisim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_homisim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMITXSIM -->
@@ -1749,15 +2290,25 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_homitxsim} -->
 
 <!-- df_rules_dist_sp_homitxsim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMITXSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMITXSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMITXSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMITXSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMITXSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMITXSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMITXSIM), F, T), # Longitudinal (município) -->
@@ -1773,48 +2324,77 @@ chart_vbar(df_sumario)
 <!--     DF_SP_HOMITXSIM_med_mov_munic = dplyr::if_else(SP_HOMITXSIM <= (k * zoo::rollmedian(SP_HOMITXSIM, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMITXSIM_dif_munic     = dplyr::if_else(!compare_first_dif(SP_HOMITXSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_homitxsim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_homitxsim |>  -->
+
 <!--   dplyr::select(!SP_HOMITXSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_homitxsim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_homitxsim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMMENOR15SIM -->
@@ -1822,60 +2402,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hommenor15sim} -->
 
 <!-- df_rules_dist_sp_hommenor15sim <- data |>  -->
+
 <!--    dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMMENOR15SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMENOR15SIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMENOR15SIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMMENOR15SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMENOR15SIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMMENOR15SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMENOR15SIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hommenor15sim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hommenor15sim |>  -->
+
 <!--   dplyr::select(!SP_HOMMENOR15SIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hommenor15sim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hommenor15sim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOM15A24SIM -->
@@ -1883,60 +2502,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hom15a24sim} -->
 
 <!-- df_rules_dist_sp_hom15a24sim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOM15A24SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOM15A24SIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM15A24SIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOM15A24SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOM15A24SIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOM15A24SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOM15A24SIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hom15a24sim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hom15a24sim |>  -->
+
 <!--   dplyr::select(!SP_HOM15A24SIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hom15a24sim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hom15a24sim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOM25A29SIM -->
@@ -1944,60 +2602,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hom25a29sim} -->
 
 <!-- df_rules_dist_sp_hom25a29sim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOM25A29SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOM25A29SIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOM25A29SIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOM25A29SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOM25A29SIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOM25A29SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOM25A29SIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hom25a29sim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hom25a29sim |>  -->
+
 <!--   dplyr::select(!SP_HOM25A29SIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hom25a29sim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hom25a29sim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMMAIOR30SIM -->
@@ -2005,60 +2702,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hommaior30sim} -->
 
 <!-- df_rules_dist_sp_hommaior30sim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMMAIOR30SIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMAIOR30SIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMAIOR30SIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMMAIOR30SIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMAIOR30SIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMMAIOR30SIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMAIOR30SIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hommaior30sim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hommaior30sim |>  -->
+
 <!--   dplyr::select(!SP_HOMMAIOR30SIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hommaior30sim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hommaior30sim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMBRANCASIM -->
@@ -2066,60 +2802,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hombrancasim} -->
 
 <!-- df_rules_dist_sp_hombrancasim <- data |>  -->
+
 <!--     dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMBRANCASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMBRANCASIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMBRANCASIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMBRANCASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMBRANCASIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMBRANCASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMBRANCASIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hombrancasim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hombrancasim |>  -->
+
 <!--   dplyr::select(!SP_HOMBRANCASIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hombrancasim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hombrancasim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMPRETASIM -->
@@ -2127,60 +2902,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hompretasim} -->
 
 <!-- df_rules_dist_sp_hompretasim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMPRETASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMPRETASIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPRETASIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMPRETASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMPRETASIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMPRETASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMPRETASIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hompretasim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hompretasim |>  -->
+
 <!--   dplyr::select(!SP_HOMPRETASIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hompretasim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hompretasim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMPARDASIM -->
@@ -2188,60 +3002,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hompardasim} -->
 
 <!-- df_rules_dist_sp_hompardasim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMPARDASIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMPARDASIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMPARDASIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMPARDASIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMPARDASIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMPARDASIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMPARDASIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hompardasim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hompardasim |>  -->
+
 <!--   dplyr::select(!SP_HOMPARDASIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hompardasim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hompardasim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMOUTROSSIM -->
@@ -2249,60 +3102,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_homoutrossim} -->
 
 <!-- df_rules_dist_sp_homoutrossim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMOUTROSSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMOUTROSSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMOUTROSSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMOUTROSSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMOUTROSSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMOUTROSSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMOUTROSSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_homoutrossim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_homoutrossim |>  -->
+
 <!--   dplyr::select(!SP_HOMOUTROSSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_homoutrossim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_homoutrossim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMHOMEMSIM -->
@@ -2310,60 +3202,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_homhomemsim} -->
 
 <!-- df_rules_dist_sp_homhomemsim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMHOMEMSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMHOMEMSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMHOMEMSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMHOMEMSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMHOMEMSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMHOMEMSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMHOMEMSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_homhomemsim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_homhomemsim |>  -->
+
 <!--   dplyr::select(!SP_HOMHOMEMSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_homhomemsim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_homhomemsim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_HOMMULHERSIM -->
@@ -2371,62 +3302,100 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_hommulhersim} -->
 
 <!-- df_rules_dist_sp_hommulhersim <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_HOMMULHERSIM" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_HOMMULHERSIM"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_HOMMULHERSIM) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_HOMMULHERSIM_hampel_munic  = dplyr::if_else(!hampel_filter(SP_HOMMULHERSIM), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_HOMMULHERSIM_out_munic     = dplyr::if_else(!outlier_function(SP_HOMMULHERSIM), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_hommulhersim} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_hommulhersim |>  -->
+
 <!--   dplyr::select(!SP_HOMMULHERSIM) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_hommulhersim} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_hommulhersim} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
-<!-- chart_vbar(df_sumario) -->
-<!-- ``` -->
 
+<!-- chart_vbar(df_sumario) -->
+
+<!-- ``` -->
 
 ### SP_PM
 
@@ -2501,66 +3470,104 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-
 <!-- ### SP_PM1 -->
 
 <!-- ```{r rules_dist_sp_pm1} -->
 
 <!-- df_rules_dist_sp_pm1 <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PM1" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PM1"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PM1) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PM1_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PM1), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PM1_out_munic     = dplyr::if_else(!outlier_function(SP_PM1), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_pm1} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_pm1 |>  -->
+
 <!--   dplyr::select(!SP_PM1) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_pm1} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_pm1} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_PC1 -->
@@ -2568,60 +3575,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_pc1} -->
 
 <!-- df_rules_dist_sp_pc1 <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PC1" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PC1"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PC1) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PC1_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PC1), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PC1_out_munic     = dplyr::if_else(!outlier_function(SP_PC1), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_pc1} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_pc1 |>  -->
+
 <!--   dplyr::select(!SP_PC1) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_pc1} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_pc1} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_PMPC -->
@@ -2629,15 +3675,25 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_pmpc} -->
 
 <!-- df_rules_dist_sp_pmpc <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PMPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PMPC"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PMPC) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PMPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PMPC), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PMPC_out_munic     = dplyr::if_else(!outlier_function(SP_PMPC), F, T), # Longitudinal (município) -->
@@ -2653,48 +3709,77 @@ chart_vbar(df_sumario)
 <!--     DF_SP_PMPC_med_mov_munic = dplyr::if_else(SP_PMPC <= (k * zoo::rollmedian(SP_PMPC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PMPC_dif_munic     = dplyr::if_else(!compare_first_dif(SP_PMPC), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_pmpc} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_pmpc |>  -->
+
 <!--   dplyr::select(!SP_PMPC) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_pmpc} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_pmpc} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_JUI2 -->
@@ -2702,60 +3787,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_jui2} -->
 
 <!-- df_rules_dist_sp_jui2 <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_JUI2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_JUI2"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_JUI2) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_JUI2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_JUI2), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_JUI2_out_munic     = dplyr::if_else(!outlier_function(SP_JUI2), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_jui2} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_jui2 |>  -->
+
 <!--   dplyr::select(!SP_JUI2) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_jui2} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_jui2} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_PRO2 -->
@@ -2763,60 +3887,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_pro2} -->
 
 <!-- df_rules_dist_sp_pro2 <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PRO2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRO2"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRO2) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PRO2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRO2), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PRO2_out_munic     = dplyr::if_else(!outlier_function(SP_PRO2), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_pro2} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_pro2 |>  -->
+
 <!--   dplyr::select(!SP_PRO2) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_pro2} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_pro2} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_DEFP2 -->
@@ -2824,60 +3987,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_defp2} -->
 
 <!-- df_rules_dist_sp_defp2 <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_DEFP2" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_DEFP2"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_DEFP2) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_DEFP2_hampel_munic  = dplyr::if_else(!hampel_filter(SP_DEFP2), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_DEFP2_out_munic     = dplyr::if_else(!outlier_function(SP_DEFP2), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_defp2} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_defp2 |>  -->
+
 <!--   dplyr::select(!SP_DEFP2) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_defp2} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_defp2} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_PRESOSPC -->
@@ -2885,60 +4087,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_presospc} -->
 
 <!-- df_rules_dist_sp_presospc <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PRESOSPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRESOSPC"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSPC) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PRESOSPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRESOSPC), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PRESOSPC_out_munic     = dplyr::if_else(!outlier_function(SP_PRESOSPC), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_presospc} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_presospc |>  -->
+
 <!--   dplyr::select(!SP_PRESOSPC) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_presospc} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_presospc} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_OCUPPC -->
@@ -2946,15 +4187,25 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_ocuppc} -->
 
 <!-- df_rules_dist_sp_ocuppc <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_OCUPPC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_OCUPPC"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPPC) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_OCUPPC_hampel_munic  = dplyr::if_else(!hampel_filter(SP_OCUPPC), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_OCUPPC_out_munic     = dplyr::if_else(!outlier_function(SP_OCUPPC), F, T), # Longitudinal (município) -->
@@ -2970,48 +4221,77 @@ chart_vbar(df_sumario)
 <!--     DF_SP_OCUPPC_med_mov_munic = dplyr::if_else(SP_OCUPPC <= (k * zoo::rollmedian(SP_OCUPPC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_OCUPPC_dif_munic     = dplyr::if_else(!compare_first_dif(SP_OCUPPC), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_ocuppc} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_ocuppc |>  -->
+
 <!--   dplyr::select(!SP_OCUPPC) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_ocuppc} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_ocuppc} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_PRESOSSUAPI -->
@@ -3019,60 +4299,99 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_presossuapi} -->
 
 <!-- df_rules_dist_sp_presossuapi <- data |>  -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_PRESOSSUAPI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_PRESOSSUAPI"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_PRESOSSUAPI) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_PRESOSSUAPI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_PRESOSSUAPI), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_PRESOSSUAPI_out_munic     = dplyr::if_else(!outlier_function(SP_PRESOSSUAPI), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_presossuapi} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_presossuapi |>  -->
+
 <!--   dplyr::select(!SP_PRESOSSUAPI) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_presossuapi} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_presossuapi} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
+
 <!-- chart_vbar(df_sumario) -->
+
 <!-- ``` -->
 
 <!-- ### SP_OCUPSUAPI -->
@@ -3080,16 +4399,27 @@ chart_vbar(df_sumario)
 <!-- ```{r rules_dist_sp_ocupsuapi} -->
 
 <!-- df_rules_dist_sp_ocupsuapi <- data |>  -->
+
 <!--   remove_year_variable(variable = "SP_OCUPSUAPI", exclusions_years = exclusions_years) |> -->
+
 <!--   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter" -->
+
 <!--     dplyr::case_when( -->
+
 <!--       "SP_OCUPSUAPI" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["SP_OCUPSUAPI"], -->
+
 <!--       TRUE ~ ANO >= min(ANO, na.rm = T) -->
+
 <!--     ) -->
+
 <!--   ) |> -->
+
 <!--   dplyr::select(Ano = ANO, ibge7 = IBGE7, SP_OCUPSUAPI) |>  -->
+
 <!--   dplyr::group_by(ibge7) |>  -->
+
 <!--   dplyr::mutate( -->
+
 <!--     DF_SP_OCUPSUAPI_hampel_munic  = dplyr::if_else(!hampel_filter(SP_OCUPSUAPI), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_OCUPSUAPI_out_munic     = dplyr::if_else(!outlier_function(SP_OCUPSUAPI), F, T), # Longitudinal (município) -->
@@ -3105,50 +4435,78 @@ chart_vbar(df_sumario)
 <!--     DF_SP_OCUPSUAPI_med_mov_munic = dplyr::if_else(SP_OCUPSUAPI <= (k * zoo::rollmedian(SP_OCUPSUAPI, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município) -->
 
 <!--     DF_SP_OCUPSUAPI_dif_munic     = dplyr::if_else(!compare_first_dif(SP_OCUPSUAPI), F, T) # Longitudinal (município) -->
+
 <!--   ) -->
+
 <!-- ``` -->
 
 <!-- ```{r data_wrangling_dist_sp_ocupsuapi} -->
 
 <!-- ## Transformação dos resultados -->
+
 <!-- df_sumario_dist_sp <- df_rules_dist_sp_ocupsuapi |>  -->
+
 <!--   dplyr::select(!SP_OCUPSUAPI) |>  -->
+
 <!--   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado") -->
 
 <!-- ## df com um sumário dos resultados -->
+
 <!-- df_sumario <- df_sumario_dist_sp |>  -->
+
 <!--   dplyr::group_by(Ano, Regra) |>  -->
+
 <!--   dplyr::summarise( -->
+
 <!--     Total        = dplyr::n(), -->
+
 <!--     Validada     = sum(!resultado, na.rm = T), -->
+
 <!--     Suspeita     = sum(resultado, na.rm = T), -->
+
 <!--     Ausente      = sum(is.na(resultado)), -->
+
 <!--     `% Validada` = round(Validada / Total * 100, 2), -->
+
 <!--     `% Suspeita` = round(Suspeita / Total * 100, 2), -->
+
 <!--     `% Ausente`  = round(Ausente / Total * 100, 2) -->
+
 <!--   ) |>  -->
+
 <!--   dplyr::ungroup() -->
+
 <!-- ``` -->
 
 <!-- ```{r table_sp_ocupsuapi} -->
+
 <!-- #| column: screen-inset-right -->
 
 <!-- df_sumario |> -->
+
 <!--   dplyr::filter(Ano == max(Ano)) |> -->
+
 <!--   dplyr::mutate(Ano = as.character(Ano)) |> -->
+
 <!--   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>  -->
+
 <!--   kableExtra::kable_paper("hover", full_width = F) -->
+
 <!-- ``` -->
 
 <!-- ```{r chart_dist_sp_ocupsuapi} -->
+
 <!-- #| column: screen-inset-right -->
+
 <!-- #| layout-ncol: 2 -->
+
 <!-- #| out-width: 100% -->
 
 <!-- chart_heatmap(df_sumario) -->
-<!-- chart_vbar(df_sumario) -->
-<!-- ``` -->
 
+<!-- chart_vbar(df_sumario) -->
+
+<!-- ``` -->
 
 # Análise descritiva
 

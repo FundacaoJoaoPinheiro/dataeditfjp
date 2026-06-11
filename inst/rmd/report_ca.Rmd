@@ -132,7 +132,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   Inflexível (I): necessariamente precisa ser seguida, uma regra inflexível é rígida e não existe exceção a sua condição estipulada.
 
-
 ```{r set_year}
 
 # Inserir aqui apenas aquelas variáveis que possuem alguma restrição
@@ -565,7 +564,6 @@ df_rules_consist_ca_all <- data |>
     CA_GPRESPC_total  = dplyr::if_else(CA_GPRESPC == CA_GPRESPC_soma, F, T)
   ) |> dplyr::select(Ano,ibge7, CA_GPRESPC_total, CA_GPRESPC) |> dplyr::ungroup()
 ```
-
 
 ```{r data_wrangling_consist_ma_all}
 
@@ -1580,7 +1578,6 @@ for(i in names(df_obs_valid)){
 
 ```
 
-
 ```{r df_build_viol_consist}
 
 variables = c(
@@ -1617,7 +1614,6 @@ for(i in names(df_obs_consist)){
 }
 
 ```
-
 
 ```{r df_build_viol_dist}
 
