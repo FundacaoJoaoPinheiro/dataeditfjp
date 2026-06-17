@@ -7,7 +7,11 @@
 chart_boxplot(variable, data, ano_base_alter)
 }
 \arguments{
+\item{data}{data set containing variable}
+
 \item{ano_base_alter}{year start data}
+
+\item{variabe}{Variable to be analysis}
 }
 \value{
 result

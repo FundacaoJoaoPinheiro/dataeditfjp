@@ -142,6 +142,8 @@ for (i in names(dados)) {
       )
       print(chart_boxplot(variable = var, data = dados[[i]], ano_base_alter))
       cat("\\pagebreak\n")
+      print(chart_line(variable = var, data = dados[[i]]) )
+      cat("\\pagebreak\n")
     }
 }
 
@@ -159,7 +161,7 @@ As **regras de crítica** são diretrizes ou critérios específicos estabelecid
 
 **Classificação de regras**
 
-Aqui são realizadas verificações apenas nos dados são numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes;
+Aqui são realizadas verificações apenas nos dados são numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
 
 <!-- -   **VI_NA\_**[...]: dado não tem valor ausente/*missing*; -->
 
@@ -185,6 +187,72 @@ Abaixo são exibidas as regras usadas neste relatório:
 
 -   Após a aplicação da regra construída com parâmetros esperados, pode ser que alguma observação identificada pela regra seja suspeita. Estes dados precisam ser investigado  ou justificados pelo pesquisador. O destaque destes dados não querem dizer que estão completamente errados, mas sugerem ao pesquisador uma atenção maior as observações identificadas. Casos destes tipo podem ser explicados por alguma situação.
 
+
+## Regras de validade
+
+```{r data_wrangling_NA}
+### Valores ausentes
+df_rules_valid_na <- names(dados) |>
+   sapply(function(i){
+#     pander::pandoc.header(i, level = 3)
+     variables <- unique(lista_dt[[i]]$indicador)
+     res <- dados[[i]] |>
+       dplyr::select(ano,codigo_municipio,variables) |> 
+       dplyr::mutate(dplyr::across(dplyr::all_of(variables), .fns = is.na, .names = "NA_{.col}"))
+     return(res)
+   }, simplify = FALSE, USE.NAMES = TRUE)
+
+## Transformação dos resultados
+df_sumario_valid <- names(df_rules_valid_na) |> 
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res <- df_rules_valid_na[[i]] |>
+      dplyr::select(ano,codigo_municipio,dplyr::starts_with("NA_")) |>
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado")
+      return(res)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+
+## lista com um sumário dos resultados
+df_sumario <- names(df_sumario_valid) |> 
+  sapply(function(i){
+    res <- df_sumario_valid[[i]] |> 
+      dplyr::mutate(Regra = gsub(pattern = "NA_",replacement = "",x = Regra)) |>
+      dplyr::group_by(ano, Regra) |> 
+      dplyr::summarise(
+        Total        = dplyr::n(),
+        Validada     = sum(!resultado, na.rm = T),
+        Ausente      = sum(resultado, na.rm = T),
+        `% Validada` = round((Validada / Total) * 100, 2),
+        `% Ausente` = round((Ausente / Total) * 100, 2)
+        ) |> 
+      dplyr::ungroup()
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+```
+
+### Valores ausentes
+
+```{r show_valid_na_all, results='asis'}
+#| column: screen-inset-right
+#| 
+for (i in names(df_sumario)) {
+  pander::pandoc.header(i, level = 4)
+        pander::pandoc.table(
+          df_sumario[[i]] |>
+            #dplyr::select(ano, Regra, Total, contains("Ausente")) |>
+            dplyr::filter(ano == max(ano) ) |>
+            dplyr::rename(Ano = ano) |>
+            dplyr::arrange(desc(Ano)),
+          decimal.mark = ",", 
+          big.mark     = ".", 
+          round        = 2,
+          split.table  = Inf
+      )
+        cat("\\pagebreak\n")
+}
+
+```
 
 ```{r clean_env, results='hide'}
 

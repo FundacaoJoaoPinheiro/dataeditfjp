@@ -4,7 +4,7 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(mydir = getwd(), knitmydir = getwd(), begin_years = NULL)
+create_output(mydir = getwd(), knitmydir = getwd())
 }
 \arguments{
 \item{mydir}{Output directory}
