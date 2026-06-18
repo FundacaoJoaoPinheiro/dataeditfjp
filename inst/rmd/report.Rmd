@@ -151,13 +151,19 @@ for (i in names(dados)) {
 ```
 
 
+
+
 A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
+
+
 
 # Regras de crítica
 
 As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados. A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
 
-*nome da regra estabelecida + Nome do indicador*, exemplo: mediana_movel_SE_MEDICOS, outlier_SE_MEDICOS, etc.
+*nome da regra estabelecida + Nome do indicador*, 
+
+exemplo: mediana_movel_SE_MEDICOS, outlier_SE_MEDICOS, etc.
 
 **Classificação de regras**
 
@@ -235,7 +241,9 @@ df_sumario <- names(df_sumario_valid) |>
 
 ```{r show_valid_na_all, results='asis'}
 #| column: screen-inset-right
-#| 
+#| layout-ncol: 2
+#| out-width: 110%
+
 for (i in names(df_sumario)) {
   pander::pandoc.header(i, level = 4)
         pander::pandoc.table(
@@ -301,7 +309,7 @@ df_sumario <- names(df_sumario_dist_out) |>
          Validada     = sum(!resultado, na.rm = TRUE),
          Suspeita     = sum(resultado, na.rm = TRUE),
          Ausente      = sum(is.na(resultado), na.rm = T),
-         `% Validada` = round((Validada / Total) * 100, 2),
+         `% Validada` = round((Validada / (Total - Ausente)) * 100, 2),
          `% Suspeita` = round((Suspeita / (Total - Ausente) )* 100, 2)
        ) |> 
   dplyr::ungroup()
@@ -312,24 +320,26 @@ df_sumario <- names(df_sumario_dist_out) |>
 
 ```{r show_table_dist_graph,  results='asis'}
 #| column: screen-inset-right
-#| out-width: 100%
+#| layout-ncol: 2
+#| out-width: 110%
 
 #exibe a tabela com os resultados da regra de distribuicao
-for (i in names(df_sumario)) {
-  pander::pandoc.header(i, level = 2)
-        pander::pandoc.table(
-          df_sumario[[i]] |>
-            dplyr::filter(ano == max(ano) ) |>
-            dplyr::rename(Ano = ano) |>
-            dplyr::mutate(`% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |>
-            dplyr::arrange(desc(Ano)),
-          decimal.mark = ",", 
-          big.mark     = ".", 
-          round        = 2,
-          split.table  = Inf
-      )
-        chart_heatmap(df_sumario[[i]])
-        cat("\\pagebreak\n")
+
+pander::pandoc.header("indicadores", level = 2)
+variables <- unique(lista_dt[["indicadores"]]$indicador)
+for (var in variables) {
+  df_regra <- df_sumario[["indicadores"]] |>
+    dplyr::filter(grepl(pattern = var, x = Regra) )
+  df_regra |>
+    dplyr::filter(ano == max(ano)) |>
+    dplyr::rename(Ano = ano) |> 
+    dplyr::mutate(`% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |> 
+    dplyr::arrange(desc(Ano)) |>
+    kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+    kableExtra::kable_paper("hover", full_width = F)
+  cat("\\pagebreak\n")
+  chart_heatmap(df = df_regra)
+  cat("\\pagebreak\n")
 }
 
 ```

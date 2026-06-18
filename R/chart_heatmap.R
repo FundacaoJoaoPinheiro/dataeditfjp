@@ -10,10 +10,10 @@ chart_heatmap <- function(df){
   result <-
     df |>
     dplyr::mutate(
-      Ano   = as.character(Ano),
+      ano   = as.character(ano),
       Regra = stringr::str_remove(Regra, "DF_[[:upper:]]{2}_[[:alnum:]]+_")
     ) |>
-    ggplot2::ggplot(ggplot2::aes(x = Regra, y = Ano, fill = Suspeita)) +
+    ggplot2::ggplot(ggplot2::aes(x = Regra, y = ano, fill = Suspeita)) +
     ggplot2::geom_tile() +
     ggplot2::geom_text(ggplot2::aes(label = Suspeita), size = 3) +
     ggplot2::scale_fill_distiller(palette = "OrRd", direction = 1) +
