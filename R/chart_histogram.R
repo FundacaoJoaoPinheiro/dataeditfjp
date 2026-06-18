@@ -3,11 +3,11 @@
 #' @description
 #' A short description...
 #'
-#' @param variable
-#' @param data
+#' @param variable indicators
+#' @param data data set
 #' @param ano_base_alter year start data
 #'
-#' @return
+#' @return Return a graph
 
 chart_histogram <- function(variable, data, ano_base_alter){
   result <- data |>

@@ -2,10 +2,10 @@
 #' @description
 #' A short description...
 #'
-#' @param ano
-#' @param n
+#' @param ano years
+#' @param n variable
 #'
-#' @return
+#' @return Return a graph
 
 
 chart_bar <- function(ano, n){

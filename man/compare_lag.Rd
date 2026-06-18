@@ -6,6 +6,9 @@
 \usage{
 compare_lag(var)
 }
+\arguments{
+\item{variable}{indicator or variable}
+}
 \value{
 Vector with TRUE or FALSE
 }

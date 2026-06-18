@@ -7,7 +7,12 @@
 chart_hbar(ano, n)
 }
 \arguments{
-\item{n}{}
+\item{ano}{years}
+
+\item{n}{variable}
+}
+\value{
+Return a graph
 }
 \description{
 create a horizontal barplot

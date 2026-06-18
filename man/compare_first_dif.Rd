@@ -6,6 +6,9 @@
 \usage{
 compare_first_dif(var)
 }
+\arguments{
+\item{var}{variable or indicator}
+}
 \value{
 check
 }

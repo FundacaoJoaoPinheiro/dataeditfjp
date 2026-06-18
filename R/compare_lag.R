@@ -2,7 +2,7 @@
 #' @description
 #' Compare the actual value with the before
 #'
-#' @param variable
+#' @param variable indicator or variable
 #' @importFrom dplyr lag
 #' @import dplyr
 #' @return Vector with TRUE or FALSE

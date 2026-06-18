@@ -7,7 +7,9 @@
 table_quantile(variable, data)
 }
 \arguments{
-\item{data}{}
+\item{variable}{variable or indicator}
+
+\item{data}{data set}
 }
 \value{
 result

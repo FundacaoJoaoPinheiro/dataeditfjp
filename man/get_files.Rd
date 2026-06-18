@@ -9,6 +9,9 @@ get_files(output_path)
 \arguments{
 \item{output_path}{Path representing the working directory}
 }
+\value{
+Return a file at output
+}
 \description{
 get output files
 }

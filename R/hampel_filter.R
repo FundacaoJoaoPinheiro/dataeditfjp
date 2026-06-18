@@ -2,7 +2,7 @@
 #' @description
 #' A short description...
 #'
-#' @param variable
+#' @param variable variable or indicators
 #' @importFrom stats mad
 #' @import stats
 #' @return result

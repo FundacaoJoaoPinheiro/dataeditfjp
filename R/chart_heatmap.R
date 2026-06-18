@@ -2,9 +2,9 @@
 #' @description
 #' A short description...
 #'
-#' @param df
+#' @param df data set
 #'
-#' @return
+#' @return Return a graph
 
 chart_heatmap <- function(df){
   result <-

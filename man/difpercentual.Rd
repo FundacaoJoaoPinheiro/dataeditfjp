@@ -7,6 +7,8 @@
 difpercentual(df, variable)
 }
 \arguments{
+\item{df}{data set}
+
 \item{variable}{}
 }
 \value{

@@ -2,7 +2,7 @@
 #' @description
 #' Calculate the difference between the percentage of municipal participation in the year and the participation in previous year
 #'
-#' @param df
+#' @param df data set
 #' @param variable
 #'
 #' @return Data frame containing the difference

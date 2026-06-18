@@ -2,8 +2,8 @@
 #' @description
 #' A short description...
 #'
-#' @param variable
-#' @param data
+#' @param variable variable or indicator
+#' @param data data set
 #'
 #' @return result
 

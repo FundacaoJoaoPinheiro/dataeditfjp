@@ -1,9 +1,9 @@
 #' @title create a horizontal barplot
 #'
-#' @param ano
-#' @param n
+#' @param ano years
+#' @param n variable
 #'
-#' @return
+#' @return Return a graph
 
 chart_hbar <- function(ano, n){
   result <-

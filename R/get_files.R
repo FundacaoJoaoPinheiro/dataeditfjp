@@ -2,7 +2,7 @@
 #'
 #' @param output_path Path representing the working directory
 #'
-#' @return
+#' @return Return a file at output
 
 get_files <- function(output_path){
   path_file <- system.file("qmd", package = "dataeditfjp")
