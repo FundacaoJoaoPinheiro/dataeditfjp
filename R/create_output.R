@@ -31,10 +31,10 @@ create_output <- function(mydir=getwd()#,
     message("Formato valido!\nProcessando...")
     path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
     data <- openxlsx::read.xlsx(path_data[[1]])|>
-      dplyr::select(-c("CHAVE", "IBGE6") & where(is.numeric))|>
+      dplyr::select( ANO, IBGE7,-CHAVE,-IBGE6 & where(is.numeric))|>
       tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
 
-  } else if (sum(colunas_arquivo %in% nome_colunas)!= 0) {
+  } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")
     path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
     data <- openxlsx::read.xlsx(path_data[[1]])
