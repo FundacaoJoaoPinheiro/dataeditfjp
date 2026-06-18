@@ -4,17 +4,15 @@
 #'
 #' @param path_data Path to dataset
 #' @param mydir Output directory
-#' @param knitmydir output knit
 #' @param categorical_variable List of qualitative variables
 #' @param deleted_variable List of deleted variables
 #' @return Report
 #' @export
 
-create_output <- function(mydir=getwd(),
-                          knitmydir = getwd()#,
+create_output <- function(mydir=getwd()#,
                           # path_file_rules,
                           ){
-
+  knitmydir = mydir#,
   # Prompt para o usuario selecionar a base de dados
   path_data <- file.choose()
   #path_file_rules <- file.choose()

@@ -262,6 +262,152 @@ for (i in names(df_sumario)) {
 
 ```
 
+### Valores entre 0 e 100
+
+```{r data_manipulation_valid_all}
+### 
+df_rules_valid_pos <- names(dados) |>
+   sapply(function(i){
+     variables <- unique(lista_dt[[i]]$indicador)
+     res <- dados[[i]] |>
+       dplyr::select(ano,codigo_municipio,variables) |> 
+       dplyr::mutate(dplyr::across(dplyr::all_of(variables),
+                                   .fns = list(
+                                     pos =  ~ifelse(.x >= 0,F,T),
+                                     per = ~ifelse(dplyr::between(.x, 0,100),F,T) ),
+                                   .names = "{.fn}_{.col}"))
+     return(res)
+   }, simplify = FALSE, USE.NAMES = TRUE)
+
+## Transformação dos resultados
+df_sumario_valid <- names(df_rules_valid_pos) |> 
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio,dplyr::starts_with("pos_")) |>
+      tidyr::pivot_longer(cols = !c(ano, codigo_municipio), names_to = "Regra", values_to = "resultado")
+    
+    res_aux <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio,dplyr::starts_with("per_")) |>
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado")
+    
+    res <- rbind(res,res_aux)
+      return(res)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+
+```
+
+```{r data_wrangling_valid_all}
+
+## Transformação dos resultados
+df_sumario_valid <- names(df_rules_valid_pos) |> 
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res <- df_rules_valid_pos[[i]] |>
+      #dplyr::select(ano,uf,cod_regint, cod_mun,dplyr::ends_with(variables)) |>
+      tidyr::pivot_longer(cols = !c(ano, codigo_municipio, variables), names_to = "Regra", values_to = "resultado")
+      return(res)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+  
+
+## lista com um sumário dos resultados
+df_sumario <- names(df_sumario_valid) |> 
+  sapply(function(i){
+    res <- df_sumario_valid[[i]] |> 
+      dplyr::filter(grepl(pattern = "pos_",x = Regra)) |>
+      dplyr::mutate(Regra = gsub(pattern = "pos_",replacement = "",x = Regra)) |>
+      dplyr::group_by(ano, Regra) |> 
+      dplyr::summarise(
+        Total        = dplyr::n(),
+        Validada     = sum(!resultado, na.rm = TRUE),
+        Suspeita     = sum(resultado, na.rm = TRUE),
+        Ausente      = sum(is.na(resultado), na.rm = T),
+        `% Validada` = round((Validada / Total) * 100, 2),
+        `% Suspeita` = round((Suspeita / (Total - Ausente) )* 100, 2),
+        `% Ausente` = round((Ausente / Total) * 100, 2)
+      ) |> 
+      dplyr::ungroup() |> dplyr::mutate(aux = "pos")
+    
+      res_aux <- df_sumario_valid[[i]] |>
+        dplyr::filter(grepl(pattern = "per_",x = Regra)) |>
+        dplyr::mutate(Regra = gsub(pattern = "per_",replacement = "",x = Regra)) |>
+        dplyr::group_by(ano, Regra) |> 
+        dplyr::summarise(
+          Total        = dplyr::n(),
+          Validada     = sum(!resultado, na.rm = TRUE),
+          Suspeita     = sum(resultado, na.rm = TRUE),
+          Ausente      = sum(is.na(resultado), na.rm = T),
+          `% Validada` = round((Validada / Total) * 100, 2),
+          `% Suspeita` = round((Suspeita / (Total - Ausente) )* 100, 2),
+          `% Ausente` = round((Ausente / Total) * 100, 2)
+        ) |> 
+        dplyr::ungroup() |> dplyr::mutate(aux = "per")
+      
+      res <- rbind(res,res_aux)
+      return(res)
+        
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+```
+
+
+```{r show_val_rules, results='asis'}
+#| column: screen-inset-right
+
+# Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
+descricao <- c(
+  # Casos mais comuns
+#  `1` = "Valor é ≥ 0",
+  `2` = "Valor está dentro da categoria esperada",
+  `3` = "Valor está dentro da faixa esperada (0 a 100)"#,
+  #`4` = "Valor é > 0" #,
+  #`5` = "Valor está dentro da faixa esperada (0 a 1000)",
+  #`6` = "Valor está dentro da faixa esperada (0 a 10000)",
+  #`7` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  #`8` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  #`9` = "Valor é ≥ 8", # SP_PM1
+  #`10` = "Valor está dentro da faixa esperada (-100 a 100)"
+)
+
+#exibe a tabela com os resultados da regra de valores positivos ou percentual
+for (i in names(df_sumario)) {
+  pander::pandoc.header(i, level = 4)
+      #   pander::pandoc.table(
+      #     df_sumario[[i]] |> 
+      #       dplyr::filter(aux == "pos") |> 
+      #       dplyr::select(-aux)|>
+      #       dplyr::mutate(`Descrição` = descricao[1]) |>
+      #        dplyr::filter(ano == max(ano) ) |>
+      #       dplyr::rename(Ano = ano) |>
+      #       dplyr::arrange(desc(Ano)),
+      #     decimal.mark = ",", 
+      #     big.mark     = ".", 
+      #     round        = 2,
+      #     split.table  = Inf
+      # )
+      #   cat("\\pagebreak\n")
+        
+        pander::pandoc.table(
+          df_sumario[[i]] |> 
+            dplyr::filter(aux == "per") |> 
+            dplyr::select(-aux)|>
+            dplyr::mutate(`Descrição` = descricao[3]) |>
+            dplyr::filter(ano == max(ano) ) |>
+            dplyr::rename(Ano = ano) |>
+            dplyr::arrange(desc(Ano)),
+          decimal.mark = ",", 
+          big.mark     = ".", 
+          round        = 2,
+          split.table  = Inf
+      )
+}
+
+```
+
+
+
 ### Regras de distribuição e/ou Filtros de *outliers*
 
 ```{r data_rules_dist}

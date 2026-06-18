@@ -4,14 +4,12 @@
 \alias{creating_report}
 \title{Create Report}
 \usage{
-creating_report(mydir = getwd(), knitmydir = getwd())
+creating_report(mydir = getwd())
 }
 \arguments{
-\item{mydir}{Output directory}
+\item{path_data}{Path to dataset}
 
 \item{knitmydir}{output knit}
-
-\item{path_data}{Path to dataset}
 }
 \value{
 Report

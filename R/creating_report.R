@@ -3,13 +3,12 @@
 #' This function return the report with all statistical analysis and critial rules
 #'
 #' @param path_data Path to dataset
-#' @param mydir Output directory
 #' @param knitmydir output knit
 #' @return Report
 #' @export
 
-creating_report <- function(mydir=getwd(), knitmydir = getwd()){
-
+creating_report <- function(mydir=getwd()){
+  knitmydir = mydir
   path_list <- c(
     "MA" = system.file("rmd", "report_ma.Rmd", package = "dataeditfjp"),
     "AS" = system.file("rmd", "report_as.Rmd", package = "dataeditfjp"),
