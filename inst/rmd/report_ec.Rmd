@@ -1,6 +1,6 @@
 ---
 title: "FJP Dados"
-subtitle: "Esporte e Lazer"
+subtitle: "Economia Criativa"
 author:
   - name: "Coordenação de Indicadores Sociais (CIS)"
     affiliation: "Diretoria de Estatística e Informações (Direi)"
@@ -33,7 +33,7 @@ execute:
   message: false
 params:
   data: file.xlsx
-output-file: "relatorio_el.html"
+output-file: "relatorio_ec.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -43,10 +43,15 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
-k <- 1.5 
+
+k <- 1.5
+
+## "Truque" para setar "k" como uma constante
+#lockBinding("k", globalenv())
 ```
 
 ```{r import_data}
+
 data <- openxlsx::read.xlsx(params$data)
 data$ANO <- as.character(data$ANO)
 ```
@@ -54,22 +59,22 @@ data$ANO <- as.character(data$ANO)
 ```{r get_var_numeric}
 
 # Obter as siglas das variáveis do tipo numérico
-var_numeric <- data |> 
+var_numeric <- data |>
   dplyr::select(
     !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.numeric)
-  ) |> 
-  colnames() |> 
+  ) |>
+  colnames() |>
   unlist()
 ```
 
 ```{r get_var_character}
 
 # Obter as siglas variáveis do tipo string
-var_char <- data |> 
+var_char <- data |>
   dplyr::select(
     !c("CHAVE", "IBGE6", "IBGE7", "ANO") & dplyr::where(is.character)
-  ) |> 
-  colnames() |> 
+  ) |>
+  colnames() |>
   unlist()
 ```
 
@@ -119,6 +124,8 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
+-   **DF\_[...]\_estoque_munic**: valor atual é maior ou igual ao valor imediatamente anterior.
+
 **Classificação por flexibilidade (F ou I)**
 
 -   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
@@ -127,46 +134,46 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 ```{r set_year}
 
-# Inserir aqui apenas aquelas variáveis que possuem alguma restrição 
+# Inserir aqui apenas aquelas variáveis que possuem alguma restrição
 # no ano inicial de análise devido a fatores como mudança de metodologia
+# ano_base_alter <- c(
+#   "MA_ICMSECOLOG" = 2010
+# )
 
 # Remover os comentários para utilizar este trecho caso não haja nenhuma restrição
 # para nenhuma variável
 ano_base_alter <- c(
-   "EL_QUANT"   = 2015,
-   "EL_PARTESP" = 2015,
-   "EL_PROGE"   = 2009,
-   "EL_ESPESC"  = 2009,
-   "EL_ILRHE"   = 2009,
-   "EL_ORGESP"  = 2015,
-   "EL_CONVESP" = 2016
+ "NA" = NA_integer_
 )
 
-exclusions_years <- c(
+exclusions_years = list(
   "NA" = NA_integer_
-  )
-
+)
 ```
 
 ```{r get_cat}
 
 ## Categorias variáveis dicotômicas
-cat_dic <- c(
-  "Sim",
-  "Não"
-)
+# cat_dic <- c(
+#   "Sim",
+#   "Não"
+# )
 
 ## Categorias encontradas na série histórica
-cat_orgesp <- c(
-  "Não possui estrutura",
-  "Órgão da administração indireta",
-  "Outros",
-  "Secretaria em conjunto com outras políticas setoriais",
-  "Secretaria exclusiva",
-  "Secretaria municipal exclusiva",
-  "Setor subordinado a outra secretaria",
-  "Setor subordinado diretamente  à chefia do Executivo"
-)
+# cat_ogestor <- c(
+#   "Departamento, assessoria, setor ou órgão similar",
+#   "Não possui estrutura",
+#   "Não possui estrutura para a área",
+#   "Órgão da administração indireta",
+#   "Secretaria em conjunto com outra política",
+#   "Secretaria em conjunto com outras políticas setoriais",
+#   "Secretaria exclusiva",
+#   "Secretaria municipal em conjunto com outras políticas",
+#   "Secretaria municipal em conjunto com outros temas",
+#   "Secretaria municipal exclusiva",
+#   "Setor subordinado a outra secretaria",
+#   "Setor subordinado diretamente à chefia do executivo"
+# )
 ```
 
 ```{r map_valid_desc}
@@ -176,37 +183,52 @@ desc_regra_valid <- c(
   # Casos mais comuns
   `1` = "Valor é ≥ 0",
   `2` = "Valor está dentro da categoria esperada",
-  `3` = "Valor está dentro da faixa esperada (0 a 1)",
-  `4` = "Valor está dentro da faixa esperada (0 a 10)",
-  `5` = "Valor está dentro da faixa esperada (0 a 100)")
+  `3` = "Valor está dentro da faixa esperada (0 a 100)",
+  `4` = "Valor está dentro da faixa esperada (0 a 1000)",
+  `5` = "Valor está dentro da faixa esperada (0 a 10000)",
+  `6` = "Valor está dentro da faixa esperada (0 a 100000)",
+  # Casos especiais
+  `7` = "Valor é ≥ 1", # SP_PM e SP_PMPC
+  `8` = "Valor é ≥ 8" # SP_PM1
+)
 
-# df com o nome da regra e a respectiva descrição
 # df com o nome da regra e a respectiva descrição
 desc_regra_valid_var <- data.frame(
   Regra = c(
-    "VI_EL_EQUI",
-    "VI_EL_QUANT",
-    "VI_EL_PARTESP",
-    "VI_EL_PROGE",
-    "VI_EL_ESPESC",
-    "VI_EL_ILRHE",
-    "VI_EL_CONSESP",
-    "VI_EL_ORGESP",
-    "VI_EL_CONVESP"
+    "VI_EC_NMRTRABEC",
+    "VI_EC_PERCPARTECMUN",
+    "VI_EC_PERCPARTECMG",
+    "VI_EC_MEDIASALTRABEC"
   )
-) |> 
+) |>
   dplyr::mutate(
     `Descrição` = dplyr::case_match(
       Regra,
-      "VI_EL_EQUI"    ~ desc_regra_valid[2],
-      "VI_EL_QUANT"   ~ desc_regra_valid[1],
-      "VI_EL_PARTESP" ~ desc_regra_valid[2],
-      "VI_EL_PROGE"   ~ desc_regra_valid[1],
-      "VI_EL_ESPESC"  ~ desc_regra_valid[3],
-      "VI_EL_ILRHE"   ~ desc_regra_valid[3],
-      "VI_EL_CONSESP" ~ desc_regra_valid[2],
-      "VI_EL_ORGESP"  ~ desc_regra_valid[2],
-      "VI_EL_CONVESP" ~ desc_regra_valid[2]
+      "VI_EC_NMRTRABEC"       ~ desc_regra_valid[1],
+      "VI_EC_PERCPARTECMUN"  ~ desc_regra_valid[3],
+      "VI_EC_PERCPARTECMG"   ~ desc_regra_valid[3],
+      "VI_EC_MEDIASALTRABEC" ~ desc_regra_valid[1]
+    )
+  )
+```
+
+```{r map_consist_desc}
+
+# Mapear variável e descrição de sua respectiva regra de consistência para ser apresentado na tabela.
+ desc_regra_consist <- c(
+   `1` = "A soma da proporção anual é igual a 100%" # PERC_PART_EC_MG
+ )
+
+# df com o nome da regra e a respectiva descrição
+desc_regra_consist_var <- data.frame(
+  Regra = c(
+    "CF_EC_PERCPARTECMG_total_year"
+  )
+) |>
+  dplyr::mutate(
+    `Descrição` = dplyr::case_match(
+      Regra,
+      "CF_EC_PERCPARTECMG_year" ~ desc_regra_consist[1]
     )
   )
 ```
@@ -216,16 +238,12 @@ desc_regra_valid_var <- data.frame(
 ### Todos os indicadores
 
 ```{r rules_type}
+
 rules_type <- validate::validator(
-  TI_EL_EQUI    = is.character(EL_EQUI),
-  TI_EL_QUANT   = is.numeric(EL_QUANT),
-  TI_EL_PARTESP = is.character(EL_PARTESP),
-  TI_EL_PROGE   = is.numeric(EL_PROGE),
-  TI_EL_ESPESC  = is.numeric(EL_ESPESC),
-  TI_EL_ILRHE   = is.numeric(EL_ILRHE),
-  TI_EL_CONSESP = is.character(EL_CONSESP),
-  TI_EL_ORGESP  = is.character(EL_ORGESP),
-  TI_EL_CONVESP = is.character(EL_CONVESP)
+  TI_EC_NMRTRABEC      = is.numeric(EC_NMRTRABEC),
+  TI_EC_PERCPARTECMUN  = is.numeric(EC_PERCPARTECMUN),
+  TI_EC_PERCPARTECMG   = is.numeric(EC_PERCPARTECMG),
+  TI_EC_MEDIASALTRABEC = is.numeric(EC_MEDIASALTRABEC)
 )
 ```
 
@@ -234,156 +252,196 @@ rules_type <- validate::validator(
 ## Confrontar os dados com as regras e exibir uma tabela com os resultados
 check_type <- validate::confront(data, rules_type)
 
-validate::summary(check_type) |> 
+validate::summary(check_type) |>
   dplyr::select(
     Regra    = name,
     Validada = passes
-  ) |> 
+  ) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ## Validade
 
-```{r data_rules_valid_el_all}
+```{r data_rules_valid_ec_all}
 
 ## df com o resultado das aplicações das regras
-## df com o resultado das aplicações das regras
-df_rules_valid_el_all <- data |> 
+df_rules_valid_ec_all <- data |>
   dplyr::select(
-    Ano   = ANO, 
-    ibge7 = IBGE7, 
-    dplyr::starts_with("EL_")
-  ) |> 
+    Ano   = ANO,
+    ibge7 = IBGE7,
+    dplyr::starts_with("EC_")
+  ) |>
   dplyr::mutate(
     # Missing
-    VI_NA_EL_EQUI    = dplyr::if_else(!is.na(EL_EQUI), F, T),
-    VI_NA_EL_QUANT   = dplyr::if_else(!is.na(EL_QUANT), F, T),
-    VI_NA_EL_PARTESP = dplyr::if_else(!is.na(EL_PARTESP), F, T),
-    VI_NA_EL_PROGE   = dplyr::if_else(!is.na(EL_PROGE), F, T),
-    VI_NA_EL_ESPESC  = dplyr::if_else(!is.na(EL_ESPESC), F, T),
-    VI_NA_EL_ILRHE   = dplyr::if_else(!is.na(EL_ILRHE), F, T),
-    VI_NA_EL_CONSESP = dplyr::if_else(!is.na(EL_CONSESP), F, T),
-    VI_NA_EL_ORGESP  = dplyr::if_else(!is.na(EL_ORGESP), F, T),
-    VI_NA_EL_CONVESP = dplyr::if_else(!is.na(EL_CONVESP), F, T),
+    VI_NA_EC_NMRTRABEC      = dplyr::if_else(!is.na(EC_NMRTRABEC), F, NA),
+    VI_NA_EC_PERCPARTECMUN  = dplyr::if_else(!is.na(EC_PERCPARTECMUN), F, NA),
+    VI_NA_EC_PERCPARTECMG   = dplyr::if_else(!is.na(EC_PERCPARTECMG), F, NA),
+    VI_NA_EC_MEDIASALTRABEC = dplyr::if_else(!is.na(EC_MEDIASALTRABEC), F, NA),
     # Others
-    VI_EL_EQUI       = dplyr::if_else(EL_EQUI %in% cat_dic, F, T),
-    VI_EL_QUANT      = dplyr::if_else(EL_QUANT >= 0, F, T),
-    VI_EL_PARTESP    = dplyr::if_else(EL_PARTESP %in% cat_dic, F, T),
-    VI_EL_PROGE      = dplyr::if_else(EL_PROGE >= 0, F, T),
-    VI_EL_ESPESC     = dplyr::if_else(dplyr::between(EL_ESPESC, 0, 100), F, T),
-    VI_EL_ILRHE      = dplyr::if_else(dplyr::between(EL_ILRHE, 0, 100), F, T),
-    VI_EL_CONSESP    = dplyr::if_else(EL_CONSESP %in% cat_dic, F, T),
-    VI_EL_ORGESP     = dplyr::if_else(EL_ORGESP %in% cat_orgesp, F, T),
-    VI_EL_CONVESP    = dplyr::if_else(EL_CONVESP %in% cat_dic, F, T)
+    VI_EC_NMRTRABEC      = dplyr::if_else(EC_NMRTRABEC >= 0, F, T),
+    VI_EC_PERCPARTECMUN  = dplyr::if_else(dplyr::between(EC_PERCPARTECMUN, 0, 100), F, T),
+    VI_EC_PERCPARTECMG   = dplyr::if_else(dplyr::between(EC_PERCPARTECMG, 0, 100), F, T),
+    VI_EC_MEDIASALTRABEC = dplyr::if_else(EC_MEDIASALTRABEC >= 0, F, T)
   )
 ```
 
-```{r data_wrangling_valid_eo_all}
+```{r data_wrangling_valid_ma_all}
 
 ## Transformação dos resultados
-df_sumario_valid_el <- df_rules_valid_el_all |> 
+df_sumario_valid_ec <- df_rules_valid_ec_all |>
   dplyr::select(
-    Ano, 
-    ibge7, 
-    dplyr::starts_with(c("VI_", "VI_NA"))
-  ) |> 
+    Ano,
+    ibge7,
+    dplyr::starts_with(c("VI_", "VF_"))
+  ) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_valid_el |> 
-  dplyr::group_by(Ano, Regra) |> 
+df_sumario <- df_sumario_valid_ec |>
+  dplyr::group_by(Ano, Regra) |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
     Suspeita     = sum(resultado, na.rm = T),
-    Ausente      = Total - Validada - Suspeita,
+    Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
+  ) |>
   dplyr::ungroup()
 ```
 
 ### Todos os indicadores - Valores ausentes
 
-```{r table_valid_eo_na_all}
+```{r table_valid_ec_na_all}
 
 df_sumario |>
-  dplyr::select(Ano, Regra, Total, contains("Suspeita")) |>
+  dplyr::select(Ano, Regra, Total, contains("Ausente")) |>
   dplyr::filter(
-    Ano == max(Ano) & 
+    Ano == max(Ano) &
     stringr::str_detect(Regra, "_NA_")
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ### Todos os indicadores - Demais regras
 
-```{r table_valid_eo_all}
+```{r table_valid_ec_all}
 #| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(
-    Ano == max(Ano) & 
+    Ano == max(Ano) &
     stringr::str_detect(Regra, "_NA_", negate = T)
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> 
-  unique() |># Introdução coluna descrição
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
+  kableExtra::kable_paper("hover", full_width = F)
+```
+
+## Consistência
+
+```{r data_rules_consist_ec_all}
+
+## df com o resultado das aplicações das regras
+df_rules_consist_ec_all <- data |>
+  dplyr::select(
+    Ano   = ANO,
+    ibge7 = IBGE7,
+    EC_PERCPARTECMG
+  ) |>
+  dplyr::group_by(Ano) |>
+  dplyr::mutate(
+    CFEC_PERCPARTECMG_total_year = dplyr::if_else(
+      dplyr::between(sum(EC_PERCPARTECMG, na.rm = T), 99, 101), F, T)
+  )
+```
+
+```{r data_wrangling_consist_ec_all}
+
+## Tranformação dos resultados
+df_sumario_consist_ec <- df_rules_consist_ec_all |>
+  dplyr::select(!EC_PERCPARTECMG) |>
+  tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
+
+## df com um sumário dos resultados
+df_sumario <- df_sumario_consist_ec |>
+  dplyr::group_by(Ano, Regra) |>
+  dplyr::summarise(
+    Total        = dplyr::n(),
+    Validada     = sum(!resultado, na.rm = T),
+    Suspeita     = sum(resultado, na.rm = T),
+    Ausente      = sum(is.na(resultado)),
+    `% Validada` = round(Validada / Total * 100, 2),
+    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Ausente`  = round(Ausente / Total * 100, 2)
+  ) |>
+  dplyr::ungroup()
+```
+
+### Todos os indicadores
+
+```{r table_consist_ec_all}
+#| column: screen-inset-right
+
+df_sumario |>
+  dplyr::filter(Ano == max(Ano)) |>
+  dplyr::mutate(Ano = as.character(Ano)) |>
+  dplyr::left_join(desc_regra_consist_var, by = dplyr::join_by(Regra)) |> # Introdução coluna descrição
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
 ## Distribuição
 
-### EL_QUANT
+### EC_NMRTRABEC
 
-```{r data_rules_dist_el_quant}
+```{r data_rules_dist_ec_nmrtrabec}
+
 ## df com o resultado das aplicações das regras
-df_rules_dist_el_quant <- data |> 
-  remove_year_variable(variable = "EL_QUANT", exclusions_years = exclusions_years) |>
+df_rules_dist_ec_nmrtrabec <- data |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EL_QUANT" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_QUANT"],
+      "EC_NMRTRABEC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EC_NMRTRABEC"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_QUANT) |> 
-  dplyr::group_by(ibge7) |> 
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EC_NMRTRABEC) |>
+  dplyr::group_by(ibge7) |>
   dplyr::mutate(
-    DF_EL_QUANT_hampel_munic  = dplyr::if_else(!hampel_filter(EL_QUANT), F, T), # Longitudinal (município)
-    
-    DF_EL_QUANT_out_munic     = dplyr::if_else(!outlier_function(EL_QUANT), F, T), # Longitudinal (município)
-    
-    DF_EL_QUANT_min_munic     = dplyr::if_else(EL_QUANT >= (min(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_EL_QUANT_max_munic     = dplyr::if_else(EL_QUANT <= (max(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_QUANT_min_k_munic   = dplyr::if_else(EL_QUANT >= (min(dplyr::lag(EL_QUANT), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_EL_QUANT_max_k_munic   = dplyr::if_else(EL_QUANT <= (k * max(dplyr::lag(EL_QUANT), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_QUANT_med_mov_munic = dplyr::if_else(EL_QUANT <= (k * zoo::rollmedian(EL_QUANT, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_EL_QUANT_dif_munic     = dplyr::if_else(!compare_first_dif(EL_QUANT), F, T) # Longitudinal (município)
+    DF_EC_NMRTRABEC_hampel_munic  = dplyr::if_else(!hampel_filter(EC_NMRTRABEC), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_out_munic     = dplyr::if_else(!outlier_function(EC_NMRTRABEC), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_min_munic     = dplyr::if_else(EC_NMRTRABEC >= (min(dplyr::lag(EC_NMRTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_max_munic     = dplyr::if_else(EC_NMRTRABEC <= (max(dplyr::lag(EC_NMRTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_min_k_munic   = dplyr::if_else(EC_NMRTRABEC >= (min(dplyr::lag(EC_NMRTRABEC), na.rm = T) / k), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_max_k_munic   = dplyr::if_else(EC_NMRTRABEC <= (k * max(dplyr::lag(EC_NMRTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_med_mov_munic = dplyr::if_else(EC_NMRTRABEC <= (k * zoo::rollmedian(EC_NMRTRABEC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+
+    DF_EC_NMRTRABEC_dif_munic     = dplyr::if_else(!compare_first_dif(EC_NMRTRABEC), F, T) # Longitudinal (município)
 )
 ```
 
-```{r data_wrangling_dist_el_quant}
+```{r data_wrangling_dist_ec_nmrtrabec}
 
 ## Transformação dos resultados
-df_sumario_dist_el <- df_rules_dist_el_quant |> 
-  dplyr::select(!EL_QUANT) |> 
+df_sumario_dist_ec <- df_rules_dist_ec_nmrtrabec |>
+  dplyr::select(!EC_NMRTRABEC) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_el |> 
-  dplyr::group_by(Ano, Regra) |> 
+df_sumario <- df_sumario_dist_ec |>
+  dplyr::group_by(Ano, Regra) |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
@@ -392,21 +450,21 @@ df_sumario <- df_sumario_dist_el |>
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
+  ) |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_el_quant}
+```{r table_dist_ec_nmrtrabec}
 #| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_el_quant}
+```{r chart_dist_ec_nmrtrabec}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -415,49 +473,49 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EL_PROGE
+### EC_PERCPARTECMUN
 
-```{r data_rules_dist_el_proge}
+```{r rules_dist_ec_percpartecmun}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_el_proge <- data |> 
+df_rules_dist_ec_percpartecmun <- data |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EL_PROGE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_PROGE"],
+      "EC_PERCPARTECMUN" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EC_PERCPARTECMUN"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_PROGE) |> 
-  dplyr::group_by(ibge7) |> 
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EC_PERCPARTECMUN) |>
+  dplyr::group_by(ibge7) |>
   dplyr::mutate(
-    DF_EL_PROGE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_PROGE), F, T), # Longitudinal (município)
-    
-    DF_EL_PROGE_out_munic     = dplyr::if_else(!outlier_function(EL_PROGE), F, T), # Longitudinal (município)
-    
-    DF_EL_PROGE_min_munic     = dplyr::if_else(EL_PROGE >= (min(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_EL_PROGE_max_munic     = dplyr::if_else(EL_PROGE <= (max(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_PROGE_min_k_munic   = dplyr::if_else(EL_PROGE >= (min(dplyr::lag(EL_PROGE), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_EL_PROGE_max_k_munic   = dplyr::if_else(EL_PROGE <= (k * max(dplyr::lag(EL_PROGE), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_PROGE_med_mov_munic = dplyr::if_else(EL_PROGE <= (k * zoo::rollmedian(EL_PROGE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_EL_PROGE_dif_munic     = dplyr::if_else(!compare_first_dif(EL_PROGE), F, T) # Longitudinal (município)
+    DF_EC_PERCPARTECMUN_hampel_munic  = dplyr::if_else(!hampel_filter(EC_PERCPARTECMUN), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_out_munic     = dplyr::if_else(!outlier_function(EC_PERCPARTECMUN), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_min_munic     = dplyr::if_else(EC_PERCPARTECMUN >= (min(dplyr::lag(EC_PERCPARTECMUN), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_max_munic     = dplyr::if_else(EC_PERCPARTECMUN <= (max(dplyr::lag(EC_PERCPARTECMUN), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_min_k_munic   = dplyr::if_else(EC_PERCPARTECMUN >= (min(dplyr::lag(EC_PERCPARTECMUN), na.rm = T) / k), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_max_k_munic   = dplyr::if_else(EC_PERCPARTECMUN <= (k * max(dplyr::lag(EC_PERCPARTECMUN), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_med_mov_munic = dplyr::if_else(EC_PERCPARTECMUN <= (k * zoo::rollmedian(EC_PERCPARTECMUN, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMUN_dif_munic     = dplyr::if_else(!compare_first_dif(EC_PERCPARTECMUN), F, T) # Longitudinal (município)
 )
 ```
 
-```{r data_wrangling_dist_el_proge}
+```{r data_wrangling_dist_ec_percpartecmun}
 
 ## Transformação dos resultados
-df_sumario_dist_el <- df_rules_dist_el_proge |> 
-  dplyr::select(!EL_PROGE) |> 
+df_sumario_dist_ec <- df_rules_dist_ec_percpartecmun |>
+  dplyr::select(!EC_PERCPARTECMUN) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_el |> 
-  dplyr::group_by(Ano, Regra) |> 
+df_sumario <- df_sumario_dist_ec |>
+  dplyr::group_by(Ano, Regra) |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
@@ -466,21 +524,21 @@ df_sumario <- df_sumario_dist_el |>
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
+  ) |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_el_proge}
+```{r table_dist_ec_percpartecmun}
 #| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_el_proge}
+```{r chart_dist_ec_percpartecmun}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -489,49 +547,49 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EL_ESPESC
+### EC_PERCPARTECMG
 
-```{r data_rules_dist_el_espesc}
+```{r rules_dist_ec_percpartecmg}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_el_espesc <- data |> 
+df_rules_dist_ec_percpartecmg <- data |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EL_ESPESC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_ESPESC"],
+      "EC_PERCPARTECMG" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EC_PERCPARTECMG"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_ESPESC) |> 
-  dplyr::group_by(ibge7) |> 
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EC_PERCPARTECMG) |>
+  dplyr::group_by(ibge7) |>
   dplyr::mutate(
-    DF_EL_ESPESC_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ESPESC), F, T), # Longitudinal (município)
-    
-    DF_EL_ESPESC_out_munic     = dplyr::if_else(!outlier_function(EL_ESPESC), F, T), # Longitudinal (município)
-    
-    DF_EL_ESPESC_min_munic     = dplyr::if_else(EL_ESPESC >= (min(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_EL_ESPESC_max_munic     = dplyr::if_else(EL_ESPESC <= (max(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_ESPESC_min_k_munic   = dplyr::if_else(EL_ESPESC >= (min(dplyr::lag(EL_ESPESC), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_EL_ESPESC_max_k_munic   = dplyr::if_else(EL_ESPESC <= (k * max(dplyr::lag(EL_ESPESC), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_ESPESC_med_mov_munic = dplyr::if_else(EL_ESPESC <= (k * zoo::rollmedian(EL_ESPESC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_EL_ESPESC_dif_munic     = dplyr::if_else(!compare_first_dif(EL_ESPESC), F, T) # Longitudinal (município)
-)
+    DF_EC_PERCPARTECMG_hampel_munic  = dplyr::if_else(!hampel_filter(EC_PERCPARTECMG), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_out_munic     = dplyr::if_else(!outlier_function(EC_PERCPARTECMG), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_min_munic     = dplyr::if_else(EC_PERCPARTECMG >= (min(dplyr::lag(EC_PERCPARTECMG), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_max_munic     = dplyr::if_else(EC_PERCPARTECMG <= (max(dplyr::lag(EC_PERCPARTECMG), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_min_k_munic   = dplyr::if_else(EC_PERCPARTECMG >= (min(dplyr::lag(EC_PERCPARTECMG), na.rm = T) / k), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_max_k_munic   = dplyr::if_else(EC_PERCPARTECMG <= (k * max(dplyr::lag(EC_PERCPARTECMG), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_med_mov_munic = dplyr::if_else(EC_PERCPARTECMG <= (k * zoo::rollmedian(EC_PERCPARTECMG, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+
+    DF_EC_PERCPARTECMG_dif_munic     = dplyr::if_else(!compare_first_dif(EC_PERCPARTECMG), F, T) # Longitudinal (município)
+  )
 ```
 
-```{r data_wrangling_dist_el_espesc}
+```{r data_wrangling_dist_ec_percpartecmg}
 
 ## Transformação dos resultados
-df_sumario_dist_el <- df_rules_dist_el_espesc |> 
-  dplyr::select(!EL_ESPESC) |> 
+df_sumario_dist_ec <- df_rules_dist_ec_percpartecmg |>
+  dplyr::select(!EC_PERCPARTECMG) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_el |> 
-  dplyr::group_by(Ano, Regra) |> 
+df_sumario <- df_sumario_dist_ec |>
+  dplyr::group_by(Ano, Regra) |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
@@ -540,21 +598,21 @@ df_sumario <- df_sumario_dist_el |>
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
+  ) |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_el_espesc}
+```{r table_dist_ec_percpartecmg}
 #| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_el_espesc}
+```{r chart_dist_ec_percpartecmg}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -563,49 +621,49 @@ chart_heatmap(df_sumario)
 chart_vbar(df_sumario)
 ```
 
-### EL_ILRHE
+### EC_MEDIASALTRABEC
 
-```{r data_rules_dist_el_ilrhe}
+```{r rules_dist_ec_mediasaltrabec}
 
 ## df com o resultado das aplicações das regras
-df_rules_dist_el_ilrhe <- data |> 
+df_rules_dist_ec_mediasaltrabec <- data |>
   dplyr::filter( # Filtro condicional para variáveis que estão em "ano_base_alter"
     dplyr::case_when(
-      "EL_ILRHE" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EL_ILRHE"],
+      "EC_MEDIASALTRABEC" %in% names(ano_base_alter) ~ ANO >= ano_base_alter["EC_MEDIASALTRABEC"],
       TRUE ~ ANO >= min(ANO, na.rm = T)
     )
-  ) |> 
-  dplyr::select(Ano = ANO, ibge7 = IBGE7, EL_ILRHE) |> 
-  dplyr::group_by(ibge7) |> 
+  ) |>
+  dplyr::select(Ano = ANO, ibge7 = IBGE7, EC_MEDIASALTRABEC) |>
+  dplyr::group_by(ibge7) |>
   dplyr::mutate(
-    DF_EL_ILRHE_hampel_munic  = dplyr::if_else(!hampel_filter(EL_ILRHE), F, T), # Longitudinal (município)
-    
-    DF_EL_ILRHE_out_munic     = dplyr::if_else(!outlier_function(EL_ILRHE), F, T), # Longitudinal (município)
-    
-    DF_EL_ILRHE_min_munic     = dplyr::if_else(EL_ILRHE >= (min(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
-     
-    DF_EL_ILRHE_max_munic     = dplyr::if_else(EL_ILRHE <= (max(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_ILRHE_min_k_munic   = dplyr::if_else(EL_ILRHE >= (min(dplyr::lag(EL_ILRHE), na.rm = T) / k), F, T), # Longitudinal (município)
-     
-    DF_EL_ILRHE_max_k_munic   = dplyr::if_else(EL_ILRHE <= (k * max(dplyr::lag(EL_ILRHE), na.rm = T)), F, T), # Longitudinal (município)
-    
-    DF_EL_ILRHE_med_mov_munic = dplyr::if_else(EL_ILRHE <= (k * zoo::rollmedian(EL_ILRHE, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
-    
-    DF_EL_ILRHE_dif_munic     = dplyr::if_else(!compare_first_dif(EL_ILRHE), F, T) # Longitudinal (município)
-)
+    DF_EC_MEDIASALTRABEC_hampel_munic  = dplyr::if_else(!hampel_filter(EC_MEDIASALTRABEC), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_out_munic     = dplyr::if_else(!outlier_function(EC_MEDIASALTRABEC), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_min_munic     = dplyr::if_else(EC_MEDIASALTRABEC >= (min(dplyr::lag(EC_MEDIASALTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_max_munic     = dplyr::if_else(EC_MEDIASALTRABEC <= (max(dplyr::lag(EC_MEDIASALTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_min_k_munic   = dplyr::if_else(EC_MEDIASALTRABEC >= (min(dplyr::lag(EC_MEDIASALTRABEC), na.rm = T) / k), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_max_k_munic   = dplyr::if_else(EC_MEDIASALTRABEC <= (k * max(dplyr::lag(EC_MEDIASALTRABEC), na.rm = T)), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_med_mov_munic = dplyr::if_else(EC_MEDIASALTRABEC <= (k * zoo::rollmedian(EC_MEDIASALTRABEC, k = 3, fill = NA, align = "right")), F, T), # Longitudinal (município)
+
+    DF_EC_MEDIASALTRABEC_dif_munic     = dplyr::if_else(!compare_first_dif(EC_MEDIASALTRABEC), F, T) # Longitudinal (município)
+  )
 ```
 
-```{r data_wrangling_dist_el_ilrhe}
+```{r data_wrangling_dist_ec_mediasaltrabec}
 
 ## Transformação dos resultados
-df_sumario_dist_el <- df_rules_dist_el_ilrhe |> 
-  dplyr::select(!EL_ILRHE) |> 
+df_sumario_dist_ec <- df_rules_dist_ec_mediasaltrabec |>
+  dplyr::select(!EC_MEDIASALTRABEC) |>
   tidyr::pivot_longer(cols = !c(Ano, ibge7), names_to = "Regra", values_to = "resultado")
 
 ## df com um sumário dos resultados
-df_sumario <- df_sumario_dist_el |> 
-  dplyr::group_by(Ano, Regra) |> 
+df_sumario <- df_sumario_dist_ec |>
+  dplyr::group_by(Ano, Regra) |>
   dplyr::summarise(
     Total        = dplyr::n(),
     Validada     = sum(!resultado, na.rm = T),
@@ -614,21 +672,21 @@ df_sumario <- df_sumario_dist_el |>
     `% Validada` = round(Validada / Total * 100, 2),
     `% Suspeita` = round(Suspeita / Total * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
-  ) |> 
+  ) |>
   dplyr::ungroup()
 ```
 
-```{r table_dist_el_ilrhe}
+```{r table_dist_ec_mediasaltrabec}
 #| column: screen-inset-right
 
 df_sumario |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
+  kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |>
   kableExtra::kable_paper("hover", full_width = F)
 ```
 
-```{r chart_dist_el_ilrhe}
+```{r chart_dist_ec_mediasaltrabec}
 #| column: screen-inset-right
 #| layout-ncol: 2
 #| out-width: 100%
@@ -678,9 +736,9 @@ pander::pandoc.header("Descritiva", level = 3)
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
   pander::pandoc.table(
-    table_descriptive(variable = var, data = data, ano_base_alter), 
-    decimal.mark = ",", 
-    big.mark     = ".", 
+    table_descriptive(variable = var, data = data, ano_base_alter),
+    decimal.mark = ",",
+    big.mark     = ".",
     round        = 2,
     split.table  = Inf
   )
@@ -703,8 +761,7 @@ pander::pandoc.header("Gráfico de caixa (boxplot)", level = 3)
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
   pander::pandoc.header(var, level = 4)
-    data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
-  print(chart_boxplot(variable = var, data = data_aux, ano_base_alter))
+  print(chart_boxplot(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -717,9 +774,8 @@ pander::pandoc.header("Histograma", level = 3)
 
 # Loop para mostrar os resultados por variável
 for(var in var_numeric){
-  data_aux <- data |> remove_year_variable(variable = var, exclusions_years = exclusions_years)
   pander::pandoc.header(var, level = 4)
-  print(chart_histogram(variable = var, data = data_aux, ano_base_alter))
+  print(chart_histogram(variable = var, data = data, ano_base_alter))
   cat("\\pagebreak\n")
 }
 ```
@@ -734,78 +790,100 @@ cidades <- openxlsx::read.xlsx(path_data)
 ```
 
 ```{r df_build_viol_valid}
-  variables = c(
-    "EL_EQUI",
-    "EL_QUANT",
-    "EL_PARTESP",
-    "EL_PROGE" ,
-    "EL_ESPESC",
-    "EL_ILRHE",
-    "EL_CONSESP",
-    "EL_ORGESP",
-    "EL_CONVESP"
-    )
 
-lis <- split(variables,f = variables)
-df_obs_valid <- names(lis)|> 
-sapply(function(i){
-lis[[i]] <- df_rules_valid_el_all |> 
-  dplyr::select(
-    Ano,
-    ibge7,
-    dplyr::ends_with(i)
-  ) |> 
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")),
-    names_to  = "regra",
-    values_to = "obs_suspeita"
-  ) |>
-  dplyr::filter(obs_suspeita) |>
-  dplyr::rename_with(tolower) |>
-  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
-  dplyr::select(-obs_suspeita) |>
-  dplyr::arrange(ano, ibge7)
-return(lis[[i]])
-}, USE.NAMES=TRUE, simplify = FALSE)
+variables = c(
+  "EC_NMRTRABEC",
+  "EC_PERCPARTECMUN",
+  "EC_PERCPARTECMG",
+  "EC_MEDIASALTRABEC"
+  )
 
-index <- sapply(df_obs_valid, nrow)!=0
+lis <- split(variables, f = variables)
+df_obs_valid <- names(lis) |>
+  sapply(function(i) {
+    lis[[i]] <- df_rules_valid_ec_all |>
+      dplyr::select(Ano, ibge7, dplyr::ends_with(i)) |>
+      tidyr::pivot_longer(
+        cols      = !c(Ano, ibge7, dplyr::starts_with("EC_")),
+        names_to  = "regra",
+        values_to = "obs_suspeita"
+      ) |>
+      dplyr::filter(obs_suspeita) |>
+      dplyr::rename_with(tolower) |>
+      dplyr::left_join(cidades, by = join_by(ibge7 == id)) |>
+      dplyr::select(ano, ibge7, cidade, regra) |>
+      dplyr::arrange(ano, ibge7)
+    return(lis[[i]])
+  }, USE.NAMES = TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_valid, nrow) != 0
 df_obs_valid <- df_obs_valid[index]
 
-for(i in names(df_obs_valid)){
+for (i in names(df_obs_valid)) {
   openxlsx::addWorksheet(pt, paste0("valid - ", i))
   openxlsx::writeData(pt, paste0("valid - ", i), df_obs_valid[[i]])
 }
 
+```
 
+```{r df_build_viol_consist}
+
+variables = c("EC_PERCPARTECMG")
+
+lis <- split(variables, f = variables)
+df_obs_consist <- names(lis) |>
+  sapply(function(i) {
+    lis[[i]] <- df_rules_consist_ec_all |>
+      dplyr::select(Ano, ibge7, dplyr::contains(i)) |>
+      tidyr::pivot_longer(
+        cols      = !c(Ano, ibge7, dplyr::starts_with("EC_")),
+        names_to  = "regra",
+        values_to = "obs_suspeita"
+      ) |>
+      dplyr::filter(obs_suspeita) |>
+      dplyr::rename_with(tolower) |>
+      dplyr::left_join(cidades, by = join_by(ibge7 == id)) |>
+      dplyr::select(ano, ibge7, cidade, obs_suspeita, regra) |>
+      dplyr::arrange(ano, ibge7)
+    return(lis[[i]])
+  }, USE.NAMES = TRUE, simplify = FALSE)
+
+index <- sapply(df_obs_consist, nrow) != 0
+
+if (index != 0) {
+  df_obs_consist <- df_obs_consist[index]
+  for (i in names(df_obs_consist)) {
+    openxlsx::addWorksheet(pt, paste0("consist - ", i))
+    openxlsx::writeData(pt, paste0("consist - ", i), df_obs_consist[[i]])
+  }
+}
 
 ```
 
 ```{r df_build_viol_dist}
-  df_dist = list(
-    "EL_QUANT" = df_rules_dist_el_quant ,
-    "EL_PROGE" = df_rules_dist_el_proge ,
-    "EO_ESPESC" = df_rules_dist_el_espesc ,
-    "EO_ILRHE"  = df_rules_dist_el_ilrhe
-  )
+df_dist <- list(
+  "EC_NMRTRABEC" = df_rules_dist_ec_nmrtrabec,
+  "EC_PERCPARTECMUN" = df_rules_dist_ec_percpartecmun,
+  "EC_PERCPARTECMG" = df_rules_dist_ec_percpartecmg,
+  "EC_MEDIASALTRABEC" = df_rules_dist_ec_mediasaltrabec
+)
 
-df_obs_dist <- names(df_dist)|>
-sapply(function(i){
-df_dist[[i]] <- df_dist[[i]] |>
-  tidyr::pivot_longer(
-    cols      = !c(Ano, ibge7, dplyr::starts_with("EL_")),
-    names_to  = "regra",
-    values_to = "obs_suspeita"
-  ) |>
-  dplyr::filter(obs_suspeita) |>
-  dplyr::rename_with(tolower) |>
-  dplyr::left_join(cidades, by = join_by(ibge7==id)) |>
-  dplyr::select(-obs_suspeita) |>
-  dplyr::arrange(ano, ibge7)
-return(df_dist[[i]])
-}, USE.NAMES=TRUE, simplify = FALSE)
+df_obs_dist <- names(df_dist) |>
+  sapply(function(i) {
+    df_dist[[i]] <- df_dist[[i]] |>
+      tidyr::pivot_longer(
+        cols      = !c(Ano, ibge7, dplyr::starts_with("EC_")),
+        names_to  = "regra",
+        values_to = "obs_suspeita"
+      ) |>
+      dplyr::filter(obs_suspeita) |>
+      dplyr::rename_with(tolower) |>
+      dplyr::left_join(cidades, by = join_by(ibge7 == id)) |>
+      dplyr::select(-obs_suspeita) |>
+      dplyr::arrange(ano, ibge7)
+    return(df_dist[[i]])
+  }, USE.NAMES = TRUE, simplify = FALSE)
 
-index <- sapply(df_obs_dist, nrow)!=0
-df_obs_dist <- df_obs_dist[index]
 
 for(i in names(df_obs_dist)){
   openxlsx::addWorksheet(pt, paste0("distrib - ", i))
@@ -816,10 +894,11 @@ for(i in names(df_obs_dist)){
 
 ```{r excel_save_wb}
 
-openxlsx::saveWorkbook(pt, "fjpdados_esportelazer_violacoes.xlsx", overwrite = T)
+openxlsx::saveWorkbook(pt, "fjpdados_economiacriativa_violacoes.xlsx", overwrite = T)
 ```
 
 ```{r clean_env, results='hide'}
+
 rm(list = ls())
 gc()
 ```

@@ -2,7 +2,7 @@
 #' @description
 #' A short description...
 #'
-#' @param var
+#' @param var variable or indicator
 #' @importFrom dplyr lag
 #' @import dplyr
 #' @return check

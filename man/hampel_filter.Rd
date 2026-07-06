@@ -6,6 +6,9 @@
 \usage{
 hampel_filter(variable)
 }
+\arguments{
+\item{variable}{variable or indicators}
+}
 \value{
 result
 }

@@ -4,7 +4,7 @@
 \alias{outlier_function}
 \title{Detect outlier}
 \usage{
-outlier_function(variable, a = -4, b = 3)
+outlier_function(variable)
 }
 \arguments{
 \item{variable}{quantitative variable}
@@ -14,4 +14,7 @@ Vector with TRUE or FALSE
 }
 \description{
 Detect outlier as well as dataMaid::identifyOutliers()
+'mc' is the 'medcouple', a robust concept and estimator of skewness, and a and b are appropriate constants (-4 and 3).
+The medcouple is defined as a scaled median difference of the left and right half of distribution,
+and hence not based on the third moment as the classical skewness.
 }

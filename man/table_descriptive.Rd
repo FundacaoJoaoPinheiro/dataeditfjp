@@ -7,6 +7,8 @@
 table_descriptive(variable, data, ano_base_alter)
 }
 \arguments{
+\item{variable}{variable or indicator}
+
 \item{data}{Dataset}
 
 \item{ano_base_alter}{start year}

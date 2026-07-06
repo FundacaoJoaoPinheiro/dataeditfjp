@@ -127,7 +127,6 @@ Distribuição (D): regras de distribuição estabelecem parâmetros esperados p
 
 -   **DF\_[...]\_dif_munic**: o valor mais recente da primeira diferença é menor ou igual ao maior valor da primeira diferença da série histórica;
 
-
 **Classificação por flexibilidade (F ou I)**
 
 -   Flexível (F): construída com parâmetros esperados, mas caso algum caso falhe a regra, precisa ser investigado o motivo, identificando se é o caso de um valor atípico explicado por alguma situação.
@@ -651,6 +650,7 @@ df_sumario |>
   ) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
   dplyr::rename(Ausente = Suspeita, `% Ausente` = `% Suspeita`) |>
+  dplyr::mutate(`% Ausente` = ifelse(is.infinite(`% Ausente`),100,`% Ausente`)) |>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -667,8 +667,10 @@ df_sumario |>
   ) |>
   dplyr::filter(Ano == max(Ano)) |>
   dplyr::mutate(Ano = as.character(Ano)) |>
-  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>
-  unique() |> # Introdução coluna descrição
+  dplyr::left_join(desc_regra_valid_var, by = dplyr::join_by(Regra)) |>  # Introdução coluna descrição
+  unique() |> 
+  dplyr::select(-c(Ausente,`% Ausente`))|> 
+  dplyr::mutate( `% Suspeita`= ifelse(is.na(`% Suspeita`),0,`% Suspeita`))|>
   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
   kableExtra::kable_paper("hover", full_width = F)
 ```
@@ -676,7 +678,6 @@ df_sumario |>
 ## Consistência
 
 ```{r data_rules_consist_as_all}
-
 ## df com o resultado das aplicações das regras
 df_rules_consist_as_all <- data |> 
   dplyr::select(
@@ -714,7 +715,7 @@ df_sumario <- df_sumario_consist_as |>
     Suspeita     = sum(resultado, na.rm = T),
     Ausente      = sum(is.na(resultado)),
     `% Validada` = round(Validada / Total * 100, 2),
-    `% Suspeita` = round(Suspeita / Total * 100, 2),
+    `% Suspeita` = round((Suspeita / (Total - Ausente)) * 100, 2),
     `% Ausente`  = round(Ausente / Total * 100, 2)
   ) |> 
   dplyr::ungroup()

@@ -7,7 +7,10 @@
 chart_vbar(df)
 }
 \arguments{
-\item{df}{}
+\item{df}{data set}
+}
+\value{
+Return a graph
 }
 \description{
 create a vertical barplot

@@ -2,7 +2,7 @@
 #' @description
 #' A short description...
 #'
-#' @param variable
+#' @param variable variable or indicator
 #' @param data Dataset
 #' @param ano_base_alter start year
 #' @return A dataframe with de summary statistics

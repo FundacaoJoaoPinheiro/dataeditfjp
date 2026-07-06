@@ -7,7 +7,14 @@
 chart_histogram(variable, data, ano_base_alter)
 }
 \arguments{
+\item{variable}{indicators}
+
+\item{data}{data set}
+
 \item{ano_base_alter}{year start data}
+}
+\value{
+Return a graph
 }
 \description{
 A short description...

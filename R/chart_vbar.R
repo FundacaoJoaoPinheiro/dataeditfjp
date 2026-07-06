@@ -1,8 +1,8 @@
 #' @title create a vertical barplot
 #'
-#' @param df
+#' @param df data set
 #'
-#' @return
+#' @return Return a graph
 
 chart_vbar <- function(df){
   result <-

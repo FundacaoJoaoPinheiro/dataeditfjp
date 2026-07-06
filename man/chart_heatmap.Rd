@@ -7,7 +7,10 @@
 chart_heatmap(df)
 }
 \arguments{
-\item{df}{}
+\item{df}{data set}
+}
+\value{
+Return a graph
 }
 \description{
 A short description...
