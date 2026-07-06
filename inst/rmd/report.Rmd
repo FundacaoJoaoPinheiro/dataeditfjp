@@ -163,7 +163,7 @@ As **regras de crítica** são diretrizes ou critérios específicos estabelecid
 
 *nome da regra estabelecida + Nome do indicador*, 
 
-exemplo: mediana_movel_SE_MEDICOS, outlier_SE_MEDICOS, etc.
+exemplo: mediana_movel_max_SE_MEDICOS, outlier_SE_MEDICOS, etc.
 
 **Classificação de regras**
 
@@ -183,11 +183,13 @@ Abaixo são exibidas as regras usadas neste relatório:
 
 -   **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de 2 desvios padrão dos dados historicos.
 
--   **minimo**:  o valor mais recente é maior ou igual ao menor valor da série histórica;
+-   **minimo**:  o valor mais recente é menor ou igual ao menor valor da série histórica;
 
--   **maximo**: o valor mais recente é menor ou igual ao maior valor da série histórica;
+-   **maximo**: o valor mais recente é maior ou igual ao maior valor da série histórica;
 
--   **mediana_movel**: o valor atual é menor ou igual a mediana móvel.
+-   **mediana_movel_min**: o valor atual está abaixo de 20% do valor da mediana dos últimos 3 meses.
+
+-   **mediana_movel_max**: o valor atual está acima de 20% do valor da mediana dos últimos 3 meses.
 
 **Flexibilidade de regras**
 
@@ -358,7 +360,7 @@ df_sumario <- names(df_sumario_valid) |>
 # Mapear variável e descrição de sua respectiva regra de validade para ser apresentado na tabela.
 descricao <- c(
   # Casos mais comuns
-#  `1` = "Valor é ≥ 0",
+  `1` = "Valor é ≥ 0",
   `2` = "Valor está dentro da categoria esperada",
   `3` = "Valor está dentro da faixa esperada (0 a 100)"#,
   #`4` = "Valor é > 0" #,
@@ -371,24 +373,10 @@ descricao <- c(
   #`10` = "Valor está dentro da faixa esperada (-100 a 100)"
 )
 
-#exibe a tabela com os resultados da regra de valores positivos ou percentual
+#exibe a tabela com os resultados da regra de valores em percentual
 for (i in names(df_sumario)) {
   pander::pandoc.header(i, level = 4)
-      #   pander::pandoc.table(
-      #     df_sumario[[i]] |> 
-      #       dplyr::filter(aux == "pos") |> 
-      #       dplyr::select(-aux)|>
-      #       dplyr::mutate(`Descrição` = descricao[1]) |>
-      #        dplyr::filter(ano == max(ano) ) |>
-      #       dplyr::rename(Ano = ano) |>
-      #       dplyr::arrange(desc(Ano)),
-      #     decimal.mark = ",", 
-      #     big.mark     = ".", 
-      #     round        = 2,
-      #     split.table  = Inf
-      # )
-      #   cat("\\pagebreak\n")
-        
+
         pander::pandoc.table(
           df_sumario[[i]] |> 
             dplyr::filter(aux == "per") |> 
@@ -403,6 +391,35 @@ for (i in names(df_sumario)) {
           split.table  = Inf
       )
 }
+
+```
+
+### Valores positivos
+
+
+```{r show_posit_val_rules, results='asis'}
+#| column: screen-inset-right
+
+#exibe a tabela com os resultados da regra de valores em positivos
+
+for (i in names(df_sumario)) {
+  pander::pandoc.header(i, level = 4)
+        pander::pandoc.table(
+          df_sumario[[i]] |>
+            dplyr::filter(aux == "pos") |>
+            dplyr::select(-aux)|>
+            dplyr::mutate(`Descrição` = descricao[1]) |>
+             dplyr::filter(ano == max(ano) ) |>
+            dplyr::rename(Ano = ano) |>
+            dplyr::arrange(desc(Ano)),
+          decimal.mark = ",",
+          big.mark     = ".",
+          round        = 2,
+          split.table  = Inf
+      )
+        cat("\\pagebreak\n")
+}
+
 
 ```
 
@@ -509,6 +526,154 @@ for (var in variables) {
 ```
 
 
+```{r df_build_val_na}
+
+df_obs_valid <- names(df_rules_valid_na)|>
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res_aux <- df_rules_valid_na[[i]] |>
+      dplyr::select(ano,codigo_municipio, dplyr::starts_with("NA_")) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+      dplyr::mutate(Regra = gsub(pattern = "NA_",replacement = "",x = Regra)) 
+    
+    res <- df_rules_valid_na[[i]] |>
+      dplyr::select(ano,codigo_municipio, variables) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado") |>
+      dplyr::left_join(res_aux) |> 
+      dplyr::filter(obs_suspeita)
+    
+    
+    res <- res |>
+        dplyr::left_join(cidades,
+                         by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
+          dplyr::select(ano,codigo_municipio, nome_municipio, indicador=Regra, resultado)
+    
+      return(res)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+
+
+index <- sapply(df_obs_valid, nrow)!=0
+df_obs_valid <- df_obs_valid[index]
+
+names(df_obs_valid) <- "valor_ausente"
+
+
+
+```
+
+
+```{r df_build_val_pos}
+
+df_obs_validade <- names(df_rules_valid_pos)|>
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res_aux <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio, dplyr::starts_with("pos_")) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+      dplyr::mutate(Regra = gsub(pattern = "pos_",replacement = "",x = Regra)) 
+    
+    res <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio, variables) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado") |> 
+      dplyr::left_join(res_aux) |> 
+      dplyr::filter(obs_suspeita)
+    
+    res <- res |>
+        dplyr::left_join(cidades,
+                         by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
+          dplyr::select(ano,codigo_municipio, nome_municipio, indicador=Regra, resultado)
+    
+    return(res)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+nom <- gsub("indicadores", "valor_positivo", names(df_obs_validade))
+names(df_obs_validade) <- nom
+index <- sapply(df_obs_validade, nrow)!=0
+df_obs_validade <- df_obs_validade[index]
+df_obs_valid <- append(df_obs_valid, df_obs_validade)
+
+```
+
+
+
+```{r data_build_val_per}
+
+df_obs_validade <- names(df_rules_valid_pos)|>
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res_aux <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio, dplyr::starts_with("per_")) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+      dplyr::mutate(Regra = gsub(pattern = "per_",replacement = "",x = Regra)) 
+    
+    res <- df_rules_valid_pos[[i]] |>
+      dplyr::select(ano,codigo_municipio, variables) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado") |>
+      dplyr::left_join(res_aux) |> 
+      dplyr::filter(obs_suspeita)
+    
+    res <- res |>
+        dplyr::left_join(cidades,
+                         by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
+          dplyr::select(ano,codigo_municipio, nome_municipio, indicador=Regra, resultado)
+    
+    return(res)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+nom <- gsub("indicadores", "valor_porcentagem", names(df_obs_validade))
+names(df_obs_validade) <- nom
+index <- sapply(df_obs_validade, nrow)!=0
+df_obs_validade <- df_obs_validade[index]
+df_obs_valid <- append(df_obs_valid, df_obs_validade)
+
+```
+
+```{r df_build_viol_dist}
+
+df_obs_dist <- names(df_rules_dist)|>
+  sapply(function(i){
+    variables <- unique(lista_dt[[i]]$indicador)
+    res_aux <- df_rules_dist[[i]] |>
+      dplyr::select(ano,codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+      dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
+                    indicador = gsub(pattern = "(outlier|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
+      dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|> 
+      dplyr::select(-Regra)
+
+    res <- df_rules_dist[[i]] |>
+      dplyr::select(ano,codigo_municipio, variables) |> 
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "variavel", values_to = "resultado")
+      
+    res_aux <- res_aux |>
+      dplyr::left_join( res|> dplyr::rename(indicador = variavel)) |> 
+      dplyr::filter(obs_suspeita)
+    
+    res_aux <- res_aux |>
+        dplyr::left_join(cidades,
+                         by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
+          dplyr::select(ano,codigo_municipio, nome_municipio, regra, indicador, resultado)
+    
+    return(res_aux)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+
+df_obs_dist <- split(df_obs_dist[["indicadores"]],f = df_obs_dist[["indicadores"]]$regra)
+
+index <- sapply(df_obs_dist, nrow)!=0
+df_obs_dist <- df_obs_dist[index]
+
+df_obs_dist <- append(df_obs_valid, df_obs_dist)
+
+```
+
+
+```{r excel_save_wb}
+#openxlsx::saveWorkbook(pt, "ct_violacoes.xlsx", overwrite = T)
+if(length(df_obs_dist)!=0){ 
+  openxlsx::write.xlsx(df_obs_dist, "regras_violacoes.xlsx", overwrite = T)
+  }
+
+```
 
 
 ```{r clean_env, results='hide'}

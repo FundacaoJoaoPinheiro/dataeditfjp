@@ -29,19 +29,20 @@ create_output <- function(mydir=getwd()#,
 
   if(sum(colunas %in% colunas_arquivo)!=0){
     message("Formato valido!\nProcessando...")
-    path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
     data <- openxlsx::read.xlsx(path_data[[1]])|>
-      dplyr::select( ANO, IBGE7,-CHAVE,-IBGE6 & where(is.numeric))|>
+      dplyr::select(-CHAVE,-IBGE6)|>
+      dplyr::select( ANO, IBGE7, where(is.numeric))|>
       tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")
-    path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
     data <- openxlsx::read.xlsx(path_data[[1]])
   } else {
     message("Formato invalido!\nVerifique o nome das colunas!")
-    }
+  }
 
+  #caminho para o relatorio
+  path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
 
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
