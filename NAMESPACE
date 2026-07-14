@@ -2,7 +2,6 @@
 
 export("%>%")
 export(create_output)
-export(create_report)
 export(creating_report)
 export(descriptiveanalisys)
 import(dplyr)
