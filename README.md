@@ -33,11 +33,16 @@ continue the installation.
 
 There are two forms of data accepted by the function. They are listed
 below. It’s important that the variables/indicators have **two-letter**
-abbreviation plus an **underscore character**.
+abbreviation plus an **underscore character**. Furthermore, the *IBGE7*
+and *ANO* column names are mandatory in data format 1. The *IBGE7* must
+have 7 digits.
 
 **Format 1** ![](imagem4.png)
 
 **Format 2**
+
+Here, the column names *codigo_municipio*, *ano*, *indicador* and
+*valor* are mandatory.
 
 ![](imagem3.png)
 
