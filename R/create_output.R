@@ -30,17 +30,10 @@ create_output <- function(mydir=getwd(),
   `%!in%` <- Negate(`%in%`)
   if(sum(colunas %in% colunas_arquivo)!=0){
     message("Formato valido!\nProcessando...")
-
-    if(c("IBGE6","CHAVE") %!in% colunas_arquivo){
-      data <- openxlsx::read.xlsx(path_data[[1]])|>
-        dplyr::select( ANO, IBGE7, where(is.numeric))|>
-        tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
-    }else{
-      data <- openxlsx::read.xlsx(path_data[[1]])|>
-        dplyr::select(-CHAVE,-IBGE6)|>
-        dplyr::select( ANO, IBGE7, where(is.numeric))|>
-        tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
-    }
+    data <- openxlsx::read.xlsx(path_data[[1]])|>
+      dplyr::select( -dplyr::any_of(c("IBGE6","CHAVE")))|>
+      dplyr::select( ANO, IBGE7, where(is.numeric))|>
+      tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")
