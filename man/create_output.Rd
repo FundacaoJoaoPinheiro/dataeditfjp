@@ -4,12 +4,12 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(mydir = getwd())
+create_output(mydir = getwd(), data_path = NULL)
 }
 \arguments{
-\item{mydir}{Output directory}
+\item{mydir}{Output directory where are the files}
 
-\item{path_data}{Path to dataset}
+\item{data_path}{Path to data set}
 
 \item{categorical_variable}{List of qualitative variables}
 

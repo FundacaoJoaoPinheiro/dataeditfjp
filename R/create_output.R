@@ -2,20 +2,23 @@
 #' @description
 #' This function return the report with all statistical analysis and critial rules
 #'
-#' @param path_data Path to dataset
-#' @param mydir Output directory
+#' @param data_path Path to data set
+#' @param mydir Output directory where are the files
 #' @param categorical_variable List of qualitative variables
 #' @param deleted_variable List of deleted variables
 #' @return Report
 #' @export
 
-create_output <- function(mydir=getwd()#,
-                          # path_file_rules,
+create_output <- function(mydir=getwd(),
+                          data_path=NULL
                           ){
   knitmydir = mydir#,
   # Prompt para o usuario selecionar a base de dados
-  path_data <- file.choose()
-  #path_file_rules <- file.choose()
+  if(is.null(data_path)){
+    path_data <- file.choose()
+    }else{
+      path_data <- data_path
+    }
   path_data <- split(path_data,f = path_data)
 
   noun <- sub(".*\\\\", "", names(path_data))
