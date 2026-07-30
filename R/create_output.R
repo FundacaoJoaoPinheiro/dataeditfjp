@@ -4,8 +4,6 @@
 #'
 #' @param data_path Path to data set
 #' @param mydir Output directory where are the files
-#' @param categorical_variable List of qualitative variables
-#' @param deleted_variable List of deleted variables
 #' @return Report
 #' @export
 
@@ -29,13 +27,20 @@ create_output <- function(mydir=getwd(),
   colunas <- c("IBGE7","ANO")
   nome_colunas <- c("ano","codigo_municipio","indicador","valor")
 
-
+  `%!in%` <- Negate(`%in%`)
   if(sum(colunas %in% colunas_arquivo)!=0){
     message("Formato valido!\nProcessando...")
-    data <- openxlsx::read.xlsx(path_data[[1]])|>
-      dplyr::select(-CHAVE,-IBGE6)|>
-      dplyr::select( ANO, IBGE7, where(is.numeric))|>
-      tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
+
+    if(c("IBGE6","CHAVE") %!in% colunas_arquivo){
+      data <- openxlsx::read.xlsx(path_data[[1]])|>
+        dplyr::select( ANO, IBGE7, where(is.numeric))|>
+        tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
+    }else{
+      data <- openxlsx::read.xlsx(path_data[[1]])|>
+        dplyr::select(-CHAVE,-IBGE6)|>
+        dplyr::select( ANO, IBGE7, where(is.numeric))|>
+        tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
+    }
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")

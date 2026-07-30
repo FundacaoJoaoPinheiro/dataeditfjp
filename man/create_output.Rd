@@ -10,10 +10,6 @@ create_output(mydir = getwd(), data_path = NULL)
 \item{mydir}{Output directory where are the files}
 
 \item{data_path}{Path to data set}
-
-\item{categorical_variable}{List of qualitative variables}
-
-\item{deleted_variable}{List of deleted variables}
 }
 \value{
 Report
