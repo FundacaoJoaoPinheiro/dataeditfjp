@@ -24,15 +24,23 @@ create_output <- function(mydir=getwd(),
   noun <- sub("\\.[^.]+$", "", noun)
   names(path_data) <- noun
   colunas_arquivo <- names(head(openxlsx::read.xlsx(path_data[[1]]),1) )
-  colunas <- c("IBGE7","ANO")
+  colunas <- c("IBGE7","ANO","IBGE6","CHAVE")
   nome_colunas <- c("ano","codigo_municipio","indicador","valor")
+
+
 
   `%!in%` <- Negate(`%in%`)
   if(sum(colunas %in% colunas_arquivo)!=0){
-    message("Formato valido!\nProcessando...")
+    indicadores <- colunas_arquivo[ !(colunas_arquivo %in% colunas) ]
+    indicadores_corrigidos <- conferir_nomes_indicadores(indicadores)
     data <- openxlsx::read.xlsx(path_data[[1]])|>
-      dplyr::select( -dplyr::any_of(c("IBGE6","CHAVE")))|>
-      dplyr::select( ANO, IBGE7, where(is.numeric))|>
+      dplyr::select( -dplyr::any_of(c("IBGE6","CHAVE")))
+
+    posicoes <- match(indicadores, names(data))
+    names(data)[posicoes] <- indicadores_corrigidos
+    message("Formato valido!\nProcessando...")
+    data <- data |>
+      dplyr::select( ANO, IBGE7, where(is.numeric)) |>
       tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
