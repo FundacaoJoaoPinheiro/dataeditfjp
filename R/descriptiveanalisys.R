@@ -4,9 +4,7 @@
 #' @param data data set containing variable
 #'
 #' @return statistics of the data
-#' @export
 #' @importFrom stats median sd
-#'
 
 descriptiveanalisys <- function(variable, data){
   res <- data |>

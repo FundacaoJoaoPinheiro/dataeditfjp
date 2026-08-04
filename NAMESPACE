@@ -3,7 +3,6 @@
 export("%>%")
 export(create_output)
 export(creating_report)
-export(descriptiveanalisys)
 import(dplyr)
 import(robustbase)
 import(stats)
