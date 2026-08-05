@@ -4,7 +4,7 @@
 \alias{roll_median}
 \title{roll_median}
 \usage{
-roll_median(variable, fator, defaut = T)
+roll_median(variable, fator, defaut = F)
 }
 \arguments{
 \item{variable}{A variable representing a series of observations.}

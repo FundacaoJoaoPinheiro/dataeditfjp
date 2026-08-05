@@ -71,7 +71,6 @@ cidades <- openxlsx::read.xlsx(path_data)
 
 ```
 
-
 ```{r get_var_numeric}
 lista_dt <- list(indicadores = data)
 dados <- names(lista_dt)|> 
@@ -94,32 +93,31 @@ dados <- names(lista_dt)|>
 
 As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, fornecendo uma visão abrangente das características dos dados. Os cálculos foram realizados em função do ano. As informações inclusas abrangem:
 
--   **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
+- **Quantidade de Valores (N):** Indica o número total de observações presentes no conjunto de dados para cada indicador.
 
--   **Valor Mínimo:** Representa o menor valor observado para o indicador.
+- **Valor Mínimo:** Representa o menor valor observado para o indicador.
 
--   **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
+- **Valor da Média:** Indica a média aritmética dos valores do indicador, fornecendo uma medida central da tendência dos dados.
 
--   **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
+- **Valor da Mediana:** Representa o valor que divide o conjunto de dados ordenados em duas metades de igual tamanho, sendo útil para lidar com casos com *outliers*.
 
--   **Valor Máximo:** Indica o maior valor observado para o indicador.
+- **Valor Máximo:** Indica o maior valor observado para o indicador.
 
--   **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
+- **Desvio Padrão (D.P.):** Mede a dispersão dos dados em relação à média, quantificando a variabilidade presente no conjunto.
 
--   **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
+- **Coeficiente de Variação (C.V.):** Expressa a razão entre o desvio padrão e a média, em porcentagem, fornecendo uma medida relativa da dispersão dos dados em relação à média.
 
--   **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
+- **Quantidade de Zeros:** Indica o número de observações com valor igual a zero para o indicador.
 
--   **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
+- **Quantidade de Dados Ausentes:** Representa o número de observações com valores ausentes para o indicador.
 
 **Observações Importantes:**
 
--   A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
+- A análise de *outliers* (valores atípicos) não foi realizada nesta tabela descritiva. Para uma avaliação mais completa da qualidade dos dados, recomenda-se a análise de *outliers* e a verificação de possíveis inconsistências nos valores apresentados anteriormente neste documento.
 
--   A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
+- A interpretação das medidas descritivas deve ser feita em conjunto com o conhecimento do contexto dos indicadores e dos objetivos da análise.
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
-
 
 ```{r show_desc_table, results='asis'}
 #| column: screen-inset-right
@@ -150,18 +148,13 @@ for (i in names(dados)) {
 
 ```
 
-
-
-
 A **crítica de dados** refere-se ao processo de verificação e validação da integridade dos dados. Esse processo é crucial para garantir a qualidade dos dados antes de serem utilizados para análises ou publicizados. A importância da crítica de dados reside na sua capacidade de identificar valores suspeitos ou inconsistências que poderiam comprometer a confiabilidade dos resultados obtidos a partir desses dados.
-
-
 
 # Regras de crítica
 
 As **regras de crítica** são diretrizes ou critérios específicos estabelecidos para avaliar se os dados atendem aos padrões de qualidade desejados. Essas regras podem incluir a verificação de intervalos de valores aceitáveis, a consistência lógica entre diferentes variáveis, e a detecção de valores ausentes, entre outras. Aplicar essas regras de maneira sistemática ajuda a assegurar que os dados sejam precisos, completos e adequados para seu propósito, promovendo a confiança nas análises e nas decisões baseadas em dados. A padronização dos nomes permite que seja possível a identificação da classificação da regra e a presença do atributo de flexibilidade. Define-se a seguinte proposta de nomenclatura para as regras de crítica:
 
-*nome da regra estabelecida + Nome do indicador*, 
+*nome da regra estabelecida + Nome do indicador*,
 
 exemplo: mediana_movel_max_SE_MEDICOS, outlier_SE_MEDICOS, etc.
 
@@ -181,20 +174,19 @@ As regras de distribuição estabelecem parâmetros esperados para as estatísti
 
 Abaixo são exibidas as regras usadas neste relatório:
 
--   **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de 2 desvios padrão dos dados historicos.
+- **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de 2 desvios padrão dos dados historicos.
 
--   **minimo**:  o valor mais recente é menor ou igual ao menor valor da série histórica;
+- **minimo**: o valor mais recente é menor ou igual ao menor valor da série histórica;
 
--   **maximo**: o valor mais recente é maior ou igual ao maior valor da série histórica;
+- **maximo**: o valor mais recente é maior ou igual ao maior valor da série histórica;
 
--   **mediana_movel_min**: o valor atual está abaixo de 20% do valor da mediana dos últimos 3 meses.
+- **mediana_movel_min**: o valor atual está abaixo de 20% do valor da mediana dos últimos 3 meses.
 
--   **mediana_movel_max**: o valor atual está acima de 20% do valor da mediana dos últimos 3 meses.
+- **mediana_movel_max**: o valor atual está acima de 20% do valor da mediana dos últimos 3 meses.
 
 **Flexibilidade de regras**
 
--   Após a aplicação da regra construída com parâmetros esperados, pode ser que alguma observação identificada pela regra seja suspeita. Estes dados precisam ser investigado  ou justificados pelo pesquisador. O destaque destes dados não querem dizer que estão completamente errados, mas sugerem ao pesquisador uma atenção maior as observações identificadas. Casos destes tipo podem ser explicados por alguma situação.
-
+- Após a aplicação da regra construída com parâmetros esperados, pode ser que alguma observação identificada pela regra seja suspeita. Estes dados precisam ser investigado ou justificados pelo pesquisador. O destaque destes dados não querem dizer que estão completamente errados, mas sugerem ao pesquisador uma atenção maior as observações identificadas. Casos destes tipo podem ser explicados por alguma situação.
 
 ## Regras de validade
 
@@ -353,7 +345,6 @@ df_sumario <- names(df_sumario_valid) |>
 
 ```
 
-
 ```{r show_val_rules, results='asis'}
 #| column: screen-inset-right
 
@@ -396,7 +387,6 @@ for (i in names(df_sumario)) {
 
 ### Valores positivos
 
-
 ```{r show_posit_val_rules, results='asis'}
 #| column: screen-inset-right
 
@@ -423,8 +413,6 @@ for (i in names(df_sumario)) {
 
 ```
 
-
-
 ### Regras de distribuição e/ou Filtros de *outliers*
 
 ```{r data_rules_dist}
@@ -437,8 +425,8 @@ df_rules_dist <- names(dados) |>
        dplyr::group_by(codigo_municipio)|>
        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
                                    .fns = list(outlier = ~outlier_function(.x),
-                                               mediana_movel_min = ~roll_median(.x, fator = fator),
-                                               mediana_movel_max = ~roll_median(.x, fator = 1.2, defaut = F),
+                                               mediana_movel_min = ~roll_median(dplyr::lag(.x), fator = fator),
+                                               mediana_movel_max = ~roll_median(dplyr::lag(.x), fator = 1.2, defaut = T),
                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
                                                max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
                                                ),
@@ -449,7 +437,6 @@ df_rules_dist <- names(dados) |>
 
 
 ```
-
 
 ```{r data_wrangling_dist_out}
 ## Transformação dos resultados
@@ -479,7 +466,6 @@ df_sumario <- names(df_sumario_dist_out) |>
   }, simplify = FALSE, USE.NAMES = TRUE)
   
 ```
-
 
 ```{r show_table_dist_graph,  results='asis'}
 #| column: screen-inset-right
@@ -525,7 +511,6 @@ for (var in variables) {
 
 ```
 
-
 ```{r df_build_val_na}
 
 df_obs_valid <- names(df_rules_valid_na)|>
@@ -561,7 +546,6 @@ names(df_obs_valid) <- "valor_ausente"
 
 ```
 
-
 ```{r df_build_val_pos}
 
 df_obs_validade <- names(df_rules_valid_pos)|>
@@ -593,8 +577,6 @@ df_obs_validade <- df_obs_validade[index]
 df_obs_valid <- append(df_obs_valid, df_obs_validade)
 
 ```
-
-
 
 ```{r data_build_val_per}
 
@@ -666,7 +648,6 @@ df_obs_dist <- append(df_obs_valid, df_obs_dist)
 
 ```
 
-
 ```{r excel_save_wb}
 #openxlsx::saveWorkbook(pt, "ct_violacoes.xlsx", overwrite = T)
 if(length(df_obs_dist)!=0){ 
@@ -674,7 +655,6 @@ if(length(df_obs_dist)!=0){
   }
 
 ```
-
 
 ```{r clean_env, results='hide'}
 
