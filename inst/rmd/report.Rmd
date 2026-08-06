@@ -425,8 +425,8 @@ df_rules_dist <- names(dados) |>
        dplyr::group_by(codigo_municipio)|>
        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
                                    .fns = list(outlier = ~outlier_function(.x),
-                                               mediana_movel_min = ~roll_median(dplyr::lag(.x), fator = fator),
-                                               mediana_movel_max = ~roll_median(dplyr::lag(.x), fator = 1.2, defaut = T),
+                                               mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator), T, F) ,
+                                               mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = 1.2), T, F) ,
                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
                                                max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
                                                ),
