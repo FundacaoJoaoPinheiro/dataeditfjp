@@ -13,5 +13,6 @@ roll_median <- function(variable, fator, defaut = T){
   if(defaut){res <- dplyr::if_else(variable > (fator * zoo::rollmedian(variable, k = 3, fill = NA, align = "right")), T, F)}
 
   if(defaut==F){res <- dplyr::if_else(variable < (fator * zoo::rollmedian(variable, k = 3, fill = NA, align = "right")), T, F)}
+  if(defaut==F){res <- dplyr::if_else(variable < (fator * zoo::rollmedian(variable, k = 3, fill = NA, align = "right")), T, F)}
   return(res)
 }
