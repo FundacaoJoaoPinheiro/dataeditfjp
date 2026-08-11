@@ -4,14 +4,12 @@
 \alias{roll_median}
 \title{roll_median}
 \usage{
-roll_median(variable, fator, defaut = F)
+roll_median(variable, fator)
 }
 \arguments{
 \item{variable}{A variable representing a series of observations.}
 
 \item{fator}{A scale parameter.}
-
-\item{defaut}{If false return the values with TRUE or FALSE if the observation is above 20\% (fator) the  roll median of the last 3 years.}
 }
 \value{
 Vector with TRUE or FALSE if the observation is below 20\%(fator) of the roll median of the last 3 years

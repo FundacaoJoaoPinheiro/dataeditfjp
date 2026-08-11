@@ -4,13 +4,19 @@
 #'
 #' @param data_path Path to data set
 #' @param mydir Output directory where are the files
+#' @param lista_cidades List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area
 #' @return Report
 #' @export
 
 create_output <- function(mydir=getwd(),
-                          data_path=NULL
+                          data_path=NULL,
+                          lista_cidades=NULL
                           ){
-  knitmydir = mydir#,
+  knitmydir = mydir
+  if(is.null(lista_cidades)){
+    lista_cidades <- c("3106200","3118601","3106705","3157807","3156700","3144805")
+  }
+
   # Prompt para o usuario selecionar a base de dados
   if(is.null(data_path)){
     path_data <- file.choose()
@@ -18,7 +24,6 @@ create_output <- function(mydir=getwd(),
       path_data <- data_path
     }
   path_data <- split(path_data,f = path_data)
-
   noun <- sub(".*\\\\", "", names(path_data))
   message("Verificando colunas do arquivo ",noun)
   noun <- sub("\\.[^.]+$", "", noun)
@@ -56,9 +61,9 @@ create_output <- function(mydir=getwd(),
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
                     output_dir = mydir,
-                    params = list(data = data#,
-                                  #file_rules = path_file_rules,
-                                  ))
+                    params = list(data = data,
+                                  shown_cities = lista_cidades)
+                    )
 
 }
 

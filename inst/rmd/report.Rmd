@@ -33,6 +33,7 @@ execute:
   message: false
 params:
   data: file.xlsx
+  shown_cities: lista_cidades
 output-file: "relatorio.html"
 ---
 
@@ -68,7 +69,10 @@ data$codigo_municipio <- as.character(data$codigo_municipio)
 #pt <- openxlsx::createWorkbook()
 path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
 cidades <- openxlsx::read.xlsx(path_data)
-
+list_city <- params$shown_cities
+list_city_aux <- cidades|> 
+  dplyr::filter(codigo_ibge %in% list_city) |> 
+  dplyr::select(codigo_municipio = codigo_ibge, nome_municipio)
 ```
 
 ```{r get_var_numeric}
@@ -122,7 +126,7 @@ Ao analisar esta tabela, é possível obter uma compreensão inicial das caracte
 ```{r show_desc_table, results='asis'}
 #| column: screen-inset-right
 #| fig-format: svg
-#| out-width: 100%
+#| out-width: 130%
 
 pander::pandoc.header("Descritiva", level = 2)
 for (i in names(dados)) {
@@ -140,7 +144,7 @@ for (i in names(dados)) {
       )
       print(chart_boxplot(variable = var, data = dados[[i]], ano_base_alter))
       cat("\\pagebreak\n")
-      print(chart_line(variable = var, data = dados[[i]]) )
+      print(chart_line(variable = var, data = dados[[i]], list_city_aux))
       cat("\\pagebreak\n")
     }
 }
