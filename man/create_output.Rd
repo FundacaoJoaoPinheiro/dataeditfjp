@@ -4,12 +4,14 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(mydir = getwd(), data_path = NULL)
+create_output(mydir = getwd(), data_path = NULL, lista_cidades = NULL)
 }
 \arguments{
 \item{mydir}{Output directory where are the files}
 
 \item{data_path}{Path to data set}
+
+\item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area}
 }
 \value{
 Report

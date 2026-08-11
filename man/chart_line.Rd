@@ -4,12 +4,14 @@
 \alias{chart_line}
 \title{Chart Line}
 \usage{
-chart_line(data, variable)
+chart_line(data, variable, list_city_aux)
 }
 \arguments{
 \item{data}{data set}
 
 \item{variable}{variable to plot}
+
+\item{list_city_aux}{list of cities}
 }
 \value{
 Return a graph
