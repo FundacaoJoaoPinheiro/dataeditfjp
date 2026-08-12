@@ -10,7 +10,8 @@
 
 create_output <- function(mydir=getwd(),
                           data_path=NULL,
-                          lista_cidades=NULL
+                          lista_cidades=NULL,
+                          fator_mediana = 0.20
                           ){
   knitmydir = mydir
   if(is.null(lista_cidades)){
@@ -62,7 +63,8 @@ create_output <- function(mydir=getwd(),
                     knit_root_dir = knitmydir,
                     output_dir = mydir,
                     params = list(data = data,
-                                  shown_cities = lista_cidades)
+                                  shown_cities = lista_cidades,
+                                  fator = fator_mediana)
                     )
 
 }

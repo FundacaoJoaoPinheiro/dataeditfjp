@@ -4,7 +4,12 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(mydir = getwd(), data_path = NULL, lista_cidades = NULL)
+create_output(
+  mydir = getwd(),
+  data_path = NULL,
+  lista_cidades = NULL,
+  fator_mediana = 0.2
+)
 }
 \arguments{
 \item{mydir}{Output directory where are the files}

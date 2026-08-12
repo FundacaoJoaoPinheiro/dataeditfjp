@@ -34,6 +34,7 @@ execute:
 params:
   data: file.xlsx
   shown_cities: lista_cidades
+  fator: k
 output-file: "relatorio.html"
 ---
 
@@ -44,7 +45,8 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r set_param_global}
-fator <- 0.80
+fator1 <- 1 - params$fator
+fator2 <- 1 + params$fator
 ano_base_alter <- c(
   "NA" = NA_integer_
 )
@@ -429,8 +431,8 @@ df_rules_dist <- names(dados) |>
        dplyr::group_by(codigo_municipio)|>
        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
                                    .fns = list(outlier = ~outlier_function(.x),
-                                               mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator), T, F) ,
-                                               mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = 1.2), T, F) ,
+                                               mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator1), T, F) ,
+                                               mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = fator2), T, F) ,
                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
                                                max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
                                                ),
