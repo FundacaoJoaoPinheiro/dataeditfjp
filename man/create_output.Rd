@@ -4,14 +4,21 @@
 \alias{create_output}
 \title{Create Report}
 \usage{
-create_output(mydir = getwd(), data_path = NULL, lista_cidades = NULL)
+create_output(
+  mydir = getwd(),
+  data_path = NULL,
+  lista_cidades = NULL,
+  fator_mediana = 0.2
+)
 }
 \arguments{
 \item{mydir}{Output directory where are the files}
 
 \item{data_path}{Path to data set}
 
-\item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area}
+\item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area.}
+
+\item{fator_mediana}{Factor applied to the moving median. The result is a threshold with k\% above or below the median. Default is 20\%.}
 }
 \value{
 Report
