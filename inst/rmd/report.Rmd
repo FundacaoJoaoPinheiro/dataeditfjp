@@ -127,8 +127,9 @@ Ao analisar esta tabela, é possível obter uma compreensão inicial das caracte
 
 ```{r show_desc_table, results='asis'}
 #| column: screen-inset-right
-#| fig-format: svg
-#| out-width: 130%
+# #| fig-format: svg
+#| layout-ncol: 2
+#| out-width: 140%
 
 pander::pandoc.header("Descritiva", level = 2)
 for (i in names(dados)) {
@@ -431,6 +432,7 @@ df_rules_dist <- names(dados) |>
        dplyr::group_by(codigo_municipio)|>
        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
                                    .fns = list(outlier = ~outlier_function(.x),
+                                               outlier_mean = ~outlier_filter(.x),
                                                mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator1), T, F) ,
                                                mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = fator2), T, F) ,
                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
@@ -625,7 +627,7 @@ df_obs_dist <- names(df_rules_dist)|>
       dplyr::select(ano,codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
-                    indicador = gsub(pattern = "(outlier|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
+                    indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|> 
       dplyr::select(-Regra)
 

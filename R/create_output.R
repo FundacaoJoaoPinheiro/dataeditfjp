@@ -4,7 +4,8 @@
 #'
 #' @param data_path Path to data set
 #' @param mydir Output directory where are the files
-#' @param lista_cidades List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area
+#' @param lista_cidades List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area.
+#' @param fator_mediana Factor applied to the moving median. The result is a threshold with k% above or below the median. Default is 20%.
 #' @return Report
 #' @export
 

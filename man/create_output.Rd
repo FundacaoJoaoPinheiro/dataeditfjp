@@ -16,7 +16,9 @@ create_output(
 
 \item{data_path}{Path to data set}
 
-\item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area}
+\item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area.}
+
+\item{fator_mediana}{Factor applied to the moving median. The result is a threshold with k\% above or below the median. Default is 20\%.}
 }
 \value{
 Report
