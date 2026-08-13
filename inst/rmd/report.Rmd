@@ -125,11 +125,10 @@ As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, 
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
 
-```{r show_desc_table, results='asis'}
+```{r show_desc_table, results='asis',fig.align = 'center', out.width="115%"}
 #| column: screen-inset-right
-# #| fig-format: svg
 #| layout-ncol: 2
-#| out-width: 140%
+
 
 pander::pandoc.header("Descritiva", level = 2)
 for (i in names(dados)) {
@@ -487,7 +486,7 @@ variables <- unique(lista_dt[["indicadores"]]$indicador)
 for (var in variables) {
   
   df_regra <- df_sumario[["indicadores"]] |>
-    dplyr::filter(grepl(pattern = var, x = Regra) )
+    dplyr::filter(grepl(pattern = paste0(var,"$"), x = Regra) )
   
    pander::pandoc.header(var, level = 3)
         pander::pandoc.table(
@@ -623,20 +622,28 @@ df_obs_valid <- append(df_obs_valid, df_obs_validade)
 df_obs_dist <- names(df_rules_dist)|>
   sapply(function(i){
     variables <- unique(lista_dt[[i]]$indicador)
-    res_aux <- df_rules_dist[[i]] |>
-      dplyr::select(ano,codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
-      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+    res_aux <- df_sumario_dist_out[[i]] |> 
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
                     indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
-      dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|> 
+      dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|>
+      dplyr::rename(obs_suspeita = resultado)|>
       dplyr::select(-Regra)
+      
+    
+    # res_aux <- df_rules_dist[[i]] |>
+    #   dplyr::select(ano,codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
+    #   tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
+    #   dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
+    #                 indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
+    #   dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|> 
+    #   dplyr::select(-Regra)
 
     res <- df_rules_dist[[i]] |>
       dplyr::select(ano,codigo_municipio, variables) |> 
-      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "variavel", values_to = "resultado")
+      tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "indicador", values_to = "resultado")
       
     res_aux <- res_aux |>
-      dplyr::left_join( res|> dplyr::rename(indicador = variavel)) |> 
+      dplyr::left_join(res) |> 
       dplyr::filter(obs_suspeita)
     
     res_aux <- res_aux |>
