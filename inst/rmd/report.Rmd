@@ -147,7 +147,7 @@ for (i in names(dados)) {
       print(chart_boxplot(variable = var, data = dados[[i]], ano_base_alter))
       cat("\\pagebreak\n")
       print(chart_line(variable = var, data = dados[[i]], list_city_aux))
-      cat("\\pagebreak\n")
+      cat("\\pagebreak\n \n")
     }
 }
 
