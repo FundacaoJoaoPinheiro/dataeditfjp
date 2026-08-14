@@ -9,25 +9,50 @@
 
 conferir_nomes_indicadores <- function(nome_colunas) {
   corrigidas <- rep(0, length(nome_colunas))
+
   repeat {
+    if (all(corrigidas == 1)) break
 
-    if (all(corrigidas == 1)) break             #condição de parada:todas corrigidas
     for (i in seq_along(nome_colunas)) {
-
       if (corrigidas[i] == 0) {
 
         nome_atual <- nome_colunas[i]
-        derivado   <- paste0("mediana_movel_max_", nome_atual)   #concatena
+        derivado   <- paste0("mediana_movel_max_", nome_atual)
+        problemas  <- character(0)
 
-        problemas <- character(0)
-
-        # Prefixo de 2 letras
-        if (!grepl("^[A-Za-z]{2}_", nome_atual)) {
+        # Regra 1: prefixo de 2 letras + underscore
+        tem_prefixo <- grepl("^[A-Za-z]{2}_", nome_atual)
+        if (!tem_prefixo) {
           problemas <- c(problemas, "sem prefixo de 2 letras")
         }
 
+        # Regra 2: sufixo vazio (apenas prefixo, sem nome do indicador)
+        if (tem_prefixo) {
+          sufixo <- substring(nome_atual, 4)
+          if (!nzchar(sufixo)) {
+            problemas <- c(problemas, "nome do indicador vazio (apenas prefixo)")
+          }
+        }
+
+        # Regra 3: underline extra no nome do indicador
+        if (tem_prefixo) {
+          sufixo <- substring(nome_atual, 4)
+          if (nzchar(sufixo) && grepl("_", sufixo)) {
+            problemas <- c(problemas, "contem underline extra no nome")
+          }
+        } else {
+          if (grepl("_", nome_atual)) {
+            problemas <- c(problemas, "contem underline extra no nome")
+          }
+        }
+
+        # Regra 4: espaco no nome
+        if (grepl(" ", nome_atual)) {
+          problemas <- c(problemas, "contem espaco no nome")
+        }
+
         if (length(problemas) > 0) {
-          message("\n[ATENÇÃO] Coluna '",
+          message("\n[ATENCAO] Coluna '",
                   nome_atual,
                   "': ",
                   paste(problemas, collapse = " e "))
@@ -39,16 +64,14 @@ conferir_nomes_indicadores <- function(nome_colunas) {
             novo_nome <- readline(prompt = "Adicione o novo nome para esta coluna: ")
             novo_nome <- trimws(novo_nome)
 
-            # não pode ser vazio (i) ou repetido (ii)
             if (!nzchar(novo_nome)) {
-              cat("[!] O nome não pode ser vazio. Tente novamente.\n")
+              cat("[!] O nome nao pode ser vazio. Tente novamente.\n")
             } else if (novo_nome %in% nome_colunas[-i]) {
-              cat("[!] Este nome já existe em outra coluna. Escolha um nome único.\n")
+              cat("[!] Este nome ja existe em outra coluna. Escolha um nome unico.\n")
             } else {
               valido <- TRUE
             }
           }
-
 
           nome_colunas[i] <- novo_nome
         } else {
