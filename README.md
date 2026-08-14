@@ -80,16 +80,17 @@ directory.
 
 ## Funding
 
-This study was developed with financial support from the Research
-Support Foundation of the State of Minas Gerais (Fapemig) under the
-project “Building Capacities and Expanding Frontiers in Research at
-FJP” - Call No. 003/2023.
+This study was initially developed with financial support from the
+Research Support Foundation of the State of Minas Gerais (Fapemig) under
+the project “Building Capacities and Expanding Frontiers in Research at
+FJP” - Call No. 003/2023. It is currently being developed with resources
+and founds from the João Pinheiro Foundation (FJP).
 
 ## Team
 
 - Coordination Social Indicators: Ester Carneiro C. Santos
 - Unit of Statistics and Data Management: Renato Vale
-- Script Development: Erick C. Amorim, Igor Souza and Luiz Pataca.
+- Script Development: Erick C. Amorim and Lívia Caroline R. Pereira
 
 ## Contributions
 
