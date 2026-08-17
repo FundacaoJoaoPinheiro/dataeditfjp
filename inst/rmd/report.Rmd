@@ -35,6 +35,7 @@ params:
   data: file.xlsx
   shown_cities: lista_cidades
   fator: k
+  distributional_check: regras
 output-file: "relatorio.html"
 ---
 
@@ -66,9 +67,6 @@ data$codigo_municipio <- as.character(data$codigo_municipio)
 ```
 
 ```{r load_citys_states_regions}
-
-## Criar pasta de trabalho
-#pt <- openxlsx::createWorkbook()
 path_data <- system.file("data", "cidades.xlsx", package = "dataeditfjp")
 cidades <- openxlsx::read.xlsx(path_data)
 list_city <- params$shown_cities
@@ -88,9 +86,7 @@ dados <- names(lista_dt)|>
     return(lista_dt[[i]])
   },simplify = FALSE, USE.NAMES = TRUE)
 
-
 # data_aux <- Reduce(function(x,y){merge(x,y, all = TRUE)}, data_aux ) %>% dplyr::select(-all_of(var_numeric))
-
 ```
 
 # Introdução
@@ -125,17 +121,18 @@ As tabelas a seguir apresentam um resumo descritivo dos indicadores analisados, 
 
 Ao analisar esta tabela, é possível obter uma compreensão inicial das características dos dados, identificando padrões, tendências e possíveis discrepâncias. As informações aqui apresentadas servem como base para análises estatísticas mais aprofundadas, auxiliando na tomada de decisões e na formulação de conclusões relevantes.
 
-```{r show_desc_table, results='asis',fig.align = 'center', out.width="115%"}
+```{r show_desc_table, results='asis',fig.align = 'center', out.width="108%"}
 #| column: screen-inset-right
 #| layout-ncol: 2
 
+variables <- unique(lista_dt[["indicadores"]]$indicador)
 
 pander::pandoc.header("Descritiva", level = 2)
 for (i in names(dados)) {
   pander::pandoc.header(i, level = 3)
-    variables <- unique(lista_dt[[i]]$indicador)
     # Loop para mostrar os resultados por variável
     for (var in variables) {
+      cat("\\pagebreak \n")
       pander::pandoc.header(var, level = 4)
       pander::pandoc.table(
         descriptiveanalisys(variable = var, data = dados[[i]]),
@@ -166,7 +163,7 @@ exemplo: mediana_movel_max_SE_MEDICOS, outlier_SE_MEDICOS, etc.
 
 **Classificação de regras**
 
-Aqui são realizadas verificações apenas nos dados são numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+Aqui são realizadas verificações apenas nos dados numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
 
 <!-- -   **VI_NA\_**[...]: dado não tem valor ausente/*missing*; -->
 
@@ -180,15 +177,17 @@ As regras de distribuição estabelecem parâmetros esperados para as estatísti
 
 Abaixo são exibidas as regras usadas neste relatório:
 
-- **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de 2 desvios padrão dos dados historicos.
+- **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de um limite superior ou abaixo de um limite inferior. O limite superior é dado por $Q_3 + 2\times IQR$ enquanto que o limite inferior é $Q_1 - 2\times IQR$. Sendo $Q_3$ e $Q_1$ o terceiro e primeiro quartil, respectivamente.
+
+- **outlier_mean**: Método de identificação de um possível valor *outlier* na série histórica. Considera os valores susperitos aqueles que estão acima ou abaixo de 3 desvios padrão da média dos dados históricos.
 
 - **minimo**: o valor mais recente é menor ou igual ao menor valor da série histórica;
 
 - **maximo**: o valor mais recente é maior ou igual ao maior valor da série histórica;
 
-- **mediana_movel_min**: o valor atual está abaixo de 20% do valor da mediana dos últimos 3 meses.
+- **mediana_movel_max**: o valor atual está acima de $k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k = 20\%$ ;
 
-- **mediana_movel_max**: o valor atual está acima de 20% do valor da mediana dos últimos 3 meses.
+- **mediana_movel_min**: o valor atual está abaixo de $100%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$ 
 
 **Flexibilidade de regras**
 
@@ -422,25 +421,55 @@ for (i in names(df_sumario)) {
 ### Regras de distribuição e/ou Filtros de *outliers*
 
 ```{r data_rules_dist}
+# Lista completa com todas as regras (definida uma vez só)
+fns_regras <- list(
+  outlier           = ~ outlier_function(.x),
+  outlier_mean      = ~ outlier_filter(.x),
+  mediana_movel_min = ~ ifelse(.x < roll_median(dplyr::lag(.x), fator = fator1), T, F),
+  mediana_movel_max = ~ ifelse(.x > roll_median(dplyr::lag(.x), fator = fator2), T, F),
+  min               = ~ ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T),
+  max               = ~ ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
+)
+
+regras_escolhidas <- params$distributional_check
+
+if(is.null(regras_escolhidas)){regras_escolhidas <- names(fns_regras)}
 
 df_rules_dist <- names(dados) |>
-   sapply(function(i){
-     variables <- unique(lista_dt[[i]]$indicador)
-     res <- dados[[i]] |>
-       dplyr::select(ano,codigo_municipio,variables) |> 
-       dplyr::group_by(codigo_municipio)|>
-       dplyr::mutate(dplyr::across(dplyr::all_of(variables),
-                                   .fns = list(outlier = ~outlier_function(.x),
-                                               outlier_mean = ~outlier_filter(.x),
-                                               mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator1), T, F) ,
-                                               mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = fator2), T, F) ,
-                                               min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
-                                               max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
-                                               ),
-                                   .names = "{.fn}_{.col}")) |>
-       dplyr::ungroup()
-     return(res)
-   }, simplify = FALSE, USE.NAMES = TRUE)
+  sapply(function(i) {
+    variables <- unique(lista_dt[[i]]$indicador)
+    res <- dados[[i]] |>
+      dplyr::select(ano, codigo_municipio, variables) |>
+      dplyr::group_by(codigo_municipio) |>
+      dplyr::mutate(dplyr::across(
+        dplyr::all_of(variables),
+        .fns   = fns_regras[regras_escolhidas],   # <- filtra a lista aqui
+        .names = "{.fn}_{.col}"
+      )) |>
+      dplyr::ungroup()
+    return(res)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+
+
+
+# df_rules_dist <- names(dados) |>
+#    sapply(function(i){
+#      variables <- unique(lista_dt[[i]]$indicador)
+#      res <- dados[[i]] |>
+#        dplyr::select(ano,codigo_municipio,variables) |> 
+#        dplyr::group_by(codigo_municipio)|>
+#        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
+#                                    .fns = list(outlier = ~outlier_function(.x),
+#                                                outlier_mean = ~outlier_filter(.x),
+#                                                mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator1), T, F) ,
+#                                                mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = fator2), T, F) ,
+#                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
+#                                                max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
+#                                                ),
+#                                    .names = "{.fn}_{.col}")) |>
+#        dplyr::ungroup()
+#      return(res)
+#    }, simplify = FALSE, USE.NAMES = TRUE)
 
 
 ```
@@ -482,7 +511,7 @@ df_sumario <- names(df_sumario_dist_out) |>
 #exibe a tabela com os resultados da regra de distribuicao
 
 pander::pandoc.header("indicadores", level = 2)
-variables <- unique(lista_dt[["indicadores"]]$indicador)
+#variables <- unique(lista_dt[["indicadores"]]$indicador)
 for (var in variables) {
   
   df_regra <- df_sumario[["indicadores"]] |>
@@ -491,7 +520,6 @@ for (var in variables) {
    pander::pandoc.header(var, level = 3)
         pander::pandoc.table(
           df_regra |>
-            #dplyr::select(ano, Regra, Total, contains("Ausente")) |>
             dplyr::filter(ano == max(ano) ) |>
             dplyr::rename(Ano = ano) |>
             dplyr::arrange(desc(Ano)),
@@ -502,15 +530,7 @@ for (var in variables) {
       )
         cat("\\pagebreak\n")
         
-  # df_regra |>
-  #   dplyr::filter(ano == max(ano)) |>
-  #   dplyr::rename(Ano = ano) |> 
-  #   dplyr::mutate(`% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |> 
-  #   dplyr::arrange(desc(Ano)) |>
-  #   kableExtra::kbl(format.args = list(big.mark = ".", decimal.mark = ",")) |> 
-  #   kableExtra::kable_paper("hover", full_width = F)
-  # cat("\\pagebreak\n")
-  
+
   chart_heatmap(df = df_regra)
   
   cat("\\pagebreak\n")
@@ -628,15 +648,6 @@ df_obs_dist <- names(df_rules_dist)|>
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|>
       dplyr::rename(obs_suspeita = resultado)|>
       dplyr::select(-Regra)
-      
-    
-    # res_aux <- df_rules_dist[[i]] |>
-    #   dplyr::select(ano,codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
-    #   tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
-    #   dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
-    #                 indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min)_", replacement = "",x = Regra))|>
-    #   dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|> 
-    #   dplyr::select(-Regra)
 
     res <- df_rules_dist[[i]] |>
       dplyr::select(ano,codigo_municipio, variables) |> 
@@ -655,6 +666,14 @@ df_obs_dist <- names(df_rules_dist)|>
     }, simplify = FALSE, USE.NAMES = TRUE)
 
 df_obs_dist <- split(df_obs_dist[["indicadores"]],f = df_obs_dist[["indicadores"]]$regra)
+
+#remove a coluna regra
+df_obs_dist <- names(df_obs_dist)|>
+  sapply(function(i){
+    df_obs_dist[[i]] <- df_obs_dist[[i]]|> 
+      dplyr::select(-regra)
+    return(df_obs_dist[[i]])
+  }, simplify = FALSE, USE.NAMES = TRUE)
 
 index <- sapply(df_obs_dist, nrow)!=0
 df_obs_dist <- df_obs_dist[index]
