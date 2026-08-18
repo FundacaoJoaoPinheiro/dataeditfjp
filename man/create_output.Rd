@@ -8,7 +8,8 @@ create_output(
   mydir = getwd(),
   data_path = NULL,
   lista_cidades = NULL,
-  fator_mediana = 0.2
+  fator_mediana = 0.2,
+  regras = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ create_output(
 \item{lista_cidades}{List of cities codes with 7 digits. If NULL, will run with 6 cities in the metropolitan area.}
 
 \item{fator_mediana}{Factor applied to the moving median. The result is a threshold with k\% above or below the median. Default is 20\%.}
+
+\item{regras}{Selects a set of distributional check/rules. If \code{regras = NULL}, apply all rules. If the vector is set to \code{regras = c("outlier_mean", "mediana_movel_min", "max")}, the selected rules are applied. One or more rules may be chosen from the set \code{c("outlier", "outlier_mean", "mediana_movel_min", "mediana_movel_max", "min", "max")}. This checking mostly refers to the procedure of detecting the outliers or non-standard observations.}
 }
 \value{
 Report
