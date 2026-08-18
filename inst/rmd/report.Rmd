@@ -187,7 +187,7 @@ Abaixo são exibidas as regras usadas neste relatório:
 
 - **mediana_movel_max**: o valor atual está acima de $k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k = 20\%$ ;
 
-- **mediana_movel_min**: o valor atual está abaixo de $100%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$ 
+- **mediana_movel_min**: o valor atual está abaixo de $100\%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$ 
 
 **Flexibilidade de regras**
 
