@@ -64,6 +64,7 @@ create_output <- function(mydir=getwd(),
 
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
+                    intermediates_dir = mydir,
                     output_dir = mydir,
                     params = list(data = data,
                                   shown_cities = lista_cidades,
