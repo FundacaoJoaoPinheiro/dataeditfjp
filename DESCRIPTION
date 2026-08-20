@@ -22,12 +22,14 @@ Imports:
     openxlsx,
     pander,
     quarto,
+    readr,
     rlang,
     rmarkdown,
     robustbase,
     stats,
     stringr,
     tidyr,
+    tools,
     validate,
     zoo
 Depends: 

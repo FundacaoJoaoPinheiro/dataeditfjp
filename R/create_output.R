@@ -32,17 +32,15 @@ create_output <- function(mydir=getwd(),
   message("Verificando colunas do arquivo ",noun)
   noun <- sub("\\.[^.]+$", "", noun)
   names(path_data) <- noun
-  colunas_arquivo <- names(head(openxlsx::read.xlsx(path_data[[1]]),1) )
+  data <- load_data(path_data[[1]])
+  colunas_arquivo <- names(data)
   colunas <- c("IBGE7","ANO","IBGE6","CHAVE")
   nome_colunas <- c("ano","codigo_municipio","indicador","valor")
 
-
-
-  `%!in%` <- Negate(`%in%`)
   if(sum(colunas %in% colunas_arquivo)!=0){
     indicadores <- colunas_arquivo[ !(colunas_arquivo %in% colunas) ]
     indicadores_corrigidos <- conferir_nomes_indicadores(indicadores)
-    data <- openxlsx::read.xlsx(path_data[[1]])|>
+    data <- data |>
       dplyr::select( -dplyr::any_of(c("IBGE6","CHAVE")))
 
     posicoes <- match(indicadores, names(data))
@@ -54,7 +52,16 @@ create_output <- function(mydir=getwd(),
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")
-    data <- openxlsx::read.xlsx(path_data[[1]])
+    indicadores <- unique(data$indicador)
+    indicadores_problematicos <- conferir_indicadores_longo(indicadores)
+    if(length(indicadores_problematicos) != 0){
+      message("Nomes dos indicadores com problemas: ", paste(indicadores_problematicos, collapse = " e "), "\n\nCorrija os nomes em sua base!")
+      message("Os nomes dos indicadores estão fora do padrão!")
+      return(invisible(NULL))
+    } else{
+      data <- data
+    }
+
   } else {
     message("Formato invalido!\nVerifique o nome das colunas!")
   }

@@ -17,7 +17,6 @@ conferir_nomes_indicadores <- function(nome_colunas) {
       if (corrigidas[i] == 0) {
 
         nome_atual <- nome_colunas[i]
-        derivado   <- paste0("mediana_movel_max_", nome_atual)
         problemas  <- character(0)
 
         # Regra 1: prefixo de 2 letras + underscore
