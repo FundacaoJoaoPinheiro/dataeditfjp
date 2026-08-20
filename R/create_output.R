@@ -56,6 +56,8 @@ create_output <- function(mydir=getwd(),
     indicadores_problematicos <- conferir_indicadores_longo(indicadores)
     if(length(indicadores_problematicos) != 0){
       message("Nomes dos indicadores com problemas: ", paste(indicadores_problematicos, collapse = " e "), "\n\nCorrija os nomes em sua base!")
+      message("Os nomes dos indicadores estão fora do padrão!")
+      return(invisible(NULL))
     } else{
       data <- data
     }
