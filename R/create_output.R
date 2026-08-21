@@ -34,7 +34,7 @@ create_output <- function(mydir=getwd(),
   names(path_data) <- noun
   data <- load_data(path_data[[1]])
   colunas_arquivo <- names(data)
-  colunas <- c("IBGE7","ANO","IBGE6","CHAVE")
+  colunas <- c("CODIGO_IBGE","IBGE7","ANO","IBGE6","CHAVE")
   nome_colunas <- c("ano","codigo_municipio","indicador","valor")
 
   if(sum(colunas %in% colunas_arquivo)!=0){
@@ -47,6 +47,7 @@ create_output <- function(mydir=getwd(),
     names(data)[posicoes] <- indicadores_corrigidos
     message("Formato valido!\nProcessando...")
     data <- data |>
+      dplyr::rename(dplyr::any_of(c("IBGE7" = "CODIGO_IBGE")) )|>
       dplyr::select( ANO, IBGE7, where(is.numeric)) |>
       tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
 
