@@ -19,7 +19,7 @@ chart_line <- function(data, variable, list_city_aux){
     ggplot2::theme(
       legend.position = "none",
       axis.title.x    = ggplot2::element_blank(),
-      axis.text.x     = ggplot2::element_text(angle = 75, vjust = 0.5, hjust = 1, size = 8)
+      axis.text.x     = ggplot2::element_text(angle = 75, vjust = 0.4, hjust = 1, size = 7)
     ) +
   ggplot2::facet_wrap(~nome_municipio,ncol = 2)
 
