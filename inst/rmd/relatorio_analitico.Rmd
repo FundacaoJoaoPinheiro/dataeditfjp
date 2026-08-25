@@ -36,7 +36,7 @@ params:
   shown_cities: lista_cidades
   fator: k
   distributional_check: regras
-output-file: "relatorio.html"
+output-file: "relatorio_analitico.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -187,7 +187,7 @@ Abaixo são exibidas as regras usadas neste relatório:
 
 - **mediana_movel_max**: o valor atual está acima de $k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k = 20\%$ ;
 
-- **mediana_movel_min**: o valor atual está abaixo de $100\%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$ 
+- **mediana_movel_min**: o valor atual está abaixo de $100\%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$
 
 **Flexibilidade de regras**
 
@@ -685,7 +685,7 @@ df_obs_dist <- append(df_obs_valid, df_obs_dist)
 ```{r excel_save_wb}
 #openxlsx::saveWorkbook(pt, "ct_violacoes.xlsx", overwrite = T)
 if(length(df_obs_dist)!=0){ 
-  openxlsx::write.xlsx(df_obs_dist, "regras_violacoes.xlsx", overwrite = T)
+  openxlsx::write.xlsx(df_obs_dist, "planilha_apontamentos.xlsx", overwrite = T)
   }
 
 ```
