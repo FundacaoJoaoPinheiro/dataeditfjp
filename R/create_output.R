@@ -68,7 +68,7 @@ create_output <- function(mydir=getwd(),
   }
 
   #caminho para o relatorio
-  path_list <- system.file("rmd", "report.Rmd", package = "dataeditfjp")
+  path_list <- system.file("rmd", "relatorio_analitico.Rmd", package = "dataeditfjp")
 
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
