@@ -7,8 +7,15 @@
 #' @returns Return a graph
 
 chart_line <- function(data, variable, list_city_aux){
+  # Primeiro ano com dados não-NA para essa variável
+  ano_inicial <- data |>
+    dplyr::filter(!is.na(.data[[variable]])) |>
+    dplyr::pull(ano) |>
+    min(na.rm = TRUE)
+
   result <- data |>
-    dplyr::right_join(list_city_aux)|>
+    dplyr::right_join(list_city_aux) |>
+    dplyr::filter(ano >= ano_inicial) |>
     ggplot2::ggplot(ggplot2::aes(x = ano, y = .data[[variable]], text = c() )) +
     ggplot2::geom_point(size = 2) +
     ggplot2::geom_line(ggplot2::aes(group = 1)) +
@@ -21,7 +28,8 @@ chart_line <- function(data, variable, list_city_aux){
       axis.title.x    = ggplot2::element_blank(),
       axis.text.x     = ggplot2::element_text(angle = 75, vjust = 0.7, hjust = 1, size = 8)
     ) +
-  ggplot2::facet_wrap(~nome_municipio,ncol = 2)
+    ggplot2::facet_wrap(~nome_municipio,ncol = 2, scales = "free_y")
 
   return(result)
 }
+

@@ -50,6 +50,7 @@ create_output <- function(mydir=getwd(),
       dplyr::rename(dplyr::any_of(c("IBGE7" = "CODIGO_IBGE")) )|>
       dplyr::select( ANO, IBGE7, where(is.numeric)) |>
       tidyr::pivot_longer(cols = !c(ANO, IBGE7), names_to = "indicador", values_to = "valor")
+    indicadores <- indicadores_corrigidos
 
   } else if (sum(nome_colunas %in% colunas_arquivo)!= 0) {
     message("Formato valido!\nProcessando...")
@@ -70,6 +71,8 @@ create_output <- function(mydir=getwd(),
   #caminho para o relatorio
   path_list <- system.file("rmd", "relatorio_analitico.Rmd", package = "dataeditfjp")
 
+  area_tematica <- extrair_area_tematica(indicadores[1])
+
   rmarkdown::render(input = path_list,
                     knit_root_dir = knitmydir,
                     intermediates_dir = mydir,
@@ -77,7 +80,8 @@ create_output <- function(mydir=getwd(),
                     params = list(data = data,
                                   shown_cities = lista_cidades,
                                   fator = fator_mediana,
-                                  distributional_check = regras)
+                                  distributional_check = regras,
+                                  sub_dinamico = area_tematica)
                     )
 
 }
