@@ -4,12 +4,10 @@
 \alias{chart_boxplot}
 \title{create a boxplot}
 \usage{
-chart_boxplot(variable, data, ano_base_alter)
+chart_boxplot(variable, data)
 }
 \arguments{
 \item{data}{data set containing variable}
-
-\item{ano_base_alter}{year start data}
 
 \item{variabe}{Variable to be analysis}
 }

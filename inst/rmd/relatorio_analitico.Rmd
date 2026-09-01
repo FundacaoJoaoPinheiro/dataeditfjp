@@ -1,6 +1,6 @@
 ---
 title: "FJP Dados"
-subtitle: "Área Temática"
+subtitle: "`r params$sub_dinamico`"
 author:
   - name: "Coordenação de Indicadores Sociais (CIS)"
     affiliation: "Diretoria de Estatística e Informações (Direi)"
@@ -36,6 +36,7 @@ params:
   shown_cities: lista_cidades
   fator: k
   distributional_check: regras
+  sub_dinamico: area_tematica
 output-file: "relatorio_analitico.html"
 ---
 
@@ -141,7 +142,7 @@ for (i in names(dados)) {
         round        = 2,
         split.table  = Inf
       )
-      print(chart_boxplot(variable = var, data = dados[[i]], ano_base_alter))
+      print(chart_boxplot(variable = var, data = dados[[i]]))
       cat("\\pagebreak\n")
       print(chart_line(variable = var, data = dados[[i]], list_city_aux))
       cat("\\pagebreak\n \n")
