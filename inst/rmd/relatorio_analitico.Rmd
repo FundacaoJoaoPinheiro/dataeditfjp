@@ -432,45 +432,70 @@ fns_regras <- list(
   max               = ~ ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
 )
 
-regras_escolhidas <- params$distributional_check
+# regras_escolhidas <- params$distributional_check
+# 
+# if(is.null(regras_escolhidas)){regras_escolhidas <- names(fns_regras)}
+# 
+# df_rules_dist <- names(dados) |>
+#   sapply(function(i) {
+#     variables <- unique(lista_dt[[i]]$indicador)
+#     res <- dados[[i]] |>
+#       dplyr::select(ano, codigo_municipio, variables) |>
+#       dplyr::group_by(codigo_municipio) |>
+#       dplyr::mutate(dplyr::across(
+#         dplyr::all_of(variables),
+#         .fns   = fns_regras[regras_escolhidas],   # <- filtra a lista aqui
+#         .names = "{.fn}_{.col}"
+#       )) |>
+#       dplyr::ungroup()
+#     return(res)
+#   }, simplify = FALSE, USE.NAMES = TRUE)
 
-if(is.null(regras_escolhidas)){regras_escolhidas <- names(fns_regras)}
+
+regras_por_var <- params$distributional_check
+
+if(is.null(regras_por_var)){
+   regras_por_var <- "all"
+}
+
+# ── APLICAÇÃO (sem quosures, sem fragmentação) ─────────────────
 
 df_rules_dist <- names(dados) |>
-  sapply(function(i) {
+  lapply(function(i) {
+    
     variables <- unique(lista_dt[[i]]$indicador)
-    res <- dados[[i]] |>
-      dplyr::select(ano, codigo_municipio, variables) |>
-      dplyr::group_by(codigo_municipio) |>
-      dplyr::mutate(dplyr::across(
-        dplyr::all_of(variables),
-        .fns   = fns_regras[regras_escolhidas],   # <- filtra a lista aqui
-        .names = "{.fn}_{.col}"
-      )) |>
-      dplyr::ungroup()
-    return(res)
-  }, simplify = FALSE, USE.NAMES = TRUE)
-
-
-
-# df_rules_dist <- names(dados) |>
-#    sapply(function(i){
-#      variables <- unique(lista_dt[[i]]$indicador)
-#      res <- dados[[i]] |>
-#        dplyr::select(ano,codigo_municipio,variables) |> 
-#        dplyr::group_by(codigo_municipio)|>
-#        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
-#                                    .fns = list(outlier = ~outlier_function(.x),
-#                                                outlier_mean = ~outlier_filter(.x),
-#                                                mediana_movel_min = ~ifelse( .x < roll_median(dplyr::lag(.x), fator = fator1), T, F) ,
-#                                                mediana_movel_max = ~ifelse( .x > roll_median(dplyr::lag(.x), fator = fator2), T, F) ,
-#                                                min = ~ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T ),
-#                                                max = ~ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T)
-#                                                ),
-#                                    .names = "{.fn}_{.col}")) |>
-#        dplyr::ungroup()
-#      return(res)
-#    }, simplify = FALSE, USE.NAMES = TRUE)
+    regras_map <- parse_regras(regras_por_var, variables)
+    
+    base_df <- dados[[i]] |>
+      dplyr::select(ano, codigo_municipio, dplyr::all_of(variables)) |>
+      dplyr::group_by(codigo_municipio)
+    
+    res <- Reduce(
+      f = function(df, item) {
+        regra_nome <- item$regra
+        vars_regra <- item$vars
+        
+        if (!regra_nome %in% names(fns_regras)) {
+          stop("Regra '", regra_nome, "' não encontrada em fns_regras.")
+        }
+        
+        df |>
+          dplyr::mutate(
+            dplyr::across(
+              .cols  = dplyr::all_of(vars_regra),
+              .fns   = fns_regras[[regra_nome]],
+              .names = paste0(regra_nome, "_{.col}")
+            )
+          )
+      },
+      x = regras_map,
+      init = base_df
+    )
+    
+    res |> dplyr::ungroup()
+    
+  }) |>
+  setNames(names(dados))
 
 
 ```
