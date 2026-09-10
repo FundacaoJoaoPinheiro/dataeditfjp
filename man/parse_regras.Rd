@@ -4,12 +4,14 @@
 \alias{parse_regras}
 \title{parse_regras}
 \usage{
-parse_regras(regras_por_var, todas_vars)
+parse_regras(regras_por_var, todas_vars, fns_regras)
 }
 \arguments{
 \item{regras_por_var}{Vector or list of rules with corresponding variables. Eg:regras_por_var <- "all" or regras_por_var <- c("outlier" = "all", "min" = "pib,populacao,area") or regras_por_var <- list(outlier = c("pib", "populacao"), min = "all", max = c("idh", "renda_per_capita")  )}
 
 \item{todas_vars}{Vector with all variables in data base}
+
+\item{fns_regras}{list of all rules}
 }
 \value{
 List with mapped variables and rules.
