@@ -464,7 +464,7 @@ df_rules_dist <- names(dados) |>
   lapply(function(i) {
     
     variables <- unique(lista_dt[[i]]$indicador)
-    regras_map <- parse_regras(regras_por_var, variables)
+    regras_map <- parse_regras(regras_por_var, variables, fns_regras)
     
     base_df <- dados[[i]] |>
       dplyr::select(ano, codigo_municipio, dplyr::all_of(variables)) |>
