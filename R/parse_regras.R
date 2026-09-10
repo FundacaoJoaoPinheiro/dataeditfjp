@@ -4,11 +4,12 @@
 #'
 #' @param regras_por_var Vector or list of rules with corresponding variables. Eg:regras_por_var <- "all" or regras_por_var <- c("outlier" = "all", "min" = "pib,populacao,area") or regras_por_var <- list(outlier = c("pib", "populacao"), min = "all", max = c("idh", "renda_per_capita")  )
 #' @param todas_vars Vector with all variables in data base
+#' @param fns_regras list of all rules
 #' @importFrom stats setNames
 #' @import stats
 #' @returns List with mapped variables and rules.
 
-parse_regras <- function(regras_por_var, todas_vars) {
+parse_regras <- function(regras_por_var, todas_vars, fns_regras) {
 
   if (identical(regras_por_var, "all")) {
     regras_por_var <- setNames(rep(list("all"), length(fns_regras)), names(fns_regras))
