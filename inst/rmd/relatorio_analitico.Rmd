@@ -542,7 +542,7 @@ for (var in variables) {
   
   df_regra <- df_sumario[["indicadores"]] |>
     dplyr::filter(grepl(pattern = paste0(var,"$"), x = Regra) )
-  
+  if(nrow(df_regra) == 0){next}
    pander::pandoc.header(var, level = 3)
         pander::pandoc.table(
           df_regra |>
