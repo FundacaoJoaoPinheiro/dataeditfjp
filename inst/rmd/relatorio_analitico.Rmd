@@ -270,17 +270,65 @@ fns_regras_validade <- list(
   intervalo    = ~ifelse(dplyr::between(.x, 0,1),F,T)
 )
 
-regras_validade <- names(fns_regras_validade)
+regras_validade <- params$distributional_check
+if(is.null(regras_validade)){
+  regras_validade <- "all"
+}else{
+  regras_validade <- regras_validade[names(regras_validade) %in% names(fns_regras_validade)]
+  
+  if(length(regras_validade)==0){
+    regras_validade <- "all"
+  }
+}
+
+
+# df_rules_valid_pos <- names(dados) |>
+#    sapply(function(i){
+#      res <- dados[[i]] |>
+#        dplyr::select(ano,codigo_municipio,variables) |> 
+#        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
+#                                    .fns = fns_regras_validade[regras_validade], # <- filtra a lista aqui
+#                                    .names = "{.fn}_{.col}"))
+#      return(res)
+#    }, simplify = FALSE, USE.NAMES = TRUE)
+
 
 df_rules_valid_pos <- names(dados) |>
-   sapply(function(i){
-     res <- dados[[i]] |>
-       dplyr::select(ano,codigo_municipio,variables) |> 
-       dplyr::mutate(dplyr::across(dplyr::all_of(variables),
-                                   .fns = fns_regras_validade[regras_validade], # <- filtra a lista aqui
-                                   .names = "{.fn}_{.col}"))
-     return(res)
-   }, simplify = FALSE, USE.NAMES = TRUE)
+  lapply(function(i) {
+    regras_map <- parse_regras(regras_por_var = regras_validade,
+                               todas_vars = variables, 
+                               fns_regras = fns_regras_validade)
+    
+    base_df <- dados[[i]] |>
+      dplyr::select(ano, codigo_municipio, dplyr::all_of(variables)) |>
+      dplyr::group_by(codigo_municipio)
+    
+    res <- Reduce(
+      f = function(df, item) {
+        regra_nome <- item$regra
+        vars_regra <- item$vars
+        
+        if (!regra_nome %in% names(fns_regras_validade)) {
+          stop("Regra '", regra_nome, "' não encontrada em fns_regras.")
+        }
+        
+        df |>
+          dplyr::mutate(
+            dplyr::across(
+              .cols  = dplyr::all_of(vars_regra),
+              .fns   = fns_regras_validade[[regra_nome]],
+              .names = paste0(regra_nome, "_{.col}")
+            )
+          )
+      },
+      x = regras_map,
+      init = base_df
+    )
+    
+    res |> dplyr::ungroup()
+    
+  }) |>
+  setNames(names(dados))
 
 
 # df_rules_valid_pos <- names(dados) |>
@@ -314,10 +362,17 @@ df_rules_valid_pos <- names(dados) |>
 ```
 
 ```{r data_wrangling_valid_all}
+df_aux <- df_rules_valid_pos$indicadores|> names()
 
-df_resumo_positivo <- summary_aux(df = df_rules_valid_pos,regra = "positivo",variables = variables)
-df_resumo_percentual <- summary_aux(df = df_rules_valid_pos,regra = "percentual",variables = variables)
-df_resumo_intervalo <- summary_aux(df = df_rules_valid_pos, regra = "intervalo", variables = variables)
+if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
+  df_resumo_positivo <- summary_aux(df = df_rules_valid_pos,regra = "positivo",variables = variables)
+}
+if(sum(grepl(pattern = "percentual", x = df_aux)) != 0){
+  df_resumo_percentual <- summary_aux(df = df_rules_valid_pos,regra = "percentual",variables = variables)
+}
+if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
+  df_resumo_intervalo <- summary_aux(df = df_rules_valid_pos, regra = "intervalo", variables = variables)
+}
 
 ## lista com um sumário dos resultados
 # df_sumario <- names(df_sumario_valid) |> 
@@ -359,7 +414,7 @@ df_resumo_intervalo <- summary_aux(df = df_rules_valid_pos, regra = "intervalo",
 
 ```
 
-### Valores entre 0 e 100
+<!-- ### Valores entre 0 e 100 -->
 
 ```{r show_val_rules, results='asis'}
 #| column: screen-inset-right
@@ -397,43 +452,47 @@ descricao <- c(
 #           split.table  = Inf
 #       )
 # }
-
-pander::pandoc.header("Indicadores", level = 4)
-pander::pandoc.table(
-  df_resumo_percentual |> 
-    dplyr::filter(ano == max(ano) ) |>
-    dplyr::mutate(`Descrição` = descricao[3]) |>
-    dplyr::rename(Ano = ano) |>
-    dplyr::arrange(desc(Ano)),
-  decimal.mark = ",", 
-  big.mark     = ".", 
-  round        = 2,
-  split.table  = Inf
-)
+if(sum(grepl(pattern = "percentual", x = df_aux)) != 0){
+  pander::pandoc.header("Valores entre 0 e 100", level = 3)
+  pander::pandoc.header("Indicadores", level = 4)
+  pander::pandoc.table(
+    df_resumo_percentual |> 
+      dplyr::filter(ano == max(ano) ) |>
+      dplyr::mutate(`Descrição` = descricao[3]) |>
+      dplyr::rename(Ano = ano) |>
+      dplyr::arrange(desc(Ano)),
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+}
 
 ```
 
-### Valores entre 0 e 1
+<!-- ### Valores entre 0 e 1 -->
 ```{r show_validade_intervalo, results='asis'}
 #| column: screen-inset-right
 
-pander::pandoc.header("Indicadores", level = 4)
-pander::pandoc.table(
-  df_resumo_intervalo |> 
-    dplyr::filter(ano == max(ano) ) |>
-    dplyr::mutate(`Descrição` = descricao[4]) |>
-    dplyr::rename(Ano = ano) |>
-    dplyr::arrange(desc(Ano)),
-  decimal.mark = ",", 
-  big.mark     = ".", 
-  round        = 2,
-  split.table  = Inf
-)
+if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
+  pander::pandoc.header("Valores entre 0 e 1", level = 3)
+  pander::pandoc.header("Indicadores", level = 4)
+  pander::pandoc.table(
+    df_resumo_intervalo |> 
+      dplyr::filter(ano == max(ano) ) |>
+      dplyr::mutate(`Descrição` = descricao[4]) |>
+      dplyr::rename(Ano = ano) |>
+      dplyr::arrange(desc(Ano)),
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+}
+
 ```
 
-
-### Valores positivos
-
+<!-- ### Valores positivos -->
 ```{r show_posit_val_rules, results='asis'}
 #| column: screen-inset-right
 
@@ -457,18 +516,21 @@ pander::pandoc.table(
 #         cat("\\pagebreak\n")
 # }
 
-pander::pandoc.header("Indicadores", level = 4)
-pander::pandoc.table(
-  df_resumo_positivo |> 
-    dplyr::filter(ano == max(ano) ) |>
-    dplyr::mutate(`Descrição` = descricao[1]) |>
-    dplyr::rename(Ano = ano) |>
-    dplyr::arrange(desc(Ano)),
-  decimal.mark = ",", 
-  big.mark     = ".", 
-  round        = 2,
-  split.table  = Inf
-)
+if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
+  pander::pandoc.header("Valores positivos", level = 3)
+  pander::pandoc.header("Indicadores", level = 4)
+  pander::pandoc.table(
+    df_resumo_positivo |> 
+      dplyr::filter(ano == max(ano) ) |>
+      dplyr::mutate(`Descrição` = descricao[1]) |>
+      dplyr::rename(Ano = ano) |>
+      dplyr::arrange(desc(Ano)),
+    decimal.mark = ",", 
+    big.mark     = ".", 
+    round        = 2,
+    split.table  = Inf
+  )
+}
 
 ```
 
@@ -507,16 +569,20 @@ fns_regras <- list(
 
 
 regras_por_var <- params$distributional_check
-
 if(is.null(regras_por_var)){
-   regras_por_var <- "all"
+  regras_por_var <- "all"
+} else {
+  regras_por_var <- regras_por_var[!(names(regras_por_var) %in% names(regras_validade) )]
+
+  if(length(regras_por_var)==0){
+    regras_por_var <- "all"
+  }
 }
 
 # ── APLICAÇÃO (sem quosures, sem fragmentação) ─────────────────
 
 df_rules_dist <- names(dados) |>
   lapply(function(i) {
-    #variables <- unique(lista_dt[[i]]$indicador)
     regras_map <- parse_regras(regras_por_var, variables, fns_regras)
     
     base_df <- dados[[i]] |>
@@ -557,7 +623,6 @@ df_rules_dist <- names(dados) |>
 ## Transformação dos resultados
 df_sumario_dist_out <- names(df_rules_dist) |> 
   sapply(function(i){
-    variables <- unique(lista_dt[[i]]$indicador)
     res <- df_rules_dist[[i]] |> 
       dplyr::select(ano, codigo_municipio, dplyr::contains(paste0("_",variables))) |> 
       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado")
@@ -590,7 +655,6 @@ df_sumario <- names(df_sumario_dist_out) |>
 #exibe a tabela com os resultados da regra de distribuicao
 
 pander::pandoc.header("indicadores", level = 2)
-#variables <- unique(lista_dt[["indicadores"]]$indicador)
 for (var in variables) {
   df_regra <- df_sumario[["indicadores"]] |>
     dplyr::filter(grepl(pattern = paste0(var,"$"), x = Regra) )
@@ -620,7 +684,6 @@ for (var in variables) {
 
 df_obs_valid <- names(df_rules_valid_na)|>
   sapply(function(i){
-    #variables <- unique(lista_dt[[i]]$indicador)
     res_aux <- df_rules_valid_na[[i]] |>
       dplyr::select(ano,codigo_municipio, dplyr::starts_with("NA_")) |> 
       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
@@ -673,16 +736,18 @@ names(df_obs_valid) <- "valor_ausente"
 #     return(res)
 #     }, simplify = FALSE, USE.NAMES = TRUE)
 
-df_obs_validade <- data_valid(df = df_rules_valid_pos, 
-                               regras = "positivo", 
-                               variables = variables, 
-                               cidades = cidades)
-
-nom <- gsub("indicadores", "valor_positivo", names(df_obs_validade))
-names(df_obs_validade) <- nom
-index <- sapply(df_obs_validade, nrow)!=0
-df_obs_validade <- df_obs_validade[index]
-df_obs_valid <- append(df_obs_valid, df_obs_validade)
+if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
+  df_obs_validade <- data_valid(df = df_rules_valid_pos, 
+                                regras = "positivo", 
+                                variables = variables, 
+                                cidades = cidades)
+  nom <- gsub("indicadores", "valor_positivo", names(df_obs_validade))
+  names(df_obs_validade) <- nom
+  index <- sapply(df_obs_validade, nrow)!=0
+  df_obs_validade <- df_obs_validade[index]
+  df_obs_valid <- append(df_obs_valid, df_obs_validade)
+  
+}
 
 ```
 
@@ -710,32 +775,35 @@ df_obs_valid <- append(df_obs_valid, df_obs_validade)
 #     return(res)
 #     }, simplify = FALSE, USE.NAMES = TRUE)
 
-df_obs_validade <- data_valid(df = df_rules_valid_pos, 
-                              regras = "percentual", 
-                              variables = variables, 
-                              cidades = cidades)
-
-nom <- gsub("indicadores", "valor_porcentagem", names(df_obs_validade))
-names(df_obs_validade) <- nom
-index <- sapply(df_obs_validade, nrow)!=0
-df_obs_validade <- df_obs_validade[index]
-df_obs_valid <- append(df_obs_valid, df_obs_validade)
+if(sum(grepl(pattern = "percentual", x = df_aux)) != 0){
+  df_obs_validade <- data_valid(df = df_rules_valid_pos, 
+                                regras = "percentual", 
+                                variables = variables, 
+                                cidades = cidades)
+  
+  nom <- gsub("indicadores", "valor_porcentagem", names(df_obs_validade))
+  names(df_obs_validade) <- nom
+  index <- sapply(df_obs_validade, nrow)!=0
+  df_obs_validade <- df_obs_validade[index]
+  df_obs_valid <- append(df_obs_valid, df_obs_validade)
+}
 
 ```
 
 
 ```{r build_validade_intervalo}
-
-df_obs_validade <- data_valid(df = df_rules_valid_pos, 
-                              regras = "intervalo", 
-                              variables = variables, 
-                              cidades = cidades)
-
-nom <- gsub("indicadores", "valor_intervalo", names(df_obs_validade))
-names(df_obs_validade) <- nom
-index <- sapply(df_obs_validade, nrow)!=0
-df_obs_validade <- df_obs_validade[index]
-df_obs_valid <- append(df_obs_valid, df_obs_validade)
+if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
+  df_obs_validade <- data_valid(df = df_rules_valid_pos, 
+                                regras = "intervalo", 
+                                variables = variables, 
+                                cidades = cidades)
+  
+  nom <- gsub("indicadores", "intervalo_zero_um", names(df_obs_validade))
+  names(df_obs_validade) <- nom
+  index <- sapply(df_obs_validade, nrow)!=0
+  df_obs_validade <- df_obs_validade[index]
+  df_obs_valid <- append(df_obs_valid, df_obs_validade)
+}
 
 ```
 
