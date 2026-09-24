@@ -167,7 +167,7 @@ exemplo: mediana_movel_max_SE_MEDICOS, outlier_SE_MEDICOS, etc.
 
 **Classificação de regras**
 
-Aqui são realizadas verificações apenas nos dados numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador. Verificações de valores positivos, intervalos entre 0 e 1, são exemplos de verificação de validades, além da verificação de valores ausentes.
+Aqui são realizadas verificações apenas nos dados numéricos. As regras de **Validade** referem-se aos intervalos estabelecidos matematicamente para um dado ou indicador.Sendo elas: A verificações de valores positivos, Percentuais (0 à 100) e intervalos entre 0 e 1. Além de verificação de valores ausentes.
 
 <!-- -   **VI_NA\_**[...]: dado não tem valor ausente/*missing*; -->
 
@@ -181,17 +181,20 @@ As regras de distribuição estabelecem parâmetros esperados para as estatísti
 
 Abaixo são exibidas as regras usadas neste relatório:
 
-- **outilier**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de um limite superior ou abaixo de um limite inferior. O limite superior é dado por $Q_3 + 2\times IQR$ enquanto que o limite inferior é $Q_1 - 2\times IQR$. Sendo $Q_3$ e $Q_1$ o terceiro e primeiro quartil, respectivamente.
+- **Outilier boxplot**: Método de identificação de um possível valor *outlier* na série histórica. Considera valores suspeitos aqueles que estão acima de um limite superior ou abaixo de um limite inferior. O limite superior é dado por $Q_3 + 2\times IQR$ enquanto que o limite inferior é $Q_1 - 2\times IQR$. Sendo $Q_3$ e $Q_1$ o terceiro e primeiro quartil, respectivamente.
 
-- **outlier_mean**: Método de identificação de um possível valor *outlier* na série histórica. Considera os valores susperitos aqueles que estão acima ou abaixo de 3 desvios padrão da média dos dados históricos.
+- **Outlier média**: Método de identificação de um possível valor *outlier* na série histórica. Considera os valores susperitos aqueles que estão acima ou abaixo de 3 desvios padrão da média dos dados históricos.
 
-- **minimo**: o valor mais recente é menor ou igual ao menor valor da série histórica;
+- **Inferior ao anterior**: O valor é menor do que o valor do ano anterior da série;
 
-- **maximo**: o valor mais recente é maior ou igual ao maior valor da série histórica;
+- **Inferior à mediana**: o valor atual está abaixo de $100\%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$;
 
-- **mediana_movel_max**: o valor atual está acima de $k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k = 20\%$ ;
+- **Superior à mediana**: o valor atual está acima de $k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k = 20\%$ ;
 
-- **mediana_movel_min**: o valor atual está abaixo de $100\%-k\%$ do valor da mediana dos últimos 3 meses. O padrão usado é $k =20\%$
+- **Mínimo**: o valor mais recente é menor ou igual ao menor valor da série histórica;
+
+- **Máximo**: o valor mais recente é maior ou igual ao maior valor da série histórica.
+
 
 **Flexibilidade de regras**
 
@@ -282,17 +285,6 @@ if(is.null(regras_validade)){
 }
 
 
-# df_rules_valid_pos <- names(dados) |>
-#    sapply(function(i){
-#      res <- dados[[i]] |>
-#        dplyr::select(ano,codigo_municipio,variables) |> 
-#        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
-#                                    .fns = fns_regras_validade[regras_validade], # <- filtra a lista aqui
-#                                    .names = "{.fn}_{.col}"))
-#      return(res)
-#    }, simplify = FALSE, USE.NAMES = TRUE)
-
-
 df_rules_valid_pos <- names(dados) |>
   lapply(function(i) {
     regras_map <- parse_regras(regras_por_var = regras_validade,
@@ -330,35 +322,6 @@ df_rules_valid_pos <- names(dados) |>
   }) |>
   setNames(names(dados))
 
-
-# df_rules_valid_pos <- names(dados) |>
-#    sapply(function(i){
-#      res <- dados[[i]] |>
-#        dplyr::select(ano,codigo_municipio,variables) |> 
-#        dplyr::mutate(dplyr::across(dplyr::all_of(variables),
-#                                    .fns = list(
-#                                      pos =  ~ifelse(.x >= 0,F,T),
-#                                      per = ~ifelse(dplyr::between(.x, 0,100),F,T) ),
-#                                    .names = "{.fn}_{.col}"))
-#      return(res)
-#    }, simplify = FALSE, USE.NAMES = TRUE)
-
-## Transformação dos resultados
-# df_sumario_valid <- names(df_rules_valid_pos) |> 
-#   sapply(function(i){
-#     variables <- unique(lista_dt[[i]]$indicador)
-#     res <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio,dplyr::starts_with("pos_")) |>
-#       tidyr::pivot_longer(cols = !c(ano, codigo_municipio), names_to = "Regra", values_to = "resultado")
-#     
-#     res_aux <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio,dplyr::starts_with("per_")) |>
-#       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado")
-# 
-#     res <- rbind(res,res_aux)
-#       return(res)
-#     }, simplify = FALSE, USE.NAMES = TRUE)
-
 ```
 
 ```{r data_wrangling_valid_all}
@@ -374,43 +337,6 @@ if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
   df_resumo_intervalo <- summary_aux(df = df_rules_valid_pos, regra = "intervalo", variables = variables)
 }
 
-## lista com um sumário dos resultados
-# df_sumario <- names(df_sumario_valid) |> 
-#   sapply(function(i){
-#     res <- df_sumario_valid[[i]] |> 
-#       dplyr::filter(grepl(pattern = "pos_",x = Regra)) |>
-#       dplyr::mutate(Regra = gsub(pattern = "pos_",replacement = "",x = Regra)) |>
-#       dplyr::group_by(ano, Regra) |> 
-#       dplyr::summarise(
-#         Total        = dplyr::n(),
-#         Validada     = sum(!resultado, na.rm = TRUE),
-#         Suspeita     = sum(resultado, na.rm = TRUE),
-#         Ausente      = sum(is.na(resultado), na.rm = T),
-#         `% Validada` = round((Validada / Total) * 100, 2),
-#         `% Suspeita` = round((Suspeita / (Total - Ausente) )* 100, 2),
-#         `% Ausente` = round((Ausente / Total) * 100, 2)
-#       ) |> 
-#       dplyr::ungroup() |> dplyr::mutate(aux = "pos")
-#     
-#       res_aux <- df_sumario_valid[[i]] |>
-#         dplyr::filter(grepl(pattern = "per_",x = Regra)) |>
-#         dplyr::mutate(Regra = gsub(pattern = "per_",replacement = "",x = Regra)) |>
-#         dplyr::group_by(ano, Regra) |> 
-#         dplyr::summarise(
-#           Total        = dplyr::n(),
-#           Validada     = sum(!resultado, na.rm = TRUE),
-#           Suspeita     = sum(resultado, na.rm = TRUE),
-#           Ausente      = sum(is.na(resultado), na.rm = T),
-#           `% Validada` = round((Validada / Total) * 100, 2),
-#           `% Suspeita` = round((Suspeita / (Total - Ausente) )* 100, 2),
-#           `% Ausente` = round((Ausente / Total) * 100, 2)
-#         ) |> 
-#         dplyr::ungroup() |> dplyr::mutate(aux = "per")
-#       
-#       res <- rbind(res,res_aux)
-#       return(res)
-#         
-#     }, simplify = FALSE, USE.NAMES = TRUE)
 
 ```
 
@@ -435,30 +361,15 @@ descricao <- c(
   #`10` = "Valor está dentro da faixa esperada (-100 a 100)"
 )
 
-#exibe a tabela com os resultados da regra de valores em percentual
-# for (i in names(df_sumario)) {
-#   pander::pandoc.header(i, level = 4)
-#         pander::pandoc.table(
-#           df_sumario[[i]] |> 
-#             dplyr::filter(aux == "per") |> 
-#             dplyr::select(-aux)|>
-#             dplyr::mutate(`Descrição` = descricao[3]) |>
-#             dplyr::filter(ano == max(ano) ) |>
-#             dplyr::rename(Ano = ano) |>
-#             dplyr::arrange(desc(Ano)),
-#           decimal.mark = ",", 
-#           big.mark     = ".", 
-#           round        = 2,
-#           split.table  = Inf
-#       )
-# }
+
 if(sum(grepl(pattern = "percentual", x = df_aux)) != 0){
-  pander::pandoc.header("Valores entre 0 e 100", level = 3)
+  pander::pandoc.header("Percentual", level = 3)
   pander::pandoc.header("Indicadores", level = 4)
   pander::pandoc.table(
     df_resumo_percentual |> 
       dplyr::filter(ano == max(ano) ) |>
-      dplyr::mutate(`Descrição` = descricao[3]) |>
+      dplyr::mutate(`Descrição` = descricao[3],
+                     `% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |>
       dplyr::rename(Ano = ano) |>
       dplyr::arrange(desc(Ano)),
     decimal.mark = ",", 
@@ -480,7 +391,8 @@ if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
   pander::pandoc.table(
     df_resumo_intervalo |> 
       dplyr::filter(ano == max(ano) ) |>
-      dplyr::mutate(`Descrição` = descricao[4]) |>
+      dplyr::mutate(`Descrição` = descricao[4],
+                    `% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |>
       dplyr::rename(Ano = ano) |>
       dplyr::arrange(desc(Ano)),
     decimal.mark = ",", 
@@ -498,23 +410,6 @@ if(sum(grepl(pattern = "intervalo", x = df_aux)) != 0){
 
 #exibe a tabela com os resultados da regra de valores em positivos
 
-# for (i in names(df_sumario)) {
-#   pander::pandoc.header(i, level = 4)
-#         pander::pandoc.table(
-#           df_sumario[[i]] |>
-#             dplyr::filter(aux == "pos") |>
-#             dplyr::select(-aux)|>
-#             dplyr::mutate(`Descrição` = descricao[1]) |>
-#              dplyr::filter(ano == max(ano) ) |>
-#             dplyr::rename(Ano = ano) |>
-#             dplyr::arrange(desc(Ano)),
-#           decimal.mark = ",",
-#           big.mark     = ".",
-#           round        = 2,
-#           split.table  = Inf
-#       )
-#         cat("\\pagebreak\n")
-# }
 
 if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
   pander::pandoc.header("Valores positivos", level = 3)
@@ -545,28 +440,8 @@ fns_regras <- list(
   mediana_movel_max = ~ ifelse(.x > roll_median(dplyr::lag(.x), fator = fator2), T, F),
   min               = ~ ifelse(.x >= min(dplyr::lag(.x), na.rm = T), F, T),
   max               = ~ ifelse(.x <= max(dplyr::lag(.x), na.rm = T), F, T),
-  maior_anterior    = ~ ifelse(.x < dplyr::lag(.x), T, F)
+  menor_anterior    = ~ ifelse(.x < dplyr::lag(.x), T, F)
 )
-
-# regras_escolhidas <- params$distributional_check
-# 
-# if(is.null(regras_escolhidas)){regras_escolhidas <- names(fns_regras)}
-# 
-# df_rules_dist <- names(dados) |>
-#   sapply(function(i) {
-#     variables <- unique(lista_dt[[i]]$indicador)
-#     res <- dados[[i]] |>
-#       dplyr::select(ano, codigo_municipio, variables) |>
-#       dplyr::group_by(codigo_municipio) |>
-#       dplyr::mutate(dplyr::across(
-#         dplyr::all_of(variables),
-#         .fns   = fns_regras[regras_escolhidas],   # <- filtra a lista aqui
-#         .names = "{.fn}_{.col}"
-#       )) |>
-#       dplyr::ungroup()
-#     return(res)
-#   }, simplify = FALSE, USE.NAMES = TRUE)
-
 
 regras_por_var <- params$distributional_check
 if(is.null(regras_por_var)){
@@ -657,12 +532,24 @@ df_sumario <- names(df_sumario_dist_out) |>
 pander::pandoc.header("indicadores", level = 2)
 for (var in variables) {
   df_regra <- df_sumario[["indicadores"]] |>
-    dplyr::filter(grepl(pattern = paste0(var,"$"), x = Regra) )
+    dplyr::filter(grepl(pattern = paste0(var,"$"), x = Regra) )|>
+    dplyr::mutate(Regra = case_when(
+      grepl(pattern = "menor_anterior_", x = Regra) ~ "Inferior ao anterior",
+      grepl(pattern = "mediana_movel_max", x = Regra) ~ "Superior à mediana",
+      grepl(pattern = "mediana_movel_min", x = Regra) ~ "Inferior à mediana",
+      grepl(pattern = "min_", x = Regra) ~ "Mínimo",
+      grepl(pattern = "max_", x = Regra) ~ "Máximo",
+      grepl(pattern = paste0("outlier_",var), x = Regra) ~ "Outlier boxplot",
+      grepl(pattern = paste0("outlier_mean_",var), x = Regra) ~ "Outlier média",
+      TRUE ~ Regra
+    ))
   if(nrow(df_regra) == 0){next}
    pander::pandoc.header(var, level = 3)
         pander::pandoc.table(
           df_regra |>
             dplyr::filter(ano == max(ano) ) |>
+            dplyr::mutate(`% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`),
+                          `% Validada` = ifelse(Validada==0,0,`% Validada`)) |>
             dplyr::rename(Ano = ano) |>
             dplyr::arrange(desc(Ano)),
           decimal.mark = ",", 
@@ -714,28 +601,6 @@ names(df_obs_valid) <- "valor_ausente"
 
 ```{r df_build_val_pos}
 
-# df_obs_validade <- names(df_rules_valid_pos)|>
-#   sapply(function(i){
-#     variables <- unique(lista_dt[[i]]$indicador)
-#     res_aux <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio, dplyr::starts_with("pos_")) |> 
-#       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
-#       dplyr::mutate(Regra = gsub(pattern = "pos_",replacement = "",x = Regra)) 
-#     
-#     res <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio, variables) |> 
-#       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado") |> 
-#       dplyr::left_join(res_aux) |> 
-#       dplyr::filter(obs_suspeita)
-#     
-#     res <- res |>
-#         dplyr::left_join(cidades,
-#                          by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
-#           dplyr::select(ano,codigo_municipio, nome_municipio, indicador=Regra, resultado)
-#     
-#     return(res)
-#     }, simplify = FALSE, USE.NAMES = TRUE)
-
 if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
   df_obs_validade <- data_valid(df = df_rules_valid_pos, 
                                 regras = "positivo", 
@@ -752,28 +617,6 @@ if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
 ```
 
 ```{r data_build_val_per}
-
-# df_obs_validade <- names(df_rules_valid_pos)|>
-#   sapply(function(i){
-#     variables <- unique(lista_dt[[i]]$indicador)
-#     res_aux <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio, dplyr::starts_with("per_")) |> 
-#       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "obs_suspeita") |>
-#       dplyr::mutate(Regra = gsub(pattern = "per_",replacement = "",x = Regra)) 
-#     
-#     res <- df_rules_valid_pos[[i]] |>
-#       dplyr::select(ano,codigo_municipio, variables) |> 
-#       tidyr::pivot_longer(cols = !c(ano,codigo_municipio), names_to = "Regra", values_to = "resultado") |>
-#       dplyr::left_join(res_aux) |> 
-#       dplyr::filter(obs_suspeita)
-#     
-#     res <- res |>
-#         dplyr::left_join(cidades,
-#                          by = dplyr::join_by(codigo_municipio==codigo_ibge)) |>
-#           dplyr::select(ano,codigo_municipio, nome_municipio, indicador=Regra, resultado)
-#     
-#     return(res)
-#     }, simplify = FALSE, USE.NAMES = TRUE)
 
 if(sum(grepl(pattern = "percentual", x = df_aux)) != 0){
   df_obs_validade <- data_valid(df = df_rules_valid_pos, 
