@@ -417,7 +417,8 @@ if(sum(grepl(pattern = "positivo", x = df_aux)) != 0){
   pander::pandoc.table(
     df_resumo_positivo |> 
       dplyr::filter(ano == max(ano) ) |>
-      dplyr::mutate(`Descrição` = descricao[1]) |>
+      dplyr::mutate(`Descrição` = descricao[1],
+                    `% Suspeita` = ifelse(Suspeita==0,0,`% Suspeita`)) |>
       dplyr::rename(Ano = ano) |>
       dplyr::arrange(desc(Ano)),
     decimal.mark = ",", 
