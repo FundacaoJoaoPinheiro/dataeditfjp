@@ -447,7 +447,7 @@ regras_por_var <- params$distributional_check
 if(is.null(regras_por_var)){
   regras_por_var <- "all"
 } else {
-  regras_por_var <- regras_por_var[!(names(regras_por_var) %in% names(regras_validade) )]
+  regras_por_var <- regras_por_var[(names(regras_por_var) %in% names(fns_regras) )]
 
   if(length(regras_por_var)==0){
     regras_por_var <- "all"
