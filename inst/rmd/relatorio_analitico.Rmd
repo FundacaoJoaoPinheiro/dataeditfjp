@@ -658,7 +658,7 @@ df_obs_dist <- names(df_rules_dist)|>
     variables <- unique(lista_dt[[i]]$indicador)
     res_aux <- df_sumario_dist_out[[i]] |> 
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = Regra),
-                    indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min|maior_anterior)_", replacement = "",x = Regra))|>
+                    indicador = gsub(pattern = "(outlier|outlier_mean|mediana_movel_max|mediana_movel_min|max|min|menor_anterior)_", replacement = "",x = Regra))|>
       dplyr::mutate(regra = gsub(pattern = "_[^_]*$", replacement = "",x = regra))|>
       dplyr::rename(obs_suspeita = resultado)|>
       dplyr::select(-Regra)
