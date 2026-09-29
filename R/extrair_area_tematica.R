@@ -34,7 +34,7 @@ extrair_area_tematica <- function(indicador) {
   # Percorre as áreas e verifica se o prefixo está no código do indicador
   encontrados <- names(possiveis_areas_tematicas) |>
     sapply(function(prefixo) {
-    grepl(prefixo, indicador)
+    grepl(pattern = paste0(prefixo,"_"), indicador)
   })
 
   # Se encontrou algum prefixo, retorna a primeira área correspondente
